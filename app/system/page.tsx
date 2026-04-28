@@ -206,21 +206,21 @@ export default function SystemPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             <PlanCard
-              label="Starter"
+              label="Entry"
               price={500}
               commitment="3-month commitment"
               priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_3M!}
               paddle={paddle}
             />
             <PlanCard
-              label="Standard"
+              label="Committed"
               price={400}
               commitment="6-month commitment"
               priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_6M!}
               paddle={paddle}
             />
             <PlanCard
-              label="Full Commitment"
+              label="All In"
               price={300}
               commitment="12-month commitment"
               priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_12M!}
