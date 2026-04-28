@@ -13,7 +13,7 @@ export default function GuidancePage() {
       <div className="flex-1 max-w-lg mx-auto w-full space-y-6">
         
         <div className="bg-navy-800 border border-navy-700 border-l-4 border-l-babyblue-500 rounded-r-2xl p-8 mb-8">
-           <p className="text-gray-400 tracking-widest text-xs uppercase mb-4">Today's Focus</p>
+           <p className="text-gray-400 tracking-widest text-xs uppercase mb-4">Today&apos;s Focus</p>
            <p className="text-lg leading-relaxed font-medium">Control the eccentric. Drop the ego. Progression comes from tension, not just moving weight from point A to B.</p>
         </div>
 

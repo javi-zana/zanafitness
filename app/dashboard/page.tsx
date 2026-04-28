@@ -29,7 +29,7 @@ export default function DashboardPage() {
         {/* 1. WORKOUT STATUS */}
         <Card className="border border-navy-700 bg-navy-800/80 backdrop-blur-sm">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="uppercase tracking-widest text-sm font-bold">Today's Session</h2>
+            <h2 className="uppercase tracking-widest text-sm font-bold">Today&apos;s Session</h2>
             <span className="text-xs text-gray-400 uppercase tracking-widest">45 Min</span>
           </div>
           <p className="text-2xl font-medium uppercase tracking-wide mb-8">Lower Body <br/> Hypertrophy</p>

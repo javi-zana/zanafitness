@@ -17,7 +17,7 @@ export default function OnboardingPage() {
             <h1 className="text-4xl md:text-5xl font-medium tracking-tight uppercase leading-snug">
               This is not<br />a program.
             </h1>
-            <p className="text-gray-400 tracking-wider">It's a system.</p>
+            <p className="text-gray-400 tracking-wider">It&apos;s a system.</p>
             <button 
               onClick={() => setStep(2)}
               className="mt-8 bg-babyblue-500 text-navy-900 font-bold px-10 py-4 rounded-full uppercase tracking-widest hover:bg-babyblue-400 transition-colors"

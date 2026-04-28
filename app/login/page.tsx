@@ -34,7 +34,7 @@ export default function LoginPage() {
         {sent ? (
           <div className="bg-navy-800 p-8 rounded-2xl text-center space-y-4 border border-navy-700">
             <h2 className="text-babyblue-500 font-bold tracking-widest uppercase">Check your inbox</h2>
-            <p className="text-gray-300 text-sm">We've sent a magic link to <span className="text-white font-medium">{email}</span></p>
+            <p className="text-gray-300 text-sm">We&apos;ve sent a magic link to <span className="text-white font-medium">{email}</span></p>
           </div>
         ) : (
           <form onSubmit={handleLogin} className="space-y-6">
