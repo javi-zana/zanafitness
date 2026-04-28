@@ -20,8 +20,15 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
     if (!exchangeError) {
+      // Password recovery flow — send to reset page
+      if (data.session && next === '/dashboard') {
+        const type = new URL(request.url).searchParams.get('type')
+        if (type === 'recovery') {
+          return NextResponse.redirect(`${origin}/reset-password`)
+        }
+      }
       return NextResponse.redirect(`${origin}${next}`)
     }
   }
