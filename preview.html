@@ -1,759 +1,268 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ZANA Fitness — Preview</title>
-  <link rel="preconnect" href="https://api.fontshare.com" />
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZANA Fitness Preview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #06080a;
-      --bg-dark: #030406;
-      --bg-mid: #090b0e;
-      --border: #1a1f26;
-      --blue: #b3cdff;
-      --gray-6: #999;
-      --gray-5: #666;
-      --gray-4: #444;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: #fff;
-      font-family: 'Satoshi', sans-serif;
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-    }
-
-    /* ── NAVBAR ── */
-    nav {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 2rem 6rem;
-    }
-
-    nav .z-icon svg { height: 1.25rem; }
-
-    nav .links {
-      display: flex;
-      align-items: center;
-      gap: 3rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      font-weight: 700;
-      color: #ccc;
-    }
-
-    nav .links a { color: inherit; text-decoration: none; transition: color .2s; }
-    nav .links a:hover { color: #fff; }
-
-    nav .links button {
-      background: var(--blue);
-      color: #06080a;
-      font-weight: 700;
-      padding: 0.6rem 2rem;
-      border-radius: 9999px;
-      border: none;
-      cursor: pointer;
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-      transition: background .2s;
-    }
-    nav .links button:hover { background: #fff; }
-
-    /* ── HERO ── */
-    .hero {
-      position: relative;
-      min-height: 95vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 0 6rem;
-      background: var(--bg);
-    }
-
-    .hero .bg {
-      position: absolute;
-      inset: 0;
-      background: url('public/671A2489-147A-4CFB-9BE4-8E41C0B1B66A.PNG') center 30% / cover no-repeat;
-      filter: brightness(0.75);
-    }
-
-    .hero .overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to right, #06080a, rgba(6,8,10,0.7), transparent);
-    }
-
-    .hero .content { position: relative; z-index: 10; max-width: 42rem; margin-top: 3rem; }
-
-    .hero h1 {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      text-transform: uppercase;
-      line-height: 1;
-      letter-spacing: -0.02em;
-    }
-
-    .hero h1 svg { height: 4rem; }
-
-    .hero h1 span {
-      display: block;
-      font-size: 11px;
-      margin-top: 2rem;
-      font-weight: 700;
-      letter-spacing: 1em;
-      color: #fff;
-      margin-left: 0.5rem;
-      font-family: 'Satoshi', sans-serif;
-    }
-
-    .hero .tagline {
-      margin: 3rem 0;
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #e5e5e5;
-      line-height: 2;
-    }
-
-    .hero .cta {
-      background: var(--blue);
-      color: #06080a;
-      font-weight: 700;
-      padding: 1rem 2.5rem;
-      border-radius: 9999px;
-      border: none;
-      cursor: pointer;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      font-family: 'Satoshi', sans-serif;
-      transition: background .2s;
-      display: inline-block;
-    }
-    .hero .cta:hover { background: #fff; }
-
-    .hero .coming-soon {
-      position: absolute;
-      bottom: 4rem;
-      right: 6rem;
-      z-index: 10;
-      text-align: right;
-    }
-    .hero .coming-soon p {
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #ccc;
-    }
-    .hero .coming-soon .line {
-      width: 1.5rem;
-      height: 1px;
-      background: #999;
-      margin-left: auto;
-      margin-top: 0.75rem;
-    }
-
-    /* ── SECTION SHARED ── */
-    section { background: var(--bg); }
-
-    .label {
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      color: var(--blue);
-      text-transform: uppercase;
-      margin-bottom: 2.5rem;
-    }
-
-    .divider {
-      width: 2rem;
-      height: 1px;
-      background: #444;
-      margin-top: 4rem;
-    }
-
-    /* ── PROBLEM ── */
-    .problem {
-      padding: 10rem 1.5rem;
-      text-align: center;
-    }
-
-    .problem .inner {
-      max-width: 56rem;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .problem h2 {
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      line-height: 2;
-    }
-
-    /* ── SHIFT ── */
-    .shift {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: var(--bg-mid);
-    }
-
-    .shift .img {
-      position: relative;
-      min-height: 500px;
-    }
-
-    .shift .img .bg {
-      position: absolute;
-      inset: 0;
-      background: url('public/A502086F-E304-43B4-87C1-93658EDB79F0.PNG') center / cover no-repeat;
-      filter: brightness(0.6);
-    }
-
-    .shift .copy {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 5rem 8rem;
-      background: var(--bg-mid);
-    }
-
-    .shift h2 {
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
-      font-weight: 300;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      line-height: 1.6;
-      margin-bottom: 4rem;
-    }
-
-    .shift .points {
-      font-family: monospace;
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gray-5);
-      line-height: 2.5;
-    }
-
-    .shift .diff {
-      font-family: monospace;
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--blue);
-      margin-top: 4rem;
-    }
-
-    /* ── SYSTEM ── */
-    .system {
-      padding: 10rem 1.5rem;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .system .inner {
-      max-width: 72rem;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .system h2 {
-      font-size: clamp(1rem, 2.5vw, 1.5rem);
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 6rem;
-      font-style: italic;
-    }
-
-    .system .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      width: 100%;
-      text-align: center;
-    }
-
-    .system .box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 4rem;
-    }
-
-    .system .box:not(:last-child) { border-right: 1px solid var(--border); }
-
-    .system .icon {
-      width: 2rem;
-      height: 2rem;
-      color: #ccc;
-      margin-bottom: 2rem;
-    }
-
-    .system .num {
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      color: var(--blue);
-      margin-bottom: 1rem;
-    }
-
-    .system h3 {
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-    }
-
-    .system p {
-      font-family: monospace;
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--gray-5);
-    }
-
-    /* ── CORE ── */
-    .core {
-      padding: 10rem 1.5rem;
-      text-align: center;
-    }
-
-    .core .inner {
-      max-width: 56rem;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .core h2 {
-      font-size: clamp(1.2rem, 3vw, 1.8rem);
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      line-height: 2;
-      color: #e5e5e5;
-    }
-
-    .core h2 span { color: var(--blue); }
-
-    /* ── VISUAL BREAK ── */
-    .visual-break {
-      position: relative;
-      height: 60vh;
-      display: flex;
-      align-items: center;
-      padding: 0 8rem;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .visual-break .bg {
-      position: absolute;
-      inset: 0;
-      background: url('public/F52D6DDD-5F62-414C-9B2D-5E12C333F2D3.PNG') center 35% / cover no-repeat;
-      filter: brightness(0.5);
-    }
-
-    .visual-break .overlay {
-      position: absolute;
-      inset: 0;
-      width: 75%;
-      background: linear-gradient(to right, #06080a, rgba(6,8,10,0.6), transparent);
-    }
-
-    .visual-break .text {
-      position: relative;
-      z-index: 10;
-    }
-
-    .visual-break p {
-      font-family: monospace;
-      font-size: 11px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #fff;
-    }
-
-    .visual-break .line {
-      width: 1.5rem;
-      height: 1px;
-      background: #999;
-      margin-top: 1rem;
-    }
-
-    /* ── PLAYLIST ── */
-    .playlist {
-      padding: 8rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .playlist .inner {
-      max-width: 42rem;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .playlist h2 {
-      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-    }
-
-    .playlist .sub {
-      font-family: monospace;
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gray-5);
-      margin-bottom: 3rem;
-    }
-
-    .playlist iframe {
-      width: 100%;
-      height: 352px;
-      border-radius: 12px;
-      border: none;
-    }
-
-    /* ── WAITLIST ── */
-    .waitlist {
-      padding: 10rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .waitlist .inner {
-      max-width: 40rem;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .waitlist h2 {
-      font-size: clamp(1.5rem, 4vw, 2.5rem);
-      font-weight: 300;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 1.5rem;
-    }
-
-    .waitlist .sub {
-      font-family: monospace;
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--blue);
-      margin-bottom: 4rem;
-    }
-
-    .waitlist form {
-      width: 100%;
-      max-width: 32rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .waitlist .field {
-      display: flex;
-      align-items: center;
-      border: 1px solid var(--border);
-      border-radius: 9999px;
-      background: rgba(0,0,0,0.5);
-      overflow: hidden;
-      padding: 0.5rem;
-    }
-
-    .waitlist input {
-      flex: 1;
-      background: transparent;
-      border: none;
-      outline: none;
-      padding: 0.75rem 1.5rem;
-      font-family: monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: #fff;
-    }
-
-    .waitlist input::placeholder { color: #444; }
-
-    .waitlist button {
-      background: var(--blue);
-      color: #000;
-      font-weight: 700;
-      padding: 0.75rem 2rem;
-      border-radius: 9999px;
-      border: none;
-      cursor: pointer;
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      font-family: 'Satoshi', sans-serif;
-      white-space: nowrap;
-      transition: background .2s;
-    }
-    .waitlist button:hover { background: #fff; }
-
-    .waitlist .lock {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: monospace;
-      font-size: 9px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--gray-5);
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      padding: 4rem 6rem;
-      background: var(--bg-dark);
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      font-family: monospace;
-      font-size: 9px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--gray-5);
-    }
-
-    footer svg { height: 1.1rem; margin-bottom: 1.5rem; }
-
-    footer .left { display: flex; flex-direction: column; gap: 0.5rem; }
-
-    footer .mid { display: flex; gap: 5rem; }
-
-    footer .col { display: flex; flex-direction: column; gap: 1.25rem; }
-
-    footer a { color: inherit; text-decoration: none; transition: color .2s; }
-    footer a:hover { color: var(--blue); }
+    @import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300,black&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Satoshi', sans-serif; background-color: #0b0f1a; color: white; -webkit-font-smoothing: antialiased; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+    .font-sans { font-family: 'Satoshi', sans-serif; }
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
   </style>
 </head>
-<body>
+<body class="selection:bg-[#b3cdff] selection:text-[#0b0f1a] bg-[#121821] min-h-screen text-white font-sans">
 
   <!-- NAVBAR -->
-  <nav>
-    <div class="z-icon">
-      <svg viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="5" stroke-miterlimit="10">
-        <path d="M0,2 H32 L18.3,14" />
-        <path d="M13.7,18 L0,30 H32" />
-      </svg>
-    </div>
-    <div class="links">
-      <a href="#about">About</a>
-      <a href="#system">The System</a>
-      <a href="#faq">FAQ</a>
-      <button>Join the System</button>
+  <nav class="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-8 md:px-16 overflow-hidden">
+    <svg viewBox="0 0 32 32" class="h-5 md:h-6 text-white" fill="none" stroke="currentColor" stroke-width="5" stroke-miterlimit="10">
+      <path d="M0,2 H32 L18.3,14" />
+      <path d="M13.7,18 L0,30 H32" />
+    </svg>
+    <div class="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] font-inter uppercase font-semibold text-gray-300">
+      <a href="preview-about.html" class="hover:text-white transition-colors">About</a>
+      <a href="preview-system.html" class="hover:text-white transition-colors">The System</a>
+      <a href="preview-faq.html" class="hover:text-white transition-colors">FAQ</a>
+      <a href="preview-join.html" class="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
+        JOIN THE SYSTEM
+      </a>
     </div>
   </nav>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="bg"></div>
-    <div class="overlay"></div>
-    <div class="content">
-      <h1>
-        <svg viewBox="0 0 180 32" fill="none" stroke="white" stroke-width="5" stroke-miterlimit="10">
+  <!-- 1. HERO SECTION -->
+  <section class="relative min-h-[85vh] flex flex-col justify-center px-8 md:px-24 bg-[#121821]">
+    
+    <!-- Background Header Crop -->
+    <div class="absolute inset-0">
+      <div class="w-full h-full bg-[url('671A2489-147A-4CFB-9BE4-8E41C0B1B66A.PNG')] bg-cover bg-[50%_30%] brightness-[0.9]"></div>
+    </div>
+    
+    <!-- Massive Gradients to fill dead space and create left-text background -->
+    <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-[#121821] via-[#121821]/70 to-transparent"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 max-w-2xl mt-12">
+      <h1 class="flex flex-col items-start tracking-[-0.02em] uppercase leading-none">
+        <svg viewBox="0 0 180 32" class="h-12 md:h-16 text-white" fill="none" stroke="currentColor" stroke-width="5" stroke-miterlimit="10">
           <path d="M0,2 H32 L18.3,14" />
           <path d="M13.7,18 L0,30 H32" />
           <path d="M48,30 L64,2 L80,30" />
           <path d="M96,30 V2 L128,30 V2" />
           <path d="M144,30 L160,2 L176,30" />
         </svg>
-        <span>F I T N E S S</span>
+        <span class="block text-[11px] md:text-sm mt-8 font-bold tracking-[1em] text-white ml-2">F I T N E S S</span>
       </h1>
-      <div class="tagline">
+      
+      <div class="my-12 space-y-2 uppercase tracking-[0.2em] font-mono text-[10px] md:text-[11px] text-gray-200">
         <p>Built for results.</p>
         <p>Not motivation.</p>
       </div>
-      <button class="cta">Join the System</button>
+      
+      <button class="bg-[#b3cdff] text-[#121821] font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors">
+        JOIN THE SYSTEM
+      </button>
     </div>
-    <div class="coming-soon">
-      <p>Coming Soon.</p>
-      <div class="line"></div>
+
+    <!-- Bottom Right Absolute -->
+    <div class="absolute bottom-16 right-8 md:right-24 z-10 text-right">
+       <p class="text-[10px] tracking-widest uppercase font-mono text-gray-300">Coming Soon.</p>
+       <div class="w-6 h-px bg-gray-400 ml-auto mt-3"></div>
     </div>
   </section>
 
-  <!-- 01 PROBLEM -->
-  <section class="problem">
-    <div class="inner">
-      <p class="label">01</p>
-      <h2>You don't lack discipline.<br />You've just never followed<br />a system that actually works.</h2>
-      <div class="divider"></div>
+  <!-- 2. PROBLEM SECTION (01) -->
+  <section class="py-24 px-6 text-center bg-[#121821]">
+    <div class="max-w-4xl mx-auto flex flex-col items-center">
+      <p class="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">01</p>
+      <h2 class="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white">
+        You don't lack discipline.<br />
+        You've just never followed<br />
+        a system that actually works.
+      </h2>
+      <div class="w-8 h-px bg-gray-400 mt-16"></div>
     </div>
   </section>
 
-  <!-- 02 SHIFT -->
-  <section class="shift">
-    <div class="img"><div class="bg"></div></div>
-    <div class="copy">
-      <p class="label">02</p>
-      <h2>Most people train randomly.</h2>
-      <div class="points">
+  <!-- 3. SHIFT SECTION (02) -->
+  <section class="grid grid-cols-1 md:grid-cols-2 bg-[#1a222c]">
+    <!-- Left Side: Header Crop -->
+    <div class="h-[60vh] md:h-auto w-full relative">
+      <div class="absolute inset-0 bg-[url('A502086F-E304-43B4-87C1-93658EDB79F0.PNG')] bg-cover bg-center brightness-[0.8]"></div>
+    </div>
+
+    <!-- Right Side: Content -->
+    <div class="flex flex-col justify-center p-12 md:p-32 bg-[#1a222c] z-10 relative">
+      <p class="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-8">02</p>
+      <h2 class="text-xl md:text-3xl font-sans font-light tracking-[0.1em] uppercase leading-snug mb-10 text-white text-left">
+        Most people train randomly.
+      </h2>
+      <div class="space-y-3 font-mono text-[11px] uppercase tracking-[0.2em] text-gray-400">
         <p>Random workouts.</p>
         <p>Random effort.</p>
         <p>Random results.</p>
       </div>
-      <p class="diff">ZANA is different.</p>
+      <p class="text-[#b3cdff] font-mono text-[11px] tracking-[0.2em] uppercase mt-16">
+        ZANA is different.
+      </p>
     </div>
   </section>
 
-  <!-- 03 SYSTEM -->
-  <section class="system">
-    <div class="inner">
-      <p class="label">03</p>
-      <h2>A system built on structure.</h2>
-      <div class="grid">
-        <div class="box">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-          </svg>
-          <p class="num">01</p>
-          <h3>Training</h3>
-          <p>That Progresses</p>
+  <!-- 4. SYSTEM SECTION (03) -->
+  <section class="py-24 px-6 bg-[#121821] border-y border-[#2d3a4b]">
+    <div class="max-w-6xl mx-auto flex flex-col items-center">
+      <p class="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">03</p>
+      <h2 class="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase text-center mb-10">
+        A system built on structure.
+      </h2>
+      <div class="grid md:grid-cols-3 gap-16 md:gap-0 w-full text-center px-4">
+        
+        <!-- Box 1 -->
+        <div class="flex flex-col items-center md:border-r border-[#2d3a4b] md:pr-16">
+           <svg class="w-8 h-8 text-gray-300 stroke-1 mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+           <div class="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">01</div>
+           <h3 class="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Training</h3>
+           <p class="font-mono text-gray-300 uppercase tracking-widest text-[9px]">That Progresses</p>
         </div>
-        <div class="box">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
-          </svg>
-          <p class="num">02</p>
-          <h3>Nutrition</h3>
-          <p>That Aligns</p>
+        
+        <!-- Box 2 -->
+        <div class="flex flex-col items-center md:border-r border-[#2d3a4b] md:px-16">
+           <svg class="w-8 h-8 text-gray-300 stroke-1 mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+           <div class="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">02</div>
+           <h3 class="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Nutrition</h3>
+           <p class="font-mono text-gray-300 uppercase tracking-widest text-[9px]">That Aligns</p>
         </div>
-        <div class="box">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-          </svg>
-          <p class="num">03</p>
-          <h3>Guidance</h3>
-          <p>That Adapts</p>
+
+        <!-- Box 3 -->
+        <div class="flex flex-col items-center md:pl-16">
+           <svg class="w-8 h-8 text-gray-300 stroke-1 mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+           <div class="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">03</div>
+           <h3 class="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Guidance</h3>
+           <p class="font-mono text-gray-300 uppercase tracking-widest text-[9px]">That Adapts</p>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- 04 CORE -->
-  <section class="core">
-    <div class="inner">
-      <p class="label">04</p>
-      <h2>This isn't a program.<br />It's a system designed<br />to make progress <span>inevitable.</span></h2>
-      <div class="divider"></div>
+  <!-- 5. CORE SECTION (04) -->
+  <section class="py-24 px-6 text-center bg-[#121821]">
+    <div class="max-w-4xl mx-auto flex flex-col items-center">
+      <p class="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">04</p>
+      <h2 class="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white">
+        This isn't a program.<br />
+        It's a system designed<br />
+        to make progress <span class="text-[#b3cdff]">inevitable.</span>
+      </h2>
+      <div class="w-8 h-px bg-gray-400 mt-16"></div>
     </div>
   </section>
 
-  <!-- VISUAL BREAK -->
-  <section class="visual-break">
-    <div class="bg"></div>
-    <div class="overlay"></div>
-    <div class="text">
-      <p>Built for results.</p>
-      <div class="line"></div>
+  <!-- 6. VISUAL BREAK -->
+  <section class="relative h-[40vh] md:h-[70vh] flex items-center px-12 md:px-32 border-y border-[#2d3a4b] bg-[#121821]">
+    <div class="absolute inset-0 bg-[url('F52D6DDD-5F62-414C-9B2D-5E12C333F2D3.PNG')] bg-cover bg-[50%_35%] brightness-[0.8]"></div>
+    
+    <div class="absolute inset-0 bg-gradient-to-r from-[#121821] via-[#121821]/60 to-transparent w-full md:w-3/4"></div>
+
+    <div class="relative z-10 flex flex-col">
+      <p class="font-mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-white">
+        Built for results.
+      </p>
+      <div class="w-6 h-px bg-gray-400 mt-4"></div>
     </div>
   </section>
 
-  <!-- 05 PLAYLIST -->
-  <section class="playlist">
-    <div class="inner">
-      <p class="label">05</p>
-      <h2>Train to This.</h2>
-      <p class="sub">My Personal Playlist</p>
-      <iframe
-        src="https://open.spotify.com/embed/playlist/6hJ4JJSCPrUbb0ZD17ntQJ?utm_source=generator&theme=0"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy">
-      </iframe>
+  <!-- 7. PLAYLIST SECTION (05) -->
+  <section class="py-20 px-6 flex flex-col items-center bg-[#121821] border-b border-[#2d3a4b]">
+    <div class="max-w-2xl w-full flex flex-col items-center">
+      <p class="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">05</p>
+      <h2 class="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase mb-3 text-white">Train to This.</h2>
+      <p class="font-mono text-gray-300 uppercase tracking-[0.2em] text-[9px] mb-12">My Personal Playlist</p>
+      <div class="w-full rounded-xl overflow-hidden">
+        <iframe
+          src="https://open.spotify.com/embed/playlist/6hJ4JJSCPrUbb0ZD17ntQJ?utm_source=generator&theme=0"
+          width="100%"
+          height="352"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          style="border-radius: 12px; border: none;"
+        ></iframe>
+      </div>
     </div>
   </section>
 
-  <!-- 06 WAITLIST -->
-  <section class="waitlist">
-    <div class="inner">
-      <p class="label">06</p>
-      <h2>Join the System.</h2>
-      <p class="sub">Get first access when Zana launches.</p>
-      <form onsubmit="return false;">
-        <div class="field">
-          <input type="email" placeholder="Enter your email" />
-          <button type="submit">Join Now</button>
+  <!-- 8. WAITLIST SECTION (06) -->
+  <section class="py-24 px-6 flex flex-col items-center justify-center text-center bg-[#121821]">
+    <div class="max-w-2xl w-full flex flex-col items-center">
+      <p class="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">06</p>
+      <h2 class="text-2xl md:text-4xl font-sans font-light tracking-[0.15em] uppercase mb-6 text-white">JOIN THE SYSTEM.</h2>
+      <p class="text-[#b3cdff] font-mono uppercase tracking-[0.2em] text-[10px] mb-10">Get first access when Zana launches.</p>
+      
+      <form class="w-full max-w-lg mb-6">
+        <div class="relative flex flex-col md:flex-row items-center border border-[#2d3a4b] rounded-full bg-[#0f141b]/80 overflow-hidden group">
+          <input
+            type="email"
+            required
+            placeholder="Enter your email"
+            class="w-full bg-transparent font-mono px-8 py-5 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none"
+          />
+          <div class="p-2 w-full md:w-auto">
+            <button 
+              type="button" 
+              class="w-full md:w-auto bg-[#b3cdff] text-black font-sans font-bold px-10 py-3.5 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors shrink-0"
+            >
+              Join Now
+            </button>
+          </div>
         </div>
       </form>
-      <div class="lock">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span>Limited First Access.</span>
+      
+      <div class="flex items-center gap-3 text-gray-300 font-mono text-[9px] uppercase tracking-widest">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        <p>Limited First Access.</p>
       </div>
     </div>
   </section>
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="left">
-      <svg viewBox="0 0 180 32" fill="none" stroke="white" stroke-width="5" stroke-miterlimit="10">
+  <!-- 8. FOOTER -->
+  <footer class="py-16 px-10 md:px-24 bg-[#0f141b] border-t border-[#2d3a4b] flex flex-col md:flex-row items-start md:items-end justify-between text-[9px] font-mono tracking-[0.2em] uppercase text-gray-300 gap-16 md:gap-0">
+    
+    <!-- Left -->
+    <div class="flex flex-col items-start text-left space-y-6">
+      <svg viewBox="0 0 180 32" class="h-4 md:h-5 text-white w-32" fill="none" stroke="currentColor" stroke-width="5" stroke-miterlimit="10">
         <path d="M0,2 H32 L18.3,14" />
         <path d="M13.7,18 L0,30 H32" />
         <path d="M48,30 L64,2 L80,30" />
         <path d="M96,30 V2 L128,30 V2" />
         <path d="M144,30 L160,2 L176,30" />
       </svg>
-      <p>Built for results.</p>
-      <p>Not motivation.</p>
-    </div>
-    <div class="mid">
-      <div class="col">
-        <a href="#">About</a>
-        <a href="#">The System</a>
-        <a href="#">FAQ</a>
-      </div>
-      <div class="col">
-        <a href="#">Instagram</a>
-        <a href="#">TikTok</a>
-        <a href="#">YouTube</a>
+      <div class="space-y-2 leading-snug">
+        <p>Built for results.</p>
+        <p>Not motivation.</p>
       </div>
     </div>
-    <div>&copy; 2024 Zana Fitness</div>
+    
+    <!-- Middle Links -->
+    <div class="flex gap-20">
+      <div class="flex flex-col gap-5">
+        <a href="#about" class="hover:text-white transition-colors">About</a>
+        <a href="#system" class="hover:text-white transition-colors">The System</a>
+        <a href="#faq" class="hover:text-white transition-colors">FAQ</a>
+      </div>
+      <div class="flex flex-col gap-5">
+        <a href="#" class="hover:text-white transition-colors">Instagram</a>
+        <a href="#" class="hover:text-white transition-colors">TikTok</a>
+        <a href="#" class="hover:text-white transition-colors">YouTube</a>
+      </div>
+    </div>
+
+    <!-- Right -->
+    <div class="text-right flex flex-col justify-end">
+      <p>&copy; 2024 Zana Fitness</p>
+    </div>
+
   </footer>
 
 </body>

@@ -225,9 +225,17 @@ export default function SystemPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="py-16 px-10 md:px-24 bg-[#0f141b] flex flex-col md:flex-row items-center justify-between text-[9px] font-mono tracking-[0.2em] uppercase text-gray-500 gap-8">
-        <ZanaLogo className="h-4 md:h-5 text-white" />
-        <p>&copy; 2024 Zana Fitness</p>
+      <footer className="py-16 px-10 md:px-24 bg-[#0f141b] flex flex-col md:flex-row items-center justify-between border-t border-[#2d3a4b] text-[9px] font-mono tracking-[0.2em] uppercase text-gray-500 gap-8">
+        <div className="flex-1 flex justify-center md:justify-start w-full md:w-auto">
+          <p>&copy; 2026 Zana Fitness</p>
+        </div>
+        <div className="flex-1 flex justify-center py-6 md:py-0">
+          <ZanaLogo className="h-4 md:h-5 text-white" />
+        </div>
+        <div className="flex-1 flex justify-center md:justify-end gap-5 w-full md:w-auto">
+          <a href="https://www.instagram.com/javi_zana/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>
+          <a href="https://www.tiktok.com/@javi_zana?lang=en" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">TikTok</a>
+        </div>
       </footer>
     </main>
   );
