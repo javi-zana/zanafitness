@@ -1,23 +1,28 @@
-import { Paddle } from "@paddle/paddle-node-sdk";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
-  const paddle = new Paddle(process.env.PADDLE_API_KEY ?? "");
-  const signature = req.headers.get("paddle-signature") || "";
   const rawBody = await req.text();
+  const signature = req.headers.get("x-signature") || "";
+  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET!;
 
-  try {
-    const event = await paddle.webhooks.unmarshal(
-      rawBody,
-      process.env.PADDLE_WEBHOOK_SECRET!,
-      signature
-    );
+  const hmac = crypto.createHmac("sha256", secret);
+  const digest = hmac.update(rawBody).digest("hex");
 
-    if (event && event.eventType === "subscription.activated") {
-      console.log("Subscription activated:", event.data);
-      // TODO: Save to Supabase
-    }
-  } catch {
-    return new Response("Webhook Error", { status: 400 });
+  if (digest !== signature) {
+    return new Response("Invalid signature", { status: 401 });
+  }
+
+  const event = JSON.parse(rawBody);
+  const eventName = event.meta?.event_name;
+
+  if (eventName === "subscription_created") {
+    console.log("Subscription created:", event.data);
+    // TODO: Save to Supabase
+  }
+
+  if (eventName === "subscription_cancelled") {
+    console.log("Subscription cancelled:", event.data);
+    // TODO: Update Supabase
   }
 
   return new Response("OK");

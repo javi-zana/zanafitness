@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Check, TrendingUp, Leaf, Target } from "lucide-react";
-import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
@@ -35,35 +33,21 @@ function PlanCard({
   label,
   price,
   commitment,
-  priceId,
+  variantId,
   featured,
-  paddle,
 }: {
   label: string;
   price: number;
   commitment: string;
-  priceId: string;
+  variantId: string;
   featured?: boolean;
-  paddle: Paddle | undefined;
 }) {
-  const [loading, setLoading] = useState(false);
-
-  const handleCheckout = () => {
-    if (!paddle) return;
-    setLoading(true);
-    paddle.Checkout.open({
-      items: [{ priceId, quantity: 1 }],
-      settings: {
-        successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
-      },
-    });
-    setLoading(false);
-  };
+  const checkoutUrl = `https://zana-fitness.lemonsqueezy.com/checkout/buy/${variantId}?checkout[redirect_url]=https://zana-fitness.vercel.app/dashboard&embed=1`;
 
   return (
     <div
       className={`flex flex-col border ${
-        featured ? "border-[#b3cdff] shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]" : "border-[#2d3a4b] bg-[#1a222c]"
+        featured ? "border-[#b3cdff] shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]" : "border-[#2d3a4b]"
       } rounded-2xl p-10 md:p-12 relative bg-[#1a222c]`}
     >
       {featured && (
@@ -91,34 +75,24 @@ function PlanCard({
         ))}
       </ul>
 
-      <button
-        onClick={handleCheckout}
-        disabled={loading || !paddle}
-        className={`w-full py-4 rounded-full text-[10px] uppercase tracking-widest font-bold transition-colors disabled:opacity-50 ${
+      <a
+        href={checkoutUrl}
+        className={`lemonsqueezy-button w-full py-4 rounded-full text-[10px] uppercase tracking-widest font-bold transition-colors text-center ${
           featured
             ? "bg-[#b3cdff] text-black hover:bg-white"
             : "border border-[#2d3a4b] text-gray-300 hover:border-[#b3cdff] hover:text-[#b3cdff]"
         }`}
       >
-        {loading ? "Opening..." : "JOIN THE SYSTEM"}
-      </button>
+        JOIN THE SYSTEM
+      </a>
     </div>
   );
 }
 
 export default function SystemPage() {
-  const [paddle, setPaddle] = useState<Paddle | undefined>();
-
-  useEffect(() => {
-    initializePaddle({
-      environment: (process.env.NEXT_PUBLIC_PADDLE_ENV as "sandbox" | "production") ?? "sandbox",
-      token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
-    }).then(setPaddle);
-  }, []);
-
   return (
     <main className="min-h-screen bg-[#121821] text-white font-sans selection:bg-[#b3cdff] selection:text-[#121821]">
-      
+
       {/* NAVBAR */}
       <nav className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-8 md:px-16 overflow-hidden border-b border-[#2d3a4b]/50">
         <Link href="/">
@@ -154,8 +128,7 @@ export default function SystemPage() {
             A framework built on structure.
           </h2>
           <div className="grid md:grid-cols-3 gap-16 md:gap-0 w-full text-center px-4">
-            
-            {/* Box 1 */}
+
             <div className="flex flex-col items-center md:border-r border-[#2d3a4b] md:pr-16">
                <TrendingUp className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">01</div>
@@ -163,8 +136,7 @@ export default function SystemPage() {
                <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Calculated Overload</p>
                <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">No random workouts. Every session builds on the last with precise volume mapping.</p>
             </div>
-            
-            {/* Box 2 */}
+
             <div className="flex flex-col items-center md:border-r border-[#2d3a4b] md:px-16">
                <Leaf className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">02</div>
@@ -173,7 +145,6 @@ export default function SystemPage() {
                <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">Mathematical macro assignments synchronized specifically against your training output.</p>
             </div>
 
-            {/* Box 3 */}
             <div className="flex flex-col items-center md:pl-16">
                <Target className="w-8 h-8 text-gray-300 stroke-[1.5] mb-8" />
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">03</div>
@@ -199,7 +170,7 @@ export default function SystemPage() {
 
       {/* PRICING */}
       <section className="py-24 px-6 bg-[#1a222c] border-y border-[#2d3a4b]" id="pricing">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-4">Choose Your Commitment.</h2>
             <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400">Secure your access protocol below.</p>
@@ -209,23 +180,20 @@ export default function SystemPage() {
               label="Entry"
               price={500}
               commitment="3-month commitment"
-              priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_3M!}
-              paddle={paddle}
+              variantId={process.env.NEXT_PUBLIC_LS_VARIANT_3M!}
             />
             <PlanCard
               label="Committed"
               price={400}
               commitment="6-month commitment"
-              priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_6M!}
-              paddle={paddle}
+              variantId={process.env.NEXT_PUBLIC_LS_VARIANT_6M!}
             />
             <PlanCard
               label="All In"
               price={300}
               commitment="12-month commitment"
-              priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_12M!}
+              variantId={process.env.NEXT_PUBLIC_LS_VARIANT_12M!}
               featured
-              paddle={paddle}
             />
           </div>
         </div>
