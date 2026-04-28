@@ -7,6 +7,8 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const LOGO_URL = "https://raw.githubusercontent.com/javi-zana/zanafitness/main/public/logo.png";
+
 const emailHtml = () => `
 <!DOCTYPE html>
 <html lang="en">
@@ -24,7 +26,7 @@ const emailHtml = () => `
       <!-- WORDMARK -->
       <tr>
         <td align="center" style="padding-bottom:48px;">
-          <img src="https://zana-fitness.vercel.app/logo.png" alt="ZANA Fitness" width="140" style="display:block;max-width:140px;" />
+          <img src="${LOGO_URL}" alt="ZANA Fitness" width="140" style="display:block;max-width:140px;" />
         </td>
       </tr>
 
