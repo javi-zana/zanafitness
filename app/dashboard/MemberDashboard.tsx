@@ -349,35 +349,47 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
 // ─── Install Banner ───────────────────────────────────────────────────────────
 
 function InstallAppBanner() {
-  const [deferredPrompt, setDeferredPrompt] = useState<Event & { prompt: () => void; userChoice: Promise<{ outcome: string }> } | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [visible, setVisible] = useState(false);
-  const [showIOSModal, setShowIOSModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [platform, setPlatform] = useState<"ios" | "android" | "other">("other");
 
   useEffect(() => {
     if (window.matchMedia("(display-mode: standalone)").matches) return;
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) { setVisible(true); return; }
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as any);
-      setVisible(true);
-    };
+    const ua = navigator.userAgent;
+    const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(ua);
+    if (isIOS) { setPlatform("ios"); setVisible(true); }
+    else if (isAndroid) { setPlatform("android"); setVisible(true); }
+    const handler = (e: Event) => { e.preventDefault(); setDeferredPrompt(e); };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
   if (!visible) return null;
 
-  const isIOS = /iPad|iPhone|iPod/.test(typeof navigator !== "undefined" ? navigator.userAgent : "");
-
   async function handleInstall() {
-    if (isIOS) { setShowIOSModal(true); return; }
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") setVisible(false);
-    setDeferredPrompt(null);
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") setVisible(false);
+      setDeferredPrompt(null);
+    } else {
+      setShowModal(true);
+    }
   }
+
+  const iosSteps = [
+    { n: "1.", text: <p>Tap the <span className="text-white font-medium">Share</span> button <span className="text-gray-500">(box with arrow pointing up)</span></p> },
+    { n: "2.", text: <p>Scroll down and tap <span className="text-white font-medium">"Add to Home Screen"</span></p> },
+    { n: "3.", text: <p>Tap <span className="text-white font-medium">"Add"</span> in the top right corner</p> },
+  ];
+  const androidSteps = [
+    { n: "1.", text: <p>Tap the <span className="text-white font-medium">three-dot menu</span> in Chrome <span className="text-gray-500">(top right corner)</span></p> },
+    { n: "2.", text: <p>Tap <span className="text-white font-medium">"Add to Home Screen"</span></p> },
+    { n: "3.", text: <p>Tap <span className="text-white font-medium">"Add"</span> to confirm</p> },
+  ];
+  const steps = platform === "ios" ? iosSteps : androidSteps;
 
   return (
     <>
@@ -385,7 +397,7 @@ function InstallAppBanner() {
         <div>
           <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-1">Get the App</p>
           <p className="text-sm font-light text-white">Add ZANA to your home screen</p>
-          <p className="font-mono text-[8px] text-gray-500 mt-0.5">Works offline. No app store needed.</p>
+          <p className="font-mono text-[8px] text-gray-500 mt-0.5">No app store needed.</p>
         </div>
         <button
           onClick={handleInstall}
@@ -395,27 +407,21 @@ function InstallAppBanner() {
         </button>
       </div>
 
-      {showIOSModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8" onClick={() => setShowIOSModal(false)}>
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8" onClick={() => setShowModal(false)}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
           <div className="relative bg-[#1a222c] border border-[#2d3a4b] rounded-2xl p-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <p className="font-mono text-[9px] tracking-[0.3em] text-[#b3cdff] uppercase mb-6">Add to Home Screen</p>
             <div className="space-y-5 text-sm text-gray-300 leading-relaxed">
-              <div className="flex items-start gap-3">
-                <span className="font-mono text-[#b3cdff] shrink-0">1.</span>
-                <p>Tap the <span className="text-white font-medium">Share</span> button at the bottom of Safari <span className="text-gray-500">(box with arrow pointing up)</span></p>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="font-mono text-[#b3cdff] shrink-0">2.</span>
-                <p>Scroll down and tap <span className="text-white font-medium">"Add to Home Screen"</span></p>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="font-mono text-[#b3cdff] shrink-0">3.</span>
-                <p>Tap <span className="text-white font-medium">"Add"</span> in the top right corner</p>
-              </div>
+              {steps.map(s => (
+                <div key={s.n} className="flex items-start gap-3">
+                  <span className="font-mono text-[#b3cdff] shrink-0">{s.n}</span>
+                  {s.text}
+                </div>
+              ))}
             </div>
             <button
-              onClick={() => setShowIOSModal(false)}
+              onClick={() => setShowModal(false)}
               className="mt-8 w-full font-mono text-[9px] tracking-widest uppercase py-3 border border-[#2d3a4b] text-gray-400 rounded hover:text-white transition-colors"
             >Got it</button>
           </div>
@@ -919,10 +925,10 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
   }
 
   async function loadMembers() {
-    const { data } = await supabase
-      .from("profiles").select("id, nickname, email, avatar_color, role").neq("id", userId);
-    setAllMembers((data ?? []).map(p => {
-      const name = p.nickname || p.email?.split("@")[0] || "Member";
+    const res = await fetch(`/api/profiles?exclude=${userId}`);
+    const { profiles } = await res.json();
+    setAllMembers((profiles ?? []).map((p: { id: string; nickname?: string; email?: string; avatar_color?: string; role?: string }) => {
+      const name = p.nickname || p.email?.split("@")[0] || "User";
       return { id: p.id, name, initials: dmInitials(name), color: p.avatar_color ?? "#b3cdff", role: p.role ?? "member" };
     }));
   }

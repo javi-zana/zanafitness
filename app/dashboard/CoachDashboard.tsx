@@ -957,9 +957,10 @@ function CoachMessagesTab({ userId, userName, userInitials, avatarColor }: {
   }
 
   async function loadMembers() {
-    const { data } = await supabase.from("profiles").select("id, nickname, email, avatar_color, role").neq("id", userId);
-    setAllMembers((data ?? []).map(p => {
-      const name = p.nickname || p.email?.split("@")[0] || "Member";
+    const res = await fetch(`/api/profiles?exclude=${userId}`);
+    const { profiles } = await res.json();
+    setAllMembers((profiles ?? []).map((p: { id: string; nickname?: string; email?: string; avatar_color?: string; role?: string }) => {
+      const name = p.nickname || p.email?.split("@")[0] || "User";
       return { id: p.id, name, initials: coachDmInitials(name), color: p.avatar_color ?? "#b3cdff", role: p.role ?? "member" };
     }));
   }
@@ -1035,7 +1036,7 @@ function CoachMessagesTab({ userId, userName, userInitials, avatarColor }: {
               <Avatar initials={activeConv.other.initials} size="sm" color={activeConv.other.color} />
               <div>
                 <p className="text-sm text-white font-medium">{activeConv.other.name}</p>
-                <p className="font-mono text-[8px] tracking-widest uppercase text-[#86efac]">Member</p>
+                <p className={`font-mono text-[8px] tracking-widest uppercase ${activeConv.other.role === "coach" ? "text-[#b3cdff]" : "text-[#86efac]"}`}>{activeConv.other.role === "coach" ? "Coach" : "Member"}</p>
               </div>
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">

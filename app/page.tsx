@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { TrendingUp, Leaf, Target, Lock, X } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
 import Footer from '@/app/components/Footer';
@@ -152,9 +153,9 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <button className="bg-[#b3cdff] text-[#121821] font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors">
+          <Link href="/system" className="bg-[#b3cdff] text-[#121821] font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors inline-block">
             Get Started
-          </button>
+          </Link>
         </div>
 
         {/* Bottom Right Absolute */}
