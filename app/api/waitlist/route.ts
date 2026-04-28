@@ -1,29 +1,28 @@
-import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
 export async function POST(req: Request) {
-  const resend = new Resend(process.env.RESEND_API_KEY);
   const { email } = await req.json();
 
-  await resend.emails.send({
-    from: "ZANA <hello@zanafitness.com>",
-    to: "hello@zanafitness.com",
-    subject: "New ZANA Signup",
-    html: `<p>${email} joined the system</p>`,
-  });
+  if (!email) {
+    return NextResponse.json({ error: "Email required" }, { status: 400 });
+  }
 
-  await resend.emails.send({
-    from: "ZANA <hello@zanafitness.com>",
-    to: email,
-    subject: "You're in.",
-    html: `
-      <h2 style="font-family:sans-serif;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;">Welcome to ZANA.</h2>
-      <p style="font-family:sans-serif;color:#666;">This isn't a program.</p>
-      <p style="font-family:sans-serif;color:#666;">It's a system.</p>
-      <br/>
-      <p style="font-family:sans-serif;color:#666;">We'll let you know when access opens.</p>
-    `,
-  });
+  const { error } = await supabase
+    .from("waitlist")
+    .insert({ email });
+
+  if (error) {
+    if (error.code === "23505") {
+      return NextResponse.json({ error: "Already on the list" }, { status: 409 });
+    }
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true });
 }

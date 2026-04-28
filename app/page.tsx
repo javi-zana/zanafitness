@@ -18,12 +18,24 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
 
 export default function LandingPage() {
   const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
 
-  const handleWaitlist = (e: React.FormEvent) => {
+  const handleWaitlist = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Waitlist joined:', email);
-    setEmail('');
-    alert("You've been added to the system.");
+    setStatus('loading');
+    const res = await fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (res.ok) {
+      setStatus('success');
+      setEmail('');
+    } else if (res.status === 409) {
+      setStatus('duplicate');
+    } else {
+      setStatus('error');
+    }
   };
 
   return (
@@ -193,22 +205,33 @@ export default function LandingPage() {
           <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase mb-4 text-white">JOIN THE SYSTEM.</h2>
           <p className="text-[#b3cdff] font-mono uppercase tracking-[0.2em] text-[10px] mb-10">Get first access when Zana launches.</p>
 
-          <form onSubmit={handleWaitlist} className="w-full mb-6 flex flex-col gap-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="Enter your email"
-              className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded-full font-mono px-6 py-4 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff] transition-colors"
-            />
-            <button
-              type="submit"
-              className="w-full bg-[#b3cdff] text-black font-bold px-8 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors"
-            >
-              Join Now
-            </button>
-          </form>
+          {status === 'success' ? (
+            <p className="font-mono text-[10px] uppercase tracking-widest text-[#b3cdff] py-4">You&apos;re on the list. We&apos;ll be in touch.</p>
+          ) : (
+            <form onSubmit={handleWaitlist} className="w-full mb-6 flex flex-col gap-3">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="Enter your email"
+                className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded-full font-mono px-6 py-4 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff] transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                className="w-full bg-[#b3cdff] text-black font-bold px-8 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50"
+              >
+                {status === 'loading' ? 'Submitting...' : 'Join Now'}
+              </button>
+              {status === 'duplicate' && (
+                <p className="font-mono text-[9px] uppercase tracking-widest text-gray-400 text-center">You&apos;re already on the list.</p>
+              )}
+              {status === 'error' && (
+                <p className="font-mono text-[9px] uppercase tracking-widest text-red-400 text-center">Something went wrong. Try again.</p>
+              )}
+            </form>
+          )}
 
           <div className="flex items-center gap-3 text-gray-500 font-mono text-[9px] uppercase tracking-widest">
             <Lock className="w-3 h-3" />
