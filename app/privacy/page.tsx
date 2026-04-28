@@ -1,5 +1,15 @@
 import Link from "next/link";
 
+const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
+  <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
+    <path d="M0,2 H32 L18.3,14" />
+    <path d="M13.7,18 L0,30 H32" />
+    <path d="M48,30 L64,2 L80,30" />
+    <path d="M96,30 V2 L128,30 V2" />
+    <path d="M144,30 L160,2 L176,30" />
+  </svg>
+);
+
 const ZIcon = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
     <path d="M0,2 H32 L18.3,14" />
@@ -9,10 +19,10 @@ const ZIcon = ({ className = "h-8" }: { className?: string }) => (
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[#06080a] text-white font-sans">
+    <main className="min-h-screen bg-[#121821] text-white font-sans">
 
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#1a1f26]">
+      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
         <Link href="/"><ZIcon className="h-5 md:h-6 text-white" /></Link>
         <Link href="/" className="font-mono text-[9px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
           &larr; Back
@@ -37,7 +47,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">2. Data We Collect</h2>
               <p>We collect the following information when you use our Service:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#1a1f26]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
                 <li>Email address (for account creation and communication)</li>
                 <li>Fitness goals and preferences (provided during onboarding)</li>
                 <li>Progress data (weight, strength metrics, consistency)</li>
@@ -49,7 +59,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">3. How We Use Your Data</h2>
               <p>Your data is used to:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#1a1f26]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
                 <li>Provide and personalise the ZANA fitness system</li>
                 <li>Process payments and manage your subscription</li>
                 <li>Send coaching guidance and program updates</li>
@@ -61,7 +71,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">4. Third-Party Services</h2>
               <p>We use the following trusted third-party services to operate the platform:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#1a1f26]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
                 <li>Supabase — secure database and authentication</li>
                 <li>Paddle — payment processing and subscription management</li>
                 <li>Resend — transactional email delivery</li>
@@ -82,7 +92,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">7. Your Rights</h2>
               <p>You have the right to:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#1a1f26]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
                 <li>Access the personal data we hold about you</li>
                 <li>Request correction of inaccurate data</li>
                 <li>Request deletion of your account and data</li>
@@ -111,11 +121,16 @@ export default function PrivacyPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="py-12 px-8 md:px-16 border-t border-[#1a1f26] flex justify-between items-center font-mono text-[9px] uppercase tracking-widest text-gray-600 mt-16">
-        <p>&copy; 2025 Zana Fitness</p>
-        <div className="flex gap-8">
-          <Link href="/terms" className="hover:text-[#b3cdff] transition-colors">Terms</Link>
-          <Link href="/refund" className="hover:text-[#b3cdff] transition-colors">Refunds</Link>
+      <footer className="py-16 px-10 md:px-24 bg-[#0f141b] flex flex-col md:flex-row items-center justify-between border-t border-[#2d3a4b] text-[9px] font-mono tracking-[0.2em] uppercase text-gray-500 gap-8 mt-16">
+        <div className="flex-1 flex justify-center md:justify-start w-full md:w-auto">
+          <p>&copy; 2026 Zana Fitness</p>
+        </div>
+        <div className="flex-1 flex justify-center py-6 md:py-0">
+          <ZanaLogo className="h-4 md:h-5 text-white" />
+        </div>
+        <div className="flex-1 flex justify-center md:justify-end gap-5 w-full md:w-auto">
+          <a href="https://www.instagram.com/javi_zana/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>
+          <a href="https://www.tiktok.com/@javi_zana?lang=en" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">TikTok</a>
         </div>
       </footer>
     </main>

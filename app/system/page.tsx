@@ -125,10 +125,10 @@ export default function SystemPage() {
           <ZIcon className="h-5 md:h-6 text-white" />
         </Link>
         <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] font-inter uppercase font-semibold text-gray-300">
-          <Link href="/preview-about.html" className="hover:text-white transition-colors">About</Link>
+          <Link href="/about" className="hover:text-white transition-colors">About</Link>
           <Link href="/system" className="text-white hover:text-white transition-colors">The System</Link>
-          <Link href="/preview-faq.html" className="hover:text-white transition-colors">FAQ</Link>
-          <Link href="/preview-join.html" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
+          <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
+          <Link href="/system" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
             JOIN THE SYSTEM
           </Link>
         </div>

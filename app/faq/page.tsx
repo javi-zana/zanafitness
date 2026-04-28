@@ -1,5 +1,15 @@
 import Link from "next/link";
 
+const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
+  <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
+    <path d="M0,2 H32 L18.3,14" />
+    <path d="M13.7,18 L0,30 H32" />
+    <path d="M48,30 L64,2 L80,30" />
+    <path d="M96,30 V2 L128,30 V2" />
+    <path d="M144,30 L160,2 L176,30" />
+  </svg>
+);
+
 const ZIcon = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
     <path d="M0,2 H32 L18.3,14" />
@@ -36,10 +46,10 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <main className="min-h-screen bg-[#06080a] text-white font-sans flex flex-col">
+    <main className="min-h-screen bg-[#121821] text-white font-sans flex flex-col">
 
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#1a1f26]">
+      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
         <Link href="/" className="hover:opacity-70 transition-opacity">
           <ZIcon className="h-5 md:h-6 text-white" />
         </Link>
@@ -47,7 +57,7 @@ export default function FAQPage() {
           <Link href="/about" className="hover:text-white transition-colors">About</Link>
           <Link href="/system" className="hover:text-white transition-colors">The System</Link>
           <Link href="/faq" className="text-white">FAQ</Link>
-          <Link href="/system" className="bg-[#b3cdff] text-[#06080a] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
+          <Link href="/system" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
             Join the System
           </Link>
         </div>
@@ -63,9 +73,9 @@ export default function FAQPage() {
           </h1>
         </div>
 
-        <div className="border-t border-[#1a1f26]">
+        <div className="border-t border-[#2d3a4b]">
           {faqs.map((item) => (
-            <div key={item.q} className="py-8 border-b border-[#1a1f26]">
+            <div key={item.q} className="py-8 border-b border-[#2d3a4b]">
               <h3 className="font-bold tracking-widest uppercase text-xs md:text-sm mb-4 text-white">
                 {item.q}
               </h3>
@@ -84,6 +94,20 @@ export default function FAQPage() {
         </div>
 
       </section>
+
+      {/* FOOTER */}
+      <footer className="py-16 px-10 md:px-24 bg-[#0f141b] flex flex-col md:flex-row items-center justify-between border-t border-[#2d3a4b] text-[9px] font-mono tracking-[0.2em] uppercase text-gray-500 gap-8">
+        <div className="flex-1 flex justify-center md:justify-start w-full md:w-auto">
+          <p>&copy; 2026 Zana Fitness</p>
+        </div>
+        <div className="flex-1 flex justify-center py-6 md:py-0">
+          <ZanaLogo className="h-4 md:h-5 text-white" />
+        </div>
+        <div className="flex-1 flex justify-center md:justify-end gap-5 w-full md:w-auto">
+          <a href="https://www.instagram.com/javi_zana/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>
+          <a href="https://www.tiktok.com/@javi_zana?lang=en" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">TikTok</a>
+        </div>
+      </footer>
 
     </main>
   );

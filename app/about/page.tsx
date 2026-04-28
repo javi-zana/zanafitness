@@ -19,10 +19,10 @@ const ZIcon = ({ className = "h-8" }: { className?: string }) => (
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[#06080a] text-white font-sans flex flex-col">
+    <main className="min-h-screen bg-[#121821] text-white font-sans flex flex-col">
 
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#1a1f26]">
+      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
         <Link href="/" className="hover:opacity-70 transition-opacity">
           <ZIcon className="h-5 md:h-6 text-white" />
         </Link>
@@ -30,19 +30,19 @@ export default function AboutPage() {
           <Link href="/about" className="text-white">About</Link>
           <Link href="/system" className="hover:text-white transition-colors">The System</Link>
           <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
-          <Link href="/system" className="bg-[#b3cdff] text-[#06080a] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
+          <Link href="/system" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
             Join the System
           </Link>
         </div>
       </nav>
 
       {/* CONTENT */}
-      <section className="grid grid-cols-1 md:grid-cols-2 flex-1 bg-[#090b0e]">
+      <section className="grid grid-cols-1 md:grid-cols-2 flex-1 bg-[#121821]">
 
         {/* Left — Photo */}
-        <div className="h-[50vh] md:h-full w-full relative border-b md:border-b-0 md:border-r border-[#1a1f26]">
+        <div className="h-[50vh] md:h-full w-full relative border-b md:border-b-0 md:border-r border-[#2d3a4b]">
           <div className="absolute inset-0 bg-[url('/A502086F-E304-43B4-87C1-93658EDB79F0.PNG')] bg-cover md:bg-contain bg-center bg-no-repeat brightness-[0.6] grayscale opacity-80" />
-          <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 150px 40px #090b0e' }} />
+          <div className="absolute inset-0" style={{ boxShadow: 'inset 0 0 150px 40px #121821' }} />
         </div>
 
         {/* Right — Copy */}
@@ -71,6 +71,20 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {/* FOOTER */}
+      <footer className="py-16 px-10 md:px-24 bg-[#0f141b] flex flex-col md:flex-row items-center justify-between border-t border-[#2d3a4b] text-[9px] font-mono tracking-[0.2em] uppercase text-gray-500 gap-8">
+        <div className="flex-1 flex justify-center md:justify-start w-full md:w-auto">
+          <p>&copy; 2026 Zana Fitness</p>
+        </div>
+        <div className="flex-1 flex justify-center py-6 md:py-0">
+          <ZanaLogo className="h-4 md:h-5 text-white" />
+        </div>
+        <div className="flex-1 flex justify-center md:justify-end gap-5 w-full md:w-auto">
+          <a href="https://www.instagram.com/javi_zana/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Instagram</a>
+          <a href="https://www.tiktok.com/@javi_zana?lang=en" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">TikTok</a>
+        </div>
+      </footer>
 
     </main>
   );
