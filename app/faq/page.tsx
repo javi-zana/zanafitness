@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Navbar from "@/app/components/Navbar";
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
@@ -10,17 +10,10 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
-const ZIcon = ({ className = "h-8" }: { className?: string }) => (
-  <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
-    <path d="M0,2 H32 L18.3,14" />
-    <path d="M13.7,18 L0,30 H32" />
-  </svg>
-);
-
 const faqs = [
   {
     q: "Is there a required commitment?",
-    a: "Yes. Progress requires time. We offer 4-month and 12-month access. We do not offer month-to-month subscriptions because true physiological changes cannot be forced into a 30-day window.",
+    a: "Yes. Progress requires time. We offer 3-month, 6-month, and 12-month access. We do not offer month-to-month subscriptions because true physiological changes cannot be forced into a 30-day window.",
   },
   {
     q: "What happens after I join?",
@@ -48,23 +41,10 @@ export default function FAQPage() {
   return (
     <main className="min-h-screen bg-[#121821] text-white font-sans flex flex-col">
 
-      {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
-        <Link href="/" className="hover:opacity-70 transition-opacity">
-          <ZIcon className="h-5 md:h-6 text-white" />
-        </Link>
-        <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] uppercase font-semibold text-gray-300">
-          <Link href="/about" className="hover:text-white transition-colors">About</Link>
-          <Link href="/system" className="hover:text-white transition-colors">The System</Link>
-          <Link href="/faq" className="text-white">FAQ</Link>
-          <Link href="/system" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
-            Join the System
-          </Link>
-        </div>
-      </nav>
+      <Navbar active="faq" />
 
       {/* CONTENT */}
-      <section className="max-w-4xl mx-auto py-32 px-6 flex-1 w-full relative">
+      <section className="max-w-4xl mx-auto pt-40 pb-32 px-6 flex-1 w-full">
 
         <div className="text-center mb-24">
           <p className="font-mono text-[10px] tracking-widest text-[#b3cdff] uppercase mb-6">Information</p>
@@ -85,12 +65,12 @@ export default function FAQPage() {
         </div>
 
         <div className="text-center mt-32">
-          <Link
+          <a
             href="/system"
             className="inline-block bg-white text-black font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-[#b3cdff] transition-colors"
           >
             Ready to start? Join Now
-          </Link>
+          </a>
         </div>
 
       </section>

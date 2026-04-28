@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Navbar from "@/app/components/Navbar";
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
@@ -10,34 +10,14 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
-const ZIcon = ({ className = "h-8" }: { className?: string }) => (
-  <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
-    <path d="M0,2 H32 L18.3,14" />
-    <path d="M13.7,18 L0,30 H32" />
-  </svg>
-);
-
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-[#121821] text-white font-sans flex flex-col">
 
-      {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
-        <Link href="/" className="hover:opacity-70 transition-opacity">
-          <ZIcon className="h-5 md:h-6 text-white" />
-        </Link>
-        <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] font-sans uppercase font-semibold text-gray-300">
-          <Link href="/about" className="text-white">About</Link>
-          <Link href="/system" className="hover:text-white transition-colors">The System</Link>
-          <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
-          <Link href="/system" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
-            JOIN THE SYSTEM
-          </Link>
-        </div>
-      </nav>
+      <Navbar active="about" />
 
       {/* CONTENT */}
-      <section className="grid grid-cols-1 md:grid-cols-2 flex-1 bg-[#121821]">
+      <section className="grid grid-cols-1 md:grid-cols-2 flex-1 bg-[#121821] pt-24 md:pt-0">
 
         {/* Left — Photo */}
         <div className="h-[50vh] md:h-full w-full relative border-b md:border-b-0 md:border-r border-[#2d3a4b] bg-[#121821] overflow-hidden">

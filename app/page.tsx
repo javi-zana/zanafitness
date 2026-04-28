@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { TrendingUp, Leaf, Target, Lock } from 'lucide-react';
+import Navbar from '@/app/components/Navbar';
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
@@ -14,12 +15,6 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
-const ZIcon = ({ className = "h-8" }: { className?: string }) => (
-  <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
-    <path d="M0,2 H32 L18.3,14" />
-    <path d="M13.7,18 L0,30 H32" />
-  </svg>
-);
 
 export default function LandingPage() {
   const [email, setEmail] = useState('');
@@ -34,18 +29,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen bg-[#121821] text-white selection:bg-[#b3cdff] selection:text-[#0b0f1a] font-sans">
       
-      {/* NAVBAR */}
-      <nav className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-8 md:px-16 overflow-hidden">
-        <ZIcon className="h-5 md:h-6 text-white" />
-        <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] font-inter uppercase font-semibold text-gray-300">
-          <Link href="/about" className="hover:text-white transition-colors">About</Link>
-          <Link href="/system" className="hover:text-white transition-colors">The System</Link>
-          <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
-          <Link href="/system" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
-            JOIN THE SYSTEM
-          </Link>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* 1. HERO SECTION */}
       <section className="relative min-h-[85vh] flex flex-col justify-center px-8 md:px-24 bg-[#121821]">
