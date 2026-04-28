@@ -296,10 +296,15 @@ function OverviewTab({ coachName, onTabChange }: { coachName: string; onTabChang
 
 // ─── Tab: Members ─────────────────────────────────────────────────────────────
 
-function MembersTab() {
+function MembersTab({ coachEmail }: { coachEmail: string }) {
   const [search, setSearch] = useState("");
   const [planFilter, setPlanFilter] = useState("All");
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [invitePlan, setInvitePlan] = useState("Entry");
+  const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [inviteError, setInviteError] = useState("");
 
   const filtered = MEMBERS.filter(m => {
     const q = search.toLowerCase();
@@ -307,9 +312,66 @@ function MembersTab() {
       (m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q));
   });
 
+  const handleInvite = async () => {
+    if (!inviteEmail.trim()) return;
+    setInviteStatus("loading");
+    setInviteError("");
+    const res = await fetch("/api/invite-member", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-coach-email": coachEmail },
+      body: JSON.stringify({ email: inviteEmail.trim(), plan: invitePlan }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setInviteStatus("error");
+      setInviteError(data.error ?? "Something went wrong.");
+    } else {
+      setInviteStatus("success");
+      setTimeout(() => {
+        setShowInvite(false);
+        setInviteEmail("");
+        setInvitePlan("Entry");
+        setInviteStatus("idle");
+      }, 2000);
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto space-y-5">
       {selectedMember && <MemberPanel member={selectedMember} onClose={() => setSelectedMember(null)} />}
+
+      {/* Invite modal */}
+      {showInvite && (
+        <Modal title="Invite Member" onClose={() => { setShowInvite(false); setInviteStatus("idle"); setInviteError(""); }}>
+          <div className="space-y-3">
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={e => setInviteEmail(e.target.value)}
+              placeholder="member@email.com"
+              className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/40 font-light text-sm"
+            />
+            <div className="grid grid-cols-3 gap-2">
+              {["Entry", "Committed", "All In"].map(p => (
+                <button key={p} onClick={() => setInvitePlan(p)}
+                  className={`font-mono text-[8px] tracking-widest uppercase py-2.5 rounded border transition-colors ${invitePlan === p ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]" : "text-gray-400 border-[#2d3a4b] hover:text-white"}`}
+                >{p}</button>
+              ))}
+            </div>
+            {inviteError && <p className="font-mono text-[8px] text-[#f87171]">{inviteError}</p>}
+            <button
+              onClick={handleInvite}
+              disabled={!inviteEmail.trim() || inviteStatus === "loading" || inviteStatus === "success"}
+              className="w-full font-mono text-[8px] tracking-[0.25em] uppercase py-3 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
+            >
+              {inviteStatus === "loading" ? "Sending..." : inviteStatus === "success" ? "Invite Sent ✓" : "Send Invite"}
+            </button>
+            <p className="font-mono text-[8px] text-gray-600 text-center">
+              They&apos;ll receive a login link by email. Their plan will be set to <span className="text-gray-400">{invitePlan}</span>.
+            </p>
+          </div>
+        </Modal>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-3">
         <input
@@ -323,6 +385,10 @@ function MembersTab() {
               className={`font-mono text-[8px] tracking-widest uppercase px-3 py-2.5 rounded border transition-colors shrink-0 ${planFilter === p ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]" : "text-gray-400 border-[#2d3a4b] hover:text-white"}`}
             >{p}</button>
           ))}
+          <button onClick={() => setShowInvite(true)}
+            className="font-mono text-[8px] tracking-widest uppercase px-3 py-2.5 rounded border border-[#b3cdff]/30 text-[#b3cdff] hover:bg-[#b3cdff]/10 transition-colors shrink-0">
+            + Invite
+          </button>
         </div>
       </div>
 
@@ -835,6 +901,7 @@ export default function CoachDashboard({ profile }: { profile: ProfileData }) {
   const coachNickname = profile?.nickname ?? "";
   const coachEmail = profile?.email ?? "";
   const coachName = coachNickname || coachEmail.split("@")[0] || "Coach";
+  // coachEmail is passed to API calls that require coach identity verification
   const initials = getCoachInitials(coachNickname, coachEmail);
   const avatarColor = profile?.avatar_color ?? "#b3cdff";
   const coachId = profile?.id ?? "";
@@ -894,7 +961,7 @@ export default function CoachDashboard({ profile }: { profile: ProfileData }) {
 
         <div className="flex-1 p-5 pb-28 md:pb-8">
           {activeTab === "overview"  && <OverviewTab  coachName={coachName} onTabChange={setActiveTab} />}
-          {activeTab === "members"   && <MembersTab />}
+          {activeTab === "members"   && <MembersTab coachEmail={coachEmail} />}
           {activeTab === "community" && <CommunityTab coachName={coachName} />}
           {activeTab === "programs"  && <ProgramsTab coachId={coachId} />}
           {activeTab === "schedule"  && <ScheduleTab />}
