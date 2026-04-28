@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TrendingUp, Leaf, Target, Lock } from 'lucide-react';
+import { TrendingUp, Leaf, Target, Lock, X } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
 import Footer from '@/app/components/Footer';
 
@@ -15,6 +15,44 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
+function WaitlistModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative bg-[#1a222c] border border-[#2d3a4b] rounded-2xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-[0_0_120px_-20px_rgba(179,205,255,0.15)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <ZanaLogo className="h-6 text-white mb-10 opacity-60" />
+
+        <div className="w-6 h-px bg-[#b3cdff] mb-10" />
+
+        <p className="font-mono text-[9px] uppercase tracking-widest text-[#b3cdff] mb-4">Access Requested</p>
+
+        <h2 className="text-xl md:text-2xl font-light tracking-[0.1em] uppercase text-white leading-snug mb-6">
+          You&apos;re on the list.
+        </h2>
+
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 leading-loose">
+          We&apos;ll send you an email once slots<br />for ZANA Fitness open.
+        </p>
+
+        <div className="w-6 h-px bg-[#2d3a4b] mt-10 mb-10" />
+
+        <p className="font-mono text-[9px] uppercase tracking-widest text-gray-600">
+          Built for results. Not motivation.
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function LandingPage() {
   const [email, setEmail] = useState('');
@@ -40,7 +78,9 @@ export default function LandingPage() {
 
   return (
     <main className="min-h-screen bg-[#121821] text-white selection:bg-[#b3cdff] selection:text-[#0b0f1a] font-sans">
-      
+
+      {status === 'success' && <WaitlistModal onClose={() => setStatus('idle')} />}
+
       <Navbar />
 
       {/* 1. HERO SECTION */}
@@ -205,33 +245,29 @@ export default function LandingPage() {
           <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase mb-4 text-white">JOIN THE SYSTEM.</h2>
           <p className="text-[#b3cdff] font-mono uppercase tracking-[0.2em] text-[10px] mb-10">Get first access when Zana launches.</p>
 
-          {status === 'success' ? (
-            <p className="font-mono text-[10px] uppercase tracking-widest text-[#b3cdff] py-4">You&apos;re on the list. We&apos;ll be in touch.</p>
-          ) : (
-            <form onSubmit={handleWaitlist} className="w-full mb-6 flex flex-col gap-3">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="Enter your email"
-                className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded-full font-mono px-6 py-4 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff] transition-colors"
-              />
-              <button
-                type="submit"
-                disabled={status === 'loading'}
-                className="w-full bg-[#b3cdff] text-black font-bold px-8 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50"
-              >
-                {status === 'loading' ? 'Submitting...' : 'Join Now'}
-              </button>
-              {status === 'duplicate' && (
-                <p className="font-mono text-[9px] uppercase tracking-widest text-gray-400 text-center">You&apos;re already on the list.</p>
-              )}
-              {status === 'error' && (
-                <p className="font-mono text-[9px] uppercase tracking-widest text-red-400 text-center">Something went wrong. Try again.</p>
-              )}
-            </form>
-          )}
+          <form onSubmit={handleWaitlist} className="w-full mb-6 flex flex-col gap-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+              className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded-full font-mono px-6 py-4 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff] transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={status === 'loading'}
+              className="w-full bg-[#b3cdff] text-black font-bold px-8 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50"
+            >
+              {status === 'loading' ? 'Submitting...' : 'Join Now'}
+            </button>
+            {status === 'duplicate' && (
+              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-400 text-center">You&apos;re already on the list.</p>
+            )}
+            {status === 'error' && (
+              <p className="font-mono text-[9px] uppercase tracking-widest text-red-400 text-center">Something went wrong. Try again.</p>
+            )}
+          </form>
 
           <div className="flex items-center gap-3 text-gray-500 font-mono text-[9px] uppercase tracking-widest">
             <Lock className="w-3 h-3" />
