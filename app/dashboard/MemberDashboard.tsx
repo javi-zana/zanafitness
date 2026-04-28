@@ -340,7 +340,88 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
           Control the eccentric. Drop the ego. Progression comes from tension, not just moving weight from point A to B.
         </p>
       </div>
+
+      <InstallAppBanner />
     </div>
+  );
+}
+
+// ─── Install Banner ───────────────────────────────────────────────────────────
+
+function InstallAppBanner() {
+  const [deferredPrompt, setDeferredPrompt] = useState<Event & { prompt: () => void; userChoice: Promise<{ outcome: string }> } | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [showIOSModal, setShowIOSModal] = useState(false);
+
+  useEffect(() => {
+    if (window.matchMedia("(display-mode: standalone)").matches) return;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) { setVisible(true); return; }
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as any);
+      setVisible(true);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  if (!visible) return null;
+
+  const isIOS = /iPad|iPhone|iPod/.test(typeof navigator !== "undefined" ? navigator.userAgent : "");
+
+  async function handleInstall() {
+    if (isIOS) { setShowIOSModal(true); return; }
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === "accepted") setVisible(false);
+    setDeferredPrompt(null);
+  }
+
+  return (
+    <>
+      <div className="bg-[#121821] border border-[#2d3a4b] rounded p-5 flex items-center justify-between gap-4">
+        <div>
+          <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-1">Get the App</p>
+          <p className="text-sm font-light text-white">Add ZANA to your home screen</p>
+          <p className="font-mono text-[8px] text-gray-500 mt-0.5">Works offline. No app store needed.</p>
+        </div>
+        <button
+          onClick={handleInstall}
+          className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-4 py-2.5 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors"
+        >
+          Install
+        </button>
+      </div>
+
+      {showIOSModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8" onClick={() => setShowIOSModal(false)}>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative bg-[#1a222c] border border-[#2d3a4b] rounded-2xl p-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <p className="font-mono text-[9px] tracking-[0.3em] text-[#b3cdff] uppercase mb-6">Add to Home Screen</p>
+            <div className="space-y-5 text-sm text-gray-300 leading-relaxed">
+              <div className="flex items-start gap-3">
+                <span className="font-mono text-[#b3cdff] shrink-0">1.</span>
+                <p>Tap the <span className="text-white font-medium">Share</span> button at the bottom of Safari <span className="text-gray-500">(box with arrow pointing up)</span></p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="font-mono text-[#b3cdff] shrink-0">2.</span>
+                <p>Scroll down and tap <span className="text-white font-medium">"Add to Home Screen"</span></p>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="font-mono text-[#b3cdff] shrink-0">3.</span>
+                <p>Tap <span className="text-white font-medium">"Add"</span> in the top right corner</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowIOSModal(false)}
+              className="mt-8 w-full font-mono text-[9px] tracking-widest uppercase py-3 border border-[#2d3a4b] text-gray-400 rounded hover:text-white transition-colors"
+            >Got it</button>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
