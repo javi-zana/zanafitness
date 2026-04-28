@@ -873,9 +873,10 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
         event: "INSERT", schema: "public", table: "direct_messages",
         filter: `conversation_id=eq.${activeId}`,
       }, (payload) => {
-        setMessages(prev => [...prev, payload.new as DM]);
+        const incoming = payload.new as DM;
+        setMessages(prev => prev.some(m => m.id === incoming.id) ? prev : [...prev, incoming]);
         setConvs(prev => prev.map(c =>
-          c.id === activeId ? { ...c, last_preview: (payload.new as DM).content, last_message_at: (payload.new as DM).created_at } : c
+          c.id === activeId ? { ...c, last_preview: incoming.content, last_message_at: incoming.created_at } : c
         ));
       })
       .subscribe();
@@ -893,9 +894,9 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
     if (!raw?.length) { setConvs([]); setLoadingConvs(false); return; }
 
     const otherIds = raw.map(c => c.participant_1 === userId ? c.participant_2 : c.participant_1);
-    const { data: profiles } = await supabase
-      .from("profiles").select("id, nickname, email, avatar_color, role").in("id", otherIds);
-    const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]));
+    const profRes = await fetch(`/api/profiles?ids=${otherIds.join(",")}`);
+    const { profiles } = await profRes.json();
+    const profileMap = Object.fromEntries((profiles ?? []).map((p: { id: string; nickname?: string; email?: string; avatar_color?: string; role?: string }) => [p.id, p]));
 
     const convIds = raw.map(c => c.id);
     const { data: lastMsgs } = await supabase
@@ -953,16 +954,11 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
     const text = input.trim();
     if (!text || !activeId) return;
     setInput("");
-    const { data, error } = await supabase
+    await supabase
       .from("direct_messages")
-      .insert({ conversation_id: activeId, sender_id: userId, content: text })
-      .select().single();
-    if (!error && data) {
-      setMessages(prev => [...prev, data]);
-      await supabase.from("conversations")
-        .update({ last_message_at: new Date().toISOString() }).eq("id", activeId);
-      setConvs(prev => prev.map(c => c.id === activeId ? { ...c, last_preview: text } : c));
-    }
+      .insert({ conversation_id: activeId, sender_id: userId, content: text });
+    await supabase.from("conversations")
+      .update({ last_message_at: new Date().toISOString() }).eq("id", activeId);
   }
 
   const filteredMembers = allMembers.filter(m =>
