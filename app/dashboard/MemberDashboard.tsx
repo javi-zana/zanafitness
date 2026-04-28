@@ -18,34 +18,47 @@ type Category = "All" | "Announcements" | "Check-ins" | "Wins" | "Q&A";
 
 const USER = { name: "Javier", plan: "All In", day: 12, phase: 1, streak: 12, points: 72 };
 
-const POSTS = [
+type Post = {
+  id: number;
+  author: string;
+  initials: string;
+  isCoach: boolean;
+  category: Category;
+  time: string;
+  content: string;
+  likes: number;
+  comments: number;
+  pinned?: boolean;
+};
+
+const INITIAL_POSTS: Post[] = [
   {
     id: 1, author: "Javier Lorenzana", initials: "JL", isCoach: true,
-    category: "Announcements" as Category, time: "2h ago",
+    category: "Announcements", time: "2h ago",
     content: "Week 3 check-in is live. Drop your weigh-in + this week's top lift in the comments. Let's see who's ahead of schedule.",
     likes: 14, comments: 8,
   },
   {
     id: 2, author: "Marcus Chen", initials: "MC", isCoach: false,
-    category: "Wins" as Category, time: "5h ago",
+    category: "Wins", time: "5h ago",
     content: "New bench PR — 185 lbs × 5. Three weeks in and the numbers are moving. Program is no joke.",
     likes: 31, comments: 6,
   },
   {
     id: 3, author: "Sofia Reyes", initials: "SR", isCoach: false,
-    category: "Check-ins" as Category, time: "Yesterday",
+    category: "Check-ins", time: "Yesterday",
     content: "Week 3 Day 2 complete. Legs were shaking by the end of the Romanian DLs but I didn't stop. First time I've finished a leg day feeling proud.",
     likes: 22, comments: 4,
   },
   {
     id: 4, author: "Daniel Park", initials: "DP", isCoach: false,
-    category: "Q&A" as Category, time: "Yesterday",
+    category: "Q&A", time: "Yesterday",
     content: "Question for Javi — on upper body days, should I be hitting failure on every set or leaving 1–2 reps in reserve? Recovery has been slower this week.",
     likes: 5, comments: 3,
   },
   {
     id: 5, author: "Aiko Tanaka", initials: "AT", isCoach: false,
-    category: "Check-ins" as Category, time: "2 days ago",
+    category: "Check-ins", time: "2 days ago",
     content: "Day 45 done. Still here. Consistency is the whole game.",
     likes: 38, comments: 9,
   },
@@ -55,31 +68,31 @@ const PROGRAMS = [
   {
     id: 1, title: "ZANA Training System", phase: "Phase 1 — Foundations",
     description: "12 weeks of structured progressive overload. Build the base before you build the peak.",
-    progress: 34, locked: false, active: true, accentColor: "#b3cdff",
+    progress: 34, locked: false, active: true, accentColor: "#b3cdff", href: "/workout",
   },
   {
     id: 2, title: "Nutrition Blueprint", phase: "Complete Guide",
     description: "Calorie targets, macro splits, meal timing, and the supplement stack that actually matters.",
-    progress: 17, locked: false, active: false, accentColor: "#86efac",
+    progress: 17, locked: false, active: false, accentColor: "#86efac", href: "/nutrition",
   },
   {
     id: 3, title: "Mindset Protocol", phase: "Mental Edge Series",
     description: "The psychological framework behind elite physical performance. Not motivation — method.",
-    progress: 0, locked: true, active: false, accentColor: "#fbbf24",
+    progress: 0, locked: true, active: false, accentColor: "#fbbf24", href: null,
   },
   {
     id: 4, title: "Recovery Science", phase: "Sleep & Stress Module",
     description: "Optimize sleep, manage cortisol, train harder by recovering smarter.",
-    progress: 0, locked: true, active: false, accentColor: "#f472b6",
+    progress: 0, locked: true, active: false, accentColor: "#f472b6", href: null,
   },
 ];
 
 const EVENTS = [
-  { id: 1, title: "Group Coaching Call", host: "Javier Lorenzana", date: "Thu, May 1", time: "7:00 PM PHT", tag: "LIVE" },
-  { id: 2, title: "Weekly Check-In Deadline", host: null, date: "Sun, May 4", time: "11:59 PM PHT", tag: "DEADLINE" },
-  { id: 3, title: "1:1 Progress Review", host: "Javier Lorenzana", date: "Fri, May 9", time: "By Appointment", tag: "1:1" },
-  { id: 4, title: "Group Coaching Call", host: "Javier Lorenzana", date: "Thu, May 15", time: "7:00 PM PHT", tag: "LIVE" },
-  { id: 5, title: "Monthly Deload Week Begins", host: null, date: "Mon, May 19", time: "All day", tag: "PROGRAM" },
+  { id: 1, title: "Group Coaching Call", host: "Javier Lorenzana", date: "Thu, May 1", time: "7:00 PM PHT", tag: "LIVE", meetUrl: "https://meet.google.com/new" },
+  { id: 2, title: "Weekly Check-In Deadline", host: null, date: "Sun, May 4", time: "11:59 PM PHT", tag: "DEADLINE", meetUrl: null },
+  { id: 3, title: "1:1 Progress Review", host: "Javier Lorenzana", date: "Fri, May 9", time: "By Appointment", tag: "1:1", meetUrl: null },
+  { id: 4, title: "Group Coaching Call", host: "Javier Lorenzana", date: "Thu, May 15", time: "7:00 PM PHT", tag: "LIVE", meetUrl: "https://meet.google.com/new" },
+  { id: 5, title: "Monthly Deload Week Begins", host: null, date: "Mon, May 19", time: "All day", tag: "PROGRAM", meetUrl: null },
 ];
 
 const MEMBERS_LIST = [
@@ -104,6 +117,25 @@ const LEADERBOARD_DATA = [
   { rank: 8, name: "Ryan Nguyen", initials: "RN", points: 45, streak: 9, delta: "+2", isUser: false },
   { rank: 9, name: "Kevin Liu", initials: "KL", points: 28, streak: 5, delta: "+1", isUser: false },
 ];
+
+// ─── ZANA SVG Logos ───────────────────────────────────────────────────────────
+
+const ZLogo = ({ className = "h-7" }: { className?: string }) => (
+  <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
+    <path d="M0,2 H32 L18.3,14" />
+    <path d="M13.7,18 L0,30 H32" />
+    <path d="M48,30 L64,2 L80,30" />
+    <path d="M96,30 V2 L128,30 V2" />
+    <path d="M144,30 L160,2 L176,30" />
+  </svg>
+);
+
+const ZMark = ({ className = "h-6" }: { className?: string }) => (
+  <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
+    <path d="M0,2 H32 L18.3,14" />
+    <path d="M13.7,18 L0,30 H32" />
+  </svg>
+);
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -189,7 +221,7 @@ function Avatar({ initials, size = "md", online }: { initials: string; size?: "s
 
 // ─── Tab: Home ────────────────────────────────────────────────────────────────
 
-function HomeTab() {
+function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
   const weekDays = ["M", "T", "W", "T", "F", "S", "S"];
   const completed = [true, true, true, true, false, false, false];
 
@@ -213,10 +245,13 @@ function HomeTab() {
           <p className="font-mono text-[8px] tracking-widest text-gray-500 uppercase">Phase</p>
           <p className="text-2xl font-light text-white tracking-tight">0{USER.phase}</p>
         </div>
-        <div className="flex-1 bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3 flex items-center justify-between">
+        <button
+          onClick={() => onNavigate("ranks")}
+          className="flex-1 bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3 flex items-center justify-between hover:border-[#b3cdff]/40 transition-colors"
+        >
           <p className="font-mono text-[8px] tracking-widest text-gray-500 uppercase">Streak</p>
           <p className="text-2xl font-light text-[#b3cdff] tracking-tight">{USER.streak}</p>
-        </div>
+        </button>
       </div>
 
       {/* Today's Session */}
@@ -288,7 +323,22 @@ function HomeTab() {
         </div>
       </Link>
 
-      {/* Daily Intel */}
+      {/* Schedule shortcut */}
+      <button
+        onClick={() => onNavigate("schedule")}
+        className="w-full bg-[#121821] border border-[#2d3a4b] rounded p-5 flex items-center justify-between hover:border-[#b3cdff]/40 transition-colors group"
+      >
+        <div className="text-left">
+          <p className="font-mono text-[8px] tracking-[0.3em] text-gray-400 uppercase mb-1 group-hover:text-[#b3cdff] transition-colors">Next Event</p>
+          <p className="text-sm font-light tracking-wide text-white">Group Coaching Call</p>
+          <p className="font-mono text-[9px] text-gray-500 mt-0.5">Thu, May 1 · 7:00 PM PHT</p>
+        </div>
+        <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-1 rounded border text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10">
+          LIVE
+        </span>
+      </button>
+
+      {/* Coach's Note */}
       <div className="bg-[#121821] border-l-2 border-l-[#b3cdff] border border-[#2d3a4b] rounded p-6">
         <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-3">Coach&apos;s Note</p>
         <p className="text-sm font-light leading-relaxed text-gray-300">
@@ -301,9 +351,18 @@ function HomeTab() {
 
 // ─── Tab: Community ───────────────────────────────────────────────────────────
 
-function CommunityTab() {
+function CommunityTab({ userInitials, userName }: { userInitials: string; userName: string }) {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
+  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+  const [composerText, setComposerText] = useState("");
+  const [composerCategory, setComposerCategory] = useState<Category>("Check-ins");
+  const [showComposer, setShowComposer] = useState(false);
+  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
+
   const categories: Category[] = ["All", "Announcements", "Check-ins", "Wins", "Q&A"];
+  const postCategories: Category[] = ["Check-ins", "Wins", "Q&A"];
 
   const categoryColors: Record<string, string> = {
     Announcements: "text-[#b3cdff] bg-[#b3cdff]/10 border-[#b3cdff]/30",
@@ -312,17 +371,109 @@ function CommunityTab() {
     "Q&A": "text-[#f472b6] bg-[#f472b6]/10 border-[#f472b6]/30",
   };
 
-  const filtered = activeCategory === "All" ? POSTS : POSTS.filter(p => p.category === activeCategory);
+  const filtered = activeCategory === "All" ? posts : posts.filter(p => p.category === activeCategory);
+
+  const handlePost = () => {
+    if (!composerText.trim()) return;
+    const newPost: Post = {
+      id: Date.now(),
+      author: userName,
+      initials: userInitials,
+      isCoach: false,
+      category: composerCategory,
+      time: "Just now",
+      content: composerText.trim(),
+      likes: 0,
+      comments: 0,
+    };
+    setPosts(prev => [newPost, ...prev]);
+    setComposerText("");
+    setShowComposer(false);
+    setActiveCategory("All");
+  };
+
+  const toggleLike = (postId: number) => {
+    setLikedPosts(prev => {
+      const next = new Set(prev);
+      if (next.has(postId)) {
+        next.delete(postId);
+        setPosts(ps => ps.map(p => p.id === postId ? { ...p, likes: p.likes - 1 } : p));
+      } else {
+        next.add(postId);
+        setPosts(ps => ps.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p));
+      }
+      return next;
+    });
+  };
+
+  const submitReply = (postId: number) => {
+    if (!replyText.trim()) return;
+    setPosts(ps => ps.map(p => p.id === postId ? { ...p, comments: p.comments + 1 } : p));
+    setReplyText("");
+    setReplyingTo(null);
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      {/* Composer */}
-      <div className="bg-[#121821] border border-[#2d3a4b] rounded p-4 flex items-center gap-3">
-        <Avatar initials="JL" size="sm" />
-        <div className="flex-1 bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 font-mono text-[10px] text-gray-500 tracking-wide cursor-pointer hover:border-[#b3cdff]/30 transition-colors">
-          Share a win, ask a question, post a check-in...
+      {/* Composer trigger */}
+      {!showComposer ? (
+        <div
+          className="bg-[#121821] border border-[#2d3a4b] rounded p-4 flex items-center gap-3 cursor-pointer hover:border-[#b3cdff]/30 transition-colors"
+          onClick={() => setShowComposer(true)}
+        >
+          <Avatar initials={userInitials} size="sm" />
+          <div className="flex-1 bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 font-mono text-[10px] text-gray-500 tracking-wide">
+            Share a win, ask a question, post a check-in...
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-[#121821] border border-[#b3cdff]/30 rounded p-4 space-y-3">
+          <div className="flex items-center gap-3">
+            <Avatar initials={userInitials} size="sm" />
+            <span className="text-sm text-white">{userName}</span>
+          </div>
+          <textarea
+            autoFocus
+            value={composerText}
+            onChange={e => setComposerText(e.target.value)}
+            placeholder="What's on your mind?"
+            rows={3}
+            className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors resize-none font-light leading-relaxed"
+          />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+              {postCategories.map(c => (
+                <button
+                  key={c}
+                  onClick={() => setComposerCategory(c)}
+                  className={`shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 rounded border transition-colors ${
+                    composerCategory === c
+                      ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]"
+                      : "text-gray-400 border-[#2d3a4b] hover:text-white"
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2 shrink-0">
+              <button
+                onClick={() => { setShowComposer(false); setComposerText(""); }}
+                className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#2d3a4b] text-gray-400 rounded hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePost}
+                disabled={!composerText.trim()}
+                className="font-mono text-[8px] tracking-widest uppercase px-4 py-2 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Post
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Category filters */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
@@ -343,9 +494,9 @@ function CommunityTab() {
 
       {/* Posts */}
       {filtered.map(post => (
-        <div key={post.id} className="bg-[#121821] border border-[#2d3a4b] rounded p-5 hover:border-[#2d3a4b]/80 transition-colors">
+        <div key={post.id} className="bg-[#121821] border border-[#2d3a4b] rounded p-5 transition-colors">
           <div className="flex items-start gap-3 mb-4">
-            <Avatar initials={post.initials} size="md" online={post.author === "Javier Lorenzana" ? true : undefined} />
+            <Avatar initials={post.initials} size="md" online={post.isCoach ? true : undefined} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm font-medium text-white">{post.author}</span>
@@ -363,19 +514,49 @@ function CommunityTab() {
           </div>
           <p className="text-sm text-gray-300 leading-relaxed mb-4">{post.content}</p>
           <div className="flex items-center gap-5 pt-3 border-t border-[#1a222c]">
-            <button className="flex items-center gap-1.5 font-mono text-[9px] text-gray-500 hover:text-[#b3cdff] transition-colors uppercase tracking-widest">
-              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <button
+              onClick={() => toggleLike(post.id)}
+              className={`flex items-center gap-1.5 font-mono text-[9px] transition-colors uppercase tracking-widest ${
+                likedPosts.has(post.id) ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"
+              }`}
+            >
+              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill={likedPosts.has(post.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
                 <path d="M8 2.667L9.667 6H14l-3.333 2.667L12 13.333 8 10.667 4 13.333l1.333-4.666L2 6h4.333L8 2.667z" />
               </svg>
               {post.likes}
             </button>
-            <button className="flex items-center gap-1.5 font-mono text-[9px] text-gray-500 hover:text-[#b3cdff] transition-colors uppercase tracking-widest">
+            <button
+              onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}
+              className={`flex items-center gap-1.5 font-mono text-[9px] transition-colors uppercase tracking-widest ${
+                replyingTo === post.id ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"
+              }`}
+            >
               <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M14 10a2 2 0 01-2 2H4l-2 2V4a2 2 0 012-2h8a2 2 0 012 2v6z" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               {post.comments}
             </button>
           </div>
+          {/* Inline reply */}
+          {replyingTo === post.id && (
+            <div className="mt-3 flex gap-2">
+              <input
+                autoFocus
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && submitReply(post.id)}
+                placeholder="Write a reply..."
+                className="flex-1 bg-[#0f141b] border border-[#2d3a4b] rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+              />
+              <button
+                onClick={() => submitReply(post.id)}
+                disabled={!replyText.trim()}
+                className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
+              >
+                Reply
+              </button>
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -397,7 +578,6 @@ function ProgramsTab() {
           key={prog.id}
           className={`bg-[#121821] border rounded overflow-hidden ${prog.locked ? "border-[#1a222c] opacity-60" : "border-[#2d3a4b] hover:border-[#2d3a4b]/80"} transition-all`}
         >
-          {/* Color bar */}
           <div className="h-0.5 w-full" style={{ backgroundColor: prog.accentColor }} />
 
           <div className="p-5">
@@ -440,12 +620,15 @@ function ProgramsTab() {
             )}
 
             {prog.locked ? (
-              <div className="font-mono text-[8px] tracking-widest uppercase text-gray-600 text-center py-2 border border-[#1a222c] rounded">
+              <Link
+                href="/system"
+                className="block w-full text-center font-mono text-[8px] tracking-widest uppercase py-3 rounded border border-[#1a222c] text-gray-600 hover:border-[#b3cdff]/30 hover:text-[#b3cdff] transition-colors"
+              >
                 Upgrade to unlock
-              </div>
+              </Link>
             ) : (
               <Link
-                href={prog.id === 1 ? "/workout" : "#"}
+                href={prog.href!}
                 className="block w-full text-center font-mono text-[8px] tracking-[0.25em] uppercase py-3 rounded border transition-colors"
                 style={{
                   borderColor: prog.accentColor + "40",
@@ -479,13 +662,11 @@ function ScheduleTab() {
         <h2 className="text-lg font-light tracking-[0.12em] uppercase text-white">Schedule</h2>
       </div>
 
-      {/* Recurring note */}
       <div className="bg-[#121821] border border-[#2d3a4b] rounded p-4 font-mono text-[9px] text-gray-400 tracking-wide">
         <span className="text-[#b3cdff]">Every Thursday — </span>
         Group Coaching Call with Javier. 7:00 PM Manila time.
       </div>
 
-      {/* Events list */}
       <div className="space-y-3">
         {EVENTS.map(event => (
           <div key={event.id} className="bg-[#121821] border border-[#2d3a4b] rounded p-5 flex items-start gap-4 hover:border-[#2d3a4b]/80 transition-colors">
@@ -516,10 +697,23 @@ function ScheduleTab() {
               <p className="font-mono text-[9px] text-gray-500 mt-0.5">{event.time}</p>
             </div>
 
-            {event.tag === "LIVE" && (
-              <button className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#86efac]/30 text-[#86efac] rounded hover:bg-[#86efac]/10 transition-colors">
+            {event.tag === "LIVE" && event.meetUrl && (
+              <a
+                href={event.meetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#86efac]/30 text-[#86efac] rounded hover:bg-[#86efac]/10 transition-colors"
+              >
                 Join
-              </button>
+              </a>
+            )}
+            {event.tag === "1:1" && (
+              <a
+                href="mailto:me@javilorenzana.com?subject=1:1 Progress Review Request"
+                className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#b3cdff]/30 text-[#b3cdff] rounded hover:bg-[#b3cdff]/10 transition-colors"
+              >
+                Book
+              </a>
             )}
           </div>
         ))}
@@ -545,7 +739,6 @@ function MembersTab() {
         </div>
       </div>
 
-      {/* Stats strip */}
       <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Members", value: MEMBERS_LIST.length },
@@ -559,10 +752,9 @@ function MembersTab() {
         ))}
       </div>
 
-      {/* Members list */}
       <div className="space-y-2">
         {MEMBERS_LIST.map(member => (
-          <div key={member.id} className="bg-[#121821] border border-[#2d3a4b] rounded p-4 flex items-center gap-3 hover:border-[#2d3a4b]/80 transition-colors">
+          <div key={member.id} className="bg-[#121821] border border-[#2d3a4b] rounded p-4 flex items-center gap-3">
             <Avatar initials={member.initials} size="md" online={member.online} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -591,7 +783,6 @@ function RanksTab() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      {/* User rank card */}
       <div className="bg-[#121821] border border-[#b3cdff]/20 rounded p-5">
         <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-4">Your Standing</p>
         <div className="flex items-center gap-4">
@@ -616,7 +807,6 @@ function RanksTab() {
         </div>
       </div>
 
-      {/* Period toggle */}
       <div className="flex gap-2">
         {(["weekly", "alltime"] as const).map(p => (
           <button
@@ -633,9 +823,7 @@ function RanksTab() {
         ))}
       </div>
 
-      {/* Leaderboard table */}
       <div className="bg-[#121821] border border-[#2d3a4b] rounded overflow-hidden">
-        {/* Header */}
         <div className="grid grid-cols-[40px_1fr_60px_50px] gap-3 px-4 py-3 border-b border-[#2d3a4b]">
           {["#", "Member", "Points", "Streak"].map(h => (
             <p key={h} className="font-mono text-[8px] text-gray-500 uppercase tracking-widest">{h}</p>
@@ -683,9 +871,20 @@ const NAV_ITEMS: { id: Tab; label: string; icon: (props: { active?: boolean }) =
   { id: "ranks", label: "Ranks", icon: IconRanks },
 ];
 
+function getInitials(email: string): string {
+  const username = email.split("@")[0];
+  const parts = username.split(/[._-]/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return username.slice(0, 2).toUpperCase();
+}
+
 export default function MemberDashboard({ profile }: { profile: ProfileData }) {
-  const displayName = profile?.email?.split("@")[0] ?? USER.name;
+  const userEmail = profile?.email ?? "";
+  const userInitials = userEmail ? getInitials(userEmail) : "ME";
+  const displayName = userEmail ? userEmail.split("@")[0].split(/[._-]/)[0] : USER.name;
+  const displayNameCapitalized = displayName.charAt(0).toUpperCase() + displayName.slice(1);
   const displayPlan = profile?.plan ?? USER.plan;
+
   const [activeTab, setActiveTab] = useState<Tab>("home");
 
   const currentLabel = NAV_ITEMS.find(n => n.id === activeTab)?.label ?? "";
@@ -696,9 +895,8 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
       {/* ── Sidebar (desktop) ── */}
       <aside className="hidden md:flex flex-col w-60 bg-[#0a0f16] border-r border-[#2d3a4b] fixed h-full z-20">
         {/* Logo */}
-        <div className="px-6 py-8 border-b border-[#2d3a4b]">
-          <p className="font-mono text-lg font-black tracking-[0.3em] text-white uppercase">ZANA</p>
-          <p className="font-mono text-[8px] tracking-[0.4em] text-[#b3cdff] uppercase mt-0.5">Fitness</p>
+        <div className="px-6 py-7 border-b border-[#2d3a4b]">
+          <ZLogo className="h-6 text-white" />
         </div>
 
         {/* Nav */}
@@ -725,15 +923,15 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
         {/* User card */}
         <div className="p-4 border-t border-[#2d3a4b]">
           <div className="flex items-center gap-3">
-            <Avatar initials="JL" size="sm" online={true} />
+            <Avatar initials={userInitials} size="sm" online={true} />
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-white truncate">{USER.name}</p>
-              <PlanBadge plan={USER.plan} />
+              <p className="text-xs text-white truncate capitalize">{displayNameCapitalized}</p>
+              <PlanBadge plan={displayPlan} />
             </div>
             <Link href="/profile" className="text-gray-500 hover:text-white transition-colors">
               <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <circle cx="8" cy="8" r="6" />
-                <path d="M8 5v3l2 2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M8 5v6M5 8h6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </Link>
           </div>
@@ -745,9 +943,9 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
 
         {/* Top bar */}
         <header className="sticky top-0 z-10 bg-[#0f141b]/90 backdrop-blur border-b border-[#2d3a4b] px-5 py-4 flex items-center justify-between">
-          {/* Mobile: logo */}
+          {/* Mobile: Z mark */}
           <div className="md:hidden">
-            <p className="font-mono text-sm font-black tracking-[0.3em] text-white uppercase">ZANA</p>
+            <ZMark className="h-5 text-white" />
           </div>
           {/* Desktop: current section */}
           <p className="hidden md:block font-mono text-[10px] tracking-[0.3em] text-gray-400 uppercase">{currentLabel}</p>
@@ -755,7 +953,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
           <div className="flex items-center gap-3">
             {/* Notification bell */}
             <button className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white transition-colors relative">
-              <svg viewBox="0 0 20 20" className="w-4.5 h-4.5" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <svg viewBox="0 0 20 20" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M10 2a6 6 0 00-6 6v3l-1.5 2.5h15L16 11V8a6 6 0 00-6-6z" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M8.5 17a1.5 1.5 0 003 0" strokeLinecap="round" />
               </svg>
@@ -763,15 +961,15 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
             </button>
             {/* Avatar */}
             <Link href="/profile">
-              <Avatar initials="JL" size="sm" online={true} />
+              <Avatar initials={userInitials} size="sm" online={true} />
             </Link>
           </div>
         </header>
 
         {/* Page content */}
         <div className="flex-1 p-5 pb-28 md:pb-8">
-          {activeTab === "home" && <HomeTab />}
-          {activeTab === "community" && <CommunityTab />}
+          {activeTab === "home" && <HomeTab onNavigate={setActiveTab} />}
+          {activeTab === "community" && <CommunityTab userInitials={userInitials} userName={displayNameCapitalized} />}
           {activeTab === "programs" && <ProgramsTab />}
           {activeTab === "schedule" && <ScheduleTab />}
           {activeTab === "members" && <MembersTab />}
