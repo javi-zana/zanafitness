@@ -188,33 +188,29 @@ export default function LandingPage() {
 
       {/* 8. WAITLIST SECTION (06) */}
       <section className="py-24 px-6 flex flex-col items-center justify-center text-center bg-[#121821]">
-        <div className="max-w-2xl w-full flex flex-col items-center">
+        <div className="max-w-lg w-full flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">06</p>
-          <h2 className="text-2xl md:text-4xl font-sans font-light tracking-[0.15em] uppercase mb-6 text-white">JOIN THE SYSTEM.</h2>
+          <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase mb-4 text-white">JOIN THE SYSTEM.</h2>
           <p className="text-[#b3cdff] font-mono uppercase tracking-[0.2em] text-[10px] mb-10">Get first access when Zana launches.</p>
-          
-          <form onSubmit={handleWaitlist} className="w-full max-w-lg mb-6">
-            <div className="relative flex flex-col md:flex-row items-center border border-[#2d3a4b] rounded-full bg-[#0f141b]/80 overflow-hidden group">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="Enter your email"
-                className="w-full bg-transparent font-mono px-8 py-5 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none"
-              />
-              <div className="p-2 w-full md:w-auto">
-                <button 
-                  type="submit" 
-                  className="w-full md:w-auto bg-[#b3cdff] text-black font-sans font-bold px-10 py-3.5 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors shrink-0"
-                >
-                  Join Now
-                </button>
-              </div>
-            </div>
+
+          <form onSubmit={handleWaitlist} className="w-full mb-6 flex flex-col gap-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+              className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded-full font-mono px-6 py-4 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff] transition-colors"
+            />
+            <button
+              type="submit"
+              className="w-full bg-[#b3cdff] text-black font-bold px-8 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors"
+            >
+              Join Now
+            </button>
           </form>
-          
-          <div className="flex items-center gap-3 text-gray-300 font-mono text-[9px] uppercase tracking-widest">
+
+          <div className="flex items-center gap-3 text-gray-500 font-mono text-[9px] uppercase tracking-widest">
             <Lock className="w-3 h-3" />
             <p>Limited First Access.</p>
           </div>
