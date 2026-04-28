@@ -54,6 +54,45 @@ function WaitlistModal({ onClose }: { onClose: () => void }) {
   );
 }
 
+function DuplicateModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative bg-[#1a222c] border border-[#2d3a4b] rounded-2xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-[0_0_120px_-20px_rgba(179,205,255,0.08)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        <ZanaLogo className="h-6 text-white mb-10 opacity-60" />
+
+        <div className="w-6 h-px bg-gray-600 mb-10" />
+
+        <p className="font-mono text-[9px] uppercase tracking-widest text-gray-500 mb-4">Already Registered</p>
+
+        <h2 className="text-xl md:text-2xl font-light tracking-[0.1em] uppercase text-white leading-snug mb-6">
+          I love how<br />committed you are.
+        </h2>
+
+        <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400 leading-loose">
+          You&apos;re already on the list.<br />We&apos;ll reach out when it&apos;s time.
+        </p>
+
+        <div className="w-6 h-px bg-[#2d3a4b] mt-10 mb-10" />
+
+        <p className="font-mono text-[9px] uppercase tracking-widest text-gray-600">
+          Built for results. Not motivation.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function LandingPage() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
@@ -80,6 +119,7 @@ export default function LandingPage() {
     <main className="min-h-screen bg-[#121821] text-white selection:bg-[#b3cdff] selection:text-[#0b0f1a] font-sans">
 
       {status === 'success' && <WaitlistModal onClose={() => setStatus('idle')} />}
+      {status === 'duplicate' && <DuplicateModal onClose={() => setStatus('idle')} />}
 
       <Navbar />
 
@@ -261,9 +301,6 @@ export default function LandingPage() {
             >
               {status === 'loading' ? 'Submitting...' : 'Join Now'}
             </button>
-            {status === 'duplicate' && (
-              <p className="font-mono text-[9px] uppercase tracking-widest text-gray-400 text-center">You&apos;re already on the list.</p>
-            )}
             {status === 'error' && (
               <p className="font-mono text-[9px] uppercase tracking-widest text-red-400 text-center">Something went wrong. Try again.</p>
             )}
