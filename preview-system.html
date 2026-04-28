@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZANA Fitness | The System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300,black&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Satoshi', sans-serif; background-color: #0b0f1a; color: white; -webkit-font-smoothing: antialiased; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+    .font-sans { font-family: 'Satoshi', sans-serif; }
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+  </style>
+</head>
+<body class="selection:bg-[#b3cdff] selection:text-[#0b0f1a] bg-[#06080a] min-h-screen text-white font-sans flex flex-col">
+
+  <!-- NAVBAR -->
+  <nav class="flex items-center justify-between p-8 md:px-16 border-b border-[#1a1f26]">
+    <a href="preview.html" class="hover:opacity-70 transition-opacity">
+      <svg viewBox="0 0 32 32" class="h-5 md:h-6 text-white" fill="none" stroke="currentColor" stroke-width="5" stroke-miterlimit="10">
+        <path d="M0,2 H32 L18.3,14" /><path d="M13.7,18 L0,30 H32" />
+      </svg>
+    </a>
+    <div class="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] font-inter uppercase font-semibold text-gray-300">
+      <a href="preview-about.html" class="hover:text-white transition-colors">About</a>
+      <a href="preview-system.html" class="text-white hover:text-white transition-colors">The System</a>
+      <a href="preview-faq.html" class="hover:text-white transition-colors">FAQ</a>
+      <a href="preview-join.html" class="bg-[#b3cdff] text-[#06080a] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
+        Join the System
+      </a>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <section class="pt-32 pb-20 px-6 text-center">
+    <div class="max-w-2xl mx-auto flex flex-col items-center">
+      <svg viewBox="0 0 180 32" class="h-8 md:h-10 text-white mb-12" fill="none" stroke="currentColor" stroke-width="5" stroke-miterlimit="10"><path d="M0,2 H32 L18.3,14" /><path d="M13.7,18 L0,30 H32" /><path d="M48,30 L64,2 L80,30" /><path d="M96,30 V2 L128,30 V2" /><path d="M144,30 L160,2 L176,30" /></svg>
+      <div class="w-6 h-px bg-gray-600 mb-12"></div>
+      <h1 class="text-2xl md:text-4xl font-sans font-light tracking-[0.1em] uppercase mb-6 text-white">The System.</h1>
+      <p class="font-mono text-[10px] uppercase tracking-widest text-gray-500">Choose your commitment. Begin your progress.</p>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="py-12 px-6 flex-1 border-b border-[#1a1f26]">
+    <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12">
+      
+      <!-- Card 1 -->
+      <div class="flex flex-col border border-[#1a1f26] bg-[#090b0e] p-12 transition-all hover:border-gray-700">
+        <p class="font-mono text-[10px] uppercase tracking-widest text-[#b3cdff] mb-6">Standard Access</p>
+        <div class="flex items-end gap-2 mb-2">
+          <span class="text-5xl font-sans tracking-tighter font-bold">$500</span><span class="font-mono text-[10px] uppercase tracking-widest text-gray-500 mb-2">/mo</span>
+        </div>
+        <p class="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-500 mb-12">4-month commitment</p>
+        <ul class="space-y-4 font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 flex-1 mb-12">
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Progressive training program</li>
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Personalised nutrition targets</li>
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Weekly system adjustments</li>
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Progress tracking dashboard</li>
+        </ul>
+        <a href="preview-join.html" class="block w-full text-center border border-[#1a1f26] text-gray-300 font-sans font-bold px-8 py-3.5 text-[10px] uppercase tracking-widest hover:bg-[#b3cdff] hover:text-black hover:border-[#b3cdff] transition-all">Select Standard</a>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="flex flex-col border border-[#b3cdff] bg-[#090b0e] p-12 relative shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#b3cdff] text-black text-[9px] font-mono font-bold uppercase tracking-widest px-4 py-1">Best Value</span>
+        <p class="font-mono text-[10px] uppercase tracking-widest text-[#b3cdff] mb-6">Full Commitment</p>
+        <div class="flex items-end gap-2 mb-2">
+          <span class="text-5xl font-sans tracking-tighter font-bold">$400</span><span class="font-mono text-[10px] uppercase tracking-widest text-gray-500 mb-2">/mo</span>
+        </div>
+        <p class="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-500 mb-12">12-month commitment</p>
+        <ul class="space-y-4 font-mono text-[10px] uppercase tracking-[0.15em] text-gray-400 flex-1 mb-12">
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-[#b3cdff]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Progressive training program</li>
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-[#b3cdff]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Personalised nutrition targets</li>
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-[#b3cdff]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Weekly system adjustments</li>
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-[#b3cdff]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>Progress tracking dashboard</li>
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-[#b3cdff]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg><span class="text-white font-bold">Daily coaching guidance</span></li>
+          <li class="flex items-center gap-3"><svg class="w-3 h-3 text-[#b3cdff]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg><span class="text-white font-bold">Direct 1-on-1 access</span></li>
+        </ul>
+        <a href="preview-join.html" class="block w-full text-center bg-[#b3cdff] text-black font-sans font-bold px-8 py-3.5 text-[10px] uppercase tracking-widest hover:bg-white transition-all">Select Full</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-16 px-10 md:px-24 bg-[#030406] flex items-center justify-between text-[9px] font-mono tracking-[0.2em] uppercase text-gray-500">
+    <svg viewBox="0 0 32 32" class="h-4 text-white opacity-20" fill="none" stroke="currentColor" stroke-width="5" stroke-miterlimit="10"><path d="M0,2 H32 L18.3,14" /><path d="M13.7,18 L0,30 H32" /></svg>
+    <p>&copy; 2024 Zana Fitness</p>
+  </footer>
+
+</body>
+</html>

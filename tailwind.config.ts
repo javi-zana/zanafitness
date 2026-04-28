@@ -22,7 +22,8 @@ const config: Config = {
         }
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
+        sans: ['Satoshi', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
       },
       letterSpacing: {
         tighter: '-0.04em',

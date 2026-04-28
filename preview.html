@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZANA Fitness — Preview</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #06080a;
+      --bg-dark: #030406;
+      --bg-mid: #090b0e;
+      --border: #1a1f26;
+      --blue: #b3cdff;
+      --gray-6: #999;
+      --gray-5: #666;
+      --gray-4: #444;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: #fff;
+      font-family: 'Satoshi', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── NAVBAR ── */
+    nav {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2rem 6rem;
+    }
+
+    nav .z-icon svg { height: 1.25rem; }
+
+    nav .links {
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #ccc;
+    }
+
+    nav .links a { color: inherit; text-decoration: none; transition: color .2s; }
+    nav .links a:hover { color: #fff; }
+
+    nav .links button {
+      background: var(--blue);
+      color: #06080a;
+      font-weight: 700;
+      padding: 0.6rem 2rem;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: background .2s;
+    }
+    nav .links button:hover { background: #fff; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 95vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 6rem;
+      background: var(--bg);
+    }
+
+    .hero .bg {
+      position: absolute;
+      inset: 0;
+      background: url('public/671A2489-147A-4CFB-9BE4-8E41C0B1B66A.PNG') center 30% / cover no-repeat;
+      filter: brightness(0.75);
+    }
+
+    .hero .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, #06080a, rgba(6,8,10,0.7), transparent);
+    }
+
+    .hero .content { position: relative; z-index: 10; max-width: 42rem; margin-top: 3rem; }
+
+    .hero h1 {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-transform: uppercase;
+      line-height: 1;
+      letter-spacing: -0.02em;
+    }
+
+    .hero h1 svg { height: 4rem; }
+
+    .hero h1 span {
+      display: block;
+      font-size: 11px;
+      margin-top: 2rem;
+      font-weight: 700;
+      letter-spacing: 1em;
+      color: #fff;
+      margin-left: 0.5rem;
+      font-family: 'Satoshi', sans-serif;
+    }
+
+    .hero .tagline {
+      margin: 3rem 0;
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #e5e5e5;
+      line-height: 2;
+    }
+
+    .hero .cta {
+      background: var(--blue);
+      color: #06080a;
+      font-weight: 700;
+      padding: 1rem 2.5rem;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-family: 'Satoshi', sans-serif;
+      transition: background .2s;
+      display: inline-block;
+    }
+    .hero .cta:hover { background: #fff; }
+
+    .hero .coming-soon {
+      position: absolute;
+      bottom: 4rem;
+      right: 6rem;
+      z-index: 10;
+      text-align: right;
+    }
+    .hero .coming-soon p {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #ccc;
+    }
+    .hero .coming-soon .line {
+      width: 1.5rem;
+      height: 1px;
+      background: #999;
+      margin-left: auto;
+      margin-top: 0.75rem;
+    }
+
+    /* ── SECTION SHARED ── */
+    section { background: var(--bg); }
+
+    .label {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--blue);
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+
+    .divider {
+      width: 2rem;
+      height: 1px;
+      background: #444;
+      margin-top: 4rem;
+    }
+
+    /* ── PROBLEM ── */
+    .problem {
+      padding: 10rem 1.5rem;
+      text-align: center;
+    }
+
+    .problem .inner {
+      max-width: 56rem;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .problem h2 {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      line-height: 2;
+    }
+
+    /* ── SHIFT ── */
+    .shift {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background: var(--bg-mid);
+    }
+
+    .shift .img {
+      position: relative;
+      min-height: 500px;
+    }
+
+    .shift .img .bg {
+      position: absolute;
+      inset: 0;
+      background: url('public/A502086F-E304-43B4-87C1-93658EDB79F0.PNG') center / cover no-repeat;
+      filter: brightness(0.6);
+    }
+
+    .shift .copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 5rem 8rem;
+      background: var(--bg-mid);
+    }
+
+    .shift h2 {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1.6;
+      margin-bottom: 4rem;
+    }
+
+    .shift .points {
+      font-family: monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray-5);
+      line-height: 2.5;
+    }
+
+    .shift .diff {
+      font-family: monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-top: 4rem;
+    }
+
+    /* ── SYSTEM ── */
+    .system {
+      padding: 10rem 1.5rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .system .inner {
+      max-width: 72rem;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .system h2 {
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 6rem;
+      font-style: italic;
+    }
+
+    .system .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      width: 100%;
+      text-align: center;
+    }
+
+    .system .box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 4rem;
+    }
+
+    .system .box:not(:last-child) { border-right: 1px solid var(--border); }
+
+    .system .icon {
+      width: 2rem;
+      height: 2rem;
+      color: #ccc;
+      margin-bottom: 2rem;
+    }
+
+    .system .num {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      color: var(--blue);
+      margin-bottom: 1rem;
+    }
+
+    .system h3 {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    .system p {
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gray-5);
+    }
+
+    /* ── CORE ── */
+    .core {
+      padding: 10rem 1.5rem;
+      text-align: center;
+    }
+
+    .core .inner {
+      max-width: 56rem;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .core h2 {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      line-height: 2;
+      color: #e5e5e5;
+    }
+
+    .core h2 span { color: var(--blue); }
+
+    /* ── VISUAL BREAK ── */
+    .visual-break {
+      position: relative;
+      height: 60vh;
+      display: flex;
+      align-items: center;
+      padding: 0 8rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .visual-break .bg {
+      position: absolute;
+      inset: 0;
+      background: url('public/F52D6DDD-5F62-414C-9B2D-5E12C333F2D3.PNG') center 35% / cover no-repeat;
+      filter: brightness(0.5);
+    }
+
+    .visual-break .overlay {
+      position: absolute;
+      inset: 0;
+      width: 75%;
+      background: linear-gradient(to right, #06080a, rgba(6,8,10,0.6), transparent);
+    }
+
+    .visual-break .text {
+      position: relative;
+      z-index: 10;
+    }
+
+    .visual-break p {
+      font-family: monospace;
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .visual-break .line {
+      width: 1.5rem;
+      height: 1px;
+      background: #999;
+      margin-top: 1rem;
+    }
+
+    /* ── PLAYLIST ── */
+    .playlist {
+      padding: 8rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .playlist .inner {
+      max-width: 42rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .playlist h2 {
+      font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .playlist .sub {
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray-5);
+      margin-bottom: 3rem;
+    }
+
+    .playlist iframe {
+      width: 100%;
+      height: 352px;
+      border-radius: 12px;
+      border: none;
+    }
+
+    /* ── WAITLIST ── */
+    .waitlist {
+      padding: 10rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .waitlist .inner {
+      max-width: 40rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .waitlist h2 {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .waitlist .sub {
+      font-family: monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 4rem;
+    }
+
+    .waitlist form {
+      width: 100%;
+      max-width: 32rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .waitlist .field {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      background: rgba(0,0,0,0.5);
+      overflow: hidden;
+      padding: 0.5rem;
+    }
+
+    .waitlist input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      padding: 0.75rem 1.5rem;
+      font-family: monospace;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: #fff;
+    }
+
+    .waitlist input::placeholder { color: #444; }
+
+    .waitlist button {
+      background: var(--blue);
+      color: #000;
+      font-weight: 700;
+      padding: 0.75rem 2rem;
+      border-radius: 9999px;
+      border: none;
+      cursor: pointer;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      font-family: 'Satoshi', sans-serif;
+      white-space: nowrap;
+      transition: background .2s;
+    }
+    .waitlist button:hover { background: #fff; }
+
+    .waitlist .lock {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gray-5);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 4rem 6rem;
+      background: var(--bg-dark);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      font-family: monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gray-5);
+    }
+
+    footer svg { height: 1.1rem; margin-bottom: 1.5rem; }
+
+    footer .left { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    footer .mid { display: flex; gap: 5rem; }
+
+    footer .col { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    footer a { color: inherit; text-decoration: none; transition: color .2s; }
+    footer a:hover { color: var(--blue); }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav>
+    <div class="z-icon">
+      <svg viewBox="0 0 32 32" fill="none" stroke="white" stroke-width="5" stroke-miterlimit="10">
+        <path d="M0,2 H32 L18.3,14" />
+        <path d="M13.7,18 L0,30 H32" />
+      </svg>
+    </div>
+    <div class="links">
+      <a href="#about">About</a>
+      <a href="#system">The System</a>
+      <a href="#faq">FAQ</a>
+      <button>Join the System</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="content">
+      <h1>
+        <svg viewBox="0 0 180 32" fill="none" stroke="white" stroke-width="5" stroke-miterlimit="10">
+          <path d="M0,2 H32 L18.3,14" />
+          <path d="M13.7,18 L0,30 H32" />
+          <path d="M48,30 L64,2 L80,30" />
+          <path d="M96,30 V2 L128,30 V2" />
+          <path d="M144,30 L160,2 L176,30" />
+        </svg>
+        <span>F I T N E S S</span>
+      </h1>
+      <div class="tagline">
+        <p>Built for results.</p>
+        <p>Not motivation.</p>
+      </div>
+      <button class="cta">Join the System</button>
+    </div>
+    <div class="coming-soon">
+      <p>Coming Soon.</p>
+      <div class="line"></div>
+    </div>
+  </section>
+
+  <!-- 01 PROBLEM -->
+  <section class="problem">
+    <div class="inner">
+      <p class="label">01</p>
+      <h2>You don't lack discipline.<br />You've just never followed<br />a system that actually works.</h2>
+      <div class="divider"></div>
+    </div>
+  </section>
+
+  <!-- 02 SHIFT -->
+  <section class="shift">
+    <div class="img"><div class="bg"></div></div>
+    <div class="copy">
+      <p class="label">02</p>
+      <h2>Most people train randomly.</h2>
+      <div class="points">
+        <p>Random workouts.</p>
+        <p>Random effort.</p>
+        <p>Random results.</p>
+      </div>
+      <p class="diff">ZANA is different.</p>
+    </div>
+  </section>
+
+  <!-- 03 SYSTEM -->
+  <section class="system">
+    <div class="inner">
+      <p class="label">03</p>
+      <h2>A system built on structure.</h2>
+      <div class="grid">
+        <div class="box">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+          </svg>
+          <p class="num">01</p>
+          <h3>Training</h3>
+          <p>That Progresses</p>
+        </div>
+        <div class="box">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+          </svg>
+          <p class="num">02</p>
+          <h3>Nutrition</h3>
+          <p>That Aligns</p>
+        </div>
+        <div class="box">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
+          </svg>
+          <p class="num">03</p>
+          <h3>Guidance</h3>
+          <p>That Adapts</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 CORE -->
+  <section class="core">
+    <div class="inner">
+      <p class="label">04</p>
+      <h2>This isn't a program.<br />It's a system designed<br />to make progress <span>inevitable.</span></h2>
+      <div class="divider"></div>
+    </div>
+  </section>
+
+  <!-- VISUAL BREAK -->
+  <section class="visual-break">
+    <div class="bg"></div>
+    <div class="overlay"></div>
+    <div class="text">
+      <p>Built for results.</p>
+      <div class="line"></div>
+    </div>
+  </section>
+
+  <!-- 05 PLAYLIST -->
+  <section class="playlist">
+    <div class="inner">
+      <p class="label">05</p>
+      <h2>Train to This.</h2>
+      <p class="sub">My Personal Playlist</p>
+      <iframe
+        src="https://open.spotify.com/embed/playlist/6hJ4JJSCPrUbb0ZD17ntQJ?utm_source=generator&theme=0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy">
+      </iframe>
+    </div>
+  </section>
+
+  <!-- 06 WAITLIST -->
+  <section class="waitlist">
+    <div class="inner">
+      <p class="label">06</p>
+      <h2>Join the System.</h2>
+      <p class="sub">Get first access when Zana launches.</p>
+      <form onsubmit="return false;">
+        <div class="field">
+          <input type="email" placeholder="Enter your email" />
+          <button type="submit">Join Now</button>
+        </div>
+      </form>
+      <div class="lock">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Limited First Access.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="left">
+      <svg viewBox="0 0 180 32" fill="none" stroke="white" stroke-width="5" stroke-miterlimit="10">
+        <path d="M0,2 H32 L18.3,14" />
+        <path d="M13.7,18 L0,30 H32" />
+        <path d="M48,30 L64,2 L80,30" />
+        <path d="M96,30 V2 L128,30 V2" />
+        <path d="M144,30 L160,2 L176,30" />
+      </svg>
+      <p>Built for results.</p>
+      <p>Not motivation.</p>
+    </div>
+    <div class="mid">
+      <div class="col">
+        <a href="#">About</a>
+        <a href="#">The System</a>
+        <a href="#">FAQ</a>
+      </div>
+      <div class="col">
+        <a href="#">Instagram</a>
+        <a href="#">TikTok</a>
+        <a href="#">YouTube</a>
+      </div>
+    </div>
+    <div>&copy; 2024 Zana Fitness</div>
+  </footer>
+
+</body>
+</html>

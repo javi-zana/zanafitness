@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZANA Fitness | Access</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400,300,black&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+    body { font-family: 'Satoshi', sans-serif; background-color: #0b0f1a; color: white; -webkit-font-smoothing: antialiased; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+    .font-sans { font-family: 'Satoshi', sans-serif; }
+    .font-mono { font-family: 'IBM Plex Mono', monospace; }
+  </style>
+</head>
+<body class="selection:bg-[#b3cdff] selection:text-[#0b0f1a] bg-[#06080a] min-h-screen text-white font-sans flex flex-col items-center justify-center relative overflow-hidden">
+
+  <!-- Aesthetic BG Wrapper -->
+  <div class="absolute inset-0 z-0 opacity-40">
+    <div class="absolute inset-0 bg-[url('671A2489-147A-4CFB-9BE4-8E41C0B1B66A.PNG')] bg-cover bg-center md:bg-right bg-no-repeat blur-sm"></div>
+    <div class="absolute inset-0 shadow-[inset_0_0_200px_100px_#06080a] pointer-events-none"></div>
+    <div class="absolute inset-0 bg-black/80"></div>
+  </div>
+
+  <div class="absolute top-12 left-12 z-20">
+    <a href="preview.html" class="font-mono text-[9px] uppercase tracking-[0.2em] text-gray-500 hover:text-white transition-colors flex items-center gap-4">
+      ← Return
+    </a>
+  </div>
+
+  <div class="relative z-10 w-full max-w-md px-6">
+    
+    <div class="flex flex-col items-center text-center">
+      <svg viewBox="0 0 32 32" class="h-6 md:h-8 text-white mb-10" fill="none" stroke="currentColor" stroke-width="5" stroke-miterlimit="10">
+        <path d="M0,2 H32 L18.3,14" /><path d="M13.7,18 L0,30 H32" />
+      </svg>
+      
+      <p class="text-[#b3cdff] font-mono text-[9px] tracking-[0.3em] mb-4">SYSTEM ONBOARDING</p>
+      <h1 class="text-3xl md:text-4xl font-sans font-bold tracking-tighter uppercase mb-2">Claim Your Access</h1>
+      <p class="font-inter text-gray-400 text-xs font-light tracking-wide mb-12">Submit your details to enter the system and begin progress.</p>
+    </div>
+
+    <!-- Login/Reg Form Mockup -->
+    <form class="space-y-4">
+      <div>
+        <input type="text" placeholder="FULL NAME" class="w-full bg-[#090b0e] border border-[#1a1f26] px-6 py-4 text-xs font-mono tracking-widest text-white placeholder-gray-600 focus:outline-none focus:border-gray-500 transition-colors" />
+      </div>
+      <div>
+        <input type="email" placeholder="EMAIL ADDRESS" class="w-full bg-[#090b0e] border border-[#1a1f26] px-6 py-4 text-xs font-mono tracking-widest text-white placeholder-gray-600 focus:outline-none focus:border-gray-500 transition-colors" />
+      </div>
+      <div>
+        <input type="password" placeholder="CREATE PASSWORD" class="w-full bg-[#090b0e] border border-[#1a1f26] px-6 py-4 text-xs font-mono tracking-widest text-white placeholder-gray-600 focus:outline-none focus:border-gray-500 transition-colors" />
+      </div>
+      
+      <div class="pt-6">
+        <button type="button" onclick="alert('Mockup: Proceeding to checkout block.')" class="w-full bg-[#b3cdff] text-black font-sans font-bold px-8 py-4 text-[10px] uppercase tracking-widest hover:bg-white transition-colors">
+          Proceed to Checkout
+        </button>
+      </div>
+    </form>
+
+    <div class="mt-8 text-center flex flex-col items-center gap-4">
+      <div class="w-6 h-px bg-[#1a1f26]"></div>
+      <p class="font-mono text-[9px] uppercase tracking-widest text-gray-600">
+        Already in the system? <a href="#" class="text-[#b3cdff] hover:text-white">Log in here</a>
+      </p>
+    </div>
+
+  </div>
+
+</body>
+</html>

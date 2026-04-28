@@ -9,11 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.43.0",
     "lucide-react": "^0.379.0",
     "next": "^14.2.15",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "@paddle/paddle-js": "^1.4.0",
+    "@paddle/paddle-node-sdk": "^1.7.0",
+    "resend": "^3.2.0"
   },
   "devDependencies": {
     "@types/node": "^20",
