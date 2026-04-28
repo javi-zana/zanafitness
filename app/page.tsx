@@ -38,12 +38,12 @@ export default function LandingPage() {
       <nav className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-8 md:px-16 overflow-hidden">
         <ZIcon className="h-5 md:h-6 text-white" />
         <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] font-inter uppercase font-semibold text-gray-300">
-          <Link href="#about" className="hover:text-white transition-colors">About</Link>
-          <Link href="#system" className="hover:text-white transition-colors">The System</Link>
-          <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
-          <button className="bg-[#b3cdff] text-[#06080a] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
+          <Link href="/about" className="hover:text-white transition-colors">About</Link>
+          <Link href="/system" className="hover:text-white transition-colors">The System</Link>
+          <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
+          <Link href="/system" className="bg-[#b3cdff] text-[#06080a] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
             Join the System
-          </button>
+          </Link>
         </div>
       </nav>
 
@@ -252,9 +252,9 @@ export default function LandingPage() {
         {/* Middle Links */}
         <div className="flex gap-20">
           <div className="flex flex-col gap-5">
-            <Link href="#about" className="hover:text-white transition-colors">About</Link>
-            <Link href="#system" className="hover:text-white transition-colors">The System</Link>
-            <Link href="#faq" className="hover:text-white transition-colors">FAQ</Link>
+            <Link href="/about" className="hover:text-white transition-colors">About</Link>
+            <Link href="/system" className="hover:text-white transition-colors">The System</Link>
+            <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
           </div>
           <div className="flex flex-col gap-5">
             <Link href="#" className="hover:text-white transition-colors">Instagram</Link>
