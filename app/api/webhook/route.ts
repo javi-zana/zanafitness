@@ -1,8 +1,7 @@
 import { Paddle } from "@paddle/paddle-node-sdk";
 
-const paddle = new Paddle(process.env.PADDLE_API_KEY!);
-
 export async function POST(req: Request) {
+  const paddle = new Paddle(process.env.PADDLE_API_KEY ?? "");
   const signature = req.headers.get("paddle-signature") || "";
   const rawBody = await req.text();
 
