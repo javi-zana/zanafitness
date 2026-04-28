@@ -104,21 +104,21 @@ export default function ProfilePage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
 
-    // Update profile fields
+    // Upsert profile fields (creates the row if it doesn't exist yet)
     const { error: profileError } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: user.id,
         nickname: nickname.trim() || null,
         avatar_color: avatarColor,
         fitness_goal: fitnessGoal || null,
         instagram: instagram.trim() || null,
         tiktok: tiktok.trim() || null,
         bio: bio.trim() || null,
-      })
-      .eq("id", user.id);
+      }, { onConflict: "id" });
 
     if (profileError) {
-      setError("Failed to save profile. Please try again.");
+      setError(profileError.message);
       setSaving(false);
       return;
     }
