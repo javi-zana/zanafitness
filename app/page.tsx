@@ -264,8 +264,11 @@ export default function LandingPage() {
         </div>
 
         {/* Right */}
-        <div className="text-right flex flex-col justify-end">
-          <p>&copy; 2024 Zana Fitness</p>
+        <div className="flex flex-col gap-5 text-right">
+          <p>&copy; 2025 Zana Fitness</p>
+          <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+          <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+          <Link href="/refund" className="hover:text-white transition-colors">Refund Policy</Link>
         </div>
 
       </footer>

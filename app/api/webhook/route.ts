@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       signature
     );
 
-    if (event.eventType === "subscription.activated") {
+    if (event && event.eventType === "subscription.activated") {
       console.log("Subscription activated:", event.data);
       // TODO: Save to Supabase
     }
