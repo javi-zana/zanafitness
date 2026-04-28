@@ -9,6 +9,12 @@ export type ProfileData = {
   plan?: string;
   status?: string;
   role?: string;
+  nickname?: string;
+  avatar_color?: string;
+  fitness_goal?: string;
+  instagram?: string;
+  tiktok?: string;
+  bio?: string;
 } | null;
 
 type Tab = "home" | "community" | "programs" | "schedule" | "members" | "ranks";
@@ -205,11 +211,15 @@ function PlanBadge({ plan }: { plan: string }) {
   );
 }
 
-function Avatar({ initials, size = "md", online }: { initials: string; size?: "sm" | "md" | "lg"; online?: boolean }) {
+function Avatar({ initials, size = "md", online, color }: { initials: string; size?: "sm" | "md" | "lg"; online?: boolean; color?: string }) {
   const sz = { sm: "w-7 h-7 text-[9px]", md: "w-9 h-9 text-xs", lg: "w-12 h-12 text-sm" }[size];
+  const c = color ?? "#b3cdff";
   return (
     <div className="relative shrink-0">
-      <div className={`${sz} rounded-full bg-[#1e2d3d] border border-[#2d3a4b] flex items-center justify-center font-mono font-bold text-[#b3cdff] tracking-wider`}>
+      <div
+        className={`${sz} rounded-full flex items-center justify-center font-mono font-bold tracking-wider border`}
+        style={{ color: c, borderColor: c + "40", backgroundColor: c + "15" }}
+      >
         {initials}
       </div>
       {online !== undefined && (
@@ -351,7 +361,7 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
 
 // ─── Tab: Community ───────────────────────────────────────────────────────────
 
-function CommunityTab({ userInitials, userName }: { userInitials: string; userName: string }) {
+function CommunityTab({ userInitials, userName, avatarColor }: { userInitials: string; userName: string; avatarColor: string }) {
   const [activeCategory, setActiveCategory] = useState<Category>("All");
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
   const [composerText, setComposerText] = useState("");
@@ -421,7 +431,7 @@ function CommunityTab({ userInitials, userName }: { userInitials: string; userNa
           className="bg-[#121821] border border-[#2d3a4b] rounded p-4 flex items-center gap-3 cursor-pointer hover:border-[#b3cdff]/30 transition-colors"
           onClick={() => setShowComposer(true)}
         >
-          <Avatar initials={userInitials} size="sm" />
+          <Avatar initials={userInitials} size="sm" color={avatarColor} />
           <div className="flex-1 bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 font-mono text-[10px] text-gray-500 tracking-wide">
             Share a win, ask a question, post a check-in...
           </div>
@@ -429,7 +439,7 @@ function CommunityTab({ userInitials, userName }: { userInitials: string; userNa
       ) : (
         <div className="bg-[#121821] border border-[#b3cdff]/30 rounded p-4 space-y-3">
           <div className="flex items-center gap-3">
-            <Avatar initials={userInitials} size="sm" />
+            <Avatar initials={userInitials} size="sm" color={avatarColor} />
             <span className="text-sm text-white">{userName}</span>
           </div>
           <textarea
@@ -871,19 +881,23 @@ const NAV_ITEMS: { id: Tab; label: string; icon: (props: { active?: boolean }) =
   { id: "ranks", label: "Ranks", icon: IconRanks },
 ];
 
-function getInitials(email: string): string {
-  const username = email.split("@")[0];
-  const parts = username.split(/[._-]/);
+function getInitials(source: string, email?: string): string {
+  const base = source.includes("@") ? source.split("@")[0] : source;
+  const parts = base.split(/[\s._-]+/);
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return username.slice(0, 2).toUpperCase();
+  if (parts[0].length >= 2) return parts[0].slice(0, 2).toUpperCase();
+  const fallback = (email ?? "").split("@")[0];
+  return fallback.slice(0, 2).toUpperCase() || "ME";
 }
 
 export default function MemberDashboard({ profile }: { profile: ProfileData }) {
   const userEmail = profile?.email ?? "";
-  const userInitials = userEmail ? getInitials(userEmail) : "ME";
-  const displayName = userEmail ? userEmail.split("@")[0].split(/[._-]/)[0] : USER.name;
+  const userNickname = profile?.nickname ?? "";
+  const userInitials = getInitials(userNickname || userEmail, userEmail);
+  const displayName = userNickname || (userEmail ? userEmail.split("@")[0].split(/[._-]/)[0] : USER.name);
   const displayNameCapitalized = displayName.charAt(0).toUpperCase() + displayName.slice(1);
   const displayPlan = profile?.plan ?? USER.plan;
+  const avatarColor = profile?.avatar_color ?? "#b3cdff";
 
   const [activeTab, setActiveTab] = useState<Tab>("home");
 
@@ -923,7 +937,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
         {/* User card */}
         <div className="p-4 border-t border-[#2d3a4b]">
           <div className="flex items-center gap-3">
-            <Avatar initials={userInitials} size="sm" online={true} />
+            <Avatar initials={userInitials} size="sm" online={true} color={avatarColor} />
             <div className="flex-1 min-w-0">
               <p className="text-xs text-white truncate capitalize">{displayNameCapitalized}</p>
               <PlanBadge plan={displayPlan} />
@@ -961,7 +975,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
             </button>
             {/* Avatar */}
             <Link href="/profile">
-              <Avatar initials={userInitials} size="sm" online={true} />
+              <Avatar initials={userInitials} size="sm" online={true} color={avatarColor} />
             </Link>
           </div>
         </header>
@@ -969,7 +983,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
         {/* Page content */}
         <div className="flex-1 p-5 pb-28 md:pb-8">
           {activeTab === "home" && <HomeTab onNavigate={setActiveTab} />}
-          {activeTab === "community" && <CommunityTab userInitials={userInitials} userName={displayNameCapitalized} />}
+          {activeTab === "community" && <CommunityTab userInitials={userInitials} userName={displayNameCapitalized} avatarColor={avatarColor} />}
           {activeTab === "programs" && <ProgramsTab />}
           {activeTab === "schedule" && <ScheduleTab />}
           {activeTab === "members" && <MembersTab />}

@@ -13,7 +13,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, email, plan, status, role")
+    .select("id, email, plan, status, role, nickname, avatar_color, fitness_goal, instagram, tiktok, bio")
     .eq("id", user.id)
     .single();
 
@@ -27,6 +27,12 @@ export default async function DashboardPage() {
     plan: profile?.plan ?? undefined,
     status: profile?.status ?? undefined,
     role: isCoach ? "coach" : "member",
+    nickname: profile?.nickname ?? undefined,
+    avatar_color: profile?.avatar_color ?? undefined,
+    fitness_goal: profile?.fitness_goal ?? undefined,
+    instagram: profile?.instagram ?? undefined,
+    tiktok: profile?.tiktok ?? undefined,
+    bio: profile?.bio ?? undefined,
   };
 
   if (isCoach) {
