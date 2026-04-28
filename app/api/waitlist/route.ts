@@ -23,13 +23,8 @@ const emailHtml = () => `
 
       <!-- WORDMARK -->
       <tr>
-        <td align="center" style="padding-bottom:8px;">
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:28px;font-weight:900;letter-spacing:16px;color:#ffffff;text-transform:uppercase;text-indent:16px;">ZANA</p>
-        </td>
-      </tr>
-      <tr>
         <td align="center" style="padding-bottom:48px;">
-          <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:8px;letter-spacing:6px;color:#b3cdff;text-transform:uppercase;text-indent:6px;">FITNESS</p>
+          <img src="https://zana-fitness.vercel.app/logo.png" alt="ZANA Fitness" width="140" style="display:block;max-width:140px;" />
         </td>
       </tr>
 
@@ -47,7 +42,7 @@ const emailHtml = () => `
         <td style="background-color:#121821;border:1px solid #2d3a4b;border-radius:4px;padding:56px 48px;">
 
           <!-- EYEBROW -->
-          <p style="margin:0 0 24px;font-family:'Courier New',Courier,monospace;font-size:8px;letter-spacing:4px;color:#b3cdff;text-transform:uppercase;text-align:center;">
+          <p style="margin:0 0 24px;font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:4px;color:#b3cdff;text-transform:uppercase;text-align:center;">
             — Access Confirmed —
           </p>
 
@@ -65,11 +60,11 @@ const emailHtml = () => `
           </table>
 
           <!-- BODY -->
-          <p style="margin:0 0 12px;font-family:'Courier New',Courier,monospace;font-size:9px;line-height:2;letter-spacing:3px;color:#6b7280;text-transform:uppercase;text-align:center;">
-            We'll reach out the moment<br/>slots for ZANA open.
+          <p style="margin:0 0 12px;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.8;letter-spacing:1px;color:#9ca3af;text-align:center;">
+            We'll reach out the moment slots for ZANA open.
           </p>
-          <p style="margin:0 0 48px;font-family:'Courier New',Courier,monospace;font-size:9px;line-height:2;letter-spacing:3px;color:#6b7280;text-transform:uppercase;text-align:center;">
-            When they do — move fast.<br/>Access is limited.
+          <p style="margin:0 0 48px;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.8;letter-spacing:1px;color:#9ca3af;text-align:center;">
+            When they do — move fast. Access is limited.
           </p>
 
           <!-- CTA -->
@@ -99,18 +94,18 @@ const emailHtml = () => `
       <!-- FOOTER TEXT -->
       <tr>
         <td align="center" style="padding-bottom:8px;">
-          <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:8px;letter-spacing:3px;color:#374151;text-transform:uppercase;">
+          <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:10px;letter-spacing:2px;color:#4b5563;text-transform:uppercase;">
             Built for results. Not motivation.
           </p>
         </td>
       </tr>
       <tr>
         <td align="center">
-          <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:8px;letter-spacing:2px;color:#1f2937;text-transform:uppercase;">
+          <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:10px;letter-spacing:1px;color:#374151;text-transform:uppercase;">
             &copy; 2026 Zana Fitness &nbsp;&middot;&nbsp;
-            <a href="https://zana-fitness.vercel.app/terms" style="color:#1f2937;text-decoration:none;">Terms</a>
+            <a href="https://zana-fitness.vercel.app/terms" style="color:#374151;text-decoration:none;">Terms</a>
             &nbsp;&middot;&nbsp;
-            <a href="https://zana-fitness.vercel.app/privacy" style="color:#1f2937;text-decoration:none;">Privacy</a>
+            <a href="https://zana-fitness.vercel.app/privacy" style="color:#374151;text-decoration:none;">Privacy</a>
           </p>
         </td>
       </tr>
