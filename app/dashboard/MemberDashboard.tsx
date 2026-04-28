@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 
 export type ProfileData = {
   id: string;
@@ -575,7 +576,44 @@ function CommunityTab({ userInitials, userName, avatarColor }: { userInitials: s
 
 // ─── Tab: Programs ────────────────────────────────────────────────────────────
 
+type ContentType = "workout" | "meal_plan" | "instructions" | "video";
+type ContentBlock = {
+  id: string;
+  program_id: number;
+  type: ContentType;
+  title: string;
+  label: string | null;
+  body: string | null;
+  created_at: string;
+};
+const CONTENT_META: Record<ContentType, { label: string; color: string }> = {
+  workout:      { label: "Workout Plan",  color: "#b3cdff" },
+  meal_plan:    { label: "Meal Plan",     color: "#86efac" },
+  instructions: { label: "Instructions", color: "#fbbf24" },
+  video:        { label: "Video",         color: "#f472b6" },
+};
+
 function ProgramsTab() {
+  const supabase = createClient();
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [contents, setContents] = useState<Record<number, ContentBlock[]>>({});
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+
+  const toggleExpand = async (progId: number, locked: boolean) => {
+    if (locked) return;
+    if (expanded === progId) { setExpanded(null); return; }
+    setExpanded(progId);
+    if (contents[progId] !== undefined) return;
+    setLoadingId(progId);
+    const { data } = await supabase
+      .from("program_content")
+      .select("*")
+      .eq("program_id", progId)
+      .order("created_at", { ascending: true });
+    setContents(prev => ({ ...prev, [progId]: data ?? [] }));
+    setLoadingId(null);
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       <div>
@@ -586,69 +624,101 @@ function ProgramsTab() {
       {PROGRAMS.map(prog => (
         <div
           key={prog.id}
-          className={`bg-[#121821] border rounded overflow-hidden ${prog.locked ? "border-[#1a222c] opacity-60" : "border-[#2d3a4b] hover:border-[#2d3a4b]/80"} transition-all`}
+          className={`bg-[#121821] border rounded overflow-hidden transition-all ${prog.locked ? "border-[#1a222c] opacity-60" : "border-[#2d3a4b]"}`}
         >
           <div className="h-0.5 w-full" style={{ backgroundColor: prog.accentColor }} />
 
-          <div className="p-5">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <p className="font-mono text-[8px] tracking-widest uppercase mb-1" style={{ color: prog.accentColor }}>
-                  {prog.phase}
-                </p>
-                <h3 className="text-base font-light tracking-[0.1em] uppercase text-white">{prog.title}</h3>
-              </div>
-              {prog.locked ? (
-                <div className="border border-[#2d3a4b] rounded p-1.5">
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth="1.5">
+          {/* Header — clickable to expand (unlocked only) */}
+          <button
+            onClick={() => toggleExpand(prog.id, prog.locked)}
+            className={`w-full p-5 flex items-start justify-between text-left ${!prog.locked ? "hover:bg-[#1a222c]/50 transition-colors" : "cursor-default"}`}
+          >
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-mono text-[8px] tracking-widest uppercase" style={{ color: prog.accentColor }}>{prog.phase}</p>
+                {prog.locked ? (
+                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-gray-600 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <rect x="3" y="7" width="10" height="8" rx="1" />
                     <path d="M5 7V5a3 3 0 016 0v2" strokeLinecap="round" />
                   </svg>
-                </div>
-              ) : prog.active ? (
-                <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-1 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">
-                  Active
-                </span>
-              ) : null}
-            </div>
-
-            <p className="text-xs text-gray-400 leading-relaxed mb-4">{prog.description}</p>
-
-            {!prog.locked && (
-              <div className="mb-4">
-                <div className="flex justify-between mb-1.5">
-                  <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest">Progress</span>
-                  <span className="font-mono text-[8px] text-gray-400">{prog.progress}%</span>
-                </div>
-                <div className="h-0.5 bg-[#1a222c] rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${prog.progress}%`, backgroundColor: prog.accentColor }}
-                  />
-                </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    {prog.active && <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">Active</span>}
+                    <svg viewBox="0 0 16 16" className={`w-4 h-4 text-gray-500 transition-transform duration-200 shrink-0 ${expanded === prog.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                )}
               </div>
-            )}
+              <h3 className="text-base font-light tracking-[0.1em] uppercase text-white mb-1">{prog.title}</h3>
+              <p className="text-xs text-gray-400 leading-relaxed">{prog.description}</p>
 
-            {prog.locked ? (
-              <Link
-                href="/system"
-                className="block w-full text-center font-mono text-[8px] tracking-widest uppercase py-3 rounded border border-[#1a222c] text-gray-600 hover:border-[#b3cdff]/30 hover:text-[#b3cdff] transition-colors"
-              >
-                Upgrade to unlock
-              </Link>
-            ) : (
+              {!prog.locked && (
+                <div className="mt-3">
+                  <div className="flex justify-between mb-1.5">
+                    <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest">Progress</span>
+                    <span className="font-mono text-[8px] text-gray-400">{prog.progress}%</span>
+                  </div>
+                  <div className="h-0.5 bg-[#1a222c] rounded-full overflow-hidden">
+                    <div className="h-full rounded-full" style={{ width: `${prog.progress}%`, backgroundColor: prog.accentColor }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          </button>
+
+          {/* Expand: content blocks */}
+          {!prog.locked && expanded === prog.id && (
+            <div className="border-t border-[#2d3a4b] px-5 pt-4 pb-5 space-y-3">
+              {loadingId === prog.id ? (
+                <div className="flex justify-center py-6">
+                  <div className="w-5 h-5 border-2 border-[#b3cdff]/20 border-t-[#b3cdff] rounded-full animate-spin" />
+                </div>
+              ) : (contents[prog.id] ?? []).length === 0 ? (
+                <p className="font-mono text-[9px] text-gray-600 text-center py-4 uppercase tracking-widest">No content posted yet. Check back soon.</p>
+              ) : (
+                <div className="space-y-3">
+                  {(contents[prog.id] ?? []).map(block => {
+                    const meta = CONTENT_META[block.type];
+                    return (
+                      <div key={block.id} className="bg-[#0f141b] border border-[#2d3a4b] rounded p-4">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded border" style={{ color: meta.color, borderColor: meta.color + "40", backgroundColor: meta.color + "10" }}>
+                            {meta.label}
+                          </span>
+                          {block.label && <span className="font-mono text-[8px] text-gray-500">{block.label}</span>}
+                        </div>
+                        <p className="text-sm font-medium text-white mb-2">{block.title}</p>
+                        {block.body && (
+                          block.type === "video"
+                            ? <a href={block.body} target="_blank" rel="noopener noreferrer" className="font-mono text-[9px] text-[#b3cdff] hover:underline break-all">{block.body}</a>
+                            : <p className="text-xs text-gray-400 leading-relaxed whitespace-pre-line">{block.body}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* CTA */}
               <Link
                 href={prog.href!}
                 className="block w-full text-center font-mono text-[8px] tracking-[0.25em] uppercase py-3 rounded border transition-colors"
-                style={{
-                  borderColor: prog.accentColor + "40",
-                  color: prog.accentColor,
-                }}
+                style={{ borderColor: prog.accentColor + "40", color: prog.accentColor }}
               >
-                {prog.progress > 0 ? "Continue" : "Start"}
+                {prog.progress > 0 ? "Continue Program" : "Start Program"}
               </Link>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Locked CTA */}
+          {prog.locked && (
+            <div className="px-5 pb-5">
+              <Link href="/system" className="block w-full text-center font-mono text-[8px] tracking-widest uppercase py-3 rounded border border-[#1a222c] text-gray-600 hover:border-[#b3cdff]/30 hover:text-[#b3cdff] transition-colors">
+                Upgrade to unlock
+              </Link>
+            </div>
+          )}
         </div>
       ))}
     </div>

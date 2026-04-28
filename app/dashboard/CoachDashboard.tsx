@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { ProfileData } from "./MemberDashboard";
+import { createClient } from "@/utils/supabase/client";
 
 // ─── ZANA Logo ────────────────────────────────────────────────────────────────
 
@@ -61,12 +62,34 @@ const INITIAL_PROGRAMS: Program[] = [
 
 type CoachTab = "overview" | "members" | "community" | "programs" | "schedule";
 
+type ContentType = "workout" | "meal_plan" | "instructions" | "video";
+type ContentBlock = {
+  id: string;
+  program_id: number;
+  type: ContentType;
+  title: string;
+  label: string | null;
+  body: string | null;
+  created_at: string;
+};
+
+const CONTENT_META: Record<ContentType, { label: string; color: string }> = {
+  workout:      { label: "Workout Plan",  color: "#b3cdff" },
+  meal_plan:    { label: "Meal Plan",     color: "#86efac" },
+  instructions: { label: "Instructions", color: "#fbbf24" },
+  video:        { label: "Video",         color: "#f472b6" },
+};
+
 // ─── Shared ───────────────────────────────────────────────────────────────────
 
-function Avatar({ initials, size = "md" }: { initials: string; size?: "sm" | "md" | "lg" }) {
+function Avatar({ initials, size = "md", color }: { initials: string; size?: "sm" | "md" | "lg"; color?: string }) {
   const sz = { sm: "w-7 h-7 text-[9px]", md: "w-9 h-9 text-xs", lg: "w-12 h-12 text-sm" }[size];
+  const c = color ?? "#b3cdff";
   return (
-    <div className={`${sz} rounded-full bg-[#1e2d3d] border border-[#2d3a4b] flex items-center justify-center font-mono font-bold text-[#b3cdff] tracking-wider shrink-0`}>
+    <div
+      className={`${sz} rounded-full flex items-center justify-center font-mono font-bold tracking-wider shrink-0 border`}
+      style={{ color: c, borderColor: c + "40", backgroundColor: c + "15" }}
+    >
       {initials}
     </div>
   );
@@ -491,27 +514,80 @@ function CommunityTab({ coachName }: { coachName: string }) {
 
 // ─── Tab: Programs ────────────────────────────────────────────────────────────
 
-function ProgramsTab() {
+function ProgramsTab({ coachId }: { coachId: string }) {
+  const supabase = createClient();
   const [programs, setPrograms] = useState<Program[]>(INITIAL_PROGRAMS);
-  const [showAdd, setShowAdd] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const [contents, setContents] = useState<Record<number, ContentBlock[]>>({});
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [addingTo, setAddingTo] = useState<number | null>(null);
+  const [newType, setNewType] = useState<ContentType>("workout");
   const [newTitle, setNewTitle] = useState("");
-  const [newPhase, setNewPhase] = useState("");
+  const [newLabel, setNewLabel] = useState("");
+  const [newBody, setNewBody] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [showAddProgram, setShowAddProgram] = useState(false);
+  const [newProgTitle, setNewProgTitle] = useState("");
+  const [newProgPhase, setNewProgPhase] = useState("");
+
+  const toggleExpand = async (progId: number) => {
+    if (expanded === progId) { setExpanded(null); return; }
+    setExpanded(progId);
+    if (contents[progId] !== undefined) return;
+    setLoadingId(progId);
+    const { data } = await supabase
+      .from("program_content")
+      .select("*")
+      .eq("program_id", progId)
+      .order("created_at", { ascending: true });
+    setContents(prev => ({ ...prev, [progId]: data ?? [] }));
+    setLoadingId(null);
+  };
+
+  const addContent = async (progId: number) => {
+    if (!newTitle.trim()) return;
+    setSaving(true);
+    setSaveError("");
+    const { data, error } = await supabase
+      .from("program_content")
+      .insert({
+        program_id: progId,
+        coach_id: coachId,
+        type: newType,
+        title: newTitle.trim(),
+        label: newLabel.trim() || null,
+        body: newBody.trim() || null,
+      })
+      .select()
+      .single();
+    setSaving(false);
+    if (error) { setSaveError(error.message); return; }
+    if (data) setContents(prev => ({ ...prev, [progId]: [...(prev[progId] ?? []), data] }));
+    setNewTitle(""); setNewLabel(""); setNewBody(""); setAddingTo(null);
+  };
+
+  const deleteContent = async (blockId: string, progId: number) => {
+    await supabase.from("program_content").delete().eq("id", blockId);
+    setContents(prev => ({ ...prev, [progId]: (prev[progId] ?? []).filter(b => b.id !== blockId) }));
+  };
 
   const addProgram = () => {
-    if (!newTitle.trim()) return;
-    setPrograms(prev => [...prev, { id: Date.now(), title: newTitle, phase: newPhase || "New Program", members: 0, avgProgress: 0, active: false, color: "#b3cdff" }]);
-    setNewTitle(""); setNewPhase(""); setShowAdd(false);
+    if (!newProgTitle.trim()) return;
+    setPrograms(prev => [...prev, { id: Date.now(), title: newProgTitle, phase: newProgPhase || "New Program", members: 0, avgProgress: 0, active: false, color: "#b3cdff" }]);
+    setNewProgTitle(""); setNewProgPhase(""); setShowAddProgram(false);
   };
+
+  const inputCls = "w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/40 font-light text-sm";
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      {showAdd && (
-        <Modal title="Add Program" onClose={() => setShowAdd(false)}>
+      {showAddProgram && (
+        <Modal title="Add Program" onClose={() => setShowAddProgram(false)}>
           <div className="space-y-3">
-            <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Program title" className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/40 font-mono text-sm" />
-            <input value={newPhase} onChange={e => setNewPhase(e.target.value)} placeholder="Phase / subtitle" className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/40 font-mono text-sm" />
-            <button onClick={addProgram} disabled={!newTitle.trim()} className="w-full font-mono text-[8px] tracking-[0.25em] uppercase py-3 bg-[#b3cdff] text-[#0f141b] rounded hover:bg-white transition-colors disabled:opacity-30">Add Program</button>
+            <input value={newProgTitle} onChange={e => setNewProgTitle(e.target.value)} placeholder="Program title" className={inputCls} />
+            <input value={newProgPhase} onChange={e => setNewProgPhase(e.target.value)} placeholder="Phase / subtitle" className={inputCls} />
+            <button onClick={addProgram} disabled={!newProgTitle.trim()} className="w-full font-mono text-[8px] tracking-[0.25em] uppercase py-3 bg-[#b3cdff] text-[#0f141b] rounded hover:bg-white transition-colors disabled:opacity-30">Add Program</button>
           </div>
         </Modal>
       )}
@@ -521,41 +597,118 @@ function ProgramsTab() {
           <p className="font-mono text-[8px] tracking-[0.3em] text-gray-500 uppercase mb-1">Content Library</p>
           <h2 className="text-lg font-light tracking-[0.12em] uppercase text-white">Programs</h2>
         </div>
-        <button onClick={() => setShowAdd(true)} className="font-mono text-[8px] tracking-widest uppercase px-4 py-2.5 border border-[#b3cdff]/30 text-[#b3cdff] rounded hover:bg-[#b3cdff]/10 transition-colors">+ Add Program</button>
+        <button onClick={() => setShowAddProgram(true)} className="font-mono text-[8px] tracking-widest uppercase px-4 py-2.5 border border-[#b3cdff]/30 text-[#b3cdff] rounded hover:bg-[#b3cdff]/10 transition-colors">+ Add Program</button>
       </div>
 
       {programs.map(prog => (
         <div key={prog.id} className="bg-[#121821] border border-[#2d3a4b] rounded overflow-hidden">
           <div className="h-0.5 w-full" style={{ backgroundColor: prog.color }} />
-          <div className="p-5">
-            {editingId === prog.id ? (
-              <div className="space-y-2 mb-3">
-                <input defaultValue={prog.title} className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-[#b3cdff]/40" />
-                <div className="flex gap-2">
-                  <button onClick={() => setEditingId(null)} className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 bg-[#b3cdff] text-[#0f141b] rounded hover:bg-white transition-colors">Save</button>
-                  <button onClick={() => setEditingId(null)} className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#2d3a4b] text-gray-400 rounded hover:text-white transition-colors">Cancel</button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="font-mono text-[8px] tracking-widest uppercase mb-1" style={{ color: prog.color }}>{prog.phase}</p>
-                  <h3 className="text-base font-light tracking-[0.1em] uppercase text-white">{prog.title}</h3>
-                </div>
-                <div className="flex gap-2 items-center">
-                  {prog.active && <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-1 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">Active</span>}
-                  <button onClick={() => setEditingId(prog.id)} className="font-mono text-[7px] tracking-widest uppercase px-2.5 py-1 border border-[#2d3a4b] text-gray-400 rounded hover:text-white hover:border-[#b3cdff]/30 transition-colors">Edit</button>
-                </div>
-              </div>
-            )}
-            <div className="flex items-center gap-6 font-mono text-[9px] text-gray-400 mb-3">
-              <span>{prog.members} enrolled</span>
-              <span>Avg {prog.avgProgress}% complete</span>
+
+          {/* Clickable header */}
+          <button
+            onClick={() => toggleExpand(prog.id)}
+            className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-[#1a222c]/60 transition-colors"
+          >
+            <div>
+              <p className="font-mono text-[8px] tracking-widest uppercase mb-1" style={{ color: prog.color }}>{prog.phase}</p>
+              <h3 className="text-base font-light tracking-[0.1em] uppercase text-white">{prog.title}</h3>
+              <p className="font-mono text-[9px] text-gray-500 mt-1">{prog.members} enrolled · Avg {prog.avgProgress}%</p>
             </div>
-            <div className="h-0.5 bg-[#1a222c] rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all" style={{ width: `${prog.avgProgress}%`, backgroundColor: prog.color }} />
+            <div className="flex items-center gap-3 shrink-0">
+              {prog.active && <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">Active</span>}
+              <svg viewBox="0 0 16 16" className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${expanded === prog.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
-          </div>
+          </button>
+
+          {/* Expanded section */}
+          {expanded === prog.id && (
+            <div className="border-t border-[#2d3a4b] px-5 pt-4 pb-5 space-y-3">
+              {loadingId === prog.id ? (
+                <div className="flex justify-center py-6">
+                  <div className="w-5 h-5 border-2 border-[#b3cdff]/20 border-t-[#b3cdff] rounded-full animate-spin" />
+                </div>
+              ) : (contents[prog.id] ?? []).length === 0 ? (
+                <p className="font-mono text-[9px] text-gray-600 text-center py-4 uppercase tracking-widest">No content yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {(contents[prog.id] ?? []).map(block => {
+                    const meta = CONTENT_META[block.type];
+                    return (
+                      <div key={block.id} className="bg-[#0f141b] border border-[#2d3a4b] rounded p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
+                              <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded border" style={{ color: meta.color, borderColor: meta.color + "40", backgroundColor: meta.color + "10" }}>
+                                {meta.label}
+                              </span>
+                              {block.label && <span className="font-mono text-[8px] text-gray-500">{block.label}</span>}
+                            </div>
+                            <p className="text-sm font-medium text-white mb-1">{block.title}</p>
+                            {block.body && (
+                              block.type === "video"
+                                ? <a href={block.body} target="_blank" rel="noopener noreferrer" className="font-mono text-[9px] text-[#b3cdff] hover:underline break-all">{block.body}</a>
+                                : <p className="text-xs text-gray-400 leading-relaxed whitespace-pre-line">{block.body}</p>
+                            )}
+                          </div>
+                          <button onClick={() => deleteContent(block.id, prog.id)} className="shrink-0 text-gray-600 hover:text-[#f87171] transition-colors mt-0.5">
+                            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
+                              <path d="M3 5h10M6 5V3h4v2M12 5l-1 9H5L4 5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Add content form */}
+              {addingTo === prog.id ? (
+                <div className="space-y-3 bg-[#0f141b] border border-[#b3cdff]/20 rounded p-4">
+                  <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-2">Add Content Block</p>
+
+                  {/* Type selector */}
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                    {(Object.keys(CONTENT_META) as ContentType[]).map(t => (
+                      <button key={t} type="button" onClick={() => setNewType(t)}
+                        className={`font-mono text-[8px] tracking-wide uppercase py-2 rounded border transition-colors ${newType === t ? "text-[#0f141b] border-transparent font-bold" : "text-gray-400 border-[#2d3a4b] hover:text-white"}`}
+                        style={newType === t ? { backgroundColor: CONTENT_META[t].color } : {}}
+                      >
+                        {CONTENT_META[t].label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="Title — e.g. Push Day A, Week 3 Meals, Phase Notes" className={inputCls} />
+                  <input value={newLabel} onChange={e => setNewLabel(e.target.value)} placeholder="Week / Day label (optional) — e.g. Week 3, Day 2" className={inputCls} />
+                  <textarea
+                    value={newBody} onChange={e => setNewBody(e.target.value)}
+                    placeholder={newType === "video" ? "Paste video URL here" : "Write the full content — exercises, sets, reps, macros, notes..."}
+                    rows={6}
+                    className={`${inputCls} resize-none leading-relaxed`}
+                  />
+
+                  {saveError && <p className="font-mono text-[8px] text-[#f87171]">{saveError}</p>}
+
+                  <div className="flex gap-2">
+                    <button onClick={() => { setAddingTo(null); setNewTitle(""); setNewLabel(""); setNewBody(""); setSaveError(""); }}
+                      className="flex-1 font-mono text-[8px] tracking-widest uppercase py-2.5 border border-[#2d3a4b] text-gray-400 rounded hover:text-white transition-colors">
+                      Cancel
+                    </button>
+                    <button onClick={() => addContent(prog.id)} disabled={!newTitle.trim() || saving}
+                      className="flex-1 font-mono text-[8px] tracking-widest uppercase py-2.5 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40">
+                      {saving ? "Saving..." : "Save Block"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button onClick={() => setAddingTo(prog.id)}
+                  className="w-full font-mono text-[8px] tracking-widest uppercase py-3 border border-dashed border-[#2d3a4b] text-gray-500 rounded hover:border-[#b3cdff]/40 hover:text-[#b3cdff] transition-colors">
+                  + Add Content Block
+                </button>
+              )}
+            </div>
+          )}
         </div>
       ))}
     </div>
@@ -670,10 +823,21 @@ const NAV: { id: CoachTab; label: string; icon: (active: boolean) => React.React
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
+function getCoachInitials(nickname: string, email: string): string {
+  const source = nickname.trim() || email.split("@")[0];
+  const parts = source.split(/[\s._-]+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return source.slice(0, 2).toUpperCase();
+}
+
 export default function CoachDashboard({ profile }: { profile: ProfileData }) {
   const [activeTab, setActiveTab] = useState<CoachTab>("overview");
-  const coachName = profile?.email?.split("@")[0] ?? "Coach";
-  const initials = coachName.slice(0, 2).toUpperCase();
+  const coachNickname = profile?.nickname ?? "";
+  const coachEmail = profile?.email ?? "";
+  const coachName = coachNickname || coachEmail.split("@")[0] || "Coach";
+  const initials = getCoachInitials(coachNickname, coachEmail);
+  const avatarColor = profile?.avatar_color ?? "#b3cdff";
+  const coachId = profile?.id ?? "";
 
   return (
     <div className="min-h-screen bg-[#0f141b] text-white flex">
@@ -701,7 +865,7 @@ export default function CoachDashboard({ profile }: { profile: ProfileData }) {
 
         <div className="p-4 border-t border-[#2d3a4b]">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#b3cdff]/10 border border-[#b3cdff]/30 flex items-center justify-center font-mono text-[9px] font-bold text-[#b3cdff] shrink-0">{initials}</div>
+            <Avatar initials={initials} size="sm" color={avatarColor} />
             <div className="flex-1 min-w-0">
               <p className="text-xs text-white truncate capitalize">{coachName}</p>
               <span className="font-mono text-[7px] tracking-widest uppercase text-[#b3cdff]">Coach</span>
@@ -722,8 +886,8 @@ export default function CoachDashboard({ profile }: { profile: ProfileData }) {
             <span className="font-mono text-[8px] tracking-widest uppercase px-2 py-0.5 border border-[#b3cdff]/30 text-[#b3cdff] bg-[#b3cdff]/5 rounded-sm">Coach</span>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/profile" className="w-8 h-8 rounded-full bg-[#b3cdff]/10 border border-[#b3cdff]/30 flex items-center justify-center font-mono text-[9px] font-bold text-[#b3cdff] hover:bg-[#b3cdff]/20 transition-colors">
-              {initials}
+            <Link href="/profile">
+              <Avatar initials={initials} size="sm" color={avatarColor} />
             </Link>
           </div>
         </header>
@@ -732,7 +896,7 @@ export default function CoachDashboard({ profile }: { profile: ProfileData }) {
           {activeTab === "overview"  && <OverviewTab  coachName={coachName} onTabChange={setActiveTab} />}
           {activeTab === "members"   && <MembersTab />}
           {activeTab === "community" && <CommunityTab coachName={coachName} />}
-          {activeTab === "programs"  && <ProgramsTab />}
+          {activeTab === "programs"  && <ProgramsTab coachId={coachId} />}
           {activeTab === "schedule"  && <ScheduleTab />}
         </div>
       </main>

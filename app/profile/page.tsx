@@ -137,6 +137,7 @@ export default function ProfilePage() {
 
     setSaving(false);
     setSaved(true);
+    router.refresh();
     setTimeout(() => setSaved(false), 3000);
   };
 
