@@ -63,7 +63,7 @@ function PlanCard({
   return (
     <div
       className={`flex flex-col border ${
-        featured ? "border-[#b3cdff]" : "border-[#1a1f26]"
+        featured ? "border-[#b3cdff]" : "border-[#2d3a4b]"
       } rounded-2xl p-10 md:p-12 relative`}
     >
       {featured && (
@@ -72,18 +72,18 @@ function PlanCard({
         </span>
       )}
 
-      <p className="text-[9px] uppercase tracking-widest font-bold text-gray-500 mb-2">{label}</p>
+      <p className="text-[9px] uppercase tracking-widest font-bold text-gray-300 mb-2">{label}</p>
       <div className="flex items-end gap-2 mb-1">
         <span className="text-4xl md:text-5xl font-light text-white">${price}</span>
-        <span className="text-[10px] uppercase tracking-widest text-gray-500 mb-2">/mo</span>
+        <span className="text-[10px] uppercase tracking-widest text-gray-300 mb-2">/mo</span>
       </div>
-      <p className="text-[9px] uppercase tracking-widest text-gray-600 mb-10">{commitment}</p>
+      <p className="text-[9px] uppercase tracking-widest text-gray-400 mb-10">{commitment}</p>
 
       <ul className="space-y-4 mb-12 flex-1">
         {features.map((f) => (
           <li key={f} className="flex items-center gap-3">
             <Check
-              className={`w-3 h-3 flex-shrink-0 ${featured ? "text-[#b3cdff]" : "text-gray-600"}`}
+              className={`w-3 h-3 flex-shrink-0 ${featured ? "text-[#b3cdff]" : "text-gray-400"}`}
               strokeWidth={2.5}
             />
             <span className="text-[10px] uppercase tracking-widest text-gray-400">{f}</span>
@@ -97,10 +97,10 @@ function PlanCard({
         className={`w-full py-4 rounded-full text-[10px] uppercase tracking-widest font-bold transition-colors disabled:opacity-50 ${
           featured
             ? "bg-[#b3cdff] text-black hover:bg-white"
-            : "border border-[#1a1f26] text-gray-300 hover:border-[#b3cdff] hover:text-[#b3cdff]"
+            : "border border-[#2d3a4b] text-gray-300 hover:border-[#b3cdff] hover:text-[#b3cdff]"
         }`}
       >
-        {loading ? "Opening..." : "Join the System"}
+        {loading ? "Opening..." : "JOIN THE SYSTEM"}
       </button>
     </div>
   );
@@ -117,9 +117,9 @@ export default function SystemPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#06080a] text-white font-sans">
+    <main className="min-h-screen bg-[#121821] text-white font-sans">
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#1a1f26]">
+      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
         <Link href="/">
           <ZIcon className="h-5 md:h-6 text-white" />
         </Link>
@@ -131,14 +131,14 @@ export default function SystemPage() {
       </nav>
 
       {/* HEADER */}
-      <section className="py-32 px-6 text-center border-b border-[#1a1f26]">
+      <section className="py-20 px-6 text-center border-b border-[#2d3a4b]">
         <div className="max-w-2xl mx-auto flex flex-col items-center">
           <ZanaLogo className="h-10 md:h-12 text-white mb-12" />
-          <div className="w-8 h-px bg-gray-700 mb-12"></div>
-          <h1 className="text-xl md:text-2xl font-light tracking-[0.15em] uppercase leading-loose text-white mb-4">
+          <div className="w-8 h-px bg-gray-500 mb-12"></div>
+          <h1 className="text-xl md:text-2xl font-light tracking-[0.15em] uppercase leading-tight text-white mb-4">
             The System.
           </h1>
-          <p className="text-[10px] uppercase tracking-widest font-bold text-gray-500">
+          <p className="text-[10px] uppercase tracking-widest font-bold text-gray-300">
             Choose your commitment. Begin your progress.
           </p>
         </div>
@@ -166,9 +166,9 @@ export default function SystemPage() {
       </section>
 
       {/* STATEMENT */}
-      <section className="py-24 px-6 text-center border-t border-[#1a1f26]">
+      <section className="py-24 px-6 text-center border-t border-[#2d3a4b]">
         <div className="max-w-xl mx-auto">
-          <p className="text-[10px] uppercase tracking-widest text-gray-500 font-bold leading-loose">
+          <p className="text-[10px] uppercase tracking-widest text-gray-300 font-bold leading-tight">
             This isn&apos;t a subscription.<br />
             It&apos;s a system designed to make<br />
             <span className="text-[#b3cdff]">progress inevitable</span>.
@@ -177,7 +177,7 @@ export default function SystemPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="py-12 px-8 md:px-16 border-t border-[#1a1f26] flex justify-between items-center text-[9px] uppercase tracking-widest text-gray-600 font-bold">
+      <footer className="py-12 px-8 md:px-16 border-t border-[#2d3a4b] flex justify-between items-center text-[9px] uppercase tracking-widest text-gray-400 font-bold">
         <ZanaLogo className="h-5 text-white" />
         <p>&copy; 2024 Zana Fitness</p>
       </footer>
