@@ -16,12 +16,12 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
 
 
 const features = [
-  "Progressive training program",
-  "Personalised nutrition targets",
-  "Daily coaching guidance",
-  "Weekly system adjustments",
-  "Progress tracking dashboard",
-  "Direct coach access",
+  "Habit-based lifestyle system",
+  "Simple, effective training split",
+  "Personalised nutrition & macros",
+  "Weekly check-ins with your coach",
+  "Supplement & recovery guidance",
+  "Direct access to Javi",
 ];
 
 function PlanCard({
@@ -116,7 +116,7 @@ export default function SystemPage() {
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">01</div>
                <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Training</h3>
                <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Calculated Overload</p>
-               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">No random workouts. Every session builds on the last with precise volume mapping.</p>
+               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">A simple, progressive split built for your schedule — not a bodybuilder's. 45–60 minute sessions, structured to build the lean aesthetic look: shoulders, chest, arms.</p>
             </div>
 
             <div className="flex flex-col items-center md:border-r border-[#2d3a4b] md:px-16">
@@ -124,7 +124,7 @@ export default function SystemPage() {
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">02</div>
                <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Nutrition</h3>
                <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Linear Alignment</p>
-               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">Mathematical macro assignments synchronized specifically against your training output.</p>
+               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">No elimination diets. No extreme cuts. Real food, clear macro targets, and meal habits that fit your life in Singapore, Manila, Jakarta, or wherever you are.</p>
             </div>
 
             <div className="flex flex-col items-center md:pl-16">
@@ -132,7 +132,7 @@ export default function SystemPage() {
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">03</div>
                <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Guidance</h3>
                <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Constant Adaptation</p>
-               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">Data is collected weekly. Protocols are adjusted immediately to ensure momentum.</p>
+               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">Weekly check-ins. Adjustments when life gets busy. A coach who understands your world — the travel, the client dinners, the demanding schedule.</p>
             </div>
 
           </div>
@@ -144,8 +144,9 @@ export default function SystemPage() {
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">THE RESULT</p>
           <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white mb-10">
-            When you eliminate choice,<br />
-            progress becomes <span className="text-[#b3cdff]">inevitable.</span>
+            The physique compounds into everything else<br />
+            you've built — career, confidence, presence.<br />
+            Start building it <span className="text-[#b3cdff]">right.</span>
           </h2>
         </div>
       </section>
@@ -154,8 +155,8 @@ export default function SystemPage() {
       <section className="py-24 px-6 bg-[#1a222c] border-y border-[#2d3a4b]" id="pricing">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-4">Choose Your Commitment.</h2>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400">Secure your access protocol below.</p>
+            <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-4">Choose Your Commitment Level.</h2>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400">All plans include the full system. Choose how long you're in.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             <PlanCard

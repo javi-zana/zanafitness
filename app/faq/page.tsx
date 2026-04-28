@@ -13,28 +13,36 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
 
 const faqs = [
   {
+    q: "Who is this for?",
+    a: "Asian male professionals, 25–34. You're earning well, dressing well, but the body doesn't match the life you've built. You've tried programs before and fallen off. You have 2–3 free hours a day and flexible schedules — you just need a system that fits your actual life.",
+  },
+  {
+    q: "What makes this different from other programs?",
+    a: "Most programs are built around the gym. ZANA is built around your lifestyle. The training is simple and effective — not designed to turn you into a bodybuilder. The real work happens in the habits around it: how you eat, how you recover, how you structure your days. That's what makes the physique stick.",
+  },
+  {
+    q: "What results should I expect?",
+    a: "A lean, aesthetic build — typically 12–15% body fat with visible shoulders, chest, and arms. The 'looks good in a fitted shirt or suit' physique. Most members see significant changes in the first 8–12 weeks. You will not look like a bodybuilder. You will look like someone who clearly takes care of himself.",
+  },
+  {
+    q: "How much time does it require each day?",
+    a: "Training sessions run 45–60 minutes, 4–5 days per week. The nutrition system is habit-based — no meal prepping for hours. If you have 2–3 free hours a day, you have enough time.",
+  },
+  {
+    q: "What's included in the program?",
+    a: "Everything. Training split, nutrition targets, macro guidance, supplement protocol, recovery habits, weekly check-ins, and direct access to Javi. You don't buy add-ons.",
+  },
+  {
+    q: "Do I need a gym?",
+    a: "Yes. The training system is built around standard commercial gym equipment — barbells, dumbbells, cables, machines. Any decent gym will have everything you need.",
+  },
+  {
     q: "Is there a required commitment?",
-    a: "Yes. Progress requires time. We offer 3-month, 6-month, and 12-month access. We do not offer month-to-month subscriptions because true physiological changes cannot be forced into a 30-day window.",
+    a: "Yes — 3, 6, or 12 months. Meaningful physical change takes time. We don't offer month-to-month because 30 days isn't enough to build the habits or see the physique shift. The longer the commitment, the lower the monthly rate.",
   },
   {
-    q: "What happens after I join?",
-    a: "You will complete a comprehensive biological onboarding. Based on your metrics, you will be assigned strict, daily macro targets and a non-negotiable progressive overload training block.",
-  },
-  {
-    q: "Are diet blocks included?",
-    a: "Everything is included. Nutrition, weight training, and cardiovascular metrics are mathematically synchronized to ensure you reach the desired outcome. You do not purchase add-ons.",
-  },
-  {
-    q: "Do I need equipment?",
-    a: "Yes. The system is designed around standard commercial gym equipment including barbells, dumbbells, cables, and generic machines.",
-  },
-  {
-    q: "What is the refund policy?",
-    a: "We offer a 7-day satisfaction guarantee on your first payment. After 7 days, all sales are final. See our full refund policy for details.",
-  },
-  {
-    q: "Can I pause my subscription?",
-    a: "Subscriptions cannot be paused. If you need to cancel, you retain access until the end of your current billing period.",
+    q: "What's the refund policy?",
+    a: "7-day satisfaction guarantee on your first payment. After that, all sales are final. See our full refund policy for details.",
   },
 ];
 
@@ -50,7 +58,7 @@ export default function FAQPage() {
         <div className="text-center mb-24">
           <p className="font-mono text-[10px] tracking-widest text-[#b3cdff] uppercase mb-6">Information</p>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tighter uppercase leading-[0.85] text-white">
-            Direct Answers.
+            Common Questions.
           </h1>
         </div>
 

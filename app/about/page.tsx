@@ -28,20 +28,20 @@ export default function AboutPage() {
         {/* Right — Copy */}
         <div className="flex flex-col justify-center p-12 md:p-32 z-10">
           <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tighter uppercase leading-[0.85] text-white">
-            Origin.<br />The Idea.
+            The Idea.<br />Who This Is For.
           </h1>
 
           <div className="w-8 h-px bg-[#b3cdff] mt-12 mb-12" />
 
           <div className="space-y-8 text-sm tracking-wide text-gray-400 font-light leading-relaxed max-w-lg">
             <p>
-              Motivation is a myth sold to the masses. It&apos;s an emotion, and like all emotions, it fades.
+              Getting lean was one of the highest-ROI decisions I ever made. It changed how I walked into rooms, how people responded to me, how I felt building my business. The physique compounds into everything — presence, confidence, attraction, energy.
             </p>
             <p>
-              ZANA was built on the fundamental belief that lasting physical change requires structural elimination of choice. When you remove &ldquo;how&rdquo; and &ldquo;what&rdquo; from your daily equation, you are only left with &ldquo;do&rdquo;.
+              But I watched the same people around me — smart, successful, well-dressed Asian men in their late 20s and 30s — stuck in the same loop. They'd start a program, fall off, restart. They'd look fine in clothes but hated photos. They had the income. The wardrobe. The career. Not the body.
             </p>
             <p>
-              Our protocols are mathematically linear. Our nutrition mandates are uncompromising. We built this platform for people who are tired of guessing and ready to simply execute.
+              ZANA exists to close that gap. Not through two-hour gym sessions or rice-and-chicken diets. Through a lifestyle system built around how ambitious people actually live — and a simple, proven path to a lean, aesthetic physique that stays.
             </p>
           </div>
 

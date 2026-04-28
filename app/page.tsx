@@ -163,9 +163,10 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">01</p>
           <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white">
-            You don't lack discipline.<br />
-            You've just never followed<br />
-            a system that actually works.
+            You've built the career.<br />
+            You've built the income.<br />
+            The body is the one thing<br />
+            that hasn't caught up yet.
           </h2>
           <div className="w-8 h-px bg-gray-400 mt-16"></div>
         </div>
@@ -182,15 +183,16 @@ export default function LandingPage() {
         <div className="flex flex-col justify-center p-12 md:p-32 bg-[#1a222c] z-10 relative">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-8">02</p>
           <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.1em] uppercase leading-snug mb-10 text-white text-left">
-            Most people train randomly.
+            You look good on paper.<br />
+            Not in the mirror.
           </h2>
           <div className="space-y-3 font-mono text-[11px] uppercase tracking-[0.2em] text-gray-400">
-            <p>Random workouts.</p>
-            <p>Random effort.</p>
-            <p>Random results.</p>
+            <p>Skinny-fat.</p>
+            <p>Soft in clothes.</p>
+            <p>Not matching the life you've built.</p>
           </div>
           <p className="text-[#b3cdff] font-mono text-[11px] tracking-[0.2em] uppercase mt-16">
-            ZANA is different.
+            That changes here.
           </p>
         </div>
       </section>
@@ -209,7 +211,7 @@ export default function LandingPage() {
                <TrendingUp className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">01</div>
                <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Training</h3>
-               <p className="font-mono text-gray-300 uppercase tracking-widest text-[9px]">That Progresses</p>
+               <p className="font-mono text-gray-300 uppercase tracking-widest text-[9px]">Around Your Life</p>
             </div>
             
             {/* Box 2 */}
@@ -217,7 +219,7 @@ export default function LandingPage() {
                <Leaf className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">02</div>
                <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Nutrition</h3>
-               <p className="font-mono text-gray-300 uppercase tracking-widest text-[9px]">That Aligns</p>
+               <p className="font-mono text-gray-300 uppercase tracking-widest text-[9px]">Without Extremes</p>
             </div>
 
             {/* Box 3 */}
@@ -225,7 +227,7 @@ export default function LandingPage() {
                <Target className="w-8 h-8 text-gray-300 stroke-[1.5] mb-8" />
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">03</div>
                <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Guidance</h3>
-               <p className="font-mono text-gray-300 uppercase tracking-widest text-[9px]">That Adapts</p>
+               <p className="font-mono text-gray-300 uppercase tracking-widest text-[9px]">That Compounds</p>
             </div>
 
           </div>
@@ -237,9 +239,10 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">04</p>
           <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white">
-            This isn't a program.<br />
-            It's a system designed<br />
-            to make progress <span className="text-[#b3cdff]">inevitable.</span>
+            This isn't about the gym.<br />
+            It's a lifestyle built around<br />
+            a lean, aesthetic physique that<br />
+            becomes <span className="text-[#b3cdff]">effortless.</span>
           </h2>
           <div className="w-8 h-px bg-gray-400 mt-16"></div>
         </div>
@@ -282,8 +285,8 @@ export default function LandingPage() {
       <section className="py-24 px-6 flex flex-col items-center justify-center text-center bg-[#121821]">
         <div className="max-w-lg w-full flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">06</p>
-          <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase mb-4 text-white">JOIN THE SYSTEM.</h2>
-          <p className="text-[#b3cdff] font-mono uppercase tracking-[0.2em] text-[10px] mb-10">Get first access when Zana launches.</p>
+          <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase mb-4 text-white">YOUR BODY SHOULD MATCH YOUR LIFE.</h2>
+          <p className="text-[#b3cdff] font-mono uppercase tracking-[0.2em] text-[10px] mb-10">Be first when doors open.</p>
 
           <form onSubmit={handleWaitlist} className="w-full mb-6 flex flex-col gap-3">
             <input
