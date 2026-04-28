@@ -53,8 +53,9 @@ export default function TermsPage() {
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">3. Subscriptions</h2>
               <p>Access to the ZANA system requires a paid subscription. We offer the following plans:</p>
               <ul className="mt-4 space-y-2 list-none pl-4 border-l border-[#2d3a4b]">
-                <li>Standard Access — $500/month, 4-month commitment</li>
-                <li>Full Commitment — $400/month, 12-month commitment</li>
+                <li>Starter — $500/month, 3-month commitment</li>
+                <li>Standard — $400/month, 6-month commitment</li>
+                <li>Full Commitment — $300/month, 12-month commitment</li>
               </ul>
               <p className="mt-4">Subscriptions are billed monthly through Paddle. By subscribing, you authorise recurring charges until you cancel.</p>
             </div>

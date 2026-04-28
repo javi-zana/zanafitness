@@ -204,17 +204,24 @@ export default function SystemPage() {
             <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-4">Choose Your Commitment.</h2>
             <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400">Secure your access protocol below.</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             <PlanCard
-              label="Standard Access"
+              label="Starter"
               price={500}
-              commitment="4-month commitment"
-              priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_4M!}
+              commitment="3-month commitment"
+              priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_3M!}
+              paddle={paddle}
+            />
+            <PlanCard
+              label="Standard"
+              price={400}
+              commitment="6-month commitment"
+              priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_6M!}
               paddle={paddle}
             />
             <PlanCard
               label="Full Commitment"
-              price={400}
+              price={300}
               commitment="12-month commitment"
               priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_12M!}
               featured
