@@ -29,16 +29,41 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const protectedPaths = ['/dashboard', '/workout', '/nutrition', '/progress', '/guidance', '/profile', '/onboarding']
-  const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
+  const pathname = request.nextUrl.pathname
 
-  if (!user && isProtected) {
+  // Paths that require login only
+  const authPaths = ['/profile', '/onboarding']
+  // Paths that require login AND active subscription
+  const memberPaths = ['/dashboard', '/workout', '/nutrition', '/progress', '/guidance']
+
+  const needsAuth = authPaths.some(p => pathname.startsWith(p))
+  const needsMembership = memberPaths.some(p => pathname.startsWith(p))
+
+  // Not logged in → /login
+  if (!user && (needsAuth || needsMembership)) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && request.nextUrl.pathname === '/login') {
+  // Logged in but needs active subscription → check profile
+  if (user && needsMembership) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('status')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || profile.status !== 'active') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/system'
+      url.searchParams.set('access', 'required')
+      return NextResponse.redirect(url)
+    }
+  }
+
+  // Already logged in → skip /login
+  if (user && pathname === '/login') {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
