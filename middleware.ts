@@ -46,15 +46,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Logged in but needs active subscription → check profile
-  if (user && needsMembership) {
+  // Coaches always get through
+  const COACH_EMAILS = ['me@javilorenzana.com', 'bea.ongg@gmail.com']
+  const isCoach = COACH_EMAILS.includes(user?.email ?? '')
+
+  // Logged in but needs active subscription → check profile (coaches skip this)
+  if (user && needsMembership && !isCoach) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('status')
+      .select('status, role')
       .eq('id', user.id)
       .single()
 
-    if (!profile || profile.status !== 'active') {
+    const hasAccess = profile?.status === 'active' || profile?.role === 'coach'
+    if (!hasAccess) {
       const url = request.nextUrl.clone()
       url.pathname = '/system'
       url.searchParams.set('access', 'required')
