@@ -386,6 +386,9 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
   const [openComments, setOpenComments] = useState<Set<string>>(new Set());
   const [comments, setComments] = useState<Record<string, DBComment[]>>({});
   const [replyText, setReplyText] = useState<Record<string, string>>({});
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   const categories = ["All", "Announcements", "Check-ins", "Wins", "Q&A"];
   const postCategories = ["Check-ins", "Wins", "Q&A"];
@@ -471,11 +474,27 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
     }
   }
 
+  async function deletePost(postId: string) {
+    await supabase.from("community_posts").delete().eq("id", postId);
+    setPosts(ps => ps.filter(p => p.id !== postId));
+    setOpenMenuId(null);
+  }
+
+  async function saveEdit(postId: string) {
+    const text = editText.trim();
+    if (!text) return;
+    const { error } = await supabase.from("community_posts").update({ content: text }).eq("id", postId);
+    if (!error) {
+      setPosts(ps => ps.map(p => p.id === postId ? { ...p, content: text } : p));
+      setEditingId(null);
+    }
+  }
+
   const filtered = activeCategory === "All" ? posts : posts.filter(p => p.category === activeCategory);
   const grouped = groupPostsByDate(filtered);
 
   return (
-    <div className="max-w-2xl mx-auto space-y-5">
+    <div className="max-w-2xl mx-auto space-y-5" onClick={() => setOpenMenuId(null)}>
       {/* Composer trigger */}
       {!showComposer ? (
         <div
@@ -575,9 +594,69 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
                       </div>
                       <p className="font-mono text-[9px] text-gray-500 mt-0.5">{formatTime(post.created_at)}</p>
                     </div>
+                    {/* Menu — visible only to post owner or coach */}
+                    {(post.user_id === userId || isCoach) && (
+                      <div className="relative shrink-0">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === post.id ? null : post.id); }}
+                          className="w-7 h-7 flex items-center justify-center text-gray-600 hover:text-white transition-colors rounded hover:bg-[#1a222c]"
+                        >
+                          <svg viewBox="0 0 16 16" className="w-4 h-4" fill="currentColor">
+                            <circle cx="8" cy="3" r="1.2" /><circle cx="8" cy="8" r="1.2" /><circle cx="8" cy="13" r="1.2" />
+                          </svg>
+                        </button>
+                        {openMenuId === post.id && (
+                          <div className="absolute right-0 top-8 z-20 bg-[#1a222c] border border-[#2d3a4b] rounded shadow-xl min-w-[120px] overflow-hidden" onClick={e => e.stopPropagation()}>
+                            {post.user_id === userId && (
+                              <button
+                                onClick={() => { setEditingId(post.id); setEditText(post.content); setOpenMenuId(null); }}
+                                className="w-full flex items-center gap-2 px-4 py-2.5 text-left font-mono text-[9px] tracking-widest uppercase text-gray-300 hover:bg-[#2d3a4b] hover:text-white transition-colors"
+                              >
+                                <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                  <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                                Edit
+                              </button>
+                            )}
+                            <button
+                              onClick={() => deletePost(post.id)}
+                              className="w-full flex items-center gap-2 px-4 py-2.5 text-left font-mono text-[9px] tracking-widest uppercase text-[#f87171] hover:bg-[#f87171]/10 transition-colors"
+                            >
+                              <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                <path d="M3 4h10M5 4V3h6v1M6 7v5M10 7v5M4 4l1 9h6l1-9" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <p className="text-sm text-gray-300 leading-relaxed mb-4">{post.content}</p>
+                  {editingId === post.id ? (
+                    <div className="mb-4 space-y-2">
+                      <textarea
+                        autoFocus
+                        value={editText}
+                        onChange={e => setEditText(e.target.value)}
+                        rows={3}
+                        className="w-full bg-[#0f141b] border border-[#b3cdff]/40 rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#b3cdff]/70 transition-colors resize-none leading-relaxed"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => saveEdit(post.id)}
+                          disabled={!editText.trim()}
+                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
+                        >Save</button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 border border-[#2d3a4b] text-gray-400 rounded hover:text-white transition-colors"
+                        >Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-300 leading-relaxed mb-4">{post.content}</p>
+                  )}
 
                   <div className="flex items-center gap-5 pt-3 border-t border-[#1a222c]">
                     <button onClick={() => toggleLike(post.id, post.liked_by_me)}
