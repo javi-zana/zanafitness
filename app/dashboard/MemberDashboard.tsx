@@ -980,7 +980,9 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
       <aside className="hidden md:flex flex-col w-60 bg-[#0a0f16] border-r border-[#2d3a4b] fixed h-full z-20">
         {/* Logo */}
         <div className="px-6 py-7 border-b border-[#2d3a4b]">
-          <ZLogo className="h-6 text-white" />
+          <Link href="/" title="Back to home">
+            <ZLogo className="h-6 text-white hover:opacity-70 transition-opacity" />
+          </Link>
         </div>
 
         {/* Nav */}
@@ -1027,10 +1029,10 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
 
         {/* Top bar */}
         <header className="sticky top-0 z-10 bg-[#0f141b]/90 backdrop-blur border-b border-[#2d3a4b] px-5 py-4 flex items-center justify-between">
-          {/* Mobile: Z mark */}
-          <div className="md:hidden">
-            <ZMark className="h-5 text-white" />
-          </div>
+          {/* Mobile: Z mark — tapping goes home */}
+          <Link href="/" className="md:hidden" title="Back to home">
+            <ZMark className="h-5 text-white hover:opacity-70 transition-opacity" />
+          </Link>
           {/* Desktop: current section */}
           <p className="hidden md:block font-mono text-[10px] tracking-[0.3em] text-gray-400 uppercase">{currentLabel}</p>
 
