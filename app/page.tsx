@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import { TrendingUp, Leaf, Target, Lock } from 'lucide-react';
 import Navbar from '@/app/components/Navbar';
+import Footer from '@/app/components/Footer';
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
@@ -221,41 +221,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 8. FOOTER */}
-      <footer className="py-16 px-10 md:px-24 bg-[#0f141b] border-t border-[#2d3a4b] flex flex-col md:flex-row items-start md:items-end justify-between text-[9px] font-mono tracking-[0.2em] uppercase text-gray-300 gap-16 md:gap-0">
-        
-        {/* Left */}
-        <div className="flex flex-col items-start text-left space-y-6">
-          <ZanaLogo className="h-4 md:h-5 text-white" />
-          <div className="space-y-2 leading-snug">
-            <p>Built for results.</p>
-            <p>Not motivation.</p>
-          </div>
-        </div>
-        
-        {/* Middle Links */}
-        <div className="flex gap-20">
-          <div className="flex flex-col gap-5">
-            <Link href="/about" className="hover:text-white transition-colors">About</Link>
-            <Link href="/system" className="hover:text-white transition-colors">The System</Link>
-            <Link href="/faq" className="hover:text-white transition-colors">FAQ</Link>
-          </div>
-          <div className="flex flex-col gap-5">
-            <Link href="#" className="hover:text-white transition-colors">Instagram</Link>
-            <Link href="#" className="hover:text-white transition-colors">TikTok</Link>
-            <Link href="#" className="hover:text-white transition-colors">YouTube</Link>
-          </div>
-        </div>
-
-        {/* Right */}
-        <div className="flex flex-col gap-5 text-right">
-          <p>&copy; 2025 Zana Fitness</p>
-          <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-          <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-          <Link href="/refund" className="hover:text-white transition-colors">Refund Policy</Link>
-        </div>
-
-      </footer>
+      <Footer />
     </main>
   );
 }
