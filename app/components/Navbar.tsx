@@ -38,6 +38,9 @@ export default function Navbar({ active }: { active?: "about" | "system" | "faq"
               {l.label}
             </Link>
           ))}
+          <Link href="/login" className="font-mono text-[10px] tracking-[0.2em] uppercase text-gray-300 hover:text-white transition-colors">
+            Log In
+          </Link>
           <Link href="/system" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
             JOIN THE SYSTEM
           </Link>
@@ -67,6 +70,13 @@ export default function Navbar({ active }: { active?: "about" | "system" | "faq"
                 {l.label}
               </Link>
             ))}
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="hover:text-white transition-colors"
+            >
+              Log In
+            </Link>
             <Link
               href="/system"
               onClick={() => setOpen(false)}
