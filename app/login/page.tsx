@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, FormEvent } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 
@@ -12,10 +13,11 @@ const ZIcon = () => (
 );
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(searchParams.get('error') ?? '');
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
