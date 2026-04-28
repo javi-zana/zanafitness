@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { ProfileData } from "./MemberDashboard";
 import { createClient } from "@/utils/supabase/client";
@@ -60,7 +60,7 @@ const INITIAL_PROGRAMS: Program[] = [
   { id: 4, title: "Recovery Science",      phase: "Sleep & Stress Module",   members: 2, avgProgress: 0,  active: false, color: "#f472b6" },
 ];
 
-type CoachTab = "overview" | "members" | "community" | "programs" | "schedule";
+type CoachTab = "overview" | "members" | "community" | "messages" | "programs" | "schedule";
 
 type ContentType = "workout" | "meal_plan" | "instructions" | "video";
 type ContentBlock = {
@@ -877,12 +877,247 @@ function ScheduleTab() {
   );
 }
 
+// ─── Tab: Messages ────────────────────────────────────────────────────────────
+
+type CoachConversation = {
+  id: string; participant_1: string; participant_2: string; last_message_at: string;
+  other: { id: string; name: string; initials: string; color: string; role: string };
+  last_preview: string;
+};
+type CoachDM = { id: string; conversation_id: string; sender_id: string; content: string; created_at: string };
+type CoachMemberProfile = { id: string; name: string; initials: string; color: string; role: string };
+
+function coachDmInitials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function CoachMessagesTab({ userId, userName, userInitials, avatarColor }: {
+  userId: string; userName: string; userInitials: string; avatarColor: string;
+}) {
+  const supabase = createClient();
+  const [convs, setConvs] = useState<CoachConversation[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<CoachDM[]>([]);
+  const [input, setInput] = useState("");
+  const [loadingConvs, setLoadingConvs] = useState(true);
+  const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [allMembers, setAllMembers] = useState<CoachMemberProfile[]>([]);
+  const [search, setSearch] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  const activeConv = convs.find(c => c.id === activeId) ?? null;
+
+  useEffect(() => { if (userId) loadConvs(); }, [userId]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => {
+    if (!activeId) return;
+    loadMessages(activeId);
+    channelRef.current?.unsubscribe();
+    channelRef.current = supabase.channel(`coach-dm-${activeId}`)
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "direct_messages", filter: `conversation_id=eq.${activeId}` },
+        (payload) => {
+          setMessages(prev => [...prev, payload.new as CoachDM]);
+          setConvs(prev => prev.map(c => c.id === activeId ? { ...c, last_preview: (payload.new as CoachDM).content } : c));
+        })
+      .subscribe();
+    return () => { channelRef.current?.unsubscribe(); };
+  }, [activeId]);
+
+  async function loadConvs() {
+    setLoadingConvs(true);
+    const { data: raw } = await supabase.from("conversations").select("*")
+      .or(`participant_1.eq.${userId},participant_2.eq.${userId}`)
+      .order("last_message_at", { ascending: false });
+    if (!raw?.length) { setConvs([]); setLoadingConvs(false); return; }
+    const otherIds = raw.map(c => c.participant_1 === userId ? c.participant_2 : c.participant_1);
+    const { data: profiles } = await supabase.from("profiles").select("id, nickname, email, avatar_color, role").in("id", otherIds);
+    const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]));
+    const { data: lastMsgs } = await supabase.from("direct_messages").select("conversation_id, content")
+      .in("conversation_id", raw.map(c => c.id)).order("created_at", { ascending: false });
+    const previewMap: Record<string, string> = {};
+    for (const m of lastMsgs ?? []) { if (!previewMap[m.conversation_id]) previewMap[m.conversation_id] = m.content; }
+    setConvs(raw.map(c => {
+      const othId = c.participant_1 === userId ? c.participant_2 : c.participant_1;
+      const p = profileMap[othId];
+      const name = p?.nickname || p?.email?.split("@")[0] || "Member";
+      return { ...c, other: { id: othId, name, initials: coachDmInitials(name), color: p?.avatar_color ?? "#b3cdff", role: p?.role ?? "member" }, last_preview: previewMap[c.id] ?? "" };
+    }));
+    setLoadingConvs(false);
+  }
+
+  async function loadMessages(convId: string) {
+    setLoadingMsgs(true);
+    const { data } = await supabase.from("direct_messages").select("*").eq("conversation_id", convId).order("created_at", { ascending: true });
+    setMessages(data ?? []);
+    setLoadingMsgs(false);
+  }
+
+  async function loadMembers() {
+    const { data } = await supabase.from("profiles").select("id, nickname, email, avatar_color, role").neq("id", userId);
+    setAllMembers((data ?? []).map(p => {
+      const name = p.nickname || p.email?.split("@")[0] || "Member";
+      return { id: p.id, name, initials: coachDmInitials(name), color: p.avatar_color ?? "#b3cdff", role: p.role ?? "member" };
+    }));
+  }
+
+  async function openOrCreateConv(otherId: string) {
+    const [p1, p2] = [userId, otherId].sort();
+    const { data: existing } = await supabase.from("conversations").select("id").eq("participant_1", p1).eq("participant_2", p2).maybeSingle();
+    if (existing) { setActiveId(existing.id); }
+    else {
+      const { data: created } = await supabase.from("conversations").insert({ participant_1: p1, participant_2: p2 }).select().single();
+      if (created) { setActiveId(created.id); await loadConvs(); }
+    }
+    setShowPicker(false); setSearch("");
+  }
+
+  async function sendMessage() {
+    const text = input.trim();
+    if (!text || !activeId) return;
+    setInput("");
+    const { data, error } = await supabase.from("direct_messages").insert({ conversation_id: activeId, sender_id: userId, content: text }).select().single();
+    if (!error && data) {
+      setMessages(prev => [...prev, data]);
+      await supabase.from("conversations").update({ last_message_at: new Date().toISOString() }).eq("id", activeId);
+      setConvs(prev => prev.map(c => c.id === activeId ? { ...c, last_preview: text } : c));
+    }
+  }
+
+  const filteredMembers = allMembers.filter(m => m.name.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <div className="max-w-4xl mx-auto h-[calc(100dvh-130px)] md:h-[calc(100dvh-80px)] flex border border-[#2d3a4b] rounded overflow-hidden relative">
+      {/* Conversation list */}
+      <div className={`w-full md:w-72 shrink-0 bg-[#0a0f16] border-r border-[#2d3a4b] flex flex-col ${activeId ? "hidden md:flex" : "flex"}`}>
+        <div className="px-4 py-3.5 border-b border-[#2d3a4b] flex items-center justify-between">
+          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-gray-400">Messages</p>
+          <button onClick={() => { setShowPicker(true); loadMembers(); }}
+            className="font-mono text-[8px] tracking-widest uppercase text-[#b3cdff] hover:text-white transition-colors flex items-center gap-1">
+            <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3v10M3 8h10" strokeLinecap="round" /></svg>New
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {loadingConvs && <div className="flex justify-center py-8"><div className="w-4 h-4 border-2 border-[#b3cdff]/30 border-t-[#b3cdff] rounded-full animate-spin" /></div>}
+          {!loadingConvs && convs.length === 0 && (
+            <div className="text-center py-12 px-4">
+              <p className="font-mono text-[8px] tracking-widest uppercase text-gray-600">No conversations yet</p>
+              <button onClick={() => { setShowPicker(true); loadMembers(); }} className="mt-3 font-mono text-[8px] tracking-widest uppercase text-[#b3cdff] hover:text-white transition-colors">Message a member →</button>
+            </div>
+          )}
+          {convs.map(conv => (
+            <button key={conv.id} onClick={() => setActiveId(conv.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-[#1a222c] ${activeId === conv.id ? "bg-[#b3cdff]/5 border-l-2 border-l-[#b3cdff]" : "hover:bg-[#121821]"}`}>
+              <Avatar initials={conv.other.initials} size="sm" color={conv.other.color} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <p className="text-xs text-white font-medium truncate">{conv.other.name}</p>
+                  {conv.other.role === "member" && <span className="font-mono text-[6px] tracking-widest uppercase px-1.5 py-0.5 rounded-sm bg-[#86efac]/10 text-[#86efac] border border-[#86efac]/30 shrink-0">Member</span>}
+                </div>
+                <p className="font-mono text-[9px] text-gray-500 truncate">{conv.last_preview || "No messages yet"}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Chat view */}
+      <div className={`flex-1 flex flex-col min-w-0 ${!activeId ? "hidden md:flex" : "flex"}`}>
+        {activeConv ? (
+          <>
+            <div className="px-4 py-3.5 border-b border-[#2d3a4b] flex items-center gap-3 bg-[#0a0f16]">
+              <button onClick={() => setActiveId(null)} className="md:hidden text-gray-400 hover:text-white transition-colors mr-1">
+                <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 3L4 8l6 5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </button>
+              <Avatar initials={activeConv.other.initials} size="sm" color={activeConv.other.color} />
+              <div>
+                <p className="text-sm text-white font-medium">{activeConv.other.name}</p>
+                <p className="font-mono text-[8px] tracking-widest uppercase text-[#86efac]">Member</p>
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {loadingMsgs && <div className="flex justify-center py-8"><div className="w-4 h-4 border-2 border-[#b3cdff]/30 border-t-[#b3cdff] rounded-full animate-spin" /></div>}
+              {!loadingMsgs && messages.length === 0 && <div className="text-center py-12"><p className="font-mono text-[8px] tracking-widest uppercase text-gray-600">No messages yet. Start the conversation.</p></div>}
+              {messages.map((msg, i) => {
+                const isMe = msg.sender_id === userId;
+                const prevMsg = messages[i - 1];
+                const showAvatar = !isMe && (!prevMsg || prevMsg.sender_id !== msg.sender_id);
+                return (
+                  <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"}`}>
+                    {!isMe && <div className="w-7 shrink-0">{showAvatar && <Avatar initials={activeConv.other.initials} size="sm" color={activeConv.other.color} />}</div>}
+                    <div className={`max-w-[72%] md:max-w-sm flex flex-col ${isMe ? "items-end" : "items-start"}`}>
+                      <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${isMe ? "bg-[#b3cdff] text-[#0f141b] rounded-br-sm" : "bg-[#1a222c] text-white rounded-bl-sm"}`}>{msg.content}</div>
+                      <p className="font-mono text-[8px] text-gray-600 px-1">{new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}</p>
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={bottomRef} />
+            </div>
+            <div className="p-3 border-t border-[#2d3a4b] flex gap-2 bg-[#0a0f16]">
+              <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                placeholder={`Message ${activeConv.other.name}...`}
+                className="flex-1 bg-[#121821] border border-[#2d3a4b] rounded-full px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+              />
+              <button onClick={sendMessage} disabled={!input.trim()}
+                className="w-10 h-10 rounded-full bg-[#b3cdff] text-[#0f141b] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-40 shrink-0">
+                <svg viewBox="0 0 16 16" className="w-4 h-4 rotate-90" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 1l7 7-7 7M1 8h14" /></svg>
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center flex-col gap-4">
+            <svg viewBox="0 0 48 48" className="w-10 h-10 text-gray-700" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 10h.01M12 10h.01M16 10h.01M9 30H5a2 2 0 01-2-2V8a2 2 0 012-2h38a2 2 0 012 2v20a2 2 0 01-2 2h-8l-8 8v-8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            <p className="font-mono text-[9px] tracking-widest uppercase text-gray-600">Select a conversation</p>
+            <button onClick={() => { setShowPicker(true); loadMembers(); }} className="font-mono text-[8px] tracking-widest uppercase text-[#b3cdff] hover:text-white transition-colors">or message a member →</button>
+          </div>
+        )}
+      </div>
+
+      {/* Member picker */}
+      {showPicker && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.6)" }}>
+          <div className="bg-[#121821] border border-[#2d3a4b] rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#2d3a4b] flex items-center justify-between">
+              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-gray-400">New Message</p>
+              <button onClick={() => { setShowPicker(false); setSearch(""); }} className="text-gray-500 hover:text-white transition-colors">
+                <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 3l10 10M13 3L3 13" strokeLinecap="round" /></svg>
+              </button>
+            </div>
+            <div className="px-4 py-3 border-b border-[#2d3a4b]">
+              <input autoFocus value={search} onChange={e => setSearch(e.target.value)} placeholder="Search members..."
+                className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors" />
+            </div>
+            <div className="max-h-64 overflow-y-auto">
+              {filteredMembers.length === 0 && <p className="font-mono text-[9px] tracking-widest uppercase text-gray-600 text-center py-8">No members found</p>}
+              {filteredMembers.map(m => (
+                <button key={m.id} onClick={() => openOrCreateConv(m.id)}
+                  className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-[#1a222c] transition-colors text-left border-b border-[#1a222c] last:border-0">
+                  <Avatar initials={m.initials} size="sm" color={m.color} />
+                  <div>
+                    <p className="text-sm text-white">{m.name}</p>
+                    <p className="font-mono text-[8px] tracking-widest uppercase text-[#86efac]">Member</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 const NAV: { id: CoachTab; label: string; icon: (active: boolean) => React.ReactNode }[] = [
   { id: "overview",  label: "Overview",  icon: a => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2:1.5} className="w-5 h-5"><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /></svg> },
   { id: "members",   label: "Members",   icon: a => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2:1.5} className="w-5 h-5"><circle cx="9" cy="7" r="4" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" /></svg> },
   { id: "community", label: "Community", icon: a => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2:1.5} className="w-5 h-5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
+  { id: "messages",  label: "Messages",  icon: a => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2:1.5} className="w-5 h-5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="9" cy="10" r="1" fill="currentColor" stroke="none" /><circle cx="12" cy="10" r="1" fill="currentColor" stroke="none" /><circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" /></svg> },
   { id: "programs",  label: "Programs",  icon: a => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2:1.5} className="w-5 h-5"><path d="M4 6h16M4 10h16M4 14h16M4 18h10" strokeLinecap="round" /></svg> },
   { id: "schedule",  label: "Schedule",  icon: a => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={a?2:1.5} className="w-5 h-5"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" /></svg> },
 ];
@@ -963,6 +1198,7 @@ export default function CoachDashboard({ profile }: { profile: ProfileData }) {
           {activeTab === "overview"  && <OverviewTab  coachName={coachName} onTabChange={setActiveTab} />}
           {activeTab === "members"   && <MembersTab coachEmail={coachEmail} />}
           {activeTab === "community" && <CommunityTab coachName={coachName} />}
+          {activeTab === "messages"  && <CoachMessagesTab userId={coachId} userName={coachName} userInitials={initials} avatarColor={avatarColor} />}
           {activeTab === "programs"  && <ProgramsTab coachId={coachId} />}
           {activeTab === "schedule"  && <ScheduleTab />}
         </div>
