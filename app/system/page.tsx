@@ -162,19 +162,19 @@ export default function SystemPage() {
               label="Entry"
               price={500}
               commitment="3-month commitment"
-              variantId={process.env.NEXT_PUBLIC_LS_VARIANT_3M!}
+              variantId="f0300d4c-3b86-4b56-9bd3-767779edbfaf"
             />
             <PlanCard
               label="Committed"
               price={400}
               commitment="6-month commitment"
-              variantId={process.env.NEXT_PUBLIC_LS_VARIANT_6M!}
+              variantId="218015ad-39b5-4d64-9158-c4864fb8038a"
             />
             <PlanCard
               label="All In"
               price={300}
               commitment="12-month commitment"
-              variantId={process.env.NEXT_PUBLIC_LS_VARIANT_12M!}
+              variantId="174b1e98-247a-41e2-bcfe-7ce449e329a7"
               featured
             />
           </div>
