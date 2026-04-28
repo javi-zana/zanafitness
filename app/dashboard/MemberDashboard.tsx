@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
 
@@ -18,58 +18,35 @@ export type ProfileData = {
   bio?: string;
 } | null;
 
-type Tab = "home" | "community" | "programs" | "schedule" | "members" | "ranks";
+type Tab = "home" | "community" | "messages" | "programs" | "schedule" | "members" | "ranks";
 type Category = "All" | "Announcements" | "Check-ins" | "Wins" | "Q&A";
 
 // ─── Mock Data ────────────────────────────────────────────────────────────────
 
 const USER = { name: "Javier", plan: "All In", day: 12, phase: 1, streak: 12, points: 72 };
 
-type Post = {
-  id: number;
-  author: string;
-  initials: string;
-  isCoach: boolean;
-  category: Category;
-  time: string;
+type DBPost = {
+  id: string;
+  user_id: string;
+  author_name: string;
+  is_coach: boolean;
+  category: string;
   content: string;
-  likes: number;
-  comments: number;
-  pinned?: boolean;
+  created_at: string;
+  pinned: boolean;
+  likes_count: number;
+  comments_count: number;
+  liked_by_me: boolean;
 };
 
-const INITIAL_POSTS: Post[] = [
-  {
-    id: 1, author: "Javier Lorenzana", initials: "JL", isCoach: true,
-    category: "Announcements", time: "2h ago",
-    content: "Week 3 check-in is live. Drop your weigh-in + this week's top lift in the comments. Let's see who's ahead of schedule.",
-    likes: 14, comments: 8,
-  },
-  {
-    id: 2, author: "Marcus Chen", initials: "MC", isCoach: false,
-    category: "Wins", time: "5h ago",
-    content: "New bench PR — 185 lbs × 5. Three weeks in and the numbers are moving. Program is no joke.",
-    likes: 31, comments: 6,
-  },
-  {
-    id: 3, author: "Sofia Reyes", initials: "SR", isCoach: false,
-    category: "Check-ins", time: "Yesterday",
-    content: "Week 3 Day 2 complete. Legs were shaking by the end of the Romanian DLs but I didn't stop. First time I've finished a leg day feeling proud.",
-    likes: 22, comments: 4,
-  },
-  {
-    id: 4, author: "Daniel Park", initials: "DP", isCoach: false,
-    category: "Q&A", time: "Yesterday",
-    content: "Question for Javi — on upper body days, should I be hitting failure on every set or leaving 1–2 reps in reserve? Recovery has been slower this week.",
-    likes: 5, comments: 3,
-  },
-  {
-    id: 5, author: "Aiko Tanaka", initials: "AT", isCoach: false,
-    category: "Check-ins", time: "2 days ago",
-    content: "Day 45 done. Still here. Consistency is the whole game.",
-    likes: 38, comments: 9,
-  },
-];
+type DBComment = {
+  id: string;
+  post_id: string;
+  user_id: string;
+  author_name: string;
+  content: string;
+  created_at: string;
+};
 
 const PROGRAMS = [
   {
@@ -159,6 +136,13 @@ function IconCommunity({ active }: { active?: boolean }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.5} className="w-5 h-5">
       <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function IconMessages({ active }: { active?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2 : 1.5} className="w-5 h-5">
+      <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -362,19 +346,49 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
 
 // ─── Tab: Community ───────────────────────────────────────────────────────────
 
-function CommunityTab({ userInitials, userName, avatarColor }: { userInitials: string; userName: string; avatarColor: string }) {
-  const [activeCategory, setActiveCategory] = useState<Category>("All");
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+function postInitials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+function groupPostsByDate(posts: DBPost[]) {
+  const todayMid = new Date(); todayMid.setHours(0, 0, 0, 0);
+  const yestMid = new Date(todayMid); yestMid.setDate(todayMid.getDate() - 1);
+  const groups = new Map<string, DBPost[]>();
+  for (const p of posts) {
+    const d = new Date(p.created_at); d.setHours(0, 0, 0, 0);
+    let label: string;
+    if (d.getTime() === todayMid.getTime()) label = "Today";
+    else if (d.getTime() === yestMid.getTime()) label = "Yesterday";
+    else label = new Date(p.created_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    if (!groups.has(label)) groups.set(label, []);
+    groups.get(label)!.push(p);
+  }
+  return Array.from(groups.entries()).map(([label, ps]) => ({ label, posts: ps }));
+}
+
+function CommunityTab({ userInitials, userName, avatarColor, userId }: {
+  userInitials: string; userName: string; avatarColor: string; userId: string;
+}) {
+  const supabase = createClient();
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [posts, setPosts] = useState<DBPost[]>([]);
   const [composerText, setComposerText] = useState("");
-  const [composerCategory, setComposerCategory] = useState<Category>("Check-ins");
+  const [composerCategory, setComposerCategory] = useState("Check-ins");
   const [showComposer, setShowComposer] = useState(false);
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
-  const [replyingTo, setReplyingTo] = useState<number | null>(null);
-  const [replyText, setReplyText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isCoach, setIsCoach] = useState(false);
+  const [openComments, setOpenComments] = useState<Set<string>>(new Set());
+  const [comments, setComments] = useState<Record<string, DBComment[]>>({});
+  const [replyText, setReplyText] = useState<Record<string, string>>({});
 
-  const categories: Category[] = ["All", "Announcements", "Check-ins", "Wins", "Q&A"];
-  const postCategories: Category[] = ["Check-ins", "Wins", "Q&A"];
-
+  const categories = ["All", "Announcements", "Check-ins", "Wins", "Q&A"];
+  const postCategories = ["Check-ins", "Wins", "Q&A"];
   const categoryColors: Record<string, string> = {
     Announcements: "text-[#b3cdff] bg-[#b3cdff]/10 border-[#b3cdff]/30",
     "Check-ins": "text-[#86efac] bg-[#86efac]/10 border-[#86efac]/30",
@@ -382,47 +396,83 @@ function CommunityTab({ userInitials, userName, avatarColor }: { userInitials: s
     "Q&A": "text-[#f472b6] bg-[#f472b6]/10 border-[#f472b6]/30",
   };
 
-  const filtered = activeCategory === "All" ? posts : posts.filter(p => p.category === activeCategory);
+  useEffect(() => {
+    loadPosts();
+    supabase.from("profiles").select("role").eq("id", userId).single()
+      .then(({ data }) => { if (data?.role === "coach") setIsCoach(true); });
+  }, []);
 
-  const handlePost = () => {
-    if (!composerText.trim()) return;
-    const newPost: Post = {
-      id: Date.now(),
-      author: userName,
-      initials: userInitials,
-      isCoach: false,
-      category: composerCategory,
-      time: "Just now",
-      content: composerText.trim(),
-      likes: 0,
-      comments: 0,
-    };
-    setPosts(prev => [newPost, ...prev]);
-    setComposerText("");
-    setShowComposer(false);
-    setActiveCategory("All");
-  };
+  async function loadPosts() {
+    setLoading(true);
+    const [{ data: rawPosts }, { data: allLikes }, { data: myLikes }, { data: allComments }] = await Promise.all([
+      supabase.from("community_posts").select("*").order("created_at", { ascending: false }),
+      supabase.from("community_likes").select("post_id"),
+      supabase.from("community_likes").select("post_id").eq("user_id", userId),
+      supabase.from("community_comments").select("post_id"),
+    ]);
+    const likeCount: Record<string, number> = {};
+    for (const l of allLikes ?? []) likeCount[l.post_id] = (likeCount[l.post_id] ?? 0) + 1;
+    const myLikeSet = new Set((myLikes ?? []).map(l => l.post_id));
+    const commentCount: Record<string, number> = {};
+    for (const c of allComments ?? []) commentCount[c.post_id] = (commentCount[c.post_id] ?? 0) + 1;
+    setPosts((rawPosts ?? []).map(p => ({
+      ...p,
+      likes_count: likeCount[p.id] ?? 0,
+      comments_count: commentCount[p.id] ?? 0,
+      liked_by_me: myLikeSet.has(p.id),
+    })));
+    setLoading(false);
+  }
 
-  const toggleLike = (postId: number) => {
-    setLikedPosts(prev => {
+  async function handlePost() {
+    if (!composerText.trim() || !userId) return;
+    const { data, error } = await supabase.from("community_posts").insert({
+      user_id: userId, author_name: userName, is_coach: isCoach,
+      category: composerCategory, content: composerText.trim(),
+    }).select().single();
+    if (!error && data) {
+      setPosts(prev => [{ ...data, likes_count: 0, comments_count: 0, liked_by_me: false }, ...prev]);
+      setComposerText(""); setShowComposer(false);
+    }
+  }
+
+  async function toggleLike(postId: string, liked: boolean) {
+    if (liked) {
+      await supabase.from("community_likes").delete().eq("post_id", postId).eq("user_id", userId);
+      setPosts(ps => ps.map(p => p.id === postId ? { ...p, likes_count: p.likes_count - 1, liked_by_me: false } : p));
+    } else {
+      await supabase.from("community_likes").insert({ post_id: postId, user_id: userId });
+      setPosts(ps => ps.map(p => p.id === postId ? { ...p, likes_count: p.likes_count + 1, liked_by_me: true } : p));
+    }
+  }
+
+  async function toggleComments(postId: string) {
+    setOpenComments(prev => {
       const next = new Set(prev);
-      if (next.has(postId)) {
-        next.delete(postId);
-        setPosts(ps => ps.map(p => p.id === postId ? { ...p, likes: p.likes - 1 } : p));
-      } else {
-        next.add(postId);
-        setPosts(ps => ps.map(p => p.id === postId ? { ...p, likes: p.likes + 1 } : p));
-      }
+      next.has(postId) ? next.delete(postId) : next.add(postId);
       return next;
     });
-  };
+    if (comments[postId] !== undefined) return;
+    const { data } = await supabase.from("community_comments").select("*")
+      .eq("post_id", postId).order("created_at", { ascending: true });
+    setComments(prev => ({ ...prev, [postId]: data ?? [] }));
+  }
 
-  const submitReply = (postId: number) => {
-    if (!replyText.trim()) return;
-    setPosts(ps => ps.map(p => p.id === postId ? { ...p, comments: p.comments + 1 } : p));
-    setReplyText("");
-    setReplyingTo(null);
-  };
+  async function submitComment(postId: string) {
+    const text = (replyText[postId] ?? "").trim();
+    if (!text) return;
+    const { data, error } = await supabase.from("community_comments").insert({
+      post_id: postId, user_id: userId, author_name: userName, content: text,
+    }).select().single();
+    if (!error && data) {
+      setComments(prev => ({ ...prev, [postId]: [...(prev[postId] ?? []), data] }));
+      setPosts(ps => ps.map(p => p.id === postId ? { ...p, comments_count: p.comments_count + 1 } : p));
+      setReplyText(prev => ({ ...prev, [postId]: "" }));
+    }
+  }
+
+  const filtered = activeCategory === "All" ? posts : posts.filter(p => p.category === activeCategory);
+  const grouped = groupPostsByDate(filtered);
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
@@ -444,43 +494,30 @@ function CommunityTab({ userInitials, userName, avatarColor }: { userInitials: s
             <span className="text-sm text-white">{userName}</span>
           </div>
           <textarea
-            autoFocus
-            value={composerText}
-            onChange={e => setComposerText(e.target.value)}
-            placeholder="What's on your mind?"
-            rows={3}
+            autoFocus value={composerText} onChange={e => setComposerText(e.target.value)}
+            placeholder="What's on your mind?" rows={3}
             className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors resize-none font-light leading-relaxed"
           />
           <div className="flex items-center justify-between gap-3">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {postCategories.map(c => (
-                <button
-                  key={c}
-                  onClick={() => setComposerCategory(c)}
-                  className={`shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 rounded border transition-colors ${
-                    composerCategory === c
-                      ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]"
-                      : "text-gray-400 border-[#2d3a4b] hover:text-white"
-                  }`}
-                >
-                  {c}
-                </button>
+                <button key={c} onClick={() => setComposerCategory(c)}
+                  className={`shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 rounded border transition-colors ${composerCategory === c ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]" : "text-gray-400 border-[#2d3a4b] hover:text-white"}`}
+                >{c}</button>
               ))}
+              {isCoach && (
+                <button onClick={() => setComposerCategory("Announcements")}
+                  className={`shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 rounded border transition-colors ${composerCategory === "Announcements" ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]" : "text-gray-400 border-[#2d3a4b] hover:text-white"}`}
+                >Announcement</button>
+              )}
             </div>
             <div className="flex gap-2 shrink-0">
-              <button
-                onClick={() => { setShowComposer(false); setComposerText(""); }}
+              <button onClick={() => { setShowComposer(false); setComposerText(""); }}
                 className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#2d3a4b] text-gray-400 rounded hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePost}
-                disabled={!composerText.trim()}
+              >Cancel</button>
+              <button onClick={handlePost} disabled={!composerText.trim()}
                 className="font-mono text-[8px] tracking-widest uppercase px-4 py-2 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Post
-              </button>
+              >Post</button>
             </div>
           </div>
         </div>
@@ -489,87 +526,464 @@ function CommunityTab({ userInitials, userName, avatarColor }: { userInitials: s
       {/* Category filters */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {categories.map(c => (
-          <button
-            key={c}
-            onClick={() => setActiveCategory(c)}
-            className={`shrink-0 font-mono text-[8px] tracking-[0.2em] uppercase px-3 py-2 rounded border transition-colors ${
-              activeCategory === c
-                ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]"
-                : "text-gray-400 border-[#2d3a4b] bg-[#121821] hover:border-[#b3cdff]/30 hover:text-white"
-            }`}
-          >
-            {c}
-          </button>
+          <button key={c} onClick={() => setActiveCategory(c)}
+            className={`shrink-0 font-mono text-[8px] tracking-[0.2em] uppercase px-3 py-2 rounded border transition-colors ${activeCategory === c ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]" : "text-gray-400 border-[#2d3a4b] bg-[#121821] hover:border-[#b3cdff]/30 hover:text-white"}`}
+          >{c}</button>
         ))}
       </div>
 
-      {/* Posts */}
-      {filtered.map(post => (
-        <div key={post.id} className="bg-[#121821] border border-[#2d3a4b] rounded p-5 transition-colors">
-          <div className="flex items-start gap-3 mb-4">
-            <Avatar initials={post.initials} size="md" online={post.isCoach ? true : undefined} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-medium text-white">{post.author}</span>
-                {post.isCoach && (
-                  <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">
-                    Coach
-                  </span>
-                )}
-                <span className={`font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm border ${categoryColors[post.category]}`}>
-                  {post.category}
-                </span>
+      {loading && (
+        <div className="flex justify-center py-12">
+          <div className="w-5 h-5 border-2 border-[#b3cdff]/30 border-t-[#b3cdff] rounded-full animate-spin" />
+        </div>
+      )}
+
+      {!loading && posts.length === 0 && (
+        <div className="text-center py-16">
+          <p className="font-mono text-[9px] tracking-widest uppercase text-gray-600">No posts yet. Be the first.</p>
+        </div>
+      )}
+
+      {/* Posts grouped by date */}
+      {grouped.map(group => (
+        <div key={group.label} className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-[#2d3a4b]" />
+            <span className="font-mono text-[8px] tracking-widest uppercase text-gray-500 shrink-0">{group.label}</span>
+            <div className="flex-1 h-px bg-[#2d3a4b]" />
+          </div>
+
+          {group.posts.map(post => {
+            const isAnnouncement = post.category === "Announcements";
+            const commentsOpen = openComments.has(post.id);
+            const postComments = comments[post.id] ?? [];
+            return (
+              <div key={post.id} className={`border rounded overflow-hidden transition-colors ${isAnnouncement ? "bg-[#131b2e] border-[#b3cdff]/25" : "bg-[#121821] border-[#2d3a4b]"}`}>
+                {isAnnouncement && <div className="h-px w-full bg-[#b3cdff]/40" />}
+                <div className="p-5">
+                  <div className="flex items-start gap-3 mb-4">
+                    <Avatar initials={postInitials(post.author_name)} size="md" online={post.is_coach ? true : undefined} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-white">{post.author_name}</span>
+                        {post.is_coach && (
+                          <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">Coach</span>
+                        )}
+                        <span className={`font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm border ${categoryColors[post.category] ?? ""}`}>
+                          {post.category}
+                        </span>
+                      </div>
+                      <p className="font-mono text-[9px] text-gray-500 mt-0.5">{formatTime(post.created_at)}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-gray-300 leading-relaxed mb-4">{post.content}</p>
+
+                  <div className="flex items-center gap-5 pt-3 border-t border-[#1a222c]">
+                    <button onClick={() => toggleLike(post.id, post.liked_by_me)}
+                      className={`flex items-center gap-1.5 font-mono text-[9px] transition-colors uppercase tracking-widest ${post.liked_by_me ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"}`}
+                    >
+                      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill={post.liked_by_me ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
+                        <path d="M8 2.667L9.667 6H14l-3.333 2.667L12 13.333 8 10.667 4 13.333l1.333-4.666L2 6h4.333L8 2.667z" />
+                      </svg>
+                      {post.likes_count}
+                    </button>
+                    <button onClick={() => toggleComments(post.id)}
+                      className={`flex items-center gap-1.5 font-mono text-[9px] transition-colors uppercase tracking-widest ${commentsOpen ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"}`}
+                    >
+                      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M14 10a2 2 0 01-2 2H4l-2 2V4a2 2 0 012-2h8a2 2 0 012 2v6z" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      {post.comments_count}
+                    </button>
+                  </div>
+
+                  {commentsOpen && (
+                    <div className="mt-4 space-y-3 pt-3 border-t border-[#1a222c]">
+                      {postComments.map(comment => (
+                        <div key={comment.id} className="flex gap-2.5">
+                          <Avatar initials={postInitials(comment.author_name)} size="sm" />
+                          <div className="flex-1 bg-[#0f141b] rounded px-3 py-2.5">
+                            <div className="flex items-baseline gap-2 mb-1">
+                              <span className="text-xs font-medium text-white">{comment.author_name}</span>
+                              <span className="font-mono text-[8px] text-gray-600">{formatTime(comment.created_at)}</span>
+                            </div>
+                            <p className="text-xs text-gray-300 leading-relaxed">{comment.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="flex gap-2 pt-1">
+                        <Avatar initials={userInitials} size="sm" color={avatarColor} />
+                        <input
+                          value={replyText[post.id] ?? ""}
+                          onChange={e => setReplyText(prev => ({ ...prev, [post.id]: e.target.value }))}
+                          onKeyDown={e => e.key === "Enter" && submitComment(post.id)}
+                          placeholder="Write a reply..."
+                          className="flex-1 bg-[#0f141b] border border-[#2d3a4b] rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+                        />
+                        <button onClick={() => submitComment(post.id)} disabled={!(replyText[post.id] ?? "").trim()}
+                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
+                        >Reply</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="font-mono text-[9px] text-gray-500 mt-0.5">{post.time}</p>
-            </div>
-          </div>
-          <p className="text-sm text-gray-300 leading-relaxed mb-4">{post.content}</p>
-          <div className="flex items-center gap-5 pt-3 border-t border-[#1a222c]">
-            <button
-              onClick={() => toggleLike(post.id)}
-              className={`flex items-center gap-1.5 font-mono text-[9px] transition-colors uppercase tracking-widest ${
-                likedPosts.has(post.id) ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"
-              }`}
-            >
-              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill={likedPosts.has(post.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
-                <path d="M8 2.667L9.667 6H14l-3.333 2.667L12 13.333 8 10.667 4 13.333l1.333-4.666L2 6h4.333L8 2.667z" />
-              </svg>
-              {post.likes}
-            </button>
-            <button
-              onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}
-              className={`flex items-center gap-1.5 font-mono text-[9px] transition-colors uppercase tracking-widest ${
-                replyingTo === post.id ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"
-              }`}
-            >
-              <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <path d="M14 10a2 2 0 01-2 2H4l-2 2V4a2 2 0 012-2h8a2 2 0 012 2v6z" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              {post.comments}
-            </button>
-          </div>
-          {/* Inline reply */}
-          {replyingTo === post.id && (
-            <div className="mt-3 flex gap-2">
-              <input
-                autoFocus
-                value={replyText}
-                onChange={e => setReplyText(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && submitReply(post.id)}
-                placeholder="Write a reply..."
-                className="flex-1 bg-[#0f141b] border border-[#2d3a4b] rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
-              />
-              <button
-                onClick={() => submitReply(post.id)}
-                disabled={!replyText.trim()}
-                className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
-              >
-                Reply
-              </button>
-            </div>
-          )}
+            );
+          })}
         </div>
       ))}
+    </div>
+  );
+}
+
+// ─── Tab: Messages ────────────────────────────────────────────────────────────
+
+type Conversation = {
+  id: string;
+  participant_1: string;
+  participant_2: string;
+  last_message_at: string;
+  other: { id: string; name: string; initials: string; color: string; role: string };
+  last_preview: string;
+};
+
+type DM = {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+};
+
+type MemberProfile = {
+  id: string;
+  name: string;
+  initials: string;
+  color: string;
+  role: string;
+};
+
+function dmInitials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function MessagesTab({ userId, userName, userInitials, avatarColor }: {
+  userId: string; userName: string; userInitials: string; avatarColor: string;
+}) {
+  const supabase = createClient();
+  const [convs, setConvs] = useState<Conversation[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<DM[]>([]);
+  const [input, setInput] = useState("");
+  const [loadingConvs, setLoadingConvs] = useState(true);
+  const [loadingMsgs, setLoadingMsgs] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [allMembers, setAllMembers] = useState<MemberProfile[]>([]);
+  const [search, setSearch] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  const activeConv = convs.find(c => c.id === activeId) ?? null;
+
+  useEffect(() => {
+    if (!userId) return;
+    loadConvs();
+  }, [userId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    if (!activeId) return;
+    loadMessages(activeId);
+    channelRef.current?.unsubscribe();
+    channelRef.current = supabase
+      .channel(`dm-${activeId}`)
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "direct_messages",
+        filter: `conversation_id=eq.${activeId}`,
+      }, (payload) => {
+        setMessages(prev => [...prev, payload.new as DM]);
+        setConvs(prev => prev.map(c =>
+          c.id === activeId ? { ...c, last_preview: (payload.new as DM).content, last_message_at: (payload.new as DM).created_at } : c
+        ));
+      })
+      .subscribe();
+    return () => { channelRef.current?.unsubscribe(); };
+  }, [activeId]);
+
+  async function loadConvs() {
+    setLoadingConvs(true);
+    const { data: raw } = await supabase
+      .from("conversations")
+      .select("*")
+      .or(`participant_1.eq.${userId},participant_2.eq.${userId}`)
+      .order("last_message_at", { ascending: false });
+
+    if (!raw?.length) { setConvs([]); setLoadingConvs(false); return; }
+
+    const otherIds = raw.map(c => c.participant_1 === userId ? c.participant_2 : c.participant_1);
+    const { data: profiles } = await supabase
+      .from("profiles").select("id, nickname, email, avatar_color, role").in("id", otherIds);
+    const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]));
+
+    const convIds = raw.map(c => c.id);
+    const { data: lastMsgs } = await supabase
+      .from("direct_messages").select("conversation_id, content")
+      .in("conversation_id", convIds).order("created_at", { ascending: false });
+    const previewMap: Record<string, string> = {};
+    for (const m of lastMsgs ?? []) {
+      if (!previewMap[m.conversation_id]) previewMap[m.conversation_id] = m.content;
+    }
+
+    setConvs(raw.map(c => {
+      const othId = c.participant_1 === userId ? c.participant_2 : c.participant_1;
+      const p = profileMap[othId];
+      const name = p?.nickname || p?.email?.split("@")[0] || "Member";
+      return { ...c, other: { id: othId, name, initials: dmInitials(name), color: p?.avatar_color ?? "#b3cdff", role: p?.role ?? "member" }, last_preview: previewMap[c.id] ?? "" };
+    }));
+    setLoadingConvs(false);
+  }
+
+  async function loadMessages(convId: string) {
+    setLoadingMsgs(true);
+    const { data } = await supabase
+      .from("direct_messages").select("*")
+      .eq("conversation_id", convId).order("created_at", { ascending: true });
+    setMessages(data ?? []);
+    setLoadingMsgs(false);
+  }
+
+  async function loadMembers() {
+    const { data } = await supabase
+      .from("profiles").select("id, nickname, email, avatar_color, role").neq("id", userId);
+    setAllMembers((data ?? []).map(p => {
+      const name = p.nickname || p.email?.split("@")[0] || "Member";
+      return { id: p.id, name, initials: dmInitials(name), color: p.avatar_color ?? "#b3cdff", role: p.role ?? "member" };
+    }));
+  }
+
+  async function openOrCreateConv(otherId: string) {
+    const [p1, p2] = [userId, otherId].sort();
+    const { data: existing } = await supabase
+      .from("conversations").select("id")
+      .eq("participant_1", p1).eq("participant_2", p2).maybeSingle();
+    if (existing) {
+      setActiveId(existing.id);
+    } else {
+      const { data: created } = await supabase
+        .from("conversations").insert({ participant_1: p1, participant_2: p2 })
+        .select().single();
+      if (created) { setActiveId(created.id); await loadConvs(); }
+    }
+    setShowPicker(false); setSearch("");
+  }
+
+  async function sendMessage() {
+    const text = input.trim();
+    if (!text || !activeId) return;
+    setInput("");
+    const { data, error } = await supabase
+      .from("direct_messages")
+      .insert({ conversation_id: activeId, sender_id: userId, content: text })
+      .select().single();
+    if (!error && data) {
+      setMessages(prev => [...prev, data]);
+      await supabase.from("conversations")
+        .update({ last_message_at: new Date().toISOString() }).eq("id", activeId);
+      setConvs(prev => prev.map(c => c.id === activeId ? { ...c, last_preview: text } : c));
+    }
+  }
+
+  const filteredMembers = allMembers.filter(m =>
+    m.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="max-w-4xl mx-auto h-[calc(100dvh-130px)] md:h-[calc(100dvh-80px)] flex border border-[#2d3a4b] rounded overflow-hidden relative">
+
+      {/* ── Conversation list ── */}
+      <div className={`w-full md:w-72 shrink-0 bg-[#0a0f16] border-r border-[#2d3a4b] flex flex-col ${activeId ? "hidden md:flex" : "flex"}`}>
+        <div className="px-4 py-3.5 border-b border-[#2d3a4b] flex items-center justify-between">
+          <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-gray-400">Messages</p>
+          <button
+            onClick={() => { setShowPicker(true); loadMembers(); }}
+            className="font-mono text-[8px] tracking-widest uppercase text-[#b3cdff] hover:text-white transition-colors flex items-center gap-1"
+          >
+            <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M8 3v10M3 8h10" strokeLinecap="round" />
+            </svg>
+            New
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto">
+          {loadingConvs && (
+            <div className="flex justify-center py-8">
+              <div className="w-4 h-4 border-2 border-[#b3cdff]/30 border-t-[#b3cdff] rounded-full animate-spin" />
+            </div>
+          )}
+          {!loadingConvs && convs.length === 0 && (
+            <div className="text-center py-12 px-4">
+              <p className="font-mono text-[8px] tracking-widest uppercase text-gray-600">No conversations yet</p>
+              <button onClick={() => { setShowPicker(true); loadMembers(); }}
+                className="mt-3 font-mono text-[8px] tracking-widest uppercase text-[#b3cdff] hover:text-white transition-colors"
+              >Start one →</button>
+            </div>
+          )}
+          {convs.map(conv => (
+            <button
+              key={conv.id}
+              onClick={() => setActiveId(conv.id)}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-[#1a222c] ${activeId === conv.id ? "bg-[#b3cdff]/5 border-l-2 border-l-[#b3cdff]" : "hover:bg-[#121821]"}`}
+            >
+              <Avatar initials={conv.other.initials} size="sm" color={conv.other.color} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <p className="text-xs text-white font-medium truncate">{conv.other.name}</p>
+                  {conv.other.role === "coach" && (
+                    <span className="font-mono text-[6px] tracking-widest uppercase px-1.5 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30 shrink-0">Coach</span>
+                  )}
+                </div>
+                <p className="font-mono text-[9px] text-gray-500 truncate">{conv.last_preview || "No messages yet"}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Chat view ── */}
+      <div className={`flex-1 flex flex-col min-w-0 ${!activeId ? "hidden md:flex" : "flex"}`}>
+        {activeConv ? (
+          <>
+            {/* Chat header */}
+            <div className="px-4 py-3.5 border-b border-[#2d3a4b] flex items-center gap-3 bg-[#0a0f16]">
+              <button onClick={() => setActiveId(null)} className="md:hidden text-gray-400 hover:text-white transition-colors mr-1">
+                <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10 3L4 8l6 5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <Avatar initials={activeConv.other.initials} size="sm" color={activeConv.other.color} />
+              <div>
+                <p className="text-sm text-white font-medium">{activeConv.other.name}</p>
+                {activeConv.other.role === "coach" && (
+                  <p className="font-mono text-[8px] tracking-widest uppercase text-[#b3cdff]">Coach</p>
+                )}
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {loadingMsgs && (
+                <div className="flex justify-center py-8">
+                  <div className="w-4 h-4 border-2 border-[#b3cdff]/30 border-t-[#b3cdff] rounded-full animate-spin" />
+                </div>
+              )}
+              {!loadingMsgs && messages.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="font-mono text-[8px] tracking-widest uppercase text-gray-600">No messages yet. Say something.</p>
+                </div>
+              )}
+              {messages.map((msg, i) => {
+                const isMe = msg.sender_id === userId;
+                const prevMsg = messages[i - 1];
+                const showAvatar = !isMe && (!prevMsg || prevMsg.sender_id !== msg.sender_id);
+                return (
+                  <div key={msg.id} className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"}`}>
+                    {!isMe && (
+                      <div className="w-7 shrink-0">
+                        {showAvatar && <Avatar initials={activeConv.other.initials} size="sm" color={activeConv.other.color} />}
+                      </div>
+                    )}
+                    <div className={`max-w-[72%] md:max-w-sm space-y-0.5 ${isMe ? "items-end" : "items-start"} flex flex-col`}>
+                      <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${isMe ? "bg-[#b3cdff] text-[#0f141b] rounded-br-sm" : "bg-[#1a222c] text-white rounded-bl-sm"}`}>
+                        {msg.content}
+                      </div>
+                      <p className="font-mono text-[8px] text-gray-600 px-1">
+                        {new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+              <div ref={bottomRef} />
+            </div>
+
+            {/* Input */}
+            <div className="p-3 border-t border-[#2d3a4b] flex gap-2 bg-[#0a0f16]">
+              <input
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                placeholder={`Message ${activeConv.other.name}...`}
+                className="flex-1 bg-[#121821] border border-[#2d3a4b] rounded-full px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+              />
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim()}
+                className="w-10 h-10 rounded-full bg-[#b3cdff] text-[#0f141b] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              >
+                <svg viewBox="0 0 16 16" className="w-4 h-4 rotate-90" fill="currentColor">
+                  <path d="M8 1l7 7-7 7M1 8h14" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center flex-col gap-4">
+            <svg viewBox="0 0 48 48" className="w-10 h-10 text-gray-700" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M8 10h.01M12 10h.01M16 10h.01M9 30H5a2 2 0 01-2-2V8a2 2 0 012-2h38a2 2 0 012 2v20a2 2 0 01-2 2h-8l-8 8v-8z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <p className="font-mono text-[9px] tracking-widest uppercase text-gray-600">Select a conversation</p>
+            <button onClick={() => { setShowPicker(true); loadMembers(); }}
+              className="font-mono text-[8px] tracking-widest uppercase text-[#b3cdff] hover:text-white transition-colors"
+            >or start a new one →</button>
+          </div>
+        )}
+      </div>
+
+      {/* ── New DM picker overlay ── */}
+      {showPicker && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.6)" }}>
+          <div className="bg-[#121821] border border-[#2d3a4b] rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#2d3a4b] flex items-center justify-between">
+              <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-gray-400">New Message</p>
+              <button onClick={() => { setShowPicker(false); setSearch(""); }} className="text-gray-500 hover:text-white transition-colors">
+                <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 3l10 10M13 3L3 13" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-4 py-3 border-b border-[#2d3a4b]">
+              <input
+                autoFocus value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search members..."
+                className="w-full bg-[#0f141b] border border-[#2d3a4b] rounded px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+              />
+            </div>
+            <div className="max-h-64 overflow-y-auto">
+              {filteredMembers.length === 0 && (
+                <p className="font-mono text-[9px] tracking-widest uppercase text-gray-600 text-center py-8">No members found</p>
+              )}
+              {filteredMembers.map(m => (
+                <button key={m.id} onClick={() => openOrCreateConv(m.id)}
+                  className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-[#1a222c] transition-colors text-left border-b border-[#1a222c] last:border-0"
+                >
+                  <Avatar initials={m.initials} size="sm" color={m.color} />
+                  <div>
+                    <p className="text-sm text-white">{m.name}</p>
+                    {m.role === "coach" && <p className="font-mono text-[8px] tracking-widest uppercase text-[#b3cdff]">Coach</p>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -734,69 +1148,204 @@ function ScheduleTab() {
     "1:1": "text-[#b3cdff] border-[#b3cdff]/30 bg-[#b3cdff]/10",
     PROGRAM: "text-[#fbbf24] border-[#fbbf24]/30 bg-[#fbbf24]/10",
   };
+  const tagDotColors: Record<string, string> = {
+    LIVE: "bg-[#86efac]", DEADLINE: "bg-[#f87171]", "1:1": "bg-[#b3cdff]", PROGRAM: "bg-[#fbbf24]",
+  };
+
+  const todayRef = new Date();
+  todayRef.setHours(0, 0, 0, 0);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date(todayRef));
+
+  function getWeekStart(offset: number): Date {
+    const d = new Date(todayRef);
+    const dow = d.getDay();
+    const diff = dow === 0 ? -6 : 1 - dow;
+    d.setDate(d.getDate() + diff + offset * 7);
+    return d;
+  }
+
+  const weekStart = getWeekStart(weekOffset);
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate() + i);
+    return d;
+  });
+  const weekEnd = weekDays[6];
+
+  function parseEventDate(dateStr: string): Date {
+    const comma = dateStr.indexOf(",");
+    const rest = comma >= 0 ? dateStr.slice(comma + 2) : dateStr;
+    return new Date(`${rest}, 2026`);
+  }
+
+  function isSameDay(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
+  }
+
+  function eventsOnDay(date: Date) {
+    return EVENTS.filter(e => isSameDay(parseEventDate(e.date), date));
+  }
+
+  const fmt = (d: Date, opts: Intl.DateTimeFormatOptions) =>
+    d.toLocaleDateString("en-US", opts);
+
+  const weekLabel = `${fmt(weekStart, { month: "short", day: "numeric" })} – ${fmt(weekEnd, { month: "short", day: "numeric" })}`;
+
+  const displayedEvents = selectedDate
+    ? EVENTS.filter(e => isSameDay(parseEventDate(e.date), selectedDate))
+    : EVENTS;
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       <div>
-        <p className="font-mono text-[8px] tracking-[0.3em] text-gray-500 uppercase mb-1">Upcoming</p>
-        <h2 className="text-lg font-light tracking-[0.12em] uppercase text-white">Schedule</h2>
+        <p className="font-mono text-[8px] tracking-[0.3em] text-gray-500 uppercase mb-1">Schedule</p>
+        <h2 className="text-lg font-light tracking-[0.12em] uppercase text-white">This Week</h2>
       </div>
 
+      {/* ── Weekly calendar ── */}
+      <div className="bg-[#121821] border border-[#2d3a4b] rounded overflow-hidden">
+        {/* Week navigation */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[#2d3a4b]">
+          <button
+            onClick={() => setWeekOffset(w => w - 1)}
+            className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white transition-colors rounded hover:bg-[#1a222c]"
+          >
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M10 3L5 8l5 5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <div className="flex items-center gap-2">
+            <p className="font-mono text-[9px] tracking-widest text-gray-300 uppercase">{weekLabel}</p>
+            {weekOffset !== 0 && (
+              <button
+                onClick={() => { setWeekOffset(0); setSelectedDate(new Date(todayRef)); }}
+                className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/20 hover:bg-[#b3cdff]/20 transition-colors"
+              >Today</button>
+            )}
+          </div>
+          <button
+            onClick={() => setWeekOffset(w => w + 1)}
+            className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white transition-colors rounded hover:bg-[#1a222c]"
+          >
+            <svg viewBox="0 0 16 16" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 3l5 5-5 5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Day columns */}
+        <div className="grid grid-cols-7 p-3 gap-1">
+          {["M", "T", "W", "T", "F", "S", "S"].map((label, i) => {
+            const date = weekDays[i];
+            const isToday = isSameDay(date, todayRef);
+            const isSelected = selectedDate ? isSameDay(date, selectedDate) : false;
+            const isPast = date < todayRef;
+            const dayEvents = eventsOnDay(date);
+
+            return (
+              <button
+                key={i}
+                onClick={() => setSelectedDate(isSelected ? null : date)}
+                className={`flex flex-col items-center gap-1 py-3 rounded-lg transition-all ${
+                  isSelected
+                    ? "bg-[#b3cdff] text-[#0f141b]"
+                    : isToday
+                    ? "bg-[#b3cdff]/10 border border-[#b3cdff]/30 text-[#b3cdff]"
+                    : isPast
+                    ? "text-gray-600 hover:bg-[#1a222c] hover:text-gray-400"
+                    : "text-gray-400 hover:bg-[#1a222c] hover:text-white"
+                }`}
+              >
+                <span className="font-mono text-[8px] tracking-widest uppercase">{label}</span>
+                <span className={`text-sm leading-none ${isSelected ? "font-semibold" : "font-light"}`}>
+                  {date.getDate()}
+                </span>
+                <div className="flex gap-0.5 min-h-[6px] items-center">
+                  {dayEvents.slice(0, 3).map((e, j) => (
+                    <span
+                      key={j}
+                      className={`w-1 h-1 rounded-full ${isSelected ? "bg-[#0f141b]/50" : tagDotColors[e.tag] ?? "bg-gray-500"}`}
+                    />
+                  ))}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Recurring note */}
       <div className="bg-[#121821] border border-[#2d3a4b] rounded p-4 font-mono text-[9px] text-gray-400 tracking-wide">
         <span className="text-[#b3cdff]">Every Thursday — </span>
         Group Coaching Call with Javier. 7:00 PM Manila time.
       </div>
 
-      <div className="space-y-3">
-        {EVENTS.map(event => (
-          <div key={event.id} className="bg-[#121821] border border-[#2d3a4b] rounded p-5 flex items-start gap-4 hover:border-[#2d3a4b]/80 transition-colors">
-            <div className="text-center min-w-[48px]">
-              <p className="font-mono text-[8px] text-gray-500 uppercase tracking-widest leading-tight">
-                {event.date.split(",")[0]}
-              </p>
-              <p className="font-mono text-lg font-light text-white leading-tight">
-                {event.date.split(" ")[1]}
-              </p>
-              <p className="font-mono text-[8px] text-gray-500 uppercase leading-tight">
-                {event.date.split(" ")[2]}
-              </p>
-            </div>
+      {/* Events for selected day or all upcoming */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="font-mono text-[8px] tracking-[0.3em] text-gray-500 uppercase">
+            {selectedDate
+              ? fmt(selectedDate, { weekday: "long", month: "long", day: "numeric" })
+              : "Upcoming"}
+          </p>
+          {selectedDate && (
+            <button
+              onClick={() => setSelectedDate(null)}
+              className="font-mono text-[7px] tracking-widest uppercase text-gray-500 hover:text-white transition-colors"
+            >Show all</button>
+          )}
+        </div>
 
-            <div className="w-px self-stretch bg-[#2d3a4b] mx-1" />
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                <span className={`font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 border rounded-sm ${tagColors[event.tag]}`}>
-                  {event.tag}
-                </span>
-              </div>
-              <h3 className="text-sm font-light tracking-wide text-white mb-0.5">{event.title}</h3>
-              {event.host && (
-                <p className="font-mono text-[9px] text-gray-500">with {event.host}</p>
-              )}
-              <p className="font-mono text-[9px] text-gray-500 mt-0.5">{event.time}</p>
-            </div>
-
-            {event.tag === "LIVE" && event.meetUrl && (
-              <a
-                href={event.meetUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#86efac]/30 text-[#86efac] rounded hover:bg-[#86efac]/10 transition-colors"
-              >
-                Join
-              </a>
-            )}
-            {event.tag === "1:1" && (
-              <a
-                href="mailto:me@javilorenzana.com?subject=1:1 Progress Review Request"
-                className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#b3cdff]/30 text-[#b3cdff] rounded hover:bg-[#b3cdff]/10 transition-colors"
-              >
-                Book
-              </a>
-            )}
+        {displayedEvents.length === 0 ? (
+          <div className="bg-[#121821] border border-[#2d3a4b] rounded p-10 text-center">
+            <p className="font-mono text-[9px] tracking-widest uppercase text-gray-600">Nothing scheduled</p>
           </div>
-        ))}
+        ) : (
+          <div className="space-y-3">
+            {displayedEvents.map(event => (
+              <div key={event.id} className="bg-[#121821] border border-[#2d3a4b] rounded p-5 flex items-start gap-4 hover:border-[#2d3a4b]/80 transition-colors">
+                <div className="text-center min-w-[48px]">
+                  <p className="font-mono text-[8px] text-gray-500 uppercase tracking-widest leading-tight">
+                    {event.date.split(",")[0]}
+                  </p>
+                  <p className="font-mono text-lg font-light text-white leading-tight">
+                    {event.date.split(" ")[1]}
+                  </p>
+                  <p className="font-mono text-[8px] text-gray-500 uppercase leading-tight">
+                    {event.date.split(" ")[2]}
+                  </p>
+                </div>
+
+                <div className="w-px self-stretch bg-[#2d3a4b] mx-1" />
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className={`font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 border rounded-sm ${tagColors[event.tag]}`}>
+                      {event.tag}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-light tracking-wide text-white mb-0.5">{event.title}</h3>
+                  {event.host && <p className="font-mono text-[9px] text-gray-500">with {event.host}</p>}
+                  <p className="font-mono text-[9px] text-gray-500 mt-0.5">{event.time}</p>
+                </div>
+
+                {event.tag === "LIVE" && event.meetUrl && (
+                  <a href={event.meetUrl} target="_blank" rel="noopener noreferrer"
+                    className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#86efac]/30 text-[#86efac] rounded hover:bg-[#86efac]/10 transition-colors"
+                  >Join</a>
+                )}
+                {event.tag === "1:1" && (
+                  <a href="mailto:me@javilorenzana.com?subject=1:1 Progress Review Request"
+                    className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#b3cdff]/30 text-[#b3cdff] rounded hover:bg-[#b3cdff]/10 transition-colors"
+                  >Book</a>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -945,6 +1494,7 @@ function RanksTab() {
 const NAV_ITEMS: { id: Tab; label: string; icon: (props: { active?: boolean }) => JSX.Element }[] = [
   { id: "home", label: "Home", icon: IconHome },
   { id: "community", label: "Community", icon: IconCommunity },
+  { id: "messages", label: "Messages", icon: IconMessages },
   { id: "programs", label: "Programs", icon: IconPrograms },
   { id: "schedule", label: "Schedule", icon: IconSchedule },
   { id: "members", label: "Members", icon: IconMembers },
@@ -1055,7 +1605,8 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
         {/* Page content */}
         <div className="flex-1 p-5 pb-28 md:pb-8">
           {activeTab === "home" && <HomeTab onNavigate={setActiveTab} />}
-          {activeTab === "community" && <CommunityTab userInitials={userInitials} userName={displayNameCapitalized} avatarColor={avatarColor} />}
+          {activeTab === "community" && <CommunityTab userInitials={userInitials} userName={displayNameCapitalized} avatarColor={avatarColor} userId={profile?.id ?? ""} />}
+          {activeTab === "messages" && <MessagesTab userId={profile?.id ?? ""} userName={displayNameCapitalized} userInitials={userInitials} avatarColor={avatarColor} />}
           {activeTab === "programs" && <ProgramsTab />}
           {activeTab === "schedule" && <ScheduleTab />}
           {activeTab === "members" && <MembersTab />}

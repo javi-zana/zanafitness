@@ -37,7 +37,7 @@ function PlanCard({
   variantId: string;
   featured?: boolean;
 }) {
-  const checkoutUrl = `https://zana-fitness.lemonsqueezy.com/checkout/buy/${variantId}?checkout[redirect_url]=https://zana-fitness.vercel.app/dashboard&embed=1`;
+  const checkoutUrl = `https://zana-fitness.lemonsqueezy.com/checkout/buy/${variantId}?checkout[redirect_url]=https://zanafitness.com/dashboard&embed=1`;
 
   return (
     <div

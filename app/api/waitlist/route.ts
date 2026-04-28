@@ -73,7 +73,7 @@ const emailHtml = () => `
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
               <td align="center">
-                <a href="https://zana-fitness.vercel.app/system"
+                <a href="https://zanafitness.com/system"
                   style="display:inline-block;background-color:#b3cdff;color:#0f141b;font-family:'Courier New',Courier,monospace;font-size:8px;font-weight:700;letter-spacing:4px;text-transform:uppercase;text-decoration:none;padding:16px 40px;border-radius:100px;">
                   VIEW THE SYSTEM
                 </a>
@@ -105,9 +105,9 @@ const emailHtml = () => `
         <td align="center">
           <p style="margin:0;font-family:'Courier New',Courier,monospace;font-size:10px;letter-spacing:1px;color:#374151;text-transform:uppercase;">
             &copy; 2026 Zana Fitness &nbsp;&middot;&nbsp;
-            <a href="https://zana-fitness.vercel.app/terms" style="color:#374151;text-decoration:none;">Terms</a>
+            <a href="https://zanafitness.com/terms" style="color:#374151;text-decoration:none;">Terms</a>
             &nbsp;&middot;&nbsp;
-            <a href="https://zana-fitness.vercel.app/privacy" style="color:#374151;text-decoration:none;">Privacy</a>
+            <a href="https://zanafitness.com/privacy" style="color:#374151;text-decoration:none;">Privacy</a>
           </p>
         </td>
       </tr>

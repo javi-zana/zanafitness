@@ -141,13 +141,19 @@ export default function LandingPage() {
             <span className="block text-[11px] md:text-sm mt-8 font-bold tracking-[1em] text-white ml-2">F I T N E S S</span>
           </h1>
           
-          <div className="my-12 space-y-2 uppercase tracking-[0.2em] font-mono text-[10px] md:text-[11px] text-gray-200">
-            <p>Built for results.</p>
-            <p>Not motivation.</p>
+          <div className="my-12 space-y-3">
+            <p className="text-2xl md:text-4xl font-light tracking-[-0.01em] text-white leading-snug">
+              I will help you lose<br />
+              3–5% body fat<br />
+              in 4 months.
+            </p>
+            <p className="font-mono text-[10px] md:text-[11px] uppercase tracking-[0.25em] text-gray-400 mt-6">
+              Without overhauling your life.
+            </p>
           </div>
-          
+
           <button className="bg-[#b3cdff] text-[#121821] font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors">
-            JOIN THE SYSTEM
+            Get Started
           </button>
         </div>
 
@@ -163,10 +169,8 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">01</p>
           <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white">
-            You've built the career.<br />
-            You've built the income.<br />
-            The body is the one thing<br />
-            that hasn't caught up yet.
+            You've got everything figured out.<br />
+            Except your body.
           </h2>
           <div className="w-8 h-px bg-gray-400 mt-16"></div>
         </div>
@@ -183,16 +187,16 @@ export default function LandingPage() {
         <div className="flex flex-col justify-center p-12 md:p-32 bg-[#1a222c] z-10 relative">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-8">02</p>
           <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.1em] uppercase leading-snug mb-10 text-white text-left">
-            You look good on paper.<br />
-            Not in the mirror.
+            Skinny-fat.<br />
+            Soft in clothes.<br />
+            Not where you want to be.
           </h2>
           <div className="space-y-3 font-mono text-[11px] uppercase tracking-[0.2em] text-gray-400">
-            <p>Skinny-fat.</p>
-            <p>Soft in clothes.</p>
-            <p>Not matching the life you've built.</p>
+            <p>You know what to do.</p>
+            <p>You just never had a system.</p>
           </div>
           <p className="text-[#b3cdff] font-mono text-[11px] tracking-[0.2em] uppercase mt-16">
-            That changes here.
+            Now you do.
           </p>
         </div>
       </section>
@@ -239,10 +243,9 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">04</p>
           <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white">
-            This isn't about the gym.<br />
-            It's a lifestyle built around<br />
-            a lean, aesthetic physique that<br />
-            becomes <span className="text-[#b3cdff]">effortless.</span>
+            This is not a workout plan.<br />
+            It&apos;s a system that fits your life<br />
+            and gets you <span className="text-[#b3cdff]">lean.</span>
           </h2>
           <div className="w-8 h-px bg-gray-400 mt-16"></div>
         </div>
@@ -256,7 +259,7 @@ export default function LandingPage() {
 
         <div className="relative z-10 flex flex-col">
           <p className="font-mono text-[10px] md:text-[11px] tracking-[0.3em] uppercase text-white">
-            Built for results.
+            3–5% body fat. 4 months.
           </p>
           <div className="w-6 h-px bg-gray-400 mt-4"></div>
         </div>
@@ -285,8 +288,8 @@ export default function LandingPage() {
       <section className="py-24 px-6 flex flex-col items-center justify-center text-center bg-[#121821]">
         <div className="max-w-lg w-full flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">06</p>
-          <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase mb-4 text-white">YOUR BODY SHOULD MATCH YOUR LIFE.</h2>
-          <p className="text-[#b3cdff] font-mono uppercase tracking-[0.2em] text-[10px] mb-10">Be first when doors open.</p>
+          <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase mb-4 text-white">Ready to get lean?</h2>
+          <p className="text-[#b3cdff] font-mono uppercase tracking-[0.2em] text-[10px] mb-10">Join the waitlist. First access when doors open.</p>
 
           <form onSubmit={handleWaitlist} className="w-full mb-6 flex flex-col gap-3">
             <input

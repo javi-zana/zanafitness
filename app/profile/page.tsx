@@ -56,6 +56,11 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
   const [emailNotice, setEmailNotice] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordSaved, setPasswordSaved] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   // Form state
   const [currentEmail, setCurrentEmail] = useState("");
@@ -139,6 +144,23 @@ export default function ProfilePage() {
     setSaved(true);
     router.refresh();
     setTimeout(() => setSaved(false), 3000);
+  };
+
+  const handlePasswordChange = async (e: FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+    if (newPassword !== confirmPassword) { setPasswordError("Passwords do not match."); return; }
+    if (newPassword.length < 8) { setPasswordError("Password must be at least 8 characters."); return; }
+    setPasswordSaving(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPasswordSaving(false);
+    if (error) { setPasswordError(error.message); }
+    else {
+      setPasswordSaved(true);
+      setNewPassword("");
+      setConfirmPassword("");
+      setTimeout(() => setPasswordSaved(false), 3000);
+    }
   };
 
   const handleSignOut = async () => {
@@ -346,6 +368,40 @@ export default function ProfilePage() {
             {saving ? "Saving..." : saved ? "Saved ✓" : "Save Changes"}
           </button>
 
+        </form>
+
+        {/* Password section */}
+        <form onSubmit={handlePasswordChange} className="space-y-4 border-t border-[#2d3a4b] pt-8">
+          <div>
+            <p className="font-mono text-[9px] tracking-[0.3em] text-gray-400 uppercase mb-1">Set Password</p>
+            <p className="font-mono text-[8px] text-gray-600 tracking-wide">Set or change your login password.</p>
+          </div>
+          <input
+            type="password"
+            placeholder="New password"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+          />
+          <input
+            type="password"
+            placeholder="Confirm new password"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+          />
+          {passwordError && (
+            <div className="bg-[#f87171]/10 border border-[#f87171]/30 rounded px-4 py-3">
+              <p className="font-mono text-[9px] text-[#f87171] tracking-wider">{passwordError}</p>
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={passwordSaving || !newPassword}
+            className="w-full bg-[#1e2d3d] border border-[#2d3a4b] text-white font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:border-[#b3cdff]/40 hover:text-[#b3cdff] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {passwordSaving ? "Saving..." : passwordSaved ? "Password Updated ✓" : "Set Password"}
+          </button>
         </form>
 
         {/* Divider + support */}
