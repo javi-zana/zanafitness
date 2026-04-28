@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, TrendingUp, Leaf, Target } from "lucide-react";
 import { initializePaddle, type Paddle } from "@paddle/paddle-js";
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
@@ -63,8 +63,8 @@ function PlanCard({
   return (
     <div
       className={`flex flex-col border ${
-        featured ? "border-[#b3cdff]" : "border-[#2d3a4b]"
-      } rounded-2xl p-10 md:p-12 relative`}
+        featured ? "border-[#b3cdff] shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]" : "border-[#2d3a4b] bg-[#1a222c]"
+      } rounded-2xl p-10 md:p-12 relative bg-[#1a222c]`}
     >
       {featured && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#b3cdff] text-black text-[9px] font-bold uppercase tracking-widest px-4 py-1 rounded-full whitespace-nowrap">
@@ -72,21 +72,21 @@ function PlanCard({
         </span>
       )}
 
-      <p className="text-[9px] uppercase tracking-widest font-bold text-gray-300 mb-2">{label}</p>
+      <p className="text-[9px] uppercase tracking-widest font-bold text-[#b3cdff] mb-2">{label}</p>
       <div className="flex items-end gap-2 mb-1">
         <span className="text-4xl md:text-5xl font-light text-white">${price}</span>
-        <span className="text-[10px] uppercase tracking-widest text-gray-300 mb-2">/mo</span>
+        <span className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">/mo</span>
       </div>
-      <p className="text-[9px] uppercase tracking-widest text-gray-400 mb-10">{commitment}</p>
+      <p className="text-[9px] uppercase tracking-widest text-gray-500 mb-10">{commitment}</p>
 
       <ul className="space-y-4 mb-12 flex-1">
         {features.map((f) => (
           <li key={f} className="flex items-center gap-3">
             <Check
-              className={`w-3 h-3 flex-shrink-0 ${featured ? "text-[#b3cdff]" : "text-gray-400"}`}
+              className={`w-3 h-3 flex-shrink-0 ${featured ? "text-[#b3cdff]" : "text-gray-500"}`}
               strokeWidth={2.5}
             />
-            <span className="text-[10px] uppercase tracking-widest text-gray-400">{f}</span>
+            <span className="text-[10px] uppercase tracking-widest text-gray-300">{f}</span>
           </li>
         ))}
       </ul>
@@ -117,68 +117,116 @@ export default function SystemPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#121821] text-white font-sans">
+    <main className="min-h-screen bg-[#121821] text-white font-sans selection:bg-[#b3cdff] selection:text-[#121821]">
+      
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
+      <nav className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-8 md:px-16 overflow-hidden border-b border-[#2d3a4b]/50">
         <Link href="/">
           <ZIcon className="h-5 md:h-6 text-white" />
         </Link>
-        <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-widest uppercase font-bold text-gray-400">
-          <Link href="/#training" className="hover:text-white transition-colors">Training</Link>
-          <Link href="/system" className="text-white">The System</Link>
-          <Link href="/#nutrition" className="hover:text-white transition-colors">Nutrition</Link>
+        <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] font-inter uppercase font-semibold text-gray-300">
+          <Link href="/preview-about.html" className="hover:text-white transition-colors">About</Link>
+          <Link href="/system" className="text-white hover:text-white transition-colors">The System</Link>
+          <Link href="/preview-faq.html" className="hover:text-white transition-colors">FAQ</Link>
+          <Link href="/preview-join.html" className="bg-[#b3cdff] text-[#121821] font-bold px-8 py-2.5 rounded-full hover:bg-white transition-colors">
+            JOIN THE SYSTEM
+          </Link>
         </div>
       </nav>
 
       {/* HEADER */}
-      <section className="py-20 px-6 text-center border-b border-[#2d3a4b]">
+      <section className="pt-40 pb-20 px-6 text-center bg-[#121821]">
         <div className="max-w-2xl mx-auto flex flex-col items-center">
           <ZanaLogo className="h-10 md:h-12 text-white mb-12" />
           <div className="w-8 h-px bg-gray-500 mb-12"></div>
-          <h1 className="text-xl md:text-2xl font-light tracking-[0.15em] uppercase leading-tight text-white mb-4">
+          <h1 className="text-2xl md:text-4xl font-sans font-light tracking-[0.1em] uppercase leading-tight text-white mb-6">
             The System.
           </h1>
-          <p className="text-[10px] uppercase tracking-widest font-bold text-gray-300">
-            Choose your commitment. Begin your progress.
-          </p>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-[#b3cdff]">Not a program. A protocol.</p>
+        </div>
+      </section>
+
+      {/* SYSTEM EXPECTATIONS */}
+      <section className="py-24 px-6 bg-[#1a222c] border-y border-[#2d3a4b]">
+        <div className="max-w-6xl mx-auto flex flex-col items-center">
+          <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">EXPECTATIONS</p>
+          <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase text-center mb-20">
+            A framework built on structure.
+          </h2>
+          <div className="grid md:grid-cols-3 gap-16 md:gap-0 w-full text-center px-4">
+            
+            {/* Box 1 */}
+            <div className="flex flex-col items-center md:border-r border-[#2d3a4b] md:pr-16">
+               <TrendingUp className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
+               <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">01</div>
+               <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Training</h3>
+               <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Calculated Overload</p>
+               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">No random workouts. Every session builds on the last with precise volume mapping.</p>
+            </div>
+            
+            {/* Box 2 */}
+            <div className="flex flex-col items-center md:border-r border-[#2d3a4b] md:px-16">
+               <Leaf className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
+               <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">02</div>
+               <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Nutrition</h3>
+               <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Linear Alignment</p>
+               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">Mathematical macro assignments synchronized specifically against your training output.</p>
+            </div>
+
+            {/* Box 3 */}
+            <div className="flex flex-col items-center md:pl-16">
+               <Target className="w-8 h-8 text-gray-300 stroke-[1.5] mb-8" />
+               <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">03</div>
+               <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Guidance</h3>
+               <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Constant Adaptation</p>
+               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">Data is collected weekly. Protocols are adjusted immediately to ensure momentum.</p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* CORE STATEMENT */}
+      <section className="py-24 px-6 text-center bg-[#121821]">
+        <div className="max-w-4xl mx-auto flex flex-col items-center">
+          <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">THE RESULT</p>
+          <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white mb-10">
+            When you eliminate choice,<br />
+            progress becomes <span className="text-[#b3cdff]">inevitable.</span>
+          </h2>
         </div>
       </section>
 
       {/* PRICING */}
-      <section className="py-24 px-6">
-        <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-6">
-          <PlanCard
-            label="Standard Access"
-            price={500}
-            commitment="4-month commitment"
-            priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_4M!}
-            paddle={paddle}
-          />
-          <PlanCard
-            label="Full Commitment"
-            price={400}
-            commitment="12-month commitment"
-            priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_12M!}
-            featured
-            paddle={paddle}
-          />
-        </div>
-      </section>
-
-      {/* STATEMENT */}
-      <section className="py-24 px-6 text-center border-t border-[#2d3a4b]">
-        <div className="max-w-xl mx-auto">
-          <p className="text-[10px] uppercase tracking-widest text-gray-300 font-bold leading-tight">
-            This isn&apos;t a subscription.<br />
-            It&apos;s a system designed to make<br />
-            <span className="text-[#b3cdff]">progress inevitable</span>.
-          </p>
+      <section className="py-24 px-6 bg-[#1a222c] border-y border-[#2d3a4b]" id="pricing">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-4">Choose Your Commitment.</h2>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400">Secure your access protocol below.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <PlanCard
+              label="Standard Access"
+              price={500}
+              commitment="4-month commitment"
+              priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_4M!}
+              paddle={paddle}
+            />
+            <PlanCard
+              label="Full Commitment"
+              price={400}
+              commitment="12-month commitment"
+              priceId={process.env.NEXT_PUBLIC_PADDLE_PRICE_12M!}
+              featured
+              paddle={paddle}
+            />
+          </div>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="py-12 px-8 md:px-16 border-t border-[#2d3a4b] flex justify-between items-center text-[9px] uppercase tracking-widest text-gray-400 font-bold">
-        <ZanaLogo className="h-5 text-white" />
+      <footer className="py-16 px-10 md:px-24 bg-[#0f141b] flex flex-col md:flex-row items-center justify-between text-[9px] font-mono tracking-[0.2em] uppercase text-gray-500 gap-8">
+        <ZanaLogo className="h-4 md:h-5 text-white" />
         <p>&copy; 2024 Zana Fitness</p>
       </footer>
     </main>
