@@ -61,12 +61,12 @@ function CoachNav({ active, onChange, isHeadCoach }: { active: CoachTab; onChang
     ...(isHeadCoach ? [{ id: 'admin' as CoachTab, label: 'Admin', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active === 'admin' ? 2 : 1.5} className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg> }] : []),
   ]
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#0f1a0c] border-t border-white/5 flex z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#0f1a0c] border-t border-[#b0e455]/8 flex z-50">
       {tabs.map(t => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition ${active === t.id ? 'text-[#b0e455]' : 'text-white/25 hover:text-[#edf5e2]/50'}`}
+          className={`flex-1 flex flex-col items-center gap-1 py-3 transition ${active === t.id ? 'text-[#b0e455]' : 'text-[#edf5e2]/25 hover:text-[#edf5e2]/50'}`}
         >
           {t.icon}
           <span className="text-[9px] tracking-widest uppercase font-mono">{t.label}</span>
@@ -94,7 +94,7 @@ function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[]
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <p className="text-sm text-[#edf5e2]/20">No members assigned yet.</p>
-        <p className="text-xs text-white/15 mt-1">Use Admin → Invite to add members.</p>
+        <p className="text-xs text-[#edf5e2]/15 mt-1">Use Admin → Invite to add members.</p>
       </div>
     )
   }
@@ -110,7 +110,7 @@ function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[]
                 {memberName(member).charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{memberName(member)}</p>
+                <p className="text-sm font-semibold text-[#edf5e2] truncate">{memberName(member)}</p>
                 {stat ? (
                   <p className="text-[10px] text-[#edf5e2]/30 font-mono mt-0.5">
                     {stat.weight_kg ? `${stat.weight_kg} kg · ` : ''}
@@ -136,14 +136,14 @@ function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[]
               return (
                 <div key={s.id} className="bg-[#1c2e16] rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-white">{memberName(m)}</p>
-                    <p className="text-[10px] text-white/25 font-mono">{relTime(s.created_at)} ago</p>
+                    <p className="text-xs font-semibold text-[#edf5e2]">{memberName(m)}</p>
+                    <p className="text-[10px] text-[#edf5e2]/25 font-mono">{relTime(s.created_at)} ago</p>
                   </div>
                   <div className="flex gap-4">
                     {s.weight_kg != null && (
                       <div>
                         <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Weight</p>
-                        <p className="text-sm font-semibold text-white">{s.weight_kg} kg</p>
+                        <p className="text-sm font-semibold text-[#edf5e2]">{s.weight_kg} kg</p>
                       </div>
                     )}
                     {s.confidence != null && (
@@ -209,13 +209,13 @@ function ProgramsTab({ members, userId }: { members: Member[]; userId: string })
             <button
               key={m.id}
               onClick={() => selectMember(m.id)}
-              className="w-full bg-[#1c2e16] rounded-xl p-4 flex items-center gap-3 hover:bg-[#1e2535] transition text-left"
+              className="w-full bg-[#1c2e16] rounded-xl p-4 flex items-center gap-3 hover:bg-[#233019] transition text-left"
             >
               <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
                 {memberName(m).charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">{memberName(m)}</p>
+                <p className="text-sm font-semibold text-[#edf5e2]">{memberName(m)}</p>
                 <p className="text-[10px] text-[#edf5e2]/30 font-mono">Split · Food · Habits</p>
               </div>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-[#edf5e2]/20 ml-auto">
@@ -231,12 +231,12 @@ function ProgramsTab({ members, userId }: { members: Member[]; userId: string })
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => setSelectedId(null)} className="text-[#edf5e2]/30 hover:text-white transition">
+        <button onClick={() => setSelectedId(null)} className="text-[#edf5e2]/30 hover:text-[#edf5e2] transition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <p className="text-sm font-semibold text-white">{memberName(selected!)}</p>
+        <p className="text-sm font-semibold text-[#edf5e2]">{memberName(selected!)}</p>
         <button
           onClick={saveSection}
           disabled={saving}
@@ -247,7 +247,7 @@ function ProgramsTab({ members, userId }: { members: Member[]; userId: string })
       </div>
 
       {/* Section tabs */}
-      <div className="flex gap-1 border-b border-white/5 mb-4 overflow-x-auto">
+      <div className="flex gap-1 border-b border-[#b0e455]/8 mb-4 overflow-x-auto">
         {SECTIONS.map(s => (
           <button
             key={s}
@@ -377,7 +377,7 @@ function MessagesTab({
       return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="text-sm text-[#edf5e2]/20">No threads yet.</p>
-          <p className="text-xs text-white/15 mt-1">Use Admin to set up member threads.</p>
+          <p className="text-xs text-[#edf5e2]/15 mt-1">Use Admin to set up member threads.</p>
         </div>
       )
     }
@@ -392,7 +392,7 @@ function MessagesTab({
             <button
               key={thread.id}
               onClick={() => openThread(thread.id)}
-              className="w-full bg-[#1c2e16] rounded-xl p-4 flex items-center gap-3 hover:bg-[#1e2535] transition text-left"
+              className="w-full bg-[#1c2e16] rounded-xl p-4 flex items-center gap-3 hover:bg-[#233019] transition text-left"
             >
               <div className="relative shrink-0">
                 <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
@@ -401,7 +401,7 @@ function MessagesTab({
                 {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#b0e455] rounded-full border-2 border-[#0f1a0c]" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm truncate ${unread ? 'font-semibold text-white' : 'text-white/70'}`}>
+                <p className={`text-sm truncate ${unread ? 'font-semibold text-[#edf5e2]' : 'text-[#edf5e2]/70'}`}>
                   {m ? memberName(m) : 'Unknown'}
                 </p>
                 {last && (
@@ -409,7 +409,7 @@ function MessagesTab({
                 )}
               </div>
               {last && (
-                <p className="text-[10px] text-white/25 font-mono shrink-0">{relTime(last.created_at)}</p>
+                <p className="text-[10px] text-[#edf5e2]/25 font-mono shrink-0">{relTime(last.created_at)}</p>
               )}
             </button>
           )
@@ -425,12 +425,12 @@ function MessagesTab({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => setSelectedThreadId(null)} className="text-[#edf5e2]/30 hover:text-white transition shrink-0">
+        <button onClick={() => setSelectedThreadId(null)} className="text-[#edf5e2]/30 hover:text-[#edf5e2] transition shrink-0">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <p className="text-sm font-semibold text-white">{chatMember ? memberName(chatMember) : 'Chat'}</p>
+        <p className="text-sm font-semibold text-[#edf5e2]">{chatMember ? memberName(chatMember) : 'Chat'}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-1 pb-4" style={{ maxHeight: 'calc(100vh - 340px)' }}>
@@ -439,7 +439,7 @@ function MessagesTab({
           return (
             <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[#1c2e16] text-white/85 rounded-bl-sm'
+                isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[#1c2e16] text-[#edf5e2]/85 rounded-bl-sm'
               }`}>
                 {msg.body}
               </div>
@@ -449,7 +449,7 @@ function MessagesTab({
         <div ref={bottomRef} />
       </div>
 
-      <div className="flex items-end gap-2 pt-3 border-t border-white/5">
+      <div className="flex items-end gap-2 pt-3 border-t border-[#b0e455]/8">
         <textarea
           ref={textareaRef}
           value={body}
@@ -457,7 +457,7 @@ function MessagesTab({
           onKeyDown={handleKeyDown}
           placeholder="Message…"
           rows={1}
-          className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/20 resize-none focus:outline-none focus:border-[#b0e455]/40 transition max-h-28 overflow-y-auto leading-relaxed"
+          className="flex-1 bg-[#162212] border border-[#b0e455]/12 rounded-2xl px-4 py-2.5 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 resize-none focus:outline-none focus:border-[#b0e455]/40 transition max-h-28 overflow-y-auto leading-relaxed"
         />
         <button
           onClick={send}
@@ -533,7 +533,7 @@ function AdminTab({ userId, userEmail, members, threads }: { userId: string; use
             value={inviteEmail}
             onChange={e => setInviteEmail(e.target.value)}
             placeholder="member@email.com"
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-[#b0e455]/60 transition"
+            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-[#edf5e2] text-sm placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/60 transition"
           />
           <button
             type="submit"
@@ -558,7 +558,7 @@ function AdminTab({ userId, userEmail, members, threads }: { userId: string; use
                 <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
                   {memberName(m).charAt(0).toUpperCase()}
                 </div>
-                <p className="text-sm text-white flex-1">{memberName(m)}</p>
+                <p className="text-sm text-[#edf5e2] flex-1">{memberName(m)}</p>
                 <button
                   onClick={() => setupThread(m)}
                   disabled={setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
@@ -585,13 +585,13 @@ function AdminTab({ userId, userEmail, members, threads }: { userId: string; use
                 {memberName(m).charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-white">{memberName(m)}</p>
+                <p className="text-sm text-[#edf5e2]">{memberName(m)}</p>
                 <p className="text-[10px] text-[#edf5e2]/30 font-mono truncate">{m.email}</p>
               </div>
               <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border ${
                 threadMemberIds.has(m.id)
                   ? 'text-green-400 border-green-400/20 bg-green-400/10'
-                  : 'text-[#edf5e2]/20 border-white/10'
+                  : 'text-[#edf5e2]/20 border-[#b0e455]/12'
               }`}>
                 {threadMemberIds.has(m.id) ? 'Active' : 'No thread'}
               </span>
@@ -617,7 +617,7 @@ export default function CoachClient({ userId, userEmail, userRole, members, allS
   }
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-white flex flex-col">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
       {/* Header */}
       <div className="px-5 pt-12 pb-4">
         <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach</p>
