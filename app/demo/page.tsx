@@ -24,7 +24,7 @@ const NAV: { id: Tab; label: string; icon: React.ReactNode }[] = [
 
 function LockedOverlay() {
   return (
-    <div className="absolute inset-0 bg-[#0f141b]/70 backdrop-blur-[2px] flex flex-col items-center justify-center z-10 rounded">
+    <div className="absolute inset-0 bg-[#141414]/70 backdrop-blur-[2px] flex flex-col items-center justify-center z-10 rounded">
       <svg viewBox="0 0 24 24" className="w-6 h-6 text-[#b3cdff] mb-2" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4" strokeLinecap="round"/></svg>
       <p className="font-mono text-[8px] tracking-widest uppercase text-[#b3cdff]">Join to unlock</p>
     </div>
@@ -68,7 +68,7 @@ function HomeTab() {
         <div className="mt-4 pt-4 border-t border-[#2d3a4b] flex items-center justify-between">
           <p className="font-mono text-[8px] text-gray-500">Progress this week</p>
           <div className="flex items-center gap-2">
-            <div className="w-24 h-1 bg-[#0f141b] rounded-full"><div className="h-1 bg-[#b3cdff] rounded-full" style={{ width: "60%" }} /></div>
+            <div className="w-24 h-1 bg-[#141414] rounded-full"><div className="h-1 bg-[#b3cdff] rounded-full" style={{ width: "60%" }} /></div>
             <p className="font-mono text-[8px] text-[#b3cdff]">3/5</p>
           </div>
         </div>
@@ -119,7 +119,7 @@ function ProgramsTab() {
           <p className="font-mono text-[8px] text-gray-500 uppercase tracking-widest">Overall Progress</p>
           <p className="text-2xl font-light text-white mt-1">34<span className="text-sm text-gray-500 ml-1">%</span></p>
         </div>
-        <div className="w-32 h-1.5 bg-[#0f141b] rounded-full"><div className="h-1.5 bg-[#b3cdff] rounded-full" style={{ width: "34%" }} /></div>
+        <div className="w-32 h-1.5 bg-[#141414] rounded-full"><div className="h-1.5 bg-[#b3cdff] rounded-full" style={{ width: "34%" }} /></div>
       </div>
 
       <div className="space-y-2">
@@ -136,7 +136,7 @@ function ProgramsTab() {
               <svg viewBox="0 0 16 16" className={`w-3.5 h-3.5 text-gray-500 transition-transform ${open === i ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 6l5 5 5-5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
             {open === i && d.exercises.length > 0 && (
-              <div className="px-5 pb-4 space-y-2 border-t border-[#0f141b]">
+              <div className="px-5 pb-4 space-y-2 border-t border-[#141414]">
                 {d.exercises.map(e => (
                   <div key={e} className="flex items-center gap-3 pt-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#b3cdff]/40 shrink-0" />
@@ -241,7 +241,7 @@ function MessagesTab() {
               { me: false, text: "Great work this week 💪" },
             ].map((m, i) => (
               <div key={i} className={`flex ${m.me ? "justify-end" : "justify-start"}`}>
-                <div className={`px-3 py-2 rounded-2xl text-xs max-w-[70%] ${m.me ? "bg-[#b3cdff] text-[#0f141b] rounded-br-sm" : "bg-[#1a222c] text-white rounded-bl-sm"}`}>{m.text}</div>
+                <div className={`px-3 py-2 rounded-2xl text-xs max-w-[70%] ${m.me ? "bg-[#b3cdff] text-[#141414] rounded-br-sm" : "bg-[#1a222c] text-white rounded-bl-sm"}`}>{m.text}</div>
               </div>
             ))}
           </div>
@@ -316,12 +316,12 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f141b] text-white flex flex-col">
+    <div className="min-h-screen bg-[#141414] text-white flex flex-col">
 
       {/* Preview Banner */}
-      <div className="bg-[#b3cdff] text-[#0f141b] text-center py-3 px-4 flex items-center justify-center gap-4 flex-wrap">
+      <div className="bg-[#b3cdff] text-[#141414] text-center py-3 px-4 flex items-center justify-center gap-4 flex-wrap">
         <p className="font-mono text-[9px] tracking-widest uppercase font-bold">Preview Mode — This is what your dashboard looks like inside</p>
-        <Link href="/system" className="font-mono text-[8px] tracking-widest uppercase bg-[#0f141b] text-[#b3cdff] px-4 py-1.5 rounded-full font-bold hover:bg-[#121821] transition-colors whitespace-nowrap">
+        <Link href="/system" className="font-mono text-[8px] tracking-widest uppercase bg-[#141414] text-[#b3cdff] px-4 py-1.5 rounded-full font-bold hover:bg-[#121821] transition-colors whitespace-nowrap">
           Join the System →
         </Link>
       </div>
@@ -359,7 +359,7 @@ export default function DemoPage() {
 
         {/* Main */}
         <main className="flex-1 md:ml-60 flex flex-col">
-          <header className="sticky top-[44px] z-10 bg-[#0f141b]/95 backdrop-blur border-b border-[#2d3a4b] px-5 py-4 flex items-center justify-between">
+          <header className="sticky top-[44px] z-10 bg-[#141414]/95 backdrop-blur border-b border-[#2d3a4b] px-5 py-4 flex items-center justify-between">
             <span className="font-mono text-[10px] tracking-[0.3em] text-gray-400 uppercase">{NAV.find(n => n.id === activeTab)?.label}</span>
             <span className="font-mono text-[8px] tracking-widest uppercase px-2 py-0.5 border border-[#86efac]/30 text-[#86efac] bg-[#86efac]/5 rounded-sm">Preview</span>
           </header>

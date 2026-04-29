@@ -38,7 +38,7 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <main className="min-h-screen bg-[#0f172a] text-white flex flex-col">
+    <main className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
 
       <Navbar active="faq" />
 
@@ -51,9 +51,9 @@ export default function FAQPage() {
           </h1>
         </div>
 
-        <div className="border-t border-[#1f3050]">
+        <div className="border-t border-[#242424]">
           {faqs.map((item) => (
-            <div key={item.q} className="py-8 border-b border-[#1f3050]">
+            <div key={item.q} className="py-8 border-b border-[#242424]">
               <h3 className="font-mono text-[10px] tracking-[0.25em] uppercase text-white mb-4">
                 {item.q}
               </h3>
@@ -65,7 +65,7 @@ export default function FAQPage() {
         <div className="text-center mt-24">
           <a
             href="/system"
-            className="inline-flex items-center gap-2 font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f172a] px-10 py-4 rounded-full font-bold hover:bg-white transition-colors"
+            className="inline-flex items-center gap-2 font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f0f0f] px-10 py-4 rounded-full font-bold hover:bg-white transition-colors"
           >
             Ready to start? Join Now
           </a>

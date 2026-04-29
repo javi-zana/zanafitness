@@ -12,7 +12,7 @@ const ZanaLogo = ({ className = "h-4" }: { className?: string }) => (
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0f172a] border-t border-[#1f3050] px-6 md:px-12 py-10">
+    <footer className="bg-[#0f0f0f] border-t border-[#242424] px-6 md:px-12 py-10">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
         <ZanaLogo className="h-4 text-gray-500" />
         <div className="flex gap-8">

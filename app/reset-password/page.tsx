@@ -50,7 +50,7 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0f141b] text-white flex flex-col">
+    <main className="min-h-screen bg-[#141414] text-white flex flex-col">
 
       <nav className="flex items-center justify-between px-8 py-6 border-b border-[#2d3a4b]">
         <Link href="/" className="text-white"><ZIcon /></Link>
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#b3cdff] text-[#0f141b] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:bg-white transition-colors disabled:opacity-40"
+                className="w-full bg-[#b3cdff] text-[#141414] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:bg-white transition-colors disabled:opacity-40"
               >
                 {loading ? 'Saving...' : 'Set Password & Sign In'}
               </button>

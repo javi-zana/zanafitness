@@ -26,7 +26,7 @@ export default function Navbar({ active }: { active?: string }) {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 bg-[#0f172a]/85 backdrop-blur-md border-b border-white/5">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 bg-[#0f0f0f]/85 backdrop-blur-md border-b border-white/5">
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
           <ZanaLogo className="h-5 text-white" />
         </Link>
@@ -51,7 +51,7 @@ export default function Navbar({ active }: { active?: string }) {
           <Link href="/login" className="font-mono text-[9px] tracking-widest uppercase text-gray-400 hover:text-white transition-colors px-4 py-2">
             Log In
           </Link>
-          <Link href="/system" className="font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f172a] px-5 py-2.5 rounded-full font-bold hover:bg-white transition-colors">
+          <Link href="/system" className="font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f0f0f] px-5 py-2.5 rounded-full font-bold hover:bg-white transition-colors">
             Get Started
           </Link>
         </div>
@@ -64,7 +64,7 @@ export default function Navbar({ active }: { active?: string }) {
 
       {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 z-40 bg-[#0f172a] flex flex-col pt-24 px-8 md:hidden">
+        <div className="fixed inset-0 z-40 bg-[#0f0f0f] flex flex-col pt-24 px-8 md:hidden">
           <div className="flex flex-col gap-8">
             {LINKS.map(l => (
               <Link
@@ -78,11 +78,11 @@ export default function Navbar({ active }: { active?: string }) {
                 {l.label}
               </Link>
             ))}
-            <div className="pt-6 flex flex-col gap-3 border-t border-[#1f3050]">
-              <Link href="/login" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase text-center py-3 border border-[#2d4060] text-gray-300 rounded-full">
+            <div className="pt-6 flex flex-col gap-3 border-t border-[#242424]">
+              <Link href="/login" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase text-center py-3 border border-[#2e2e2e] text-gray-300 rounded-full">
                 Log In
               </Link>
-              <Link href="/system" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase bg-[#b3cdff] text-[#0f172a] py-3.5 rounded-full font-bold text-center">
+              <Link href="/system" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase bg-[#b3cdff] text-[#0f0f0f] py-3.5 rounded-full font-bold text-center">
                 Get Started
               </Link>
             </div>

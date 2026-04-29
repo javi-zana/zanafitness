@@ -208,7 +208,7 @@ function Avatar({ initials, size = "md", online, color }: { initials: string; si
         {initials}
       </div>
       {online !== undefined && (
-        <span className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-[#0b0e14] ${online ? "bg-[#86efac]" : "bg-[#1e2a38]"}`} />
+        <span className={`absolute bottom-0 right-0 w-2 h-2 rounded-full border border-[#0b0e14] ${online ? "bg-[#86efac]" : "bg-[#242424]"}`} />
       )}
     </div>
   );
@@ -232,17 +232,17 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
 
       {/* Phase + Streak strip */}
       <div className="flex gap-3">
-        <div className="flex-1 bg-[#0f141b] border border-[#1e2a38] rounded-xl px-4 py-4 flex items-center justify-between">
+        <div className="flex-1 bg-[#141414] border border-[#242424] rounded-xl px-4 py-4 flex items-center justify-between">
           <p className="font-mono text-[8px] tracking-widest text-gray-500 uppercase">Day</p>
           <p className="font-display text-3xl text-white leading-none">{USER.day}</p>
         </div>
-        <div className="flex-1 bg-[#0f141b] border border-[#1e2a38] rounded-xl px-4 py-4 flex items-center justify-between">
+        <div className="flex-1 bg-[#141414] border border-[#242424] rounded-xl px-4 py-4 flex items-center justify-between">
           <p className="font-mono text-[8px] tracking-widest text-gray-500 uppercase">Phase</p>
           <p className="font-display text-3xl text-white leading-none">0{USER.phase}</p>
         </div>
         <button
           onClick={() => onNavigate("ranks")}
-          className="flex-1 bg-[#0f141b] border border-[#1e2a38] rounded-xl px-4 py-4 flex items-center justify-between hover:border-[#b3cdff]/40 transition-colors"
+          className="flex-1 bg-[#141414] border border-[#242424] rounded-xl px-4 py-4 flex items-center justify-between hover:border-[#b3cdff]/40 transition-colors"
         >
           <p className="font-mono text-[8px] tracking-widest text-gray-500 uppercase">Streak</p>
           <p className="font-display text-3xl text-[#b3cdff] leading-none">{USER.streak}</p>
@@ -250,7 +250,7 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
       </div>
 
       {/* Today's Session */}
-      <div className="bg-[#0f141b] border border-[#1e2a38] rounded-xl p-6">
+      <div className="bg-[#141414] border border-[#242424] rounded-xl p-6">
         <div className="flex justify-between items-start mb-5">
           <div>
             <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-2">Today&apos;s Session</p>
@@ -258,18 +258,18 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
               Lower Body<br />Hypertrophy
             </h2>
           </div>
-          <span className="font-mono text-[8px] tracking-widest text-gray-500 uppercase border border-[#1e2a38] px-2 py-1 rounded">
+          <span className="font-mono text-[8px] tracking-widest text-gray-500 uppercase border border-[#242424] px-2 py-1 rounded">
             45 min
           </span>
         </div>
         <div className="grid grid-cols-3 gap-3 mb-5 font-mono text-[9px] text-gray-400 uppercase tracking-widest">
-          <div className="bg-[#0f141b] border border-[#1e2a38] rounded p-3 text-center">
+          <div className="bg-[#141414] border border-[#242424] rounded p-3 text-center">
             <p className="text-white text-base font-light mb-1">4</p>Exercises
           </div>
-          <div className="bg-[#0f141b] border border-[#1e2a38] rounded p-3 text-center">
+          <div className="bg-[#141414] border border-[#242424] rounded p-3 text-center">
             <p className="text-white text-base font-light mb-1">16</p>Sets
           </div>
-          <div className="bg-[#0f141b] border border-[#1e2a38] rounded p-3 text-center">
+          <div className="bg-[#141414] border border-[#242424] rounded p-3 text-center">
             <p className="text-white text-base font-light mb-1">RPE 8</p>Target
           </div>
         </div>
@@ -282,7 +282,7 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
       </div>
 
       {/* Week Progress */}
-      <div className="bg-[#0f141b] border border-[#1e2a38] rounded-xl p-6">
+      <div className="bg-[#141414] border border-[#242424] rounded-xl p-6">
         <div className="flex justify-between items-center mb-5">
           <p className="font-mono text-[8px] tracking-[0.3em] text-gray-400 uppercase">This Week</p>
           <p className="font-mono text-[8px] tracking-widest text-[#b3cdff] uppercase">4 / 7 Days</p>
@@ -292,7 +292,7 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
             <div key={i} className="flex-1 flex flex-col items-center gap-2">
               <div className={`w-full aspect-square rounded-sm flex items-center justify-center ${completed[i] ? "bg-[#b3cdff]" : i === 4 ? "border-2 border-[#b3cdff] bg-transparent" : "bg-[#111820]"}`}>
                 {completed[i] && (
-                  <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="#0f141b" strokeWidth="2">
+                  <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="#141414" strokeWidth="2">
                     <path d="M2 6l3 3 5-5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 )}
@@ -305,7 +305,7 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
 
       {/* Nutrition */}
       <Link href="/nutrition">
-        <div className="bg-[#0f141b] border border-[#1e2a38] rounded-xl p-6 flex justify-between items-center hover:border-[#b3cdff]/40 transition-colors cursor-pointer group">
+        <div className="bg-[#141414] border border-[#242424] rounded-xl p-6 flex justify-between items-center hover:border-[#b3cdff]/40 transition-colors cursor-pointer group">
           <div>
             <p className="font-mono text-[8px] tracking-[0.3em] text-gray-400 uppercase mb-2 group-hover:text-[#b3cdff] transition-colors">Nutrition</p>
             <p className="text-base font-light tracking-widest uppercase text-white">On Track</p>
@@ -321,7 +321,7 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
       {/* Schedule shortcut */}
       <button
         onClick={() => onNavigate("schedule")}
-        className="w-full bg-[#0f141b] border border-[#1e2a38] rounded-xl p-5 flex items-center justify-between hover:border-[#b3cdff]/40 transition-colors group"
+        className="w-full bg-[#141414] border border-[#242424] rounded-xl p-5 flex items-center justify-between hover:border-[#b3cdff]/40 transition-colors group"
       >
         <div className="text-left">
           <p className="font-mono text-[8px] tracking-[0.3em] text-gray-400 uppercase mb-1 group-hover:text-[#b3cdff] transition-colors">Next Event</p>
@@ -334,7 +334,7 @@ function HomeTab({ onNavigate }: { onNavigate: (tab: Tab) => void }) {
       </button>
 
       {/* Coach's Note */}
-      <div className="bg-[#0f141b] border-l-2 border-l-[#b3cdff] border border-[#1e2a38] rounded-xl p-6">
+      <div className="bg-[#141414] border-l-2 border-l-[#b3cdff] border border-[#242424] rounded-xl p-6">
         <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-3">Coach&apos;s Note</p>
         <p className="text-sm font-light leading-relaxed text-gray-300">
           Control the eccentric. Drop the ego. Progression comes from tension, not just moving weight from point A to B.
@@ -393,7 +393,7 @@ function InstallAppBanner() {
 
   return (
     <>
-      <div className="bg-[#0f141b] border border-[#1e2a38] rounded p-5 flex items-center justify-between gap-4">
+      <div className="bg-[#141414] border border-[#242424] rounded p-5 flex items-center justify-between gap-4">
         <div>
           <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-1">Get the App</p>
           <p className="text-sm font-light text-white">Add ZANA to your home screen</p>
@@ -401,7 +401,7 @@ function InstallAppBanner() {
         </div>
         <button
           onClick={handleInstall}
-          className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-4 py-2.5 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors"
+          className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-4 py-2.5 bg-[#b3cdff] text-[#141414] rounded font-bold hover:bg-white transition-colors"
         >
           Install
         </button>
@@ -410,7 +410,7 @@ function InstallAppBanner() {
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8" onClick={() => setShowModal(false)}>
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
-          <div className="relative bg-[#111820] border border-[#1e2a38] rounded-2xl p-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+          <div className="relative bg-[#111820] border border-[#242424] rounded-2xl p-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
             <p className="font-mono text-[9px] tracking-[0.3em] text-[#b3cdff] uppercase mb-6">Add to Home Screen</p>
             <div className="space-y-5 text-sm text-gray-300 leading-relaxed">
               {steps.map(s => (
@@ -422,7 +422,7 @@ function InstallAppBanner() {
             </div>
             <button
               onClick={() => setShowModal(false)}
-              className="mt-8 w-full font-mono text-[9px] tracking-widest uppercase py-3 border border-[#1e2a38] text-gray-400 rounded hover:text-white transition-colors"
+              className="mt-8 w-full font-mono text-[9px] tracking-widest uppercase py-3 border border-[#242424] text-gray-400 rounded hover:text-white transition-colors"
             >Got it</button>
           </div>
         </div>
@@ -585,16 +585,16 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
       {/* Composer trigger */}
       {!showComposer ? (
         <div
-          className="bg-[#0f141b] border border-[#1e2a38] rounded p-4 flex items-center gap-3 cursor-pointer hover:border-[#b3cdff]/30 transition-colors"
+          className="bg-[#141414] border border-[#242424] rounded p-4 flex items-center gap-3 cursor-pointer hover:border-[#b3cdff]/30 transition-colors"
           onClick={() => setShowComposer(true)}
         >
           <Avatar initials={userInitials} size="sm" color={avatarColor} />
-          <div className="flex-1 bg-[#0f141b] border border-[#1e2a38] rounded px-4 py-3 font-mono text-[10px] text-gray-500 tracking-wide">
+          <div className="flex-1 bg-[#141414] border border-[#242424] rounded px-4 py-3 font-mono text-[10px] text-gray-500 tracking-wide">
             Share a win, ask a question, post a check-in...
           </div>
         </div>
       ) : (
-        <div className="bg-[#0f141b] border border-[#b3cdff]/30 rounded p-4 space-y-3">
+        <div className="bg-[#141414] border border-[#b3cdff]/30 rounded p-4 space-y-3">
           <div className="flex items-center gap-3">
             <Avatar initials={userInitials} size="sm" color={avatarColor} />
             <span className="text-sm text-white">{userName}</span>
@@ -602,27 +602,27 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
           <textarea
             autoFocus value={composerText} onChange={e => setComposerText(e.target.value)}
             placeholder="What's on your mind?" rows={3}
-            className="w-full bg-[#0f141b] border border-[#1e2a38] rounded px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors resize-none font-light leading-relaxed"
+            className="w-full bg-[#141414] border border-[#242424] rounded px-4 py-3 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors resize-none font-light leading-relaxed"
           />
           <div className="flex items-center justify-between gap-3">
             <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {postCategories.map(c => (
                 <button key={c} onClick={() => setComposerCategory(c)}
-                  className={`shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 rounded border transition-colors ${composerCategory === c ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]" : "text-gray-400 border-[#1e2a38] hover:text-white"}`}
+                  className={`shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 rounded border transition-colors ${composerCategory === c ? "bg-[#b3cdff] text-[#141414] border-[#b3cdff]" : "text-gray-400 border-[#242424] hover:text-white"}`}
                 >{c}</button>
               ))}
               {isCoach && (
                 <button onClick={() => setComposerCategory("Announcements")}
-                  className={`shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 rounded border transition-colors ${composerCategory === "Announcements" ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]" : "text-gray-400 border-[#1e2a38] hover:text-white"}`}
+                  className={`shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 rounded border transition-colors ${composerCategory === "Announcements" ? "bg-[#b3cdff] text-[#141414] border-[#b3cdff]" : "text-gray-400 border-[#242424] hover:text-white"}`}
                 >Announcement</button>
               )}
             </div>
             <div className="flex gap-2 shrink-0">
               <button onClick={() => { setShowComposer(false); setComposerText(""); }}
-                className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#1e2a38] text-gray-400 rounded hover:text-white transition-colors"
+                className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#242424] text-gray-400 rounded hover:text-white transition-colors"
               >Cancel</button>
               <button onClick={handlePost} disabled={!composerText.trim()}
-                className="font-mono text-[8px] tracking-widest uppercase px-4 py-2 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="font-mono text-[8px] tracking-widest uppercase px-4 py-2 bg-[#b3cdff] text-[#141414] rounded font-bold hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >Post</button>
             </div>
           </div>
@@ -633,7 +633,7 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {categories.map(c => (
           <button key={c} onClick={() => setActiveCategory(c)}
-            className={`shrink-0 font-mono text-[8px] tracking-[0.2em] uppercase px-3 py-2 rounded border transition-colors ${activeCategory === c ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]" : "text-gray-400 border-[#1e2a38] bg-[#0f141b] hover:border-[#b3cdff]/30 hover:text-white"}`}
+            className={`shrink-0 font-mono text-[8px] tracking-[0.2em] uppercase px-3 py-2 rounded border transition-colors ${activeCategory === c ? "bg-[#b3cdff] text-[#141414] border-[#b3cdff]" : "text-gray-400 border-[#242424] bg-[#141414] hover:border-[#b3cdff]/30 hover:text-white"}`}
           >{c}</button>
         ))}
       </div>
@@ -654,9 +654,9 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
       {grouped.map(group => (
         <div key={group.label} className="space-y-3">
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#1e2a38]" />
+            <div className="flex-1 h-px bg-[#242424]" />
             <span className="font-mono text-[8px] tracking-widest uppercase text-gray-500 shrink-0">{group.label}</span>
-            <div className="flex-1 h-px bg-[#1e2a38]" />
+            <div className="flex-1 h-px bg-[#242424]" />
           </div>
 
           {group.posts.map(post => {
@@ -664,7 +664,7 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
             const commentsOpen = openComments.has(post.id);
             const postComments = comments[post.id] ?? [];
             return (
-              <div key={post.id} className={`border rounded overflow-hidden transition-colors ${isAnnouncement ? "bg-[#131b2e] border-[#b3cdff]/25" : "bg-[#0f141b] border-[#1e2a38]"}`}>
+              <div key={post.id} className={`border rounded overflow-hidden transition-colors ${isAnnouncement ? "bg-[#131b2e] border-[#b3cdff]/25" : "bg-[#141414] border-[#242424]"}`}>
                 {isAnnouncement && <div className="h-px w-full bg-[#b3cdff]/40" />}
                 <div className="p-5">
                   <div className="flex items-start gap-3 mb-4">
@@ -693,11 +693,11 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
                           </svg>
                         </button>
                         {openMenuId === post.id && (
-                          <div className="absolute right-0 top-8 z-20 bg-[#111820] border border-[#1e2a38] rounded shadow-xl min-w-[120px] overflow-hidden" onClick={e => e.stopPropagation()}>
+                          <div className="absolute right-0 top-8 z-20 bg-[#111820] border border-[#242424] rounded shadow-xl min-w-[120px] overflow-hidden" onClick={e => e.stopPropagation()}>
                             {post.user_id === userId && (
                               <button
                                 onClick={() => { setEditingId(post.id); setEditText(post.content); setOpenMenuId(null); }}
-                                className="w-full flex items-center gap-2 px-4 py-2.5 text-left font-mono text-[9px] tracking-widest uppercase text-gray-300 hover:bg-[#1e2a38] hover:text-white transition-colors"
+                                className="w-full flex items-center gap-2 px-4 py-2.5 text-left font-mono text-[9px] tracking-widest uppercase text-gray-300 hover:bg-[#242424] hover:text-white transition-colors"
                               >
                                 <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5">
                                   <path d="M11.5 2.5l2 2L5 13H3v-2L11.5 2.5z" strokeLinecap="round" strokeLinejoin="round" />
@@ -727,17 +727,17 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
                         value={editText}
                         onChange={e => setEditText(e.target.value)}
                         rows={3}
-                        className="w-full bg-[#0f141b] border border-[#b3cdff]/40 rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#b3cdff]/70 transition-colors resize-none leading-relaxed"
+                        className="w-full bg-[#141414] border border-[#b3cdff]/40 rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-[#b3cdff]/70 transition-colors resize-none leading-relaxed"
                       />
                       <div className="flex gap-2">
                         <button
                           onClick={() => saveEdit(post.id)}
                           disabled={!editText.trim()}
-                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
+                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 bg-[#b3cdff] text-[#141414] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
                         >Save</button>
                         <button
                           onClick={() => setEditingId(null)}
-                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 border border-[#1e2a38] text-gray-400 rounded hover:text-white transition-colors"
+                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-1.5 border border-[#242424] text-gray-400 rounded hover:text-white transition-colors"
                         >Cancel</button>
                       </div>
                     </div>
@@ -769,7 +769,7 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
                       {postComments.map(comment => (
                         <div key={comment.id} className="flex gap-2.5">
                           <Avatar initials={postInitials(comment.author_name)} size="sm" />
-                          <div className="flex-1 bg-[#0f141b] rounded px-3 py-2.5">
+                          <div className="flex-1 bg-[#141414] rounded px-3 py-2.5">
                             <div className="flex items-baseline gap-2 mb-1">
                               <span className="text-xs font-medium text-white">{comment.author_name}</span>
                               <span className="font-mono text-[8px] text-gray-600">{formatTime(comment.created_at)}</span>
@@ -785,10 +785,10 @@ function CommunityTab({ userInitials, userName, avatarColor, userId }: {
                           onChange={e => setReplyText(prev => ({ ...prev, [post.id]: e.target.value }))}
                           onKeyDown={e => e.key === "Enter" && submitComment(post.id)}
                           placeholder="Write a reply..."
-                          className="flex-1 bg-[#0f141b] border border-[#1e2a38] rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+                          className="flex-1 bg-[#141414] border border-[#242424] rounded px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
                         />
                         <button onClick={() => submitComment(post.id)} disabled={!(replyText[post.id] ?? "").trim()}
-                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 bg-[#b3cdff] text-[#0f141b] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
+                          className="font-mono text-[8px] tracking-widest uppercase px-3 py-2 bg-[#b3cdff] text-[#141414] rounded font-bold hover:bg-white transition-colors disabled:opacity-40"
                         >Reply</button>
                       </div>
                     </div>
@@ -966,11 +966,11 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
   );
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100dvh-130px)] md:h-[calc(100dvh-80px)] flex border border-[#1e2a38] rounded overflow-hidden relative">
+    <div className="max-w-4xl mx-auto h-[calc(100dvh-130px)] md:h-[calc(100dvh-80px)] flex border border-[#242424] rounded overflow-hidden relative">
 
       {/* ── Conversation list ── */}
-      <div className={`w-full md:w-72 shrink-0 bg-[#0a0f16] border-r border-[#1e2a38] flex flex-col ${activeId ? "hidden md:flex" : "flex"}`}>
-        <div className="px-4 py-3.5 border-b border-[#1e2a38] flex items-center justify-between">
+      <div className={`w-full md:w-72 shrink-0 bg-[#0a0f16] border-r border-[#242424] flex flex-col ${activeId ? "hidden md:flex" : "flex"}`}>
+        <div className="px-4 py-3.5 border-b border-[#242424] flex items-center justify-between">
           <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-gray-400">Messages</p>
           <button
             onClick={() => { setShowPicker(true); loadMembers(); }}
@@ -1001,7 +1001,7 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
             <button
               key={conv.id}
               onClick={() => setActiveId(conv.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-[#1a222c] ${activeId === conv.id ? "bg-[#b3cdff]/5 border-l-2 border-l-[#b3cdff]" : "hover:bg-[#0f141b]"}`}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors border-b border-[#1a222c] ${activeId === conv.id ? "bg-[#b3cdff]/5 border-l-2 border-l-[#b3cdff]" : "hover:bg-[#141414]"}`}
             >
               <Avatar initials={conv.other.initials} size="sm" color={conv.other.color} />
               <div className="flex-1 min-w-0">
@@ -1023,7 +1023,7 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
         {activeConv ? (
           <>
             {/* Chat header */}
-            <div className="px-4 py-3.5 border-b border-[#1e2a38] flex items-center gap-3 bg-[#0a0f16]">
+            <div className="px-4 py-3.5 border-b border-[#242424] flex items-center gap-3 bg-[#0a0f16]">
               <button onClick={() => setActiveId(null)} className="md:hidden text-gray-400 hover:text-white transition-colors mr-1">
                 <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M10 3L4 8l6 5" strokeLinecap="round" strokeLinejoin="round" />
@@ -1062,7 +1062,7 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
                       </div>
                     )}
                     <div className={`max-w-[72%] md:max-w-sm space-y-0.5 ${isMe ? "items-end" : "items-start"} flex flex-col`}>
-                      <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${isMe ? "bg-[#b3cdff] text-[#0f141b] rounded-br-sm" : "bg-[#111820] text-white rounded-bl-sm"}`}>
+                      <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${isMe ? "bg-[#b3cdff] text-[#141414] rounded-br-sm" : "bg-[#111820] text-white rounded-bl-sm"}`}>
                         {msg.content}
                       </div>
                       <p className="font-mono text-[8px] text-gray-600 px-1">
@@ -1076,18 +1076,18 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-[#1e2a38] flex gap-2 bg-[#0a0f16]">
+            <div className="p-3 border-t border-[#242424] flex gap-2 bg-[#0a0f16]">
               <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && !e.shiftKey && sendMessage()}
                 placeholder={`Message ${activeConv.other.name}...`}
-                className="flex-1 bg-[#0f141b] border border-[#1e2a38] rounded-full px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+                className="flex-1 bg-[#141414] border border-[#242424] rounded-full px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
               />
               <button
                 onClick={sendMessage}
                 disabled={!input.trim()}
-                className="w-10 h-10 rounded-full bg-[#b3cdff] text-[#0f141b] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                className="w-10 h-10 rounded-full bg-[#b3cdff] text-[#141414] flex items-center justify-center hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
               >
                 <svg viewBox="0 0 16 16" className="w-4 h-4 rotate-90" fill="currentColor">
                   <path d="M8 1l7 7-7 7M1 8h14" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -1111,8 +1111,8 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
       {/* ── New DM picker overlay ── */}
       {showPicker && (
         <div className="absolute inset-0 z-30 flex items-center justify-center px-6" style={{ background: "rgba(0,0,0,0.6)" }}>
-          <div className="bg-[#0f141b] border border-[#1e2a38] rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-[#1e2a38] flex items-center justify-between">
+          <div className="bg-[#141414] border border-[#242424] rounded-xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-[#242424] flex items-center justify-between">
               <p className="font-mono text-[9px] tracking-[0.3em] uppercase text-gray-400">New Message</p>
               <button onClick={() => { setShowPicker(false); setSearch(""); }} className="text-gray-500 hover:text-white transition-colors">
                 <svg viewBox="0 0 16 16" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1120,11 +1120,11 @@ function MessagesTab({ userId, userName, userInitials, avatarColor }: {
                 </svg>
               </button>
             </div>
-            <div className="px-4 py-3 border-b border-[#1e2a38]">
+            <div className="px-4 py-3 border-b border-[#242424]">
               <input
                 autoFocus value={search} onChange={e => setSearch(e.target.value)}
                 placeholder="Search members..."
-                className="w-full bg-[#0f141b] border border-[#1e2a38] rounded px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+                className="w-full bg-[#141414] border border-[#242424] rounded px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
               />
             </div>
             <div className="max-h-64 overflow-y-auto">
@@ -1200,7 +1200,7 @@ function ProgramsTab() {
       {PROGRAMS.map(prog => (
         <div
           key={prog.id}
-          className={`bg-[#0f141b] border rounded overflow-hidden transition-all ${prog.locked ? "border-[#1a222c] opacity-60" : "border-[#1e2a38]"}`}
+          className={`bg-[#141414] border rounded overflow-hidden transition-all ${prog.locked ? "border-[#1a222c] opacity-60" : "border-[#242424]"}`}
         >
           <div className="h-0.5 w-full" style={{ backgroundColor: prog.accentColor }} />
 
@@ -1245,7 +1245,7 @@ function ProgramsTab() {
 
           {/* Expand: content blocks */}
           {!prog.locked && expanded === prog.id && (
-            <div className="border-t border-[#1e2a38] px-5 pt-4 pb-5 space-y-3">
+            <div className="border-t border-[#242424] px-5 pt-4 pb-5 space-y-3">
               {loadingId === prog.id ? (
                 <div className="flex justify-center py-6">
                   <div className="w-5 h-5 border-2 border-[#b3cdff]/20 border-t-[#b3cdff] rounded-full animate-spin" />
@@ -1257,7 +1257,7 @@ function ProgramsTab() {
                   {(contents[prog.id] ?? []).map(block => {
                     const meta = CONTENT_META[block.type];
                     return (
-                      <div key={block.id} className="bg-[#0f141b] border border-[#1e2a38] rounded p-4">
+                      <div key={block.id} className="bg-[#141414] border border-[#242424] rounded p-4">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded border" style={{ color: meta.color, borderColor: meta.color + "40", backgroundColor: meta.color + "10" }}>
                             {meta.label}
@@ -1368,9 +1368,9 @@ function ScheduleTab() {
       </div>
 
       {/* ── Weekly calendar ── */}
-      <div className="bg-[#0f141b] border border-[#1e2a38] rounded overflow-hidden">
+      <div className="bg-[#141414] border border-[#242424] rounded overflow-hidden">
         {/* Week navigation */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#1e2a38]">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-[#242424]">
           <button
             onClick={() => setWeekOffset(w => w - 1)}
             className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white transition-colors rounded hover:bg-[#111820]"
@@ -1413,7 +1413,7 @@ function ScheduleTab() {
                 onClick={() => setSelectedDate(isSelected ? null : date)}
                 className={`flex flex-col items-center gap-1 py-3 rounded-lg transition-all ${
                   isSelected
-                    ? "bg-[#b3cdff] text-[#0f141b]"
+                    ? "bg-[#b3cdff] text-[#141414]"
                     : isToday
                     ? "bg-[#b3cdff]/10 border border-[#b3cdff]/30 text-[#b3cdff]"
                     : isPast
@@ -1429,7 +1429,7 @@ function ScheduleTab() {
                   {dayEvents.slice(0, 3).map((e, j) => (
                     <span
                       key={j}
-                      className={`w-1 h-1 rounded-full ${isSelected ? "bg-[#0f141b]/50" : tagDotColors[e.tag] ?? "bg-gray-500"}`}
+                      className={`w-1 h-1 rounded-full ${isSelected ? "bg-[#141414]/50" : tagDotColors[e.tag] ?? "bg-gray-500"}`}
                     />
                   ))}
                 </div>
@@ -1440,7 +1440,7 @@ function ScheduleTab() {
       </div>
 
       {/* Recurring note */}
-      <div className="bg-[#0f141b] border border-[#1e2a38] rounded p-4 font-mono text-[9px] text-gray-400 tracking-wide">
+      <div className="bg-[#141414] border border-[#242424] rounded p-4 font-mono text-[9px] text-gray-400 tracking-wide">
         <span className="text-[#b3cdff]">Every Thursday — </span>
         Group Coaching Call with Javier. 7:00 PM Manila time.
       </div>
@@ -1462,13 +1462,13 @@ function ScheduleTab() {
         </div>
 
         {displayedEvents.length === 0 ? (
-          <div className="bg-[#0f141b] border border-[#1e2a38] rounded p-10 text-center">
+          <div className="bg-[#141414] border border-[#242424] rounded p-10 text-center">
             <p className="font-mono text-[9px] tracking-widest uppercase text-gray-600">Nothing scheduled</p>
           </div>
         ) : (
           <div className="space-y-3">
             {displayedEvents.map(event => (
-              <div key={event.id} className="bg-[#0f141b] border border-[#1e2a38] rounded p-5 flex items-start gap-4 hover:border-[#1e2a38]/80 transition-colors">
+              <div key={event.id} className="bg-[#141414] border border-[#242424] rounded p-5 flex items-start gap-4 hover:border-[#242424]/80 transition-colors">
                 <div className="text-center min-w-[48px]">
                   <p className="font-mono text-[8px] text-gray-500 uppercase tracking-widest leading-tight">
                     {event.date.split(",")[0]}
@@ -1481,7 +1481,7 @@ function ScheduleTab() {
                   </p>
                 </div>
 
-                <div className="w-px self-stretch bg-[#1e2a38] mx-1" />
+                <div className="w-px self-stretch bg-[#242424] mx-1" />
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -1536,7 +1536,7 @@ function MembersTab() {
           { label: "This Month", value: "4" },
           { label: "Avg Streak", value: "26d" },
         ].map(s => (
-          <div key={s.label} className="bg-[#0f141b] border border-[#1e2a38] rounded p-4 text-center">
+          <div key={s.label} className="bg-[#141414] border border-[#242424] rounded p-4 text-center">
             <p className="text-xl font-light text-white mb-1">{s.value}</p>
             <p className="font-mono text-[8px] text-gray-500 uppercase tracking-widest">{s.label}</p>
           </div>
@@ -1545,7 +1545,7 @@ function MembersTab() {
 
       <div className="space-y-2">
         {MEMBERS_LIST.map(member => (
-          <div key={member.id} className="bg-[#0f141b] border border-[#1e2a38] rounded p-4 flex items-center gap-3">
+          <div key={member.id} className="bg-[#141414] border border-[#242424] rounded p-4 flex items-center gap-3">
             <Avatar initials={member.initials} size="md" online={member.online} />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -1574,14 +1574,14 @@ function RanksTab() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      <div className="bg-[#0f141b] border border-[#b3cdff]/20 rounded p-5">
+      <div className="bg-[#141414] border border-[#b3cdff]/20 rounded p-5">
         <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-4">Your Standing</p>
         <div className="flex items-center gap-4">
           <div className="text-center">
             <p className="text-4xl font-light text-white">#{userEntry.rank}</p>
             <p className="font-mono text-[8px] text-gray-500 uppercase tracking-widest mt-1">Rank</p>
           </div>
-          <div className="w-px h-12 bg-[#1e2a38]" />
+          <div className="w-px h-12 bg-[#242424]" />
           <div className="flex-1">
             <div className="flex justify-between mb-2">
               <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest">Points</span>
@@ -1605,8 +1605,8 @@ function RanksTab() {
             onClick={() => setPeriod(p)}
             className={`flex-1 font-mono text-[8px] tracking-widest uppercase py-2.5 rounded border transition-colors ${
               period === p
-                ? "bg-[#b3cdff] text-[#0f141b] border-[#b3cdff]"
-                : "text-gray-400 border-[#1e2a38] bg-[#0f141b] hover:text-white"
+                ? "bg-[#b3cdff] text-[#141414] border-[#b3cdff]"
+                : "text-gray-400 border-[#242424] bg-[#141414] hover:text-white"
             }`}
           >
             {p === "weekly" ? "This Week" : "All Time"}
@@ -1614,8 +1614,8 @@ function RanksTab() {
         ))}
       </div>
 
-      <div className="bg-[#0f141b] border border-[#1e2a38] rounded overflow-hidden">
-        <div className="grid grid-cols-[40px_1fr_60px_50px] gap-3 px-4 py-3 border-b border-[#1e2a38]">
+      <div className="bg-[#141414] border border-[#242424] rounded overflow-hidden">
+        <div className="grid grid-cols-[40px_1fr_60px_50px] gap-3 px-4 py-3 border-b border-[#242424]">
           {["#", "Member", "Points", "Streak"].map(h => (
             <p key={h} className="font-mono text-[8px] text-gray-500 uppercase tracking-widest">{h}</p>
           ))}
@@ -1627,7 +1627,7 @@ function RanksTab() {
             className={`grid grid-cols-[40px_1fr_60px_50px] gap-3 px-4 py-3 items-center transition-colors ${
               entry.isUser
                 ? "bg-[#b3cdff]/5 border-l-2 border-l-[#b3cdff]"
-                : i < LEADERBOARD_DATA.length - 1 ? "border-b border-[#0f141b]" : ""
+                : i < LEADERBOARD_DATA.length - 1 ? "border-b border-[#141414]" : ""
             }`}
           >
             <p className={`font-mono text-sm ${entry.rank <= 3 ? "text-[#b3cdff]" : "text-gray-500"} font-light`}>
@@ -1686,12 +1686,12 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
   const currentLabel = NAV_ITEMS.find(n => n.id === activeTab)?.label ?? "";
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white flex">
+    <div className="min-h-screen bg-[#0f0f0f] text-white flex">
 
       {/* ── Sidebar (desktop) ── */}
-      <aside className="hidden md:flex flex-col w-60 bg-[#070b10] border-r border-[#1e2a38] fixed h-full z-20">
+      <aside className="hidden md:flex flex-col w-60 bg-[#0a0a0a] border-r border-[#242424] fixed h-full z-20">
         {/* Logo */}
-        <div className="px-5 py-6 border-b border-[#1e2a38]">
+        <div className="px-5 py-6 border-b border-[#242424]">
           <Link href="/" title="Back to home">
             <ZLogo className="h-6 text-white hover:opacity-70 transition-opacity" />
           </Link>
@@ -1719,7 +1719,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
         </nav>
 
         {/* User card */}
-        <div className="p-5 border-t border-[#1e2a38] space-y-4">
+        <div className="p-5 border-t border-[#242424] space-y-4">
           <div className="flex items-center gap-3">
             <Avatar initials={userInitials} size="sm" online={true} color={avatarColor} />
             <div className="flex-1 min-w-0">
@@ -1744,7 +1744,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
       <main className="flex-1 md:ml-60 flex flex-col min-h-screen">
 
         {/* Top bar */}
-        <header className="sticky top-0 z-10 bg-[#0f172a]/95 backdrop-blur-md border-b border-[#1e2a38] px-5 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-10 bg-[#0f0f0f]/95 backdrop-blur-md border-b border-[#242424] px-5 py-4 flex items-center justify-between">
           {/* Mobile: Z mark — tapping goes home */}
           <Link href="/" className="md:hidden" title="Back to home">
             <ZMark className="h-5 text-white hover:opacity-70 transition-opacity" />
@@ -1781,7 +1781,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
       </main>
 
       {/* ── Bottom nav (mobile) ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-20 bg-[#070b10]/95 backdrop-blur-md border-t border-[#1e2a38] flex">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-20 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-[#242424] flex">
         {NAV_ITEMS.map(item => {
           const active = activeTab === item.id;
           return (

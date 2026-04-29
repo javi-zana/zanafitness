@@ -59,7 +59,7 @@ function LoginForm() {
 
   if (showForgot) {
     return forgotSent ? (
-      <div className="bg-[#162035] border border-[#1f3050] rounded-xl p-8 text-center space-y-4">
+      <div className="bg-[#141414] border border-[#242424] rounded-xl p-8 text-center space-y-4">
         <div className="w-12 h-12 rounded-full border-2 border-[#b3cdff] flex items-center justify-center mx-auto">
           <svg viewBox="0 0 16 16" className="w-5 h-5 text-[#b3cdff]" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M2 8l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
@@ -88,12 +88,12 @@ function LoginForm() {
           required
           value={forgotEmail}
           onChange={e => setForgotEmail(e.target.value)}
-          className="w-full bg-[#1e2d42] border border-[#2d4060] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
+          className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
         />
         <button
           type="submit"
           disabled={forgotLoading}
-          className="w-full bg-[#b3cdff] text-[#0f172a] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded-lg hover:bg-white transition-colors disabled:opacity-40"
+          className="w-full bg-[#b3cdff] text-[#0f0f0f] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded-lg hover:bg-white transition-colors disabled:opacity-40"
         >
           {forgotLoading ? 'Sending...' : 'Send Reset Link'}
         </button>
@@ -116,7 +116,7 @@ function LoginForm() {
         required
         value={email}
         onChange={e => setEmail(e.target.value)}
-        className="w-full bg-[#1e2d42] border border-[#2d4060] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
+        className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
       />
       <input
         type="password"
@@ -124,7 +124,7 @@ function LoginForm() {
         required
         value={password}
         onChange={e => setPassword(e.target.value)}
-        className="w-full bg-[#1e2d42] border border-[#2d4060] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
+        className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
       />
 
       {error && (
@@ -136,7 +136,7 @@ function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-[#b3cdff] text-[#0f172a] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded-lg hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full bg-[#b3cdff] text-[#0f0f0f] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded-lg hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {loading ? 'Signing in...' : 'Sign In'}
       </button>
@@ -159,9 +159,9 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[#0f172a] text-white flex flex-col">
+    <main className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
 
-      <nav className="flex items-center justify-between px-8 py-6 border-b border-[#1f3050]">
+      <nav className="flex items-center justify-between px-8 py-6 border-b border-[#242424]">
         <Link href="/" className="text-white">
           <ZanaLogo className="h-5 text-white" />
         </Link>

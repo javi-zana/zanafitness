@@ -13,16 +13,16 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
 
 export default function AboutPage() {
   return (
-    <main className="min-h-screen bg-[#0f172a] text-white flex flex-col">
+    <main className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
 
       <Navbar active="about" />
 
       <section className="grid grid-cols-1 md:grid-cols-2 flex-1 pt-20 md:pt-0">
 
         {/* Left — Photo */}
-        <div className="h-[50vh] md:h-full w-full relative border-b md:border-b-0 md:border-r border-[#1f3050] overflow-hidden">
+        <div className="h-[50vh] md:h-full w-full relative border-b md:border-b-0 md:border-r border-[#242424] overflow-hidden">
           <div className="absolute inset-0 bg-[url('/A502086F-E304-43B4-87C1-93658EDB79F0.PNG')] bg-cover bg-center bg-no-repeat brightness-90" />
-          <div className="absolute inset-0 bg-[#0f172a]/10" />
+          <div className="absolute inset-0 bg-[#0f0f0f]/10" />
         </div>
 
         {/* Right — Copy */}

@@ -17,8 +17,8 @@ const emailHtml = () => `
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>You're on the list — ZANA Fitness</title>
 </head>
-<body style="margin:0;padding:0;background-color:#0f141b;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f141b;">
+<body style="margin:0;padding:0;background-color:#141414;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#141414;">
   <tr>
     <td align="center" style="padding:56px 24px;">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:500px;">
@@ -74,7 +74,7 @@ const emailHtml = () => `
             <tr>
               <td align="center">
                 <a href="https://zanafitness.com/system"
-                  style="display:inline-block;background-color:#b3cdff;color:#0f141b;font-family:'Courier New',Courier,monospace;font-size:8px;font-weight:700;letter-spacing:4px;text-transform:uppercase;text-decoration:none;padding:16px 40px;border-radius:100px;">
+                  style="display:inline-block;background-color:#b3cdff;color:#141414;font-family:'Courier New',Courier,monospace;font-size:8px;font-weight:700;letter-spacing:4px;text-transform:uppercase;text-decoration:none;padding:16px 40px;border-radius:100px;">
                   VIEW THE SYSTEM
                 </a>
               </td>

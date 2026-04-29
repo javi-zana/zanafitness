@@ -42,8 +42,8 @@ function PlanCard({
   return (
     <div
       className={`flex flex-col border ${
-        featured ? "border-[#b3cdff] shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]" : "border-[#2d4060]"
-      } rounded-2xl p-10 md:p-12 relative bg-[#1e2d42]`}
+        featured ? "border-[#b3cdff] shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]" : "border-[#2e2e2e]"
+      } rounded-2xl p-10 md:p-12 relative bg-[#1a1a1a]`}
     >
       {featured && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#b3cdff] text-black text-[9px] font-bold uppercase tracking-widest px-4 py-1 rounded-full whitespace-nowrap">
@@ -75,7 +75,7 @@ function PlanCard({
         className={`lemonsqueezy-button w-full py-4 rounded-full text-[10px] uppercase tracking-widest font-bold transition-colors text-center ${
           featured
             ? "bg-[#b3cdff] text-black hover:bg-white"
-            : "border border-[#2d4060] text-gray-300 hover:border-[#b3cdff] hover:text-[#b3cdff]"
+            : "border border-[#2e2e2e] text-gray-300 hover:border-[#b3cdff] hover:text-[#b3cdff]"
         }`}
       >
         JOIN THE SYSTEM
@@ -86,12 +86,12 @@ function PlanCard({
 
 export default function SystemPage() {
   return (
-    <main className="min-h-screen bg-[#1e2d42] text-white font-sans selection:bg-[#b3cdff] selection:text-[#162035]">
+    <main className="min-h-screen bg-[#1a1a1a] text-white font-sans selection:bg-[#b3cdff] selection:text-[#141414]">
 
       <Navbar active="system" />
 
       {/* HEADER */}
-      <section className="pt-40 pb-20 px-6 text-center bg-[#1e2d42]">
+      <section className="pt-40 pb-20 px-6 text-center bg-[#1a1a1a]">
         <div className="max-w-2xl mx-auto flex flex-col items-center">
           <ZanaLogo className="h-10 md:h-12 text-white mb-12" />
           <div className="w-8 h-px bg-gray-500 mb-12"></div>
@@ -103,7 +103,7 @@ export default function SystemPage() {
       </section>
 
       {/* SYSTEM EXPECTATIONS */}
-      <section className="py-24 px-6 bg-[#1e2d42] border-y border-[#2d4060]">
+      <section className="py-24 px-6 bg-[#1a1a1a] border-y border-[#2e2e2e]">
         <div className="max-w-6xl mx-auto flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">EXPECTATIONS</p>
           <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase text-center mb-20">
@@ -111,7 +111,7 @@ export default function SystemPage() {
           </h2>
           <div className="grid md:grid-cols-3 gap-16 md:gap-0 w-full text-center px-4">
 
-            <div className="flex flex-col items-center md:border-r border-[#2d4060] md:pr-16">
+            <div className="flex flex-col items-center md:border-r border-[#2e2e2e] md:pr-16">
                <TrendingUp className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">01</div>
                <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Training</h3>
@@ -119,7 +119,7 @@ export default function SystemPage() {
                <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">A simple, progressive split built for your schedule — not a bodybuilder's. 45–60 minute sessions, structured to build the lean aesthetic look: shoulders, chest, arms.</p>
             </div>
 
-            <div className="flex flex-col items-center md:border-r border-[#2d4060] md:px-16">
+            <div className="flex flex-col items-center md:border-r border-[#2e2e2e] md:px-16">
                <Leaf className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
                <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">02</div>
                <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Nutrition</h3>
@@ -140,7 +140,7 @@ export default function SystemPage() {
       </section>
 
       {/* CORE STATEMENT */}
-      <section className="py-24 px-6 text-center bg-[#1e2d42]">
+      <section className="py-24 px-6 text-center bg-[#1a1a1a]">
         <div className="max-w-4xl mx-auto flex flex-col items-center">
           <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">THE RESULT</p>
           <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white mb-10">
@@ -152,7 +152,7 @@ export default function SystemPage() {
       </section>
 
       {/* WHAT YOU GET */}
-      <section className="py-24 px-8 md:px-16 bg-[#162035]">
+      <section className="py-24 px-8 md:px-16 bg-[#141414]">
         <div className="max-w-5xl mx-auto">
 
           <div className="text-center mb-20">
@@ -168,7 +168,7 @@ export default function SystemPage() {
 
             {/* Mock UI — Member */}
             <div className="w-full max-w-[260px] mx-auto shrink-0">
-              <div className="bg-[#0a0f16] border border-[#2d4060] rounded-2xl overflow-hidden shadow-2xl">
+              <div className="bg-[#0a0f16] border border-[#2e2e2e] rounded-2xl overflow-hidden shadow-2xl">
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[#1a222c]">
                   <svg viewBox="0 0 180 32" className="h-4 text-white" fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10"><path d="M0,2 H32 L18.3,14"/><path d="M13.7,18 L0,30 H32"/><path d="M48,30 L64,2 L80,30"/><path d="M96,30 V2 L128,30 V2"/><path d="M144,30 L160,2 L176,30"/></svg>
@@ -183,26 +183,26 @@ export default function SystemPage() {
                   </div>
                   {/* Streak */}
                   <div className="flex gap-2">
-                    <div className="flex-1 bg-[#1e2d42] border border-[#2d4060] rounded p-3">
+                    <div className="flex-1 bg-[#1a1a1a] border border-[#2e2e2e] rounded p-3">
                       <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest mb-1">Streak</p>
                       <p className="text-lg font-light text-[#b3cdff]">67<span className="text-xs text-gray-500 ml-1">days</span></p>
                     </div>
-                    <div className="flex-1 bg-[#1e2d42] border border-[#2d4060] rounded p-3">
+                    <div className="flex-1 bg-[#1a1a1a] border border-[#2e2e2e] rounded p-3">
                       <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest mb-1">Phase</p>
                       <p className="text-lg font-light text-white">03</p>
                     </div>
                   </div>
                   {/* Today's workout */}
-                  <div className="bg-[#1e2d42] border border-[#b3cdff]/20 rounded p-3">
+                  <div className="bg-[#1a1a1a] border border-[#b3cdff]/20 rounded p-3">
                     <p className="font-mono text-[7px] text-[#b3cdff] uppercase tracking-widest mb-1">Today</p>
                     <p className="text-xs text-white font-medium">Upper Body A</p>
                     <p className="font-mono text-[8px] text-gray-500 mt-0.5">6 exercises · 55 min</p>
-                    <div className="mt-2 w-full bg-[#162035] rounded-full h-1">
+                    <div className="mt-2 w-full bg-[#141414] rounded-full h-1">
                       <div className="bg-[#b3cdff] h-1 rounded-full" style={{width:"45%"}} />
                     </div>
                   </div>
                   {/* Community preview */}
-                  <div className="bg-[#1e2d42] border border-[#2d4060] rounded p-3">
+                  <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded p-3">
                     <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest mb-2">Community</p>
                     <div className="flex gap-2">
                       <div className="w-5 h-5 rounded-full bg-[#b3cdff]/15 border border-[#b3cdff]/30 flex items-center justify-center shrink-0">
@@ -212,7 +212,7 @@ export default function SystemPage() {
                     </div>
                   </div>
                   {/* DM preview */}
-                  <div className="bg-[#1e2d42] border border-[#2d4060] rounded p-3 flex items-center gap-2">
+                  <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded p-3 flex items-center gap-2">
                     <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#b3cdff] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     <div>
                       <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest">Javi</p>
@@ -262,7 +262,7 @@ export default function SystemPage() {
 
             {/* Mock UI — Coach */}
             <div className="w-full max-w-[380px] mx-auto shrink-0">
-              <div className="bg-[#0a0f16] border border-[#2d4060] rounded-2xl overflow-hidden shadow-2xl flex">
+              <div className="bg-[#0a0f16] border border-[#2e2e2e] rounded-2xl overflow-hidden shadow-2xl flex">
                 {/* Sidebar */}
                 <div className="w-14 bg-[#060b10] border-r border-[#1a222c] flex flex-col items-center py-4 gap-1">
                   <svg viewBox="0 0 32 32" className="h-4 text-white mb-3" fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10"><path d="M0,2 H32 L18.3,14"/><path d="M13.7,18 L0,30 H32"/></svg>
@@ -279,26 +279,26 @@ export default function SystemPage() {
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-1.5">
                     {[{l:"Members",v:"8",c:"#fff"},{l:"Active",v:"3",c:"#86efac"},{l:"Pending",v:"5",c:"#fbbf24"}].map(s => (
-                      <div key={s.l} className="bg-[#1e2d42] border border-[#2d4060] rounded p-2 text-center">
+                      <div key={s.l} className="bg-[#1a1a1a] border border-[#2e2e2e] rounded p-2 text-center">
                         <p className="text-base font-light" style={{color:s.c}}>{s.v}</p>
                         <p className="font-mono text-[6px] text-gray-500 uppercase tracking-wider mt-0.5">{s.l}</p>
                       </div>
                     ))}
                   </div>
                   {/* Member rows */}
-                  <div className="bg-[#1e2d42] border border-[#2d4060] rounded overflow-hidden">
-                    <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest px-3 py-2 border-b border-[#0f141b]">Members</p>
+                  <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded overflow-hidden">
+                    <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest px-3 py-2 border-b border-[#141414]">Members</p>
                     {[
                       {i:"PS",n:"Priya S.",streak:67,c:"#b3cdff",pct:88},
                       {i:"AT",n:"Aiko T.", streak:45,c:"#86efac",pct:72},
                       {i:"MC",n:"Marcus C.",streak:28,c:"#fbbf24",pct:55},
                     ].map(m => (
-                      <div key={m.i} className="flex items-center gap-2 px-3 py-2 border-b border-[#0f141b] last:border-0">
+                      <div key={m.i} className="flex items-center gap-2 px-3 py-2 border-b border-[#141414] last:border-0">
                         <div className="w-5 h-5 rounded-full flex items-center justify-center font-mono text-[6px] shrink-0" style={{color:m.c,backgroundColor:m.c+"15",border:`1px solid ${m.c}30`}}>{m.i}</div>
                         <div className="flex-1 min-w-0">
                           <p className="font-mono text-[8px] text-white truncate">{m.n}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <div className="flex-1 h-0.5 bg-[#162035] rounded-full">
+                            <div className="flex-1 h-0.5 bg-[#141414] rounded-full">
                               <div className="h-0.5 rounded-full" style={{width:`${m.pct}%`,backgroundColor:m.c}} />
                             </div>
                             <span className="font-mono text-[6px]" style={{color:m.c}}>{m.streak}d</span>
@@ -308,7 +308,7 @@ export default function SystemPage() {
                     ))}
                   </div>
                   {/* Messages preview */}
-                  <div className="bg-[#1e2d42] border border-[#2d4060] rounded p-2.5 flex items-center gap-2">
+                  <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded p-2.5 flex items-center gap-2">
                     <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-[#b3cdff] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     <div className="min-w-0">
                       <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest">Priya Sharma</p>
@@ -348,7 +348,7 @@ export default function SystemPage() {
       </section>
 
       {/* PRICING */}
-      <section className="py-24 px-6 bg-[#1e2d42] border-y border-[#2d4060]" id="pricing">
+      <section className="py-24 px-6 bg-[#1a1a1a] border-y border-[#2e2e2e]" id="pricing">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-4">Choose Your Commitment Level.</h2>
