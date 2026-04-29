@@ -11,15 +11,25 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        forest: {
+          900: "#0f1a0c",
+          800: "#162212",
+          700: "#1c2e16",
+        },
+        lime: {
+          500: "#b0e455",
+          400: "#c9f070",
+        },
+        /* Legacy aliases — kept so in-app pages still compile */
         navy: {
-          900: "#0B0F1A",
-          800: "#1A1F2C",
-          700: "#2A3042"
+          900: "#0f1a0c",
+          800: "#162212",
+          700: "#1c2e16",
         },
         babyblue: {
-          500: "#AFCBFF",
-          400: "#C4DAFF"
-        }
+          500: "#b0e455",
+          400: "#c9f070",
+        },
       },
       fontFamily: {
         sans: ['Satoshi', 'sans-serif'],

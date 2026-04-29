@@ -5,10 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 
-const ZIcon = () => (
-  <svg viewBox="0 0 32 32" className="h-6" fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
+const ZanaLogo = ({ className = "h-5" }: { className?: string }) => (
+  <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
     <path d="M0,2 H32 L18.3,14" />
     <path d="M13.7,18 L0,30 H32" />
+    <path d="M48,30 L64,2 L80,30" />
+    <path d="M96,30 V2 L128,30 V2" />
+    <path d="M144,30 L160,2 L176,30" />
   </svg>
 );
 
@@ -21,13 +24,10 @@ export default function ResetPasswordPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Supabase puts the session in the URL hash after the reset link is clicked.
-    // Just detecting that we're on this page with a valid session is enough.
     const supabase = createClient();
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) setReady(true);
       else {
-        // No session yet — wait for the hash exchange
         const { data: listener } = supabase.auth.onAuthStateChange((event) => {
           if (event === 'PASSWORD_RECOVERY') setReady(true);
         });
@@ -50,33 +50,38 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#141414] text-white flex flex-col">
+    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
 
-      <nav className="flex items-center justify-between px-8 py-6 border-b border-[#2d3a4b]">
-        <Link href="/" className="text-white"><ZIcon /></Link>
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#b0e455]/8">
+        <Link href="/" className="text-[#edf5e2]"><ZanaLogo className="h-5 text-[#edf5e2]" /></Link>
       </nav>
 
       <div className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
           <div className="text-center mb-10">
-            <p className="font-mono text-[9px] tracking-[0.3em] text-[#b3cdff] uppercase mb-3">Account Setup</p>
-            <h1 className="text-2xl font-light tracking-[0.15em] uppercase text-white mb-2">Set your password.</h1>
-            <p className="font-mono text-[9px] tracking-widest text-gray-500 uppercase">Choose a password for your account</p>
+            <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-full px-4 py-1.5 mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
+              <p className="text-xs font-medium text-[#b0e455]">Account Setup</p>
+            </span>
+            <h1 className="font-display leading-none mb-3" style={{ fontSize: "clamp(32px, 5vw, 48px)" }}>
+              Set your<br />password.
+            </h1>
+            <p className="text-sm text-[#edf5e2]/45">Choose a password for your account</p>
           </div>
 
           {!ready ? (
             <div className="flex justify-center py-8">
-              <div className="w-6 h-6 border-2 border-[#b3cdff]/30 border-t-[#b3cdff] rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[#b0e455]/30 border-t-[#b0e455] rounded-full animate-spin" />
             </div>
           ) : (
-            <form onSubmit={handleReset} className="space-y-4">
+            <form onSubmit={handleReset} className="space-y-3">
               <input
                 type="password"
                 placeholder="New password"
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-sm tracking-wide"
+                className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
               />
               <input
                 type="password"
@@ -84,17 +89,17 @@ export default function ResetPasswordPage() {
                 required
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
-                className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-sm tracking-wide"
+                className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
               />
               {error && (
-                <div className="bg-[#f87171]/10 border border-[#f87171]/30 rounded px-4 py-3">
-                  <p className="font-mono text-[9px] text-[#f87171] tracking-wider text-center">{error}</p>
+                <div className="bg-red-500/8 border border-red-500/20 rounded-xl px-4 py-3">
+                  <p className="text-sm text-red-400 text-center">{error}</p>
                 </div>
               )}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#b3cdff] text-[#141414] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:bg-white transition-colors disabled:opacity-40"
+                className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40"
               >
                 {loading ? 'Saving...' : 'Set Password & Sign In'}
               </button>

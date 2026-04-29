@@ -20,10 +20,10 @@ const ZIcon = ({ className = "h-8" }: { className?: string }) => (
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-[#1a1a1a] text-white font-sans">
+    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] font-sans">
 
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2e2e2e]">
+      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#b0e455/8]">
         <Link href="/"><ZIcon className="h-5 md:h-6 text-white" /></Link>
         <Link href="/" className="font-mono text-[9px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
           &larr; Back
@@ -34,7 +34,7 @@ export default function TermsPage() {
       <section className="py-24 px-6">
         <div className="max-w-2xl mx-auto">
 
-          <p className="font-mono text-[9px] uppercase tracking-widest text-[#b3cdff] mb-6">Legal</p>
+          <p className="font-mono text-[9px] uppercase tracking-widest text-[#b0e455] mb-6">Legal</p>
           <h1 className="text-2xl md:text-3xl font-light tracking-[0.1em] uppercase mb-4">Terms of Service</h1>
           <p className="font-mono text-[9px] uppercase tracking-widest text-gray-500 mb-16">Last updated: April 2025</p>
 
@@ -53,7 +53,7 @@ export default function TermsPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">3. Subscriptions</h2>
               <p>Access to the ZANA system requires a paid subscription. We offer the following plans:</p>
-              <ul className="mt-4 space-y-2 list-none pl-4 border-l border-[#2e2e2e]">
+              <ul className="mt-4 space-y-2 list-none pl-4 border-l border-[#b0e455/10]">
                 <li>Entry — $500/month, 3-month commitment</li>
                 <li>Committed — $400/month, 6-month commitment</li>
                 <li>All In — $300/month, 12-month commitment</li>
@@ -93,7 +93,7 @@ export default function TermsPage() {
 
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">10. Contact</h2>
-              <p>For questions regarding these Terms, contact us at <span className="text-[#b3cdff]">hello@zanafitness.com</span></p>
+              <p>For questions regarding these Terms, contact us at <span className="text-[#b0e455]">hello@zanafitness.com</span></p>
             </div>
 
           </div>

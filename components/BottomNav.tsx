@@ -61,7 +61,7 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#0b0e14] border-t border-white/5 flex z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
       {NAV.map(item => {
         const active = pathname.startsWith(item.href)
         return (
@@ -69,11 +69,11 @@ export default function BottomNav() {
             key={item.href}
             href={item.href}
             className={`flex-1 flex flex-col items-center gap-1 py-3 transition ${
-              active ? 'text-babyblue-500' : 'text-white/25 hover:text-white/50'
+              active ? 'text-[#b0e455]' : 'text-[#edf5e2]/25 hover:text-[#edf5e2]/50'
             }`}
           >
             {item.icon(active)}
-            <span className="text-[9px] tracking-widest uppercase font-mono">{item.label}</span>
+            <span className="text-[9px] tracking-wide uppercase font-medium">{item.label}</span>
           </Link>
         )
       })}

@@ -12,10 +12,10 @@ const ZanaLogo = ({ className = "h-4" }: { className?: string }) => (
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0f0f0f] border-t border-[#242424] px-6 md:px-12 py-10">
+    <footer className="bg-[#0c1509] border-t border-[#b0e455]/8 px-6 md:px-12 py-10">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <ZanaLogo className="h-4 text-gray-500" />
-        <div className="flex gap-8">
+        <ZanaLogo className="h-4 text-[#edf5e2]/30" />
+        <div className="flex flex-wrap justify-center gap-6">
           {[
             { href: "/terms",   label: "Terms"      },
             { href: "/privacy", label: "Privacy"    },
@@ -27,14 +27,14 @@ export default function Footer() {
             <Link
               key={l.href}
               href={l.href}
-              className="font-mono text-[8px] tracking-widest uppercase text-gray-600 hover:text-white transition-colors"
+              className="text-xs text-[#edf5e2]/35 hover:text-[#edf5e2] transition-colors"
               {...(l.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
             >
               {l.label}
             </Link>
           ))}
         </div>
-        <p className="font-mono text-[8px] tracking-widest uppercase text-gray-700">© 2025 ZANA Fitness</p>
+        <p className="text-xs text-[#edf5e2]/25">© 2025 ZANA Fitness</p>
       </div>
     </footer>
   );

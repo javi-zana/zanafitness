@@ -44,10 +44,10 @@ function confidenceColor(v: number) {
   if (v <= 3) return '#f87171'
   if (v <= 5) return '#fbbf24'
   if (v <= 8) return '#86efac'
-  return '#AFCBFF'
+  return '#b0e455'
 }
 
-// ─── Weight chart (SVG sparkline) ─────────────────────────────────────────────
+// ─── Weight chart ─────────────────────────────────────────────────────────────
 
 function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }) {
   const pts = [...stats]
@@ -57,7 +57,7 @@ function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }
 
   if (pts.length < 2) {
     return (
-      <p className="text-xs text-white/30 text-center py-4">
+      <p className="text-sm text-[#edf5e2]/30 text-center py-4">
         Log at least 2 weights to see your trend
       </p>
     )
@@ -95,17 +95,17 @@ function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }
       >
         <defs>
           <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#AFCBFF" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="#AFCBFF" stopOpacity="0" />
+            <stop offset="0%" stopColor="#b0e455" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#b0e455" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={fillPath} fill="url(#chartGrad)" />
-        <polyline points={polyline} fill="none" stroke="#AFCBFF" strokeWidth="1.5" />
-        <circle cx={last.x} cy={last.y} r="3" fill="#AFCBFF" />
+        <polyline points={polyline} fill="none" stroke="#b0e455" strokeWidth="1.5" />
+        <circle cx={last.x} cy={last.y} r="3" fill="#b0e455" />
       </svg>
-      <div className="flex justify-between text-[10px] text-white/30 font-mono mt-1">
+      <div className="flex justify-between text-xs text-[#edf5e2]/35 mt-1">
         <span>{min} {unit}</span>
-        <span className="text-babyblue-500 font-medium">{lastVal} {unit} now</span>
+        <span className="text-[#b0e455] font-semibold">{lastVal} {unit} now</span>
         <span>{max} {unit}</span>
       </div>
     </div>
@@ -120,34 +120,34 @@ function StatCard({ stat, unit }: { stat: StatUpdate; unit: 'kg' | 'lb' }) {
   const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 
   return (
-    <div className="bg-[#1A1F2C] rounded-xl p-4 space-y-3">
-      <p className="text-[10px] text-white/30 font-mono tracking-widest uppercase">
+    <div className="bg-[#1c2e16] rounded-2xl p-4 space-y-3 border border-[#b0e455]/8">
+      <p className="text-xs text-[#edf5e2]/35">
         {formatted} · {time}
       </p>
 
       <div className="flex gap-4">
         {stat.weight_kg != null && (
           <div>
-            <p className="text-[10px] text-white/40 tracking-widest uppercase font-mono mb-0.5">Weight</p>
-            <p className="text-lg font-semibold text-white">
+            <p className="text-xs text-[#edf5e2]/40 mb-0.5">Weight</p>
+            <p className="text-xl font-bold text-[#edf5e2]">
               {toDisplay(stat.weight_kg, unit)}
-              <span className="text-xs text-white/40 ml-1">{unit}</span>
+              <span className="text-sm text-[#edf5e2]/40 ml-1">{unit}</span>
             </p>
           </div>
         )}
         {stat.confidence != null && (
           <div>
-            <p className="text-[10px] text-white/40 tracking-widest uppercase font-mono mb-0.5">Confidence</p>
-            <p className="text-lg font-semibold" style={{ color: confidenceColor(stat.confidence) }}>
+            <p className="text-xs text-[#edf5e2]/40 mb-0.5">Confidence</p>
+            <p className="text-xl font-bold" style={{ color: confidenceColor(stat.confidence) }}>
               {stat.confidence}
-              <span className="text-xs opacity-60 ml-1">/ 10</span>
+              <span className="text-sm opacity-60 ml-1">/ 10</span>
             </p>
           </div>
         )}
       </div>
 
       {stat.milestone_text && (
-        <p className="text-sm text-white/80 leading-relaxed">{stat.milestone_text}</p>
+        <p className="text-sm text-[#edf5e2]/70 leading-relaxed">{stat.milestone_text}</p>
       )}
 
       {stat.stat_update_photos.length > 0 && (
@@ -168,7 +168,7 @@ function PhotoThumb({ path }: { path: string }) {
     <img
       src={data.publicUrl}
       alt=""
-      className="w-20 h-20 rounded-lg object-cover shrink-0 bg-white/5"
+      className="w-20 h-20 rounded-xl object-cover shrink-0 bg-[#edf5e2]/5"
     />
   )
 }
@@ -257,9 +257,8 @@ function LogForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Weight */}
       <div>
-        <label className="text-[10px] text-white/40 tracking-widest uppercase font-mono block mb-2">
+        <label className="text-xs text-[#edf5e2]/45 block mb-2">
           Weight ({weightUnit})
         </label>
         <input
@@ -269,16 +268,13 @@ function LogForm({
           placeholder={`e.g. ${weightUnit === 'kg' ? '72.5' : '159.8'}`}
           value={weight}
           onChange={e => setWeight(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-babyblue-500/60 transition"
+          className="w-full bg-[#0f1a0c] border border-[#b0e455]/15 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition"
         />
       </div>
 
-      {/* Confidence */}
       <div>
         <div className="flex justify-between items-baseline mb-2">
-          <label className="text-[10px] text-white/40 tracking-widest uppercase font-mono">
-            Confidence
-          </label>
+          <label className="text-xs text-[#edf5e2]/45">Confidence</label>
           <span className="text-sm font-semibold" style={{ color: confidenceColor(confidence) }}>
             {confidence} / 10 · {confidenceLabel(confidence)}
           </span>
@@ -289,7 +285,7 @@ function LogForm({
           max="10"
           value={confidence}
           onChange={e => setConfidence(Number(e.target.value))}
-          className="w-full accent-babyblue-500"
+          className="w-full accent-[#b0e455]"
         />
         <div className="flex justify-between mt-2 gap-2">
           {PRESETS.map(p => (
@@ -297,10 +293,10 @@ function LogForm({
               key={p.label}
               type="button"
               onClick={() => setConfidence(p.value)}
-              className={`flex-1 py-1.5 rounded text-[10px] tracking-widest uppercase font-mono transition border ${
+              className={`flex-1 py-1.5 rounded-xl text-xs font-medium transition border ${
                 confidence === p.value
-                  ? 'border-babyblue-500 text-babyblue-500 bg-babyblue-500/10'
-                  : 'border-white/10 text-white/40 hover:border-white/30'
+                  ? 'border-[#b0e455] text-[#b0e455] bg-[#b0e455]/10'
+                  : 'border-[#edf5e2]/10 text-[#edf5e2]/40 hover:border-[#edf5e2]/25'
               }`}
             >
               {p.label}
@@ -309,13 +305,10 @@ function LogForm({
         </div>
       </div>
 
-      {/* Milestone */}
       <div>
         <div className="flex justify-between items-baseline mb-2">
-          <label className="text-[10px] text-white/40 tracking-widest uppercase font-mono">
-            Milestone
-          </label>
-          <span className="text-[10px] text-white/30 font-mono">{milestone.length} / 280</span>
+          <label className="text-xs text-[#edf5e2]/45">Milestone</label>
+          <span className="text-xs text-[#edf5e2]/30">{milestone.length} / 280</span>
         </div>
         <textarea
           maxLength={280}
@@ -323,19 +316,16 @@ function LogForm({
           placeholder="What did you hit this week? Any wins, realizations, momentum?"
           value={milestone}
           onChange={e => setMilestone(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-babyblue-500/60 transition resize-none"
+          className="w-full bg-[#0f1a0c] border border-[#b0e455]/15 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
         />
       </div>
 
-      {/* Photos */}
       <div>
-        <label className="text-[10px] text-white/40 tracking-widest uppercase font-mono block mb-2">
-          Photos (optional)
-        </label>
+        <label className="text-xs text-[#edf5e2]/45 block mb-2">Photos (optional)</label>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="w-full border border-dashed border-white/15 rounded-lg py-3 text-xs text-white/40 hover:border-babyblue-500/40 hover:text-babyblue-500/60 transition"
+          className="w-full border border-dashed border-[#edf5e2]/12 rounded-2xl py-3 text-sm text-[#edf5e2]/40 hover:border-[#b0e455]/35 hover:text-[#b0e455]/60 transition"
         >
           + Add photos
         </button>
@@ -343,26 +333,26 @@ function LogForm({
         {previews.length > 0 && (
           <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
             {previews.map((src, i) => (
-              <img key={i} src={src} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0 bg-white/5" />
+              <img key={i} src={src} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[#edf5e2]/5" />
             ))}
           </div>
         )}
       </div>
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       <div className="flex gap-3 pt-1">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3 rounded-lg border border-white/10 text-sm text-white/50 hover:text-white hover:border-white/30 transition tracking-widest uppercase font-mono text-xs"
+          className="flex-1 py-3 rounded-2xl border border-[#edf5e2]/10 text-sm text-[#edf5e2]/50 hover:text-[#edf5e2] hover:border-[#edf5e2]/25 transition"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 py-3 rounded-lg bg-babyblue-500 text-navy-900 text-xs tracking-widest uppercase font-mono font-semibold hover:bg-babyblue-400 transition disabled:opacity-50"
+          className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
         >
           {loading ? 'Saving…' : 'Save'}
         </button>
@@ -387,17 +377,16 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
   const chartStats = [...stats].filter(s => s.weight_kg != null)
 
   return (
-    <div className="min-h-screen bg-[#0b0e14] text-white flex flex-col">
-      {/* Header */}
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
       <div className="px-5 pt-12 pb-4 flex items-center justify-between">
         <div>
-          <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono">Zana</p>
-          <h1 className="text-xl font-semibold tracking-tight mt-0.5">My Stats</h1>
+          <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+          <h1 className="text-xl font-bold tracking-tight">My Stats</h1>
         </div>
         {!formOpen && (
           <button
             onClick={() => setFormOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-babyblue-500 text-navy-900 text-xs tracking-widest uppercase font-mono font-semibold hover:bg-babyblue-400 transition"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
               <path d="M12 5v14M5 12h14" strokeLinecap="round" />
@@ -407,16 +396,15 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-28 space-y-5">
-        {/* 3-day nudge banner */}
+      <div className="flex-1 overflow-y-auto px-5 pb-28 space-y-4">
         {showNudge && !nudgeDismissed && !formOpen && (
-          <div className="flex items-start gap-3 bg-babyblue-500/10 border border-babyblue-500/20 rounded-xl p-4">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#AFCBFF" strokeWidth="1.5" className="w-4 h-4 mt-0.5 shrink-0">
+          <div className="flex items-start gap-3 bg-[#b0e455]/8 border border-[#b0e455]/15 rounded-2xl p-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-4 h-4 mt-0.5 shrink-0">
               <path d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <div className="flex-1">
-              <p className="text-xs text-babyblue-500 font-semibold">Time to log</p>
-              <p className="text-xs text-white/50 mt-0.5">
+              <p className="text-sm font-semibold text-[#b0e455]">Time to log</p>
+              <p className="text-sm text-[#edf5e2]/50 mt-0.5">
                 {stats.length === 0
                   ? "You haven't logged any stats yet. Drop your first update."
                   : "It's been 3+ days since your last update. Keep the momentum going."}
@@ -424,7 +412,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
             </div>
             <button
               onClick={() => setNudgeDismissed(true)}
-              className="text-white/20 hover:text-white/50 transition shrink-0 mt-0.5"
+              className="text-[#edf5e2]/20 hover:text-[#edf5e2]/50 transition shrink-0 mt-0.5"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                 <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
@@ -433,10 +421,9 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
           </div>
         )}
 
-        {/* Log form */}
         {formOpen && (
-          <div className="bg-[#1A1F2C] rounded-xl p-5">
-            <h2 className="text-xs tracking-widest uppercase font-mono text-white/50 mb-5">New Update</h2>
+          <div className="bg-[#1c2e16] rounded-2xl p-5 border border-[#b0e455]/8">
+            <h2 className="text-sm font-semibold text-[#edf5e2]/60 mb-5">New Update</h2>
             <LogForm
               userId={userId}
               weightUnit={weightUnit}
@@ -446,24 +433,22 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
           </div>
         )}
 
-        {/* Weight trend */}
         {chartStats.length > 0 && !formOpen && (
-          <div className="bg-[#1A1F2C] rounded-xl p-4">
-            <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono mb-3">Weight trend</p>
+          <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8">
+            <p className="text-xs text-[#edf5e2]/35 uppercase tracking-wide mb-3">Weight trend</p>
             <WeightChart stats={chartStats} unit={weightUnit} />
           </div>
         )}
 
-        {/* History feed */}
         {stats.length === 0 && !formOpen ? (
           <div className="text-center py-16">
-            <p className="text-white/20 text-sm">No updates yet.</p>
-            <p className="text-white/15 text-xs mt-1">Tap Log to add your first one.</p>
+            <p className="text-[#edf5e2]/20 text-sm">No updates yet.</p>
+            <p className="text-[#edf5e2]/15 text-xs mt-1">Tap Log to add your first one.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {stats.length > 0 && (
-              <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono">History</p>
+              <p className="text-xs text-[#edf5e2]/30 uppercase tracking-wide">History</p>
             )}
             {stats.map(stat => (
               <StatCard key={stat.id} stat={stat} unit={weightUnit} />

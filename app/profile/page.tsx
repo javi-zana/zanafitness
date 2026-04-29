@@ -17,7 +17,7 @@ const ZMark = ({ className = "h-6" }: { className?: string }) => (
 // ─── Avatar color swatches ────────────────────────────────────────────────────
 
 const COLORS = [
-  { hex: "#b3cdff", label: "Blue" },
+  { hex: "#b0e455", label: "Lime" },
   { hex: "#86efac", label: "Green" },
   { hex: "#fbbf24", label: "Gold" },
   { hex: "#f472b6", label: "Pink" },
@@ -66,7 +66,7 @@ export default function ProfilePage() {
   const [currentEmail, setCurrentEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [email, setEmail] = useState("");
-  const [avatarColor, setAvatarColor] = useState("#b3cdff");
+  const [avatarColor, setAvatarColor] = useState("#b0e455");
   const [fitnessGoal, setFitnessGoal] = useState("");
   const [instagram, setInstagram] = useState("");
   const [tiktok, setTiktok] = useState("");
@@ -88,7 +88,7 @@ export default function ProfilePage() {
 
       if (profile) {
         setNickname(profile.nickname ?? "");
-        setAvatarColor(profile.avatar_color ?? "#b3cdff");
+        setAvatarColor(profile.avatar_color ?? "#b0e455");
         setFitnessGoal(profile.fitness_goal ?? "");
         setInstagram(profile.instagram ?? "");
         setTiktok(profile.tiktok ?? "");
@@ -172,17 +172,17 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#b3cdff]/30 border-t-[#b3cdff] rounded-full animate-spin" />
+      <main className="min-h-screen bg-[#0f1a0c] flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#b0e455]/30 border-t-[#b0e455] rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0f0f0f] text-white">
+    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2]">
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-5 border-b border-[#2e2e2e] sticky top-0 z-10 bg-[#0f0f0f]/90 backdrop-blur">
+      <nav className="flex items-center justify-between px-6 py-5 border-b border-[#b0e455/8] sticky top-0 z-10 bg-[#0f1a0c]/90 backdrop-blur">
         <Link href="/dashboard" className="text-white">
           <ZMark className="h-5" />
         </Link>
@@ -213,7 +213,7 @@ export default function ProfilePage() {
             <p className="text-base font-light tracking-[0.1em] uppercase text-white">
               {nickname.trim() || currentEmail.split("@")[0]}
             </p>
-            <p className="font-mono text-[9px] text-gray-500 mt-0.5">{currentEmail}</p>
+            <p className="font-mono text-[9px] text-[#edf5e2]/40 mt-0.5">{currentEmail}</p>
           </div>
         </div>
 
@@ -228,7 +228,7 @@ export default function ProfilePage() {
               value={nickname}
               onChange={e => setNickname(e.target.value)}
               placeholder="How you appear in the community"
-              className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+              className="w-full bg-[#162212] border border-[#b0e455/12] rounded px-4 py-3.5 text-[#edf5e2] placeholder-[#edf5e2]/25 focus:outline-none focus:border-[#b0e455]/40 transition-colors font-light text-sm tracking-wide"
             />
           </div>
 
@@ -239,9 +239,9 @@ export default function ProfilePage() {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+              className="w-full bg-[#162212] border border-[#b0e455/12] rounded px-4 py-3.5 text-[#edf5e2] placeholder-[#edf5e2]/25 focus:outline-none focus:border-[#b0e455]/40 transition-colors font-light text-sm tracking-wide"
             />
-            <p className="font-mono text-[8px] text-gray-600 tracking-wide">
+            <p className="font-mono text-[8px] text-[#edf5e2]/30">
               Changing your email sends a confirmation link to the new address.
             </p>
           </div>
@@ -270,7 +270,7 @@ export default function ProfilePage() {
                 </button>
               ))}
             </div>
-            <p className="font-mono text-[8px] text-gray-600 tracking-wide">
+            <p className="font-mono text-[8px] text-[#edf5e2]/30">
               Selected: <span style={{ color: avatarColor }}>{COLORS.find(c => c.hex === avatarColor)?.label ?? avatarColor}</span>
             </p>
           </div>
@@ -286,8 +286,8 @@ export default function ProfilePage() {
                   onClick={() => setFitnessGoal(fitnessGoal === g ? "" : g)}
                   className={`px-3 py-2.5 rounded border text-left font-mono text-[9px] tracking-wide uppercase transition-colors ${
                     fitnessGoal === g
-                      ? "bg-[#b3cdff]/10 border-[#b3cdff]/50 text-[#b3cdff]"
-                      : "bg-[#1a1a1a] border-[#2e2e2e] text-gray-400 hover:border-[#b3cdff]/30 hover:text-white"
+                      ? "bg-[#b0e455]/10 border-[#b0e455]/50 text-[#b0e455]"
+                      : "bg-[#162212] border-[#b0e455]/12 text-[#edf5e2]/40 hover:border-[#b0e455]/30 hover:text-[#edf5e2]"
                   }`}
                 >
                   {g}
@@ -305,7 +305,7 @@ export default function ProfilePage() {
               placeholder="Tell the community about yourself..."
               rows={3}
               maxLength={200}
-              className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm leading-relaxed resize-none"
+              className="w-full bg-[#162212] border border-[#b0e455/12] rounded px-4 py-3.5 text-[#edf5e2] placeholder-[#edf5e2]/25 focus:outline-none focus:border-[#b0e455]/40 transition-colors font-light text-sm leading-relaxed resize-none"
             />
             <p className="font-mono text-[8px] text-gray-600 text-right">{bio.length}/200</p>
           </div>
@@ -321,7 +321,7 @@ export default function ProfilePage() {
                 value={instagram}
                 onChange={e => setInstagram(e.target.value.replace(/^@/, ""))}
                 placeholder="Instagram username"
-                className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded pl-8 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+                className="w-full bg-[#162212] border border-[#b0e455/12] rounded pl-8 pr-4 py-3.5 text-[#edf5e2] placeholder-[#edf5e2]/25 focus:outline-none focus:border-[#b0e455]/40 transition-colors font-light text-sm tracking-wide"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#f472b6]/60" fill="currentColor">
@@ -337,7 +337,7 @@ export default function ProfilePage() {
                 value={tiktok}
                 onChange={e => setTiktok(e.target.value.replace(/^@/, ""))}
                 placeholder="TikTok username"
-                className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded pl-8 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+                className="w-full bg-[#162212] border border-[#b0e455/12] rounded pl-8 pr-4 py-3.5 text-[#edf5e2] placeholder-[#edf5e2]/25 focus:outline-none focus:border-[#b0e455]/40 transition-colors font-light text-sm tracking-wide"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/40" fill="currentColor">
@@ -354,8 +354,8 @@ export default function ProfilePage() {
             </div>
           )}
           {emailNotice && (
-            <div className="bg-[#b3cdff]/10 border border-[#b3cdff]/30 rounded px-4 py-3">
-              <p className="font-mono text-[9px] text-[#b3cdff] tracking-wider leading-relaxed">{emailNotice}</p>
+            <div className="bg-[#b0e455]/10 border border-[#b0e455]/30 rounded px-4 py-3">
+              <p className="font-mono text-[9px] text-[#b0e455] tracking-wider leading-relaxed">{emailNotice}</p>
             </div>
           )}
 
@@ -363,7 +363,7 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-[#b3cdff] text-[#141414] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full bg-[#b0e455] text-[#0f1a0c] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : saved ? "Saved ✓" : "Save Changes"}
           </button>
@@ -371,24 +371,24 @@ export default function ProfilePage() {
         </form>
 
         {/* Password section */}
-        <form onSubmit={handlePasswordChange} className="space-y-4 border-t border-[#2e2e2e] pt-8">
+        <form onSubmit={handlePasswordChange} className="space-y-4 border-t border-[#b0e455/8] pt-8">
           <div>
             <p className="font-mono text-[9px] tracking-[0.3em] text-gray-400 uppercase mb-1">Set Password</p>
-            <p className="font-mono text-[8px] text-gray-600 tracking-wide">Set or change your login password.</p>
+            <p className="font-mono text-[8px] text-[#edf5e2]/30">Set or change your login password.</p>
           </div>
           <input
             type="password"
             placeholder="New password"
             value={newPassword}
             onChange={e => setNewPassword(e.target.value)}
-            className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+            className="w-full bg-[#162212] border border-[#b0e455/12] rounded px-4 py-3.5 text-[#edf5e2] placeholder-[#edf5e2]/25 focus:outline-none focus:border-[#b0e455]/40 transition-colors font-light text-sm tracking-wide"
           />
           <input
             type="password"
             placeholder="Confirm new password"
             value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)}
-            className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+            className="w-full bg-[#162212] border border-[#b0e455/12] rounded px-4 py-3.5 text-[#edf5e2] placeholder-[#edf5e2]/25 focus:outline-none focus:border-[#b0e455]/40 transition-colors font-light text-sm tracking-wide"
           />
           {passwordError && (
             <div className="bg-[#f87171]/10 border border-[#f87171]/30 rounded px-4 py-3">
@@ -398,21 +398,21 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={passwordSaving || !newPassword}
-            className="w-full bg-[#1e2d3d] border border-[#2e2e2e] text-white font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:border-[#b3cdff]/40 hover:text-[#b3cdff] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full bg-[#162212] border border-[#b0e455/12] text-white font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:border-[#b0e455]/40 hover:text-[#b0e455] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {passwordSaving ? "Saving..." : passwordSaved ? "Password Updated ✓" : "Set Password"}
           </button>
         </form>
 
         {/* Divider + support */}
-        <div className="border-t border-[#2e2e2e] pt-6 space-y-3 text-center">
+        <div className="border-t border-[#b0e455/8] pt-6 space-y-3 text-center">
           <a
             href="mailto:hello@zanafitness.com"
-            className="block font-mono text-[9px] tracking-widest uppercase text-gray-600 hover:text-[#b3cdff] transition-colors"
+            className="block font-mono text-[9px] tracking-widest uppercase text-gray-600 hover:text-[#b0e455] transition-colors"
           >
             Support — hello@zanafitness.com
           </a>
-          <p className="font-mono text-[8px] text-[#1a222c] uppercase tracking-widest">
+          <p className="font-mono text-[8px] text-[#edf5e2]/15 uppercase tracking-widest">
             © 2026 ZANA Fitness
           </p>
         </div>

@@ -26,9 +26,9 @@ export default function Navbar({ active }: { active?: string }) {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 bg-[#0f0f0f]/85 backdrop-blur-md border-b border-white/5">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 bg-[#0f1a0c]/90 backdrop-blur-md border-b border-[#b0e455]/8">
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-          <ZanaLogo className="h-5 text-white" />
+          <ZanaLogo className="h-5 text-[#edf5e2]" />
         </Link>
 
         {/* Desktop links */}
@@ -37,8 +37,8 @@ export default function Navbar({ active }: { active?: string }) {
             <Link
               key={l.key}
               href={l.href}
-              className={`font-mono text-[9px] tracking-[0.2em] uppercase transition-colors ${
-                active === l.key ? "text-white" : "text-gray-400 hover:text-white"
+              className={`text-sm font-medium transition-colors ${
+                active === l.key ? "text-[#edf5e2]" : "text-[#edf5e2]/50 hover:text-[#edf5e2]"
               }`}
             >
               {l.label}
@@ -48,41 +48,41 @@ export default function Navbar({ active }: { active?: string }) {
 
         {/* Desktop CTAs */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/login" className="font-mono text-[9px] tracking-widest uppercase text-gray-400 hover:text-white transition-colors px-4 py-2">
+          <Link href="/login" className="text-sm font-medium text-[#edf5e2]/50 hover:text-[#edf5e2] transition-colors px-4 py-2">
             Log In
           </Link>
-          <Link href="/system" className="font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f0f0f] px-5 py-2.5 rounded-full font-bold hover:bg-white transition-colors">
+          <Link href="/system" className="text-sm font-semibold bg-[#b0e455] text-[#0f1a0c] px-5 py-2.5 rounded-full hover:bg-[#c9f070] transition-colors">
             Get Started
           </Link>
         </div>
 
         {/* Mobile hamburger */}
-        <button className="md:hidden text-white" onClick={() => setOpen(!open)} aria-label="Toggle menu">
+        <button className="md:hidden text-[#edf5e2]" onClick={() => setOpen(!open)} aria-label="Toggle menu">
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </nav>
 
       {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 z-40 bg-[#0f0f0f] flex flex-col pt-24 px-8 md:hidden">
+        <div className="fixed inset-0 z-40 bg-[#0f1a0c] flex flex-col pt-24 px-8 md:hidden">
           <div className="flex flex-col gap-8">
             {LINKS.map(l => (
               <Link
                 key={l.key}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className={`font-mono text-[11px] tracking-[0.2em] uppercase transition-colors ${
-                  active === l.key ? "text-white" : "text-gray-300 hover:text-white"
+                className={`text-lg font-medium transition-colors ${
+                  active === l.key ? "text-[#edf5e2]" : "text-[#edf5e2]/60 hover:text-[#edf5e2]"
                 }`}
               >
                 {l.label}
               </Link>
             ))}
-            <div className="pt-6 flex flex-col gap-3 border-t border-[#242424]">
-              <Link href="/login" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase text-center py-3 border border-[#2e2e2e] text-gray-300 rounded-full">
+            <div className="pt-6 flex flex-col gap-3 border-t border-[#b0e455]/10">
+              <Link href="/login" onClick={() => setOpen(false)} className="text-sm font-medium text-center py-3 border border-[#edf5e2]/15 text-[#edf5e2]/70 rounded-2xl">
                 Log In
               </Link>
-              <Link href="/system" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase bg-[#b3cdff] text-[#0f0f0f] py-3.5 rounded-full font-bold text-center">
+              <Link href="/system" onClick={() => setOpen(false)} className="text-sm font-semibold bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl font-bold text-center">
                 Get Started
               </Link>
             </div>

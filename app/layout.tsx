@@ -27,10 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
-        <meta name="theme-color" content="#141414" />
+        <meta name="theme-color" content="#0f1a0c" />
         <link rel="apple-touch-icon" href="/logo.png" />
       </head>
-      <body className={`${inter.variable} font-sans bg-[#121821] text-white min-h-screen antialiased`}>
+      <body className={`${inter.variable} font-sans bg-[#0f1a0c] text-[#edf5e2] min-h-screen antialiased`}>
         {children}
         <Script src="https://app.lemonsqueezy.com/js/lemon.js" strategy="afterInteractive" />
       </body>

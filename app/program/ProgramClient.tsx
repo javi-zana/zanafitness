@@ -45,12 +45,12 @@ function relativeTime(dateStr: string) {
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center mb-4">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-white/20">
+      <div className="w-10 h-10 rounded-full bg-[#b0e455]/8 border border-[#b0e455]/15 flex items-center justify-center mb-4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-[#edf5e2]/25">
           <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <p className="text-sm text-white/25">{message}</p>
+      <p className="text-sm text-[#edf5e2]/25">{message}</p>
     </div>
   )
 }
@@ -99,14 +99,14 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
                 <>
                   <button
                     onClick={() => setEditingPrinciples(false)}
-                    className="text-[10px] tracking-widest uppercase font-mono text-white/30 hover:text-white transition"
+                    className="text-sm text-[#edf5e2]/30 hover:text-[#edf5e2] transition"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={savePrinciples}
                     disabled={saving}
-                    className="text-[10px] tracking-widest uppercase font-mono text-babyblue-500 hover:text-babyblue-400 transition disabled:opacity-50"
+                    className="text-sm font-semibold text-[#b0e455] hover:text-[#c9f070] transition disabled:opacity-50"
                   >
                     {saving ? 'Saving…' : 'Save'}
                   </button>
@@ -114,7 +114,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
               ) : (
                 <button
                   onClick={() => setEditingPrinciples(true)}
-                  className="text-[10px] tracking-widest uppercase font-mono text-white/30 hover:text-babyblue-500 transition"
+                  className="text-sm text-[#edf5e2]/30 hover:text-[#b0e455] transition"
                 >
                   Edit
                 </button>
@@ -128,7 +128,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
             <>
               <RichTextViewer content={content} />
               {updatedAt && (
-                <p className="text-[10px] text-white/20 font-mono pt-2">{relativeTime(updatedAt)}</p>
+                <p className="text-xs text-[#edf5e2]/20 pt-2">{relativeTime(updatedAt)}</p>
               )}
             </>
           ) : (
@@ -159,22 +159,20 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
       <div className="space-y-3">
         <RichTextViewer content={content} />
         {updatedAt && (
-          <p className="text-[10px] text-white/20 font-mono pt-2">{relativeTime(updatedAt)}</p>
+          <p className="text-xs text-[#edf5e2]/20 pt-2">{relativeTime(updatedAt)}</p>
         )}
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0e14] text-white flex flex-col">
-      {/* Header */}
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
       <div className="px-5 pt-12 pb-2">
-        <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono">Zana</p>
-        <h1 className="text-xl font-semibold tracking-tight mt-0.5">My Program</h1>
+        <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+        <h1 className="text-xl font-bold tracking-tight">My Program</h1>
       </div>
 
-      {/* Tab bar — scrollable so long names don't wrap */}
-      <div className="overflow-x-auto border-b border-white/5">
+      <div className="overflow-x-auto border-b border-[#b0e455]/8">
         <div className="flex min-w-max px-5">
           {TABS.map(tab => (
             <button
@@ -183,10 +181,10 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
                 setActiveTab(tab.id)
                 setEditingPrinciples(false)
               }}
-              className={`px-4 py-3 text-[11px] tracking-wide font-mono whitespace-nowrap transition border-b-2 -mb-px ${
+              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 -mb-px ${
                 activeTab === tab.id
-                  ? 'border-babyblue-500 text-babyblue-500'
-                  : 'border-transparent text-white/30 hover:text-white/60'
+                  ? 'border-[#b0e455] text-[#b0e455]'
+                  : 'border-transparent text-[#edf5e2]/30 hover:text-[#edf5e2]/60'
               }`}
             >
               {tab.label}
@@ -195,7 +193,6 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto px-5 py-6 pb-28">
         {renderContent()}
       </div>

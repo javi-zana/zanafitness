@@ -59,28 +59,28 @@ function LoginForm() {
 
   if (showForgot) {
     return forgotSent ? (
-      <div className="bg-[#141414] border border-[#242424] rounded-xl p-8 text-center space-y-4">
-        <div className="w-12 h-12 rounded-full border-2 border-[#b3cdff] flex items-center justify-center mx-auto">
-          <svg viewBox="0 0 16 16" className="w-5 h-5 text-[#b3cdff]" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <div className="bg-[#162212] border border-[#b0e455]/12 rounded-2xl p-8 text-center space-y-4">
+        <div className="w-12 h-12 rounded-full border-2 border-[#b0e455] flex items-center justify-center mx-auto bg-[#b0e455]/10">
+          <svg viewBox="0 0 16 16" className="w-5 h-5 text-[#b0e455]" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M2 8l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <p className="font-mono text-[9px] tracking-widest text-[#b3cdff] uppercase">Check your inbox</p>
-        <p className="font-mono text-[10px] text-gray-300 leading-loose tracking-[0.1em] uppercase">
+        <p className="text-sm font-semibold text-[#b0e455]">Check your inbox</p>
+        <p className="text-sm text-[#edf5e2]/55 leading-relaxed">
           A reset link was sent to<br />
-          <span className="text-white">{forgotEmail}</span>
+          <span className="text-[#edf5e2] font-medium">{forgotEmail}</span>
         </p>
         <button
           onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(''); }}
-          className="font-mono text-[8px] tracking-widest uppercase text-gray-500 hover:text-white transition-colors"
+          className="text-sm text-[#edf5e2]/40 hover:text-[#edf5e2] transition-colors"
         >
-          Back to login
+          ← Back to login
         </button>
       </div>
     ) : (
       <form onSubmit={handleForgotPassword} className="space-y-4">
-        <p className="font-mono text-[9px] text-gray-400 tracking-[0.15em] uppercase text-center">
-          Enter your email and we&apos;ll send a reset link.
+        <p className="text-sm text-[#edf5e2]/50 text-center leading-relaxed">
+          Enter your email and we'll send a reset link.
         </p>
         <input
           type="email"
@@ -88,35 +88,35 @@ function LoginForm() {
           required
           value={forgotEmail}
           onChange={e => setForgotEmail(e.target.value)}
-          className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
+          className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
         />
         <button
           type="submit"
           disabled={forgotLoading}
-          className="w-full bg-[#b3cdff] text-[#0f0f0f] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded-lg hover:bg-white transition-colors disabled:opacity-40"
+          className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40"
         >
           {forgotLoading ? 'Sending...' : 'Send Reset Link'}
         </button>
         <button
           type="button"
           onClick={() => setShowForgot(false)}
-          className="w-full font-mono text-[8px] tracking-widest uppercase text-gray-500 hover:text-white transition-colors"
+          className="w-full text-sm text-[#edf5e2]/40 hover:text-[#edf5e2] transition-colors"
         >
-          Back to login
+          ← Back to login
         </button>
       </form>
     );
   }
 
   return (
-    <form onSubmit={handleLogin} className="space-y-4">
+    <form onSubmit={handleLogin} className="space-y-3">
       <input
         type="email"
         placeholder="Email address"
         required
         value={email}
         onChange={e => setEmail(e.target.value)}
-        className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
+        className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
       />
       <input
         type="password"
@@ -124,19 +124,19 @@ function LoginForm() {
         required
         value={password}
         onChange={e => setPassword(e.target.value)}
-        className="w-full bg-[#1a1a1a] border border-[#2e2e2e] rounded-lg px-4 py-4 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-mono text-[10px] tracking-[0.1em]"
+        className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
       />
 
       {error && (
-        <div className="bg-[#f87171]/10 border border-[#f87171]/30 rounded-lg px-4 py-3">
-          <p className="font-mono text-[9px] text-[#f87171] tracking-wider text-center">{error}</p>
+        <div className="bg-red-500/8 border border-red-500/20 rounded-xl px-4 py-3">
+          <p className="text-sm text-red-400 text-center">{error}</p>
         </div>
       )}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-[#b3cdff] text-[#0f0f0f] font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded-lg hover:bg-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {loading ? 'Signing in...' : 'Sign In'}
       </button>
@@ -145,11 +145,11 @@ function LoginForm() {
         <button
           type="button"
           onClick={() => setShowForgot(true)}
-          className="font-mono text-[8px] tracking-widest uppercase text-gray-500 hover:text-white transition-colors"
+          className="text-sm text-[#edf5e2]/40 hover:text-[#edf5e2] transition-colors"
         >
           Forgot password?
         </button>
-        <Link href="/system" className="font-mono text-[8px] tracking-widest uppercase text-[#b3cdff] hover:text-white transition-colors">
+        <Link href="/system" className="text-sm text-[#b0e455] hover:text-[#c9f070] transition-colors">
           View plans
         </Link>
       </div>
@@ -159,13 +159,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
+    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
 
-      <nav className="flex items-center justify-between px-8 py-6 border-b border-[#242424]">
-        <Link href="/" className="text-white">
-          <ZanaLogo className="h-5 text-white" />
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#b0e455]/8">
+        <Link href="/" className="text-[#edf5e2]">
+          <ZanaLogo className="h-5 text-[#edf5e2]" />
         </Link>
-        <Link href="/" className="font-mono text-[9px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
+        <Link href="/" className="text-sm text-[#edf5e2]/45 hover:text-[#edf5e2] transition-colors">
           ← Back
         </Link>
       </nav>
@@ -174,11 +174,14 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
 
           <div className="text-center mb-10">
-            <p className="font-mono text-[8px] tracking-[0.4em] uppercase text-[#b3cdff] mb-4">Member Access</p>
-            <h1 className="font-display leading-none uppercase mb-3" style={{ fontSize: "clamp(40px, 6vw, 64px)" }}>
-              Welcome back.
+            <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-full px-4 py-1.5 mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
+              <p className="text-xs font-medium text-[#b0e455]">Member Access</p>
+            </span>
+            <h1 className="font-display leading-none mb-3" style={{ fontSize: "clamp(40px, 6vw, 60px)" }}>
+              Welcome<br />back.
             </h1>
-            <p className="font-mono text-[9px] tracking-widest text-gray-500 uppercase">
+            <p className="text-sm text-[#edf5e2]/45">
               Sign in to your account
             </p>
           </div>

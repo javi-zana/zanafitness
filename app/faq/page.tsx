@@ -38,36 +38,39 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <main className="min-h-screen bg-[#0f0f0f] text-white flex flex-col">
+    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
 
       <Navbar active="faq" />
 
-      <section className="max-w-4xl mx-auto pt-40 pb-32 px-6 flex-1 w-full">
+      <section className="max-w-3xl mx-auto pt-36 pb-28 px-6 flex-1 w-full">
 
-        <div className="text-center mb-20">
-          <p className="font-mono text-[8px] tracking-[0.4em] uppercase text-[#b3cdff] mb-6">Information</p>
-          <h1 className="font-display leading-none uppercase" style={{ fontSize: "clamp(48px, 7vw, 96px)" }}>
-            Common Questions.
+        <div className="mb-16">
+          <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-5">Questions</p>
+          <h1 className="font-display leading-none" style={{ fontSize: "clamp(48px, 7vw, 88px)" }}>
+            Common<br />Questions.
           </h1>
         </div>
 
-        <div className="border-t border-[#242424]">
+        <div className="divide-y divide-[#b0e455]/8">
           {faqs.map((item) => (
-            <div key={item.q} className="py-8 border-b border-[#242424]">
-              <h3 className="font-mono text-[10px] tracking-[0.25em] uppercase text-white mb-4">
+            <div key={item.q} className="py-8">
+              <h3 className="text-base font-semibold text-[#edf5e2] mb-3">
                 {item.q}
               </h3>
-              <p className="font-mono text-[10px] text-gray-400 leading-loose tracking-[0.1em]">{item.a}</p>
+              <p className="text-sm text-[#edf5e2]/55 leading-relaxed">{item.a}</p>
             </div>
           ))}
         </div>
 
-        <div className="text-center mt-24">
+        <div className="mt-20 flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <a
             href="/system"
-            className="inline-flex items-center gap-2 font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f0f0f] px-10 py-4 rounded-full font-bold hover:bg-white transition-colors"
+            className="inline-flex items-center gap-2 bg-[#b0e455] text-[#0f1a0c] px-8 py-4 rounded-2xl font-semibold text-sm hover:bg-[#c9f070] transition-colors"
           >
             Ready to start? Join Now
+          </a>
+          <a href="/demo" className="text-sm font-medium text-[#b0e455] hover:text-[#c9f070] transition-colors">
+            Preview the app first →
           </a>
         </div>
 

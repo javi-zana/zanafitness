@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, FormEvent } from 'react'
+import { useState, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import BottomNav from '@/components/BottomNav'
@@ -89,7 +89,6 @@ function PostCard({
   const [comment, setComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const supabase = createClient()
-
   const hasReacted = post.reactions.some(r => r.user_id === userId)
   const reactionCount = post.reactions.length
   const visibleComments = post.comments.filter(c => !c.hidden || userRole === 'head_coach')
@@ -100,90 +99,86 @@ function PostCard({
     setSubmitting(true)
     const text = comment.trim()
     setComment('')
-    await onComment(post.id, text)
+    onComment(post.id, text)
     setSubmitting(false)
   }
 
   return (
-    <div className="bg-[#1A1F2C] rounded-xl overflow-hidden">
-      {/* Card header — always visible */}
+    <div className="bg-[#1c2e16] rounded-2xl overflow-hidden border border-[#b0e455]/8">
       <button
         className="w-full text-left px-4 pt-4 pb-3"
         onClick={() => setExpanded(e => !e)}
       >
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-babyblue-500/15 border border-babyblue-500/20 flex items-center justify-center text-[9px] font-mono text-babyblue-500 font-bold shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#b0e455]/12 border border-[#b0e455]/20 flex items-center justify-center text-[9px] font-bold text-[#b0e455] shrink-0">
               {displayName(post.author).charAt(0).toUpperCase()}
             </div>
-            <span className="text-xs text-white/50 font-mono">{displayName(post.author)}</span>
+            <span className="text-xs text-[#edf5e2]/50">{displayName(post.author)}</span>
           </div>
-          <span className="text-[10px] text-white/25 font-mono shrink-0">{relativeTime(post.created_at)}</span>
+          <span className="text-xs text-[#edf5e2]/25 shrink-0">{relativeTime(post.created_at)}</span>
         </div>
-        <h3 className="text-sm font-semibold text-white leading-snug text-left">{post.title}</h3>
+        <h3 className="text-sm font-semibold text-[#edf5e2] leading-snug text-left">{post.title}</h3>
       </button>
 
-      {/* Expanded body */}
       {expanded && hasContent(post.body_json) && (
-        <div className="px-4 pb-3 border-t border-white/5 pt-3">
+        <div className="px-4 pb-3 border-t border-[#b0e455]/5 pt-3">
           <RichTextViewer content={post.body_json} />
         </div>
       )}
 
-      {/* Footer: reactions + comment count + actions */}
-      <div className="px-4 pb-3 flex items-center gap-4 border-t border-white/5 pt-2.5">
+      <div className="px-4 pb-3 flex items-center gap-4 border-t border-[#b0e455]/5 pt-2.5">
         <button
           onClick={() => onReact(post.id, hasReacted)}
           className="flex items-center gap-1.5 transition group"
         >
           <svg
             viewBox="0 0 24 24"
-            className={`w-4 h-4 transition ${hasReacted ? 'fill-red-400 stroke-red-400' : 'fill-none stroke-white/30 group-hover:stroke-red-400'}`}
+            className={`w-4 h-4 transition ${hasReacted ? 'fill-red-400 stroke-red-400' : 'fill-none stroke-[#edf5e2]/25 group-hover:stroke-red-400'}`}
             strokeWidth="1.5"
           >
             <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className={`text-xs font-mono ${hasReacted ? 'text-red-400' : 'text-white/30'}`}>
+          <span className={`text-xs ${hasReacted ? 'text-red-400' : 'text-[#edf5e2]/25'}`}>
             {reactionCount > 0 ? reactionCount : ''}
           </span>
         </button>
 
         <button
           onClick={() => setExpanded(e => !e)}
-          className="flex items-center gap-1.5 text-white/30 hover:text-white/60 transition"
+          className="flex items-center gap-1.5 text-[#edf5e2]/25 hover:text-[#edf5e2]/60 transition"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
             <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="text-xs font-mono">{visibleComments.length > 0 ? visibleComments.length : ''}</span>
+          <span className="text-xs">{visibleComments.length > 0 ? visibleComments.length : ''}</span>
         </button>
 
         {userRole === 'head_coach' && !post.hidden && (
           <button
             onClick={() => onHide(post.id)}
-            className="ml-auto text-[10px] font-mono text-white/20 hover:text-red-400/60 transition tracking-widest uppercase"
+            className="ml-auto text-xs text-[#edf5e2]/20 hover:text-red-400/60 transition"
           >
             Hide
           </button>
         )}
       </div>
 
-      {/* Comments section — only when expanded */}
       {expanded && (
-        <div className="border-t border-white/5 px-4 py-3 space-y-3">
+        <div className="border-t border-[#b0e455]/5 px-4 py-3 space-y-3">
           {visibleComments.length > 0 && (
             <div className="space-y-2.5">
               {visibleComments.map(c => (
                 <div key={c.id} className="flex gap-2">
-                  <div className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[8px] font-mono text-white/40 shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-[#edf5e2]/5 border border-[#edf5e2]/10 flex items-center justify-center text-[8px] font-medium text-[#edf5e2]/40 shrink-0 mt-0.5">
                     {displayName(c.author).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-[10px] font-mono text-white/40">{displayName(c.author)}</span>
-                      <span className="text-[9px] font-mono text-white/20">{relativeTime(c.created_at)}</span>
+                      <span className="text-xs text-[#edf5e2]/40">{displayName(c.author)}</span>
+                      <span className="text-[10px] text-[#edf5e2]/20">{relativeTime(c.created_at)}</span>
                     </div>
-                    <p className="text-xs text-white/70 leading-relaxed mt-0.5">{c.body}</p>
+                    <p className="text-sm text-[#edf5e2]/70 leading-relaxed mt-0.5">{c.body}</p>
                   </div>
                 </div>
               ))}
@@ -195,12 +190,12 @@ function PostCard({
               value={comment}
               onChange={e => setComment(e.target.value)}
               placeholder="Add a comment…"
-              className="flex-1 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-babyblue-500/40 transition"
+              className="flex-1 bg-[#0f1a0c] border border-[#b0e455]/12 rounded-full px-3 py-1.5 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/35 transition"
             />
             <button
               type="submit"
               disabled={!comment.trim() || submitting}
-              className="w-7 h-7 rounded-full bg-babyblue-500 flex items-center justify-center text-navy-900 hover:bg-babyblue-400 transition disabled:opacity-30 shrink-0"
+              className="w-7 h-7 rounded-full bg-[#b0e455] flex items-center justify-center text-[#0f1a0c] hover:bg-[#c9f070] transition disabled:opacity-30 shrink-0"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3 translate-x-px">
                 <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
@@ -260,35 +255,35 @@ function NewPostForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-[#1A1F2C] rounded-xl p-5 space-y-4">
+    <form onSubmit={handleSubmit} className="bg-[#1c2e16] rounded-2xl p-5 space-y-4 border border-[#b0e455]/8">
       <div className="flex items-center justify-between">
-        <h2 className="text-xs tracking-widest uppercase font-mono text-white/40">New Post</h2>
-        <span className="text-[10px] font-mono text-babyblue-500/60 tracking-widest uppercase">{subTab}</span>
+        <h2 className="text-sm font-semibold text-[#edf5e2]/50">New Post</h2>
+        <span className="text-xs font-medium text-[#b0e455]/60 capitalize">{subTab}</span>
       </div>
 
       <input
         value={title}
         onChange={e => setTitle(e.target.value)}
         placeholder="Title"
-        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-babyblue-500/60 transition"
+        className="w-full bg-[#0f1a0c] border border-[#b0e455]/12 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/35 transition"
       />
 
       <RichTextEditor content={null} onChange={setBodyJson} />
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-sm text-red-400">{error}</p>}
 
       <div className="flex gap-3">
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3 rounded-lg border border-white/10 text-xs text-white/40 hover:text-white hover:border-white/30 transition tracking-widest uppercase font-mono"
+          className="flex-1 py-3 rounded-2xl border border-[#edf5e2]/10 text-sm text-[#edf5e2]/40 hover:text-[#edf5e2] hover:border-[#edf5e2]/25 transition"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 py-3 rounded-lg bg-babyblue-500 text-navy-900 text-xs tracking-widest uppercase font-mono font-semibold hover:bg-babyblue-400 transition disabled:opacity-50"
+          className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
         >
           {loading ? 'Posting…' : 'Post'}
         </button>
@@ -396,17 +391,16 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
   }
 
   return (
-    <div className="min-h-screen bg-[#0b0e14] text-white flex flex-col">
-      {/* Header */}
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
       <div className="px-5 pt-12 pb-2 flex items-center justify-between">
         <div>
-          <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono">Zana</p>
-          <h1 className="text-xl font-semibold tracking-tight mt-0.5">Community</h1>
+          <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+          <h1 className="text-xl font-bold tracking-tight">Community</h1>
         </div>
         {canPost && !composing && (
           <button
             onClick={() => setComposing(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-babyblue-500 text-navy-900 text-xs tracking-widest uppercase font-mono font-semibold hover:bg-babyblue-400 transition"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3">
               <path d="M12 5v14M5 12h14" strokeLinecap="round" />
@@ -416,17 +410,16 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
         )}
       </div>
 
-      {/* Tab bar */}
-      <div className="overflow-x-auto border-b border-white/5">
+      <div className="overflow-x-auto border-b border-[#b0e455]/8">
         <div className="flex min-w-max px-5">
           {SUB_TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => switchTab(tab.id)}
-              className={`px-4 py-3 text-[11px] tracking-wide font-mono whitespace-nowrap transition border-b-2 -mb-px ${
+              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 -mb-px ${
                 activeTab === tab.id
-                  ? 'border-babyblue-500 text-babyblue-500'
-                  : 'border-transparent text-white/30 hover:text-white/60'
+                  ? 'border-[#b0e455] text-[#b0e455]'
+                  : 'border-transparent text-[#edf5e2]/30 hover:text-[#edf5e2]/60'
               }`}
             >
               {tab.label}
@@ -435,9 +428,7 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
         </div>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto px-5 py-5 pb-28 space-y-3">
-        {/* Compose form */}
         {composing && (
           <NewPostForm
             subTab={activeTab}
@@ -449,17 +440,17 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
 
         {loadingTab && (
           <div className="flex justify-center py-12">
-            <p className="text-xs text-white/20 font-mono">Loading…</p>
+            <p className="text-sm text-[#edf5e2]/20">Loading…</p>
           </div>
         )}
 
         {!loadingTab && posts.filter(p => !p.hidden || userRole === 'head_coach').length === 0 && !composing && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-sm text-white/20">Nothing here yet.</p>
+            <p className="text-sm text-[#edf5e2]/20">Nothing here yet.</p>
             {canPost && (
               <button
                 onClick={() => setComposing(true)}
-                className="mt-3 text-xs text-babyblue-500/60 hover:text-babyblue-500 transition font-mono tracking-widest uppercase"
+                className="mt-3 text-sm text-[#b0e455]/60 hover:text-[#b0e455] transition font-medium"
               >
                 Be the first to post
               </button>

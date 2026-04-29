@@ -58,19 +58,19 @@ function AttachmentImage({ path }: { path: string }) {
 
 function NoThread() {
   return (
-    <div className="min-h-screen bg-[#0b0e14] text-white flex flex-col">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
       <div className="px-5 pt-12 pb-4">
-        <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono">Zana</p>
-        <h1 className="text-xl font-semibold tracking-tight mt-0.5">Messages</h1>
+        <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+        <h1 className="text-xl font-bold tracking-tight">Messages</h1>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center text-center px-8 pb-28">
-        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-white/20">
+        <div className="w-12 h-12 rounded-full bg-[#b0e455]/8 border border-[#b0e455]/12 flex items-center justify-center mb-4">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[#edf5e2]/25">
             <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <p className="text-sm text-white/30">Your messaging thread hasn't been set up yet.</p>
-        <p className="text-xs text-white/20 mt-1">Your coach will activate it when you're onboarded.</p>
+        <p className="text-sm text-[#edf5e2]/30">Your messaging thread hasn't been set up yet.</p>
+        <p className="text-xs text-[#edf5e2]/20 mt-1">Your coach will activate it when you're onboarded.</p>
       </div>
       <BottomNav />
     </div>
@@ -206,19 +206,19 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
     : false
 
   return (
-    <div className="min-h-screen bg-[#0b0e14] text-white flex flex-col">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 border-b border-white/5">
-        <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono">Zana</p>
-        <h1 className="text-xl font-semibold tracking-tight mt-0.5">Messages</h1>
+      <div className="px-5 pt-12 pb-4 border-b border-[#b0e455]/8">
+        <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+        <h1 className="text-xl font-bold tracking-tight">Messages</h1>
       </div>
 
       {/* Message list */}
       <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 space-y-1" style={{ paddingBottom: '140px' }}>
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm text-white/20">No messages yet.</p>
-            <p className="text-xs text-white/15 mt-1">Send the first one below.</p>
+            <p className="text-sm text-[#edf5e2]/20">No messages yet.</p>
+            <p className="text-xs text-[#edf5e2]/15 mt-1">Send the first one below.</p>
           </div>
         )}
 
@@ -231,7 +231,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
           return (
             <div key={msg.id}>
               {showTs && (
-                <p className="text-center text-[10px] text-white/25 font-mono py-3">
+                <p className="text-center text-xs text-[#edf5e2]/25 py-3">
                   {formatTime(msg.created_at)}
                 </p>
               )}
@@ -241,8 +241,8 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
                     <div
                       className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                         isMine
-                          ? 'bg-babyblue-500 text-navy-900 rounded-br-sm'
-                          : 'bg-[#1A1F2C] text-white/85 rounded-bl-sm'
+                          ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm font-medium'
+                          : 'bg-[#1c2e16] text-[#edf5e2]/85 rounded-bl-sm border border-[#b0e455]/8'
                       }`}
                     >
                       {msg.body}
@@ -254,7 +254,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
                       : null
                   ))}
                   {isLastMine && coachHasSeen && (
-                    <p className="text-[10px] text-white/25 font-mono mt-1 mr-1">Seen</p>
+                    <p className="text-xs text-[#edf5e2]/30 mt-1 mr-1">Seen</p>
                   )}
                 </div>
               </div>
@@ -265,7 +265,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
       </div>
 
       {/* Composer — fixed above bottom nav */}
-      <div className="fixed bottom-16 left-0 right-0 bg-[#0b0e14] border-t border-white/5 px-4 py-3 z-40">
+      <div className="fixed bottom-16 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 px-4 py-3 z-40">
         {previews.length > 0 && (
           <div className="flex gap-2 mb-2 overflow-x-auto pb-1">
             {previews.map((src, i) => (
@@ -276,7 +276,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
                     setAttachmentFiles(f => f.filter((_, j) => j !== i))
                     setPreviews(p => p.filter((_, j) => j !== i))
                   }}
-                  className="absolute -top-1 -right-1 w-4 h-4 bg-[#0b0e14] border border-white/20 rounded-full text-white/60 flex items-center justify-center text-[10px]"
+                  className="absolute -top-1 -right-1 w-4 h-4 bg-[#0f1a0c] border border-[#edf5e2]/15 rounded-full text-[#edf5e2]/60 flex items-center justify-center text-[10px]"
                 >
                   ×
                 </button>
@@ -287,7 +287,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
         <div className="flex items-end gap-2">
           <button
             onClick={() => fileRef.current?.click()}
-            className="shrink-0 w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/30 hover:text-white/60 hover:border-white/30 transition mb-0.5"
+            className="shrink-0 w-9 h-9 rounded-full border border-[#edf5e2]/10 flex items-center justify-center text-[#edf5e2]/30 hover:text-[#edf5e2]/60 hover:border-[#edf5e2]/25 transition mb-0.5"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
               <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" strokeLinecap="round" strokeLinejoin="round" />
@@ -302,13 +302,13 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
             onKeyDown={handleKeyDown}
             placeholder="Message…"
             rows={1}
-            className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 text-sm text-white placeholder-white/20 resize-none focus:outline-none focus:border-babyblue-500/40 transition max-h-32 overflow-y-auto leading-relaxed"
+            className="flex-1 bg-[#1c2e16] border border-[#b0e455]/12 rounded-2xl px-4 py-2.5 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 resize-none focus:outline-none focus:border-[#b0e455]/35 transition max-h-32 overflow-y-auto leading-relaxed"
           />
 
           <button
             onClick={sendMessage}
             disabled={sending || (!body.trim() && attachmentFiles.length === 0)}
-            className="shrink-0 w-9 h-9 rounded-full bg-babyblue-500 flex items-center justify-center text-navy-900 hover:bg-babyblue-400 transition disabled:opacity-30 mb-0.5"
+            className="shrink-0 w-9 h-9 rounded-full bg-[#b0e455] flex items-center justify-center text-[#0f1a0c] hover:bg-[#c9f070] transition disabled:opacity-30 mb-0.5"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 translate-x-px">
               <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />

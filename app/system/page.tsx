@@ -14,7 +14,6 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
-
 const features = [
   "Habit-based lifestyle system",
   "Simple, effective training split",
@@ -41,44 +40,48 @@ function PlanCard({
 
   return (
     <div
-      className={`flex flex-col border ${
-        featured ? "border-[#b3cdff] shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]" : "border-[#2e2e2e]"
-      } rounded-2xl p-10 md:p-12 relative bg-[#1a1a1a]`}
+      className={`flex flex-col rounded-3xl p-8 md:p-10 relative ${
+        featured
+          ? "bg-[#b0e455] text-[#0f1a0c]"
+          : "bg-[#1c2e16] border border-[#b0e455]/12 text-[#edf5e2]"
+      }`}
     >
       {featured && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#b3cdff] text-black text-[9px] font-bold uppercase tracking-widest px-4 py-1 rounded-full whitespace-nowrap">
+        <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#0f1a0c] text-[#b0e455] text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap border border-[#b0e455]/20">
           Best Value
         </span>
       )}
 
-      <p className="text-[9px] uppercase tracking-widest font-bold text-[#b3cdff] mb-2">{label}</p>
+      <p className={`text-xs font-semibold tracking-wider uppercase mb-2 ${featured ? "text-[#0f1a0c]/60" : "text-[#b0e455]"}`}>{label}</p>
       <div className="flex items-end gap-2 mb-1">
-        <span className="text-4xl md:text-5xl font-light text-white">${price}</span>
-        <span className="text-[10px] uppercase tracking-widest text-gray-400 mb-2">/mo</span>
+        <span className={`text-5xl font-bold ${featured ? "text-[#0f1a0c]" : "text-[#edf5e2]"}`}>${price}</span>
+        <span className={`text-sm mb-2 ${featured ? "text-[#0f1a0c]/50" : "text-[#edf5e2]/40"}`}>/mo</span>
       </div>
-      <p className="text-[9px] uppercase tracking-widest text-gray-500 mb-10">{commitment}</p>
+      <p className={`text-xs mb-10 ${featured ? "text-[#0f1a0c]/50" : "text-[#edf5e2]/40"}`}>{commitment}</p>
 
-      <ul className="space-y-4 mb-12 flex-1">
+      <ul className="space-y-3 mb-10 flex-1">
         {features.map((f) => (
           <li key={f} className="flex items-center gap-3">
-            <Check
-              className={`w-3 h-3 flex-shrink-0 ${featured ? "text-[#b3cdff]" : "text-gray-500"}`}
-              strokeWidth={2.5}
-            />
-            <span className="text-[10px] uppercase tracking-widest text-gray-300">{f}</span>
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${featured ? "bg-[#0f1a0c]/10" : "bg-[#b0e455]/12"}`}>
+              <Check
+                className={`w-3 h-3 flex-shrink-0 ${featured ? "text-[#0f1a0c]" : "text-[#b0e455]"}`}
+                strokeWidth={2.5}
+              />
+            </div>
+            <span className={`text-sm ${featured ? "text-[#0f1a0c]/80" : "text-[#edf5e2]/70"}`}>{f}</span>
           </li>
         ))}
       </ul>
 
       <a
         href={checkoutUrl}
-        className={`lemonsqueezy-button w-full py-4 rounded-full text-[10px] uppercase tracking-widest font-bold transition-colors text-center ${
+        className={`lemonsqueezy-button w-full py-4 rounded-2xl text-sm font-semibold transition-colors text-center ${
           featured
-            ? "bg-[#b3cdff] text-black hover:bg-white"
-            : "border border-[#2e2e2e] text-gray-300 hover:border-[#b3cdff] hover:text-[#b3cdff]"
+            ? "bg-[#0f1a0c] text-[#b0e455] hover:bg-[#162212]"
+            : "bg-[#b0e455] text-[#0f1a0c] hover:bg-[#c9f070]"
         }`}
       >
-        JOIN THE SYSTEM
+        Join the System
       </a>
     </div>
   );
@@ -86,156 +89,144 @@ function PlanCard({
 
 export default function SystemPage() {
   return (
-    <main className="min-h-screen bg-[#1a1a1a] text-white font-sans selection:bg-[#b3cdff] selection:text-[#141414]">
+    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] font-sans selection:bg-[#b0e455] selection:text-[#0f1a0c]">
 
       <Navbar active="system" />
 
       {/* HEADER */}
-      <section className="pt-40 pb-20 px-6 text-center bg-[#1a1a1a]">
+      <section className="pt-40 pb-20 px-6 text-center">
         <div className="max-w-2xl mx-auto flex flex-col items-center">
-          <ZanaLogo className="h-10 md:h-12 text-white mb-12" />
-          <div className="w-8 h-px bg-gray-500 mb-12"></div>
-          <h1 className="text-2xl md:text-4xl font-sans font-light tracking-[0.1em] uppercase leading-tight text-white mb-6">
+          <ZanaLogo className="h-10 md:h-12 text-[#edf5e2] mb-12 opacity-80" />
+          <div className="w-10 h-px bg-[#b0e455]/30 mb-10" />
+          <h1 className="font-display leading-none mb-5" style={{ fontSize: "clamp(48px, 6vw, 80px)" }}>
             The System.
           </h1>
-          <p className="font-mono text-[10px] uppercase tracking-widest text-[#b3cdff]">Not a program. A protocol.</p>
+          <p className="text-sm font-medium text-[#b0e455] tracking-wider">Not a program. A protocol.</p>
         </div>
       </section>
 
-      {/* SYSTEM EXPECTATIONS */}
-      <section className="py-24 px-6 bg-[#1a1a1a] border-y border-[#2e2e2e]">
-        <div className="max-w-6xl mx-auto flex flex-col items-center">
-          <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">EXPECTATIONS</p>
-          <h2 className="text-xl md:text-2xl font-sans font-light tracking-[0.15em] uppercase text-center mb-20">
-            A framework built on structure.
-          </h2>
-          <div className="grid md:grid-cols-3 gap-16 md:gap-0 w-full text-center px-4">
+      {/* THREE PILLARS */}
+      <section className="py-20 px-6 bg-[#162212] border-y border-[#b0e455]/8">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-4">Expectations</p>
+            <h2 className="font-display leading-none" style={{ fontSize: "clamp(32px, 4vw, 56px)" }}>
+              A framework built on structure.
+            </h2>
+          </div>
 
-            <div className="flex flex-col items-center md:border-r border-[#2e2e2e] md:pr-16">
-               <TrendingUp className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
-               <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">01</div>
-               <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Training</h3>
-               <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Calculated Overload</p>
-               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">A simple, progressive split built for your schedule — not a bodybuilder's. 45–60 minute sessions, structured to build the lean aesthetic look: shoulders, chest, arms.</p>
-            </div>
-
-            <div className="flex flex-col items-center md:border-r border-[#2e2e2e] md:px-16">
-               <Leaf className="w-8 h-8 text-gray-300 stroke-1 mb-8" />
-               <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">02</div>
-               <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Nutrition</h3>
-               <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Linear Alignment</p>
-               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">No elimination diets. No extreme cuts. Real food, clear macro targets, and meal habits that fit your life in Singapore, Manila, Jakarta, or wherever you are.</p>
-            </div>
-
-            <div className="flex flex-col items-center md:pl-16">
-               <Target className="w-8 h-8 text-gray-300 stroke-[1.5] mb-8" />
-               <div className="font-mono text-[10px] tracking-widest text-[#b3cdff] mb-4">03</div>
-               <h3 className="uppercase tracking-[0.2em] text-xs font-bold mb-3 text-white">Guidance</h3>
-               <p className="font-mono text-gray-400 uppercase tracking-widest text-[9px]">Constant Adaptation</p>
-               <p className="mt-4 font-inter text-xs text-gray-500 leading-snug">Weekly check-ins. Adjustments when life gets busy. A coach who understands your world — the travel, the client dinners, the demanding schedule.</p>
-            </div>
-
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: <TrendingUp className="w-7 h-7 text-[#b0e455] stroke-1" />,
+                num: "01",
+                title: "Training",
+                sub: "Calculated Overload",
+                desc: "A simple, progressive split built for your schedule — not a bodybuilder's. 45–60 minute sessions, structured to build the lean aesthetic look: shoulders, chest, arms.",
+              },
+              {
+                icon: <Leaf className="w-7 h-7 text-[#b0e455] stroke-1" />,
+                num: "02",
+                title: "Nutrition",
+                sub: "Linear Alignment",
+                desc: "No elimination diets. No extreme cuts. Real food, clear macro targets, and meal habits that fit your life in Singapore, Manila, Jakarta, or wherever you are.",
+              },
+              {
+                icon: <Target className="w-7 h-7 text-[#b0e455] stroke-[1.5]" />,
+                num: "03",
+                title: "Guidance",
+                sub: "Constant Adaptation",
+                desc: "Weekly check-ins. Adjustments when life gets busy. A coach who understands your world — the travel, the client dinners, the demanding schedule.",
+              },
+            ].map(p => (
+              <div key={p.num} className="bg-[#1c2e16] rounded-3xl p-8 border border-[#b0e455]/8">
+                <div className="mb-6">{p.icon}</div>
+                <p className="text-xs font-semibold text-[#b0e455] mb-3">{p.num} · {p.sub}</p>
+                <h3 className="text-lg font-bold text-[#edf5e2] mb-3">{p.title}</h3>
+                <p className="text-sm text-[#edf5e2]/55 leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CORE STATEMENT */}
-      <section className="py-24 px-6 text-center bg-[#1a1a1a]">
-        <div className="max-w-4xl mx-auto flex flex-col items-center">
-          <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-10">THE RESULT</p>
-          <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase leading-tight text-white mb-10">
-            The physique compounds into everything else<br />
+      <section className="py-20 px-6 text-center">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-8">The Result</p>
+          <h2 className="font-display leading-none" style={{ fontSize: "clamp(32px, 4.5vw, 60px)" }}>
+            The physique compounds into everything<br />
             you've built — career, confidence, presence.<br />
-            Start building it <span className="text-[#b3cdff]">right.</span>
+            Start building it <span className="text-[#b0e455]">right.</span>
           </h2>
         </div>
       </section>
 
       {/* WHAT YOU GET */}
-      <section className="py-24 px-8 md:px-16 bg-[#141414]">
+      <section className="py-20 px-6 bg-[#162212] border-t border-[#b0e455]/8">
         <div className="max-w-5xl mx-auto">
 
-          <div className="text-center mb-20">
-            <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-4">INSIDE THE PLATFORM</p>
-            <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-6">What You Get</h2>
-            <a href="/demo" className="inline-block font-mono text-[9px] tracking-widest uppercase px-6 py-3 border border-[#b3cdff]/40 text-[#b3cdff] rounded-full hover:bg-[#b3cdff]/10 transition-colors">
+          <div className="text-center mb-16">
+            <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-4">Inside the Platform</p>
+            <h2 className="font-display leading-none mb-6" style={{ fontSize: "clamp(32px, 4.5vw, 60px)" }}>What You Get</h2>
+            <a href="/demo" className="inline-flex items-center gap-2 text-sm font-medium text-[#b0e455] border border-[#b0e455]/25 px-5 py-2.5 rounded-full hover:bg-[#b0e455]/8 transition-colors">
               Preview the App →
             </a>
           </div>
 
-          {/* Member Dashboard */}
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 mb-28">
-
-            {/* Mock UI — Member */}
+          {/* Member features */}
+          <div className="flex flex-col lg:flex-row items-start gap-12 lg:gap-16 mb-20">
             <div className="w-full max-w-[260px] mx-auto shrink-0">
-              <div className="bg-[#0a0f16] border border-[#2e2e2e] rounded-2xl overflow-hidden shadow-2xl">
-                {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-[#1a222c]">
-                  <svg viewBox="0 0 180 32" className="h-4 text-white" fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10"><path d="M0,2 H32 L18.3,14"/><path d="M13.7,18 L0,30 H32"/><path d="M48,30 L64,2 L80,30"/><path d="M96,30 V2 L128,30 V2"/><path d="M144,30 L160,2 L176,30"/></svg>
-                  <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 border border-[#86efac]/30 text-[#86efac] bg-[#86efac]/5 rounded-sm">Member</span>
+              <div className="bg-[#0f1a0c] border border-[#b0e455]/12 rounded-3xl overflow-hidden shadow-[0_0_60px_-20px_rgba(176,228,85,0.15)]">
+                <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#b0e455]/8">
+                  <svg viewBox="0 0 180 32" className="h-4 text-[#edf5e2]" fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10"><path d="M0,2 H32 L18.3,14"/><path d="M13.7,18 L0,30 H32"/><path d="M48,30 L64,2 L80,30"/><path d="M96,30 V2 L128,30 V2"/><path d="M144,30 L160,2 L176,30"/></svg>
+                  <span className="text-[9px] font-semibold px-2 py-0.5 bg-[#86efac]/10 border border-[#86efac]/25 text-[#86efac] rounded-full">Member</span>
                 </div>
-                {/* Body */}
                 <div className="p-4 space-y-3">
-                  {/* Welcome */}
                   <div>
-                    <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest">Welcome back</p>
-                    <p className="text-sm font-light text-white uppercase tracking-wide mt-0.5">Priya.</p>
+                    <p className="text-[9px] text-[#edf5e2]/35 uppercase tracking-wide mb-0.5">Welcome back</p>
+                    <p className="text-sm font-semibold text-[#edf5e2]">Priya.</p>
                   </div>
-                  {/* Streak */}
                   <div className="flex gap-2">
-                    <div className="flex-1 bg-[#1a1a1a] border border-[#2e2e2e] rounded p-3">
-                      <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest mb-1">Streak</p>
-                      <p className="text-lg font-light text-[#b3cdff]">67<span className="text-xs text-gray-500 ml-1">days</span></p>
+                    <div className="flex-1 bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl p-3">
+                      <p className="text-[9px] text-[#edf5e2]/35 uppercase mb-1">Streak</p>
+                      <p className="text-lg font-bold text-[#b0e455]">67<span className="text-xs text-[#edf5e2]/30 ml-1">days</span></p>
                     </div>
-                    <div className="flex-1 bg-[#1a1a1a] border border-[#2e2e2e] rounded p-3">
-                      <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest mb-1">Phase</p>
-                      <p className="text-lg font-light text-white">03</p>
-                    </div>
-                  </div>
-                  {/* Today's workout */}
-                  <div className="bg-[#1a1a1a] border border-[#b3cdff]/20 rounded p-3">
-                    <p className="font-mono text-[7px] text-[#b3cdff] uppercase tracking-widest mb-1">Today</p>
-                    <p className="text-xs text-white font-medium">Upper Body A</p>
-                    <p className="font-mono text-[8px] text-gray-500 mt-0.5">6 exercises · 55 min</p>
-                    <div className="mt-2 w-full bg-[#141414] rounded-full h-1">
-                      <div className="bg-[#b3cdff] h-1 rounded-full" style={{width:"45%"}} />
+                    <div className="flex-1 bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl p-3">
+                      <p className="text-[9px] text-[#edf5e2]/35 uppercase mb-1">Phase</p>
+                      <p className="text-lg font-bold text-[#edf5e2]">03</p>
                     </div>
                   </div>
-                  {/* Community preview */}
-                  <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded p-3">
-                    <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest mb-2">Community</p>
-                    <div className="flex gap-2">
-                      <div className="w-5 h-5 rounded-full bg-[#b3cdff]/15 border border-[#b3cdff]/30 flex items-center justify-center shrink-0">
-                        <span className="font-mono text-[6px] text-[#b3cdff]">PS</span>
-                      </div>
-                      <p className="font-mono text-[8px] text-gray-400 leading-tight">Deadlifts felt strong today. Hit 145kg × 3.</p>
+                  <div className="bg-[#1c2e16] border border-[#b0e455]/20 rounded-xl p-3">
+                    <p className="text-[9px] text-[#b0e455] uppercase tracking-wide mb-1.5">Today</p>
+                    <p className="text-xs font-semibold text-[#edf5e2]">Upper Body A</p>
+                    <p className="text-[9px] text-[#edf5e2]/40 mt-0.5">6 exercises · 55 min</p>
+                    <div className="mt-2.5 w-full bg-[#0f1a0c] rounded-full h-1">
+                      <div className="bg-[#b0e455] h-1 rounded-full" style={{width:"45%"}} />
                     </div>
                   </div>
-                  {/* DM preview */}
-                  <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded p-3 flex items-center gap-2">
-                    <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#b3cdff] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  <div className="bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl p-3 flex items-center gap-2">
+                    <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#b0e455] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     <div>
-                      <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest">Javi</p>
-                      <p className="font-mono text-[8px] text-gray-300">Great work this week 💪</p>
+                      <p className="text-[9px] text-[#edf5e2]/35 uppercase mb-0.5">Javi</p>
+                      <p className="text-xs text-[#edf5e2]/70">Great work this week 💪</p>
                     </div>
                   </div>
                 </div>
-                {/* Bottom nav */}
-                <div className="border-t border-[#1a222c] flex">
+                <div className="border-t border-[#b0e455]/8 flex">
                   {["Home","Programs","Schedule","Community","Messages"].map((t, i) => (
-                    <div key={t} className={`flex-1 py-2 flex flex-col items-center gap-0.5 ${i === 0 ? "text-[#b3cdff]" : "text-gray-600"}`}>
-                      <div className={`w-3 h-3 rounded-sm ${i === 0 ? "bg-[#b3cdff]/30" : "bg-[#2d3a4b]/50"}`} />
-                      <span className="font-mono text-[5px] uppercase tracking-wider">{t}</span>
+                    <div key={t} className={`flex-1 py-2.5 flex flex-col items-center gap-0.5 ${i === 0 ? "text-[#b0e455]" : "text-[#edf5e2]/20"}`}>
+                      <div className={`w-3 h-3 rounded-sm ${i === 0 ? "bg-[#b0e455]/25" : "bg-[#1c2e16]"}`} />
+                      <span className="text-[5px] uppercase tracking-wide">{t}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* Highlights — Member */}
             <div className="flex-1">
-              <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-3">For Members</p>
-              <h3 className="text-xl md:text-2xl font-light tracking-[0.1em] uppercase text-white mb-8">Your personal system,<br/>in your pocket.</h3>
+              <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-4">For Members</p>
+              <h3 className="font-display leading-none mb-8" style={{ fontSize: "clamp(28px, 3.5vw, 44px)" }}>Your personal system,<br/>in your pocket.</h3>
               <div className="space-y-5">
                 {[
                   { title: "Your Training Plan", desc: "Progressive workouts built for your schedule. Updated as you advance through phases." },
@@ -246,10 +237,14 @@ export default function SystemPage() {
                   { title: "Streak Tracking", desc: "Daily check-in streak keeps you consistent. Simple but effective." },
                 ].map(f => (
                   <div key={f.title} className="flex gap-4">
-                    <div className="mt-1 w-1 h-1 rounded-full bg-[#b3cdff] shrink-0" />
+                    <div className="mt-1.5 w-4 h-4 rounded-full bg-[#b0e455]/12 border border-[#b0e455]/25 flex items-center justify-center shrink-0">
+                      <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
+                        <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#b0e455" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                     <div>
-                      <p className="text-sm text-white font-medium tracking-wide">{f.title}</p>
-                      <p className="font-mono text-[9px] text-gray-500 mt-0.5 leading-relaxed">{f.desc}</p>
+                      <p className="text-sm font-semibold text-[#edf5e2] mb-0.5">{f.title}</p>
+                      <p className="text-sm text-[#edf5e2]/50 leading-relaxed">{f.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -257,72 +252,57 @@ export default function SystemPage() {
             </div>
           </div>
 
-          {/* Coach Dashboard */}
-          <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16">
-
-            {/* Mock UI — Coach */}
+          {/* Coach features */}
+          <div className="flex flex-col lg:flex-row-reverse items-start gap-12 lg:gap-16">
             <div className="w-full max-w-[380px] mx-auto shrink-0">
-              <div className="bg-[#0a0f16] border border-[#2e2e2e] rounded-2xl overflow-hidden shadow-2xl flex">
-                {/* Sidebar */}
-                <div className="w-14 bg-[#060b10] border-r border-[#1a222c] flex flex-col items-center py-4 gap-1">
-                  <svg viewBox="0 0 32 32" className="h-4 text-white mb-3" fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10"><path d="M0,2 H32 L18.3,14"/><path d="M13.7,18 L0,30 H32"/></svg>
+              <div className="bg-[#0f1a0c] border border-[#b0e455]/12 rounded-3xl overflow-hidden shadow-[0_0_60px_-20px_rgba(176,228,85,0.12)] flex">
+                <div className="w-14 bg-[#0c1309] border-r border-[#b0e455]/8 flex flex-col items-center py-4 gap-1">
+                  <svg viewBox="0 0 32 32" className="h-4 text-[#edf5e2] mb-3" fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10"><path d="M0,2 H32 L18.3,14"/><path d="M13.7,18 L0,30 H32"/></svg>
                   {["Ov","Mb","Co","Mg","Pr","Sc"].map((label, i) => (
-                    <div key={label} className={`w-8 h-7 rounded flex items-center justify-center font-mono text-[7px] uppercase tracking-wider ${i === 0 ? "bg-[#b3cdff]/10 text-[#b3cdff] border-l-2 border-[#b3cdff]" : "text-gray-600"}`}>{label}</div>
+                    <div key={label} className={`w-8 h-7 rounded flex items-center justify-center text-[8px] font-medium ${i === 0 ? "bg-[#b0e455]/12 text-[#b0e455] border-l-2 border-[#b0e455]" : "text-[#edf5e2]/25"}`}>{label}</div>
                   ))}
                 </div>
-                {/* Main */}
                 <div className="flex-1 p-4 space-y-3 min-w-0">
                   <div className="flex items-center justify-between">
-                    <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest">Overview</p>
-                    <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 border border-[#b3cdff]/30 text-[#b3cdff] bg-[#b3cdff]/5 rounded-sm">Coach</span>
+                    <p className="text-[9px] text-[#edf5e2]/35 uppercase tracking-wide">Overview</p>
+                    <span className="text-[9px] font-semibold px-2 py-0.5 bg-[#b0e455]/10 border border-[#b0e455]/20 text-[#b0e455] rounded-full">Coach</span>
                   </div>
-                  {/* Stats */}
                   <div className="grid grid-cols-3 gap-1.5">
-                    {[{l:"Members",v:"8",c:"#fff"},{l:"Active",v:"3",c:"#86efac"},{l:"Pending",v:"5",c:"#fbbf24"}].map(s => (
-                      <div key={s.l} className="bg-[#1a1a1a] border border-[#2e2e2e] rounded p-2 text-center">
-                        <p className="text-base font-light" style={{color:s.c}}>{s.v}</p>
-                        <p className="font-mono text-[6px] text-gray-500 uppercase tracking-wider mt-0.5">{s.l}</p>
+                    {[{l:"Members",v:"8",c:"#edf5e2"},{l:"Active",v:"3",c:"#86efac"},{l:"Pending",v:"5",c:"#fbbf24"}].map(s => (
+                      <div key={s.l} className="bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl p-2 text-center">
+                        <p className="text-base font-bold" style={{color:s.c}}>{s.v}</p>
+                        <p className="text-[8px] text-[#edf5e2]/35 uppercase mt-0.5">{s.l}</p>
                       </div>
                     ))}
                   </div>
-                  {/* Member rows */}
-                  <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded overflow-hidden">
-                    <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest px-3 py-2 border-b border-[#141414]">Members</p>
+                  <div className="bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl overflow-hidden">
+                    <p className="text-[9px] text-[#edf5e2]/35 uppercase tracking-wide px-3 py-2 border-b border-[#b0e455]/5">Members</p>
                     {[
-                      {i:"PS",n:"Priya S.",streak:67,c:"#b3cdff",pct:88},
+                      {i:"PS",n:"Priya S.",streak:67,c:"#b0e455",pct:88},
                       {i:"AT",n:"Aiko T.", streak:45,c:"#86efac",pct:72},
                       {i:"MC",n:"Marcus C.",streak:28,c:"#fbbf24",pct:55},
                     ].map(m => (
-                      <div key={m.i} className="flex items-center gap-2 px-3 py-2 border-b border-[#141414] last:border-0">
-                        <div className="w-5 h-5 rounded-full flex items-center justify-center font-mono text-[6px] shrink-0" style={{color:m.c,backgroundColor:m.c+"15",border:`1px solid ${m.c}30`}}>{m.i}</div>
+                      <div key={m.i} className="flex items-center gap-2 px-3 py-2 border-b border-[#b0e455]/5 last:border-0">
+                        <div className="w-5 h-5 rounded-full flex items-center justify-center text-[8px] shrink-0 font-semibold" style={{color:m.c,backgroundColor:m.c+"15",border:`1px solid ${m.c}30`}}>{m.i}</div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-mono text-[8px] text-white truncate">{m.n}</p>
+                          <p className="text-[10px] text-[#edf5e2]/80 font-medium truncate">{m.n}</p>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <div className="flex-1 h-0.5 bg-[#141414] rounded-full">
+                            <div className="flex-1 h-0.5 bg-[#0f1a0c] rounded-full">
                               <div className="h-0.5 rounded-full" style={{width:`${m.pct}%`,backgroundColor:m.c}} />
                             </div>
-                            <span className="font-mono text-[6px]" style={{color:m.c}}>{m.streak}d</span>
+                            <span className="text-[8px]" style={{color:m.c}}>{m.streak}d</span>
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                  {/* Messages preview */}
-                  <div className="bg-[#1a1a1a] border border-[#2e2e2e] rounded p-2.5 flex items-center gap-2">
-                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-[#b3cdff] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    <div className="min-w-0">
-                      <p className="font-mono text-[7px] text-gray-500 uppercase tracking-widest">Priya Sharma</p>
-                      <p className="font-mono text-[8px] text-gray-300 truncate">Ready for this week's session 🔥</p>
-                    </div>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Highlights — Coach */}
             <div className="flex-1">
-              <p className="font-mono text-[8px] tracking-[0.3em] text-[#b3cdff] uppercase mb-3">For Coaches</p>
-              <h3 className="text-xl md:text-2xl font-light tracking-[0.1em] uppercase text-white mb-8">Full visibility.<br/>Zero admin overhead.</h3>
+              <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-4">For Coaches</p>
+              <h3 className="font-display leading-none mb-8" style={{ fontSize: "clamp(28px, 3.5vw, 44px)" }}>Full visibility.<br/>Zero admin overhead.</h3>
               <div className="space-y-5">
                 {[
                   { title: "Member Roster", desc: "See every member's streak, phase, check-in status and last active time at a glance." },
@@ -333,10 +313,14 @@ export default function SystemPage() {
                   { title: "Schedule & Events", desc: "Manage group calls, 1:1 reviews and deadlines. Members see it all in their calendar." },
                 ].map(f => (
                   <div key={f.title} className="flex gap-4">
-                    <div className="mt-1 w-1 h-1 rounded-full bg-[#b3cdff] shrink-0" />
+                    <div className="mt-1.5 w-4 h-4 rounded-full bg-[#b0e455]/12 border border-[#b0e455]/25 flex items-center justify-center shrink-0">
+                      <svg viewBox="0 0 10 10" fill="none" className="w-2.5 h-2.5">
+                        <path d="M1.5 5l2.5 2.5 4.5-4.5" stroke="#b0e455" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                     <div>
-                      <p className="text-sm text-white font-medium tracking-wide">{f.title}</p>
-                      <p className="font-mono text-[9px] text-gray-500 mt-0.5 leading-relaxed">{f.desc}</p>
+                      <p className="text-sm font-semibold text-[#edf5e2] mb-0.5">{f.title}</p>
+                      <p className="text-sm text-[#edf5e2]/50 leading-relaxed">{f.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -348,13 +332,14 @@ export default function SystemPage() {
       </section>
 
       {/* PRICING */}
-      <section className="py-24 px-6 bg-[#1a1a1a] border-y border-[#2e2e2e]" id="pricing">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-4">Choose Your Commitment Level.</h2>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400">All plans include the full system. Choose how long you're in.</p>
+      <section className="py-20 px-6 border-t border-[#b0e455]/8" id="pricing">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-4">Commitment</p>
+            <h2 className="font-display leading-none mb-4" style={{ fontSize: "clamp(32px, 4.5vw, 60px)" }}>Choose Your<br />Commitment Level.</h2>
+            <p className="text-sm text-[#edf5e2]/45">All plans include the full system. Choose how long you're in.</p>
           </div>
-          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-5">
             <PlanCard
               label="Committed"
               price={400}
