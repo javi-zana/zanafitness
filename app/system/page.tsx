@@ -152,19 +152,22 @@ export default function SystemPage() {
       </section>
 
       {/* WHAT YOU GET */}
-      <section className="py-24 px-6 bg-[#0f141b]">
-        <div className="max-w-6xl mx-auto">
+      <section className="py-24 px-8 md:px-16 bg-[#0f141b]">
+        <div className="max-w-5xl mx-auto">
 
           <div className="text-center mb-20">
             <p className="text-[#b3cdff] font-mono text-[10px] tracking-widest mb-4">INSIDE THE PLATFORM</p>
-            <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white">What You Get</h2>
+            <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-6">What You Get</h2>
+            <a href="/demo" className="inline-block font-mono text-[9px] tracking-widest uppercase px-6 py-3 border border-[#b3cdff]/40 text-[#b3cdff] rounded-full hover:bg-[#b3cdff]/10 transition-colors">
+              Preview the App →
+            </a>
           </div>
 
           {/* Member Dashboard */}
-          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20 mb-28">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 mb-28">
 
             {/* Mock UI — Member */}
-            <div className="w-full max-w-[300px] mx-auto lg:mx-0 shrink-0">
+            <div className="w-full max-w-[260px] mx-auto shrink-0">
               <div className="bg-[#0a0f16] border border-[#2d3a4b] rounded-2xl overflow-hidden shadow-2xl">
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[#1a222c]">
@@ -255,10 +258,10 @@ export default function SystemPage() {
           </div>
 
           {/* Coach Dashboard */}
-          <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-20">
+          <div className="flex flex-col lg:flex-row-reverse items-center gap-12 lg:gap-16">
 
             {/* Mock UI — Coach */}
-            <div className="w-full max-w-[420px] mx-auto lg:mx-0 shrink-0">
+            <div className="w-full max-w-[380px] mx-auto shrink-0">
               <div className="bg-[#0a0f16] border border-[#2d3a4b] rounded-2xl overflow-hidden shadow-2xl flex">
                 {/* Sidebar */}
                 <div className="w-14 bg-[#060b10] border-r border-[#1a222c] flex flex-col items-center py-4 gap-1">
