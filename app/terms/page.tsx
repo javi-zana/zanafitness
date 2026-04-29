@@ -20,10 +20,10 @@ const ZIcon = ({ className = "h-8" }: { className?: string }) => (
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-[#121821] text-white font-sans">
+    <main className="min-h-screen bg-[#1e2d42] text-white font-sans">
 
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
+      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d4060]">
         <Link href="/"><ZIcon className="h-5 md:h-6 text-white" /></Link>
         <Link href="/" className="font-mono text-[9px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
           &larr; Back
@@ -53,7 +53,7 @@ export default function TermsPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">3. Subscriptions</h2>
               <p>Access to the ZANA system requires a paid subscription. We offer the following plans:</p>
-              <ul className="mt-4 space-y-2 list-none pl-4 border-l border-[#2d3a4b]">
+              <ul className="mt-4 space-y-2 list-none pl-4 border-l border-[#2d4060]">
                 <li>Entry — $500/month, 3-month commitment</li>
                 <li>Committed — $400/month, 6-month commitment</li>
                 <li>All In — $300/month, 12-month commitment</li>

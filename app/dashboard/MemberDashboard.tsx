@@ -1686,7 +1686,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
   const currentLabel = NAV_ITEMS.find(n => n.id === activeTab)?.label ?? "";
 
   return (
-    <div className="min-h-screen bg-[#0b0e14] text-white flex">
+    <div className="min-h-screen bg-[#0f172a] text-white flex">
 
       {/* ── Sidebar (desktop) ── */}
       <aside className="hidden md:flex flex-col w-60 bg-[#070b10] border-r border-[#1e2a38] fixed h-full z-20">
@@ -1719,7 +1719,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
         </nav>
 
         {/* User card */}
-        <div className="p-5 border-t border-[#1e2a38]">
+        <div className="p-5 border-t border-[#1e2a38] space-y-4">
           <div className="flex items-center gap-3">
             <Avatar initials={userInitials} size="sm" online={true} color={avatarColor} />
             <div className="flex-1 min-w-0">
@@ -1733,6 +1733,10 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
               </svg>
             </Link>
           </div>
+          <Link href="/" className="flex items-center gap-2 font-mono text-[8px] tracking-[0.2em] uppercase text-gray-600 hover:text-gray-300 transition-colors">
+            <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M10 12L6 8l4-4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            zanafitness.com
+          </Link>
         </div>
       </aside>
 
@@ -1740,7 +1744,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
       <main className="flex-1 md:ml-60 flex flex-col min-h-screen">
 
         {/* Top bar */}
-        <header className="sticky top-0 z-10 bg-[#0b0e14]/95 backdrop-blur-md border-b border-[#1e2a38] px-5 py-4 flex items-center justify-between">
+        <header className="sticky top-0 z-10 bg-[#0f172a]/95 backdrop-blur-md border-b border-[#1e2a38] px-5 py-4 flex items-center justify-between">
           {/* Mobile: Z mark — tapping goes home */}
           <Link href="/" className="md:hidden" title="Back to home">
             <ZMark className="h-5 text-white hover:opacity-70 transition-opacity" />

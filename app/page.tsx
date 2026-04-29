@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Lock, X, Menu, ArrowUpRight } from 'lucide-react';
+import { Lock, X, ArrowUpRight } from 'lucide-react';
+import Navbar from '@/app/components/Navbar';
+import Footer from '@/app/components/Footer';
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 
@@ -22,7 +24,7 @@ function WaitlistModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={onClose}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-      <div className="relative bg-[#0f141b] border border-[#2d3a4b] rounded-2xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-[0_0_120px_-20px_rgba(179,205,255,0.2)]" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[#162035] border border-[#2d4060] rounded-2xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-[0_0_120px_-20px_rgba(179,205,255,0.2)]" onClick={e => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
         <ZanaLogo className="h-5 text-white mb-10 opacity-50" />
         <div className="w-6 h-px bg-[#b3cdff] mb-10" />
@@ -40,7 +42,7 @@ function DuplicateModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={onClose}>
       <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
-      <div className="relative bg-[#0f141b] border border-[#2d3a4b] rounded-2xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center" onClick={e => e.stopPropagation()}>
+      <div className="relative bg-[#162035] border border-[#2d4060] rounded-2xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center" onClick={e => e.stopPropagation()}>
         <button onClick={onClose} className="absolute top-5 right-5 text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
         <ZanaLogo className="h-5 text-white mb-10 opacity-50" />
         <p className="font-mono text-[9px] uppercase tracking-widest text-gray-500 mb-4">Already Registered</p>
@@ -48,44 +50,6 @@ function DuplicateModal({ onClose }: { onClose: () => void }) {
         <p className="font-mono text-[10px] uppercase tracking-widest text-gray-500 leading-loose">You're already on the list.<br />We'll reach out when it's time.</p>
       </div>
     </div>
-  );
-}
-
-// ─── Nav ──────────────────────────────────────────────────────────────────────
-
-function Nav() {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 bg-[#0b0e14]/80 backdrop-blur-md border-b border-white/5">
-        <Link href="/" className="flex items-center gap-3">
-          <ZanaLogo className="h-5 text-white" />
-        </Link>
-        <div className="hidden md:flex items-center gap-8">
-          {[{href:"/about",label:"About"},{href:"/system",label:"The System"},{href:"/demo",label:"Preview"},{href:"/faq",label:"FAQ"}].map(l => (
-            <Link key={l.href} href={l.href} className="font-mono text-[9px] tracking-[0.2em] uppercase text-gray-400 hover:text-white transition-colors">{l.label}</Link>
-          ))}
-        </div>
-        <div className="hidden md:flex items-center gap-3">
-          <Link href="/login" className="font-mono text-[9px] tracking-widest uppercase text-gray-400 hover:text-white transition-colors px-4 py-2">Log In</Link>
-          <Link href="/system" className="font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0b0e14] px-5 py-2.5 rounded-full font-bold hover:bg-white transition-colors">Get Started</Link>
-        </div>
-        <button className="md:hidden text-white" onClick={() => setOpen(!open)}>{open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}</button>
-      </nav>
-      {open && (
-        <div className="fixed inset-0 z-40 bg-[#0b0e14] flex flex-col pt-24 px-8 md:hidden">
-          <div className="flex flex-col gap-8">
-            {[{href:"/about",label:"About"},{href:"/system",label:"The System"},{href:"/demo",label:"Preview"},{href:"/faq",label:"FAQ"}].map(l => (
-              <Link key={l.href} href={l.href} onClick={() => setOpen(false)} className="font-mono text-[11px] tracking-[0.2em] uppercase text-gray-300 hover:text-white transition-colors">{l.label}</Link>
-            ))}
-            <div className="pt-6 flex flex-col gap-3 border-t border-[#1e2a38]">
-              <Link href="/login" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase text-center py-3 border border-[#2d3a4b] text-gray-300 rounded-full">Log In</Link>
-              <Link href="/system" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase bg-[#b3cdff] text-[#0b0e14] py-3.5 rounded-full font-bold text-center">Get Started</Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   );
 }
 
@@ -109,12 +73,12 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="bg-[#0b0e14] text-white selection:bg-[#b3cdff] selection:text-[#0b0e14]">
+    <main className="bg-[#0f172a] text-white selection:bg-[#b3cdff] selection:text-[#0f172a]">
 
       {status === 'success'   && <WaitlistModal   onClose={() => setStatus('idle')} />}
       {status === 'duplicate' && <DuplicateModal  onClose={() => setStatus('idle')} />}
 
-      <Nav />
+      <Navbar />
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex flex-col justify-end pb-20 md:pb-28 overflow-hidden">
@@ -143,7 +107,7 @@ export default function LandingPage() {
             Without overhauling your life.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/system" className="font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0b0e14] px-8 py-4 rounded-full font-bold hover:bg-white transition-colors inline-flex items-center gap-2">
+            <Link href="/system" className="font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f172a] px-8 py-4 rounded-full font-bold hover:bg-white transition-colors inline-flex items-center gap-2">
               Get Started <ArrowUpRight className="w-3 h-3" />
             </Link>
             <Link href="/demo" className="font-mono text-[9px] tracking-widest uppercase border border-white/20 text-white px-8 py-4 rounded-full hover:border-white/50 hover:bg-white/5 transition-colors">
@@ -160,7 +124,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── MARQUEE ───────────────────────────────────────────────────────── */}
-      <div className="bg-[#b3cdff] text-[#0b0e14] py-3.5 overflow-hidden">
+      <div className="bg-[#b3cdff] text-[#0f172a] py-3.5 overflow-hidden">
         <div className="flex whitespace-nowrap animate-marquee">
           {Array(8).fill(null).map((_, i) => (
             <span key={i} className="font-display text-sm tracking-[0.2em] uppercase px-8">
@@ -199,9 +163,9 @@ export default function LandingPage() {
       <section className="grid grid-cols-1 md:grid-cols-2 min-h-[70vh]">
         <div className="relative h-[50vh] md:h-auto">
           <div className="absolute inset-0 bg-[url('/A502086F-E304-43B4-87C1-93658EDB79F0.PNG')] bg-cover bg-center" />
-          <div className="absolute inset-0 bg-[#0b0e14]/20" />
+          <div className="absolute inset-0 bg-[#0f172a]/20" />
         </div>
-        <div className="bg-[#0f141b] flex flex-col justify-center px-10 md:px-16 py-16 border-l border-[#1e2a38]">
+        <div className="bg-[#162035] flex flex-col justify-center px-10 md:px-16 py-16 border-l border-[#1f3050]">
           <p className="font-mono text-[8px] tracking-[0.4em] uppercase text-[#b3cdff] mb-8">The System</p>
           <h2 className="font-display leading-none uppercase mb-10" style={{ fontSize: "clamp(40px, 5vw, 72px)" }}>
             A framework<br />built on<br />structure.
@@ -228,7 +192,7 @@ export default function LandingPage() {
       <section className="relative py-32 md:py-48 px-6 md:px-12 overflow-hidden">
         <div className="absolute inset-0">
           <div className="w-full h-full bg-[url('/F52D6DDD-5F62-414C-9B2D-5E12C333F2D3.PNG')] bg-cover bg-[50%_30%]" />
-          <div className="absolute inset-0 bg-[#0b0e14]/85" />
+          <div className="absolute inset-0 bg-[#0f172a]/85" />
         </div>
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <p className="font-mono text-[8px] tracking-[0.4em] uppercase text-[#b3cdff] mb-10">The Result</p>
@@ -244,13 +208,13 @@ export default function LandingPage() {
       </section>
 
       {/* ── APP PREVIEW ───────────────────────────────────────────────────── */}
-      <section className="py-28 px-6 md:px-12 bg-[#0f141b] border-y border-[#1e2a38]">
+      <section className="py-28 px-6 md:px-12 bg-[#162035] border-y border-[#1f3050]">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
 
             {/* Mock phone */}
             <div className="w-full max-w-[240px] mx-auto md:mx-0 shrink-0">
-              <div className="bg-[#0a0f16] border border-[#2d3a4b] rounded-2xl overflow-hidden shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]">
+              <div className="bg-[#0f172a] border border-[#2d4060] rounded-2xl overflow-hidden shadow-[0_0_80px_-20px_rgba(179,205,255,0.15)]">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-[#1a222c]">
                   <ZanaLogo className="h-3.5 text-white" />
                   <span className="font-mono text-[6px] tracking-widest uppercase px-2 py-0.5 border border-[#86efac]/30 text-[#86efac] rounded-sm">Member</span>
@@ -261,28 +225,28 @@ export default function LandingPage() {
                     <p className="text-sm font-light text-white uppercase mt-0.5">Priya.</p>
                   </div>
                   <div className="flex gap-2">
-                    <div className="flex-1 bg-[#121821] border border-[#2d3a4b] rounded p-2.5 text-center">
+                    <div className="flex-1 bg-[#1e2d42] border border-[#2d4060] rounded p-2.5 text-center">
                       <p className="font-mono text-[6px] text-gray-600 uppercase mb-1">Streak</p>
                       <p className="text-base font-light text-[#b3cdff]">67<span className="text-[8px] text-gray-500 ml-0.5">d</span></p>
                     </div>
-                    <div className="flex-1 bg-[#121821] border border-[#2d3a4b] rounded p-2.5 text-center">
+                    <div className="flex-1 bg-[#1e2d42] border border-[#2d4060] rounded p-2.5 text-center">
                       <p className="font-mono text-[6px] text-gray-600 uppercase mb-1">Phase</p>
                       <p className="text-base font-light text-white">03</p>
                     </div>
-                    <div className="flex-1 bg-[#121821] border border-[#2d3a4b] rounded p-2.5 text-center">
+                    <div className="flex-1 bg-[#1e2d42] border border-[#2d4060] rounded p-2.5 text-center">
                       <p className="font-mono text-[6px] text-gray-600 uppercase mb-1">Check-ins</p>
                       <p className="text-base font-light text-[#86efac]">12</p>
                     </div>
                   </div>
-                  <div className="bg-[#121821] border border-[#b3cdff]/20 rounded p-3">
+                  <div className="bg-[#1e2d42] border border-[#b3cdff]/20 rounded p-3">
                     <p className="font-mono text-[6px] text-[#b3cdff] uppercase tracking-widest mb-1.5">Today</p>
                     <p className="text-xs text-white">Upper Body A</p>
                     <p className="font-mono text-[7px] text-gray-500 mt-0.5">6 exercises · 55 min</p>
-                    <div className="mt-2 w-full bg-[#0f141b] rounded-full h-0.5">
+                    <div className="mt-2 w-full bg-[#162035] rounded-full h-0.5">
                       <div className="bg-[#b3cdff] h-0.5 rounded-full w-[45%]" />
                     </div>
                   </div>
-                  <div className="bg-[#121821] border border-[#2d3a4b] rounded p-3">
+                  <div className="bg-[#1e2d42] border border-[#2d4060] rounded p-3">
                     <p className="font-mono text-[6px] text-gray-600 uppercase mb-2">Coach's Note</p>
                     <p className="font-mono text-[8px] text-gray-400 leading-relaxed">Control the eccentric. Drop the ego.</p>
                   </div>
@@ -328,12 +292,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── SPOTIFY ───────────────────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-[#0b0e14]">
+      <section className="py-24 px-6 md:px-12 bg-[#0f172a]">
         <div className="max-w-2xl mx-auto">
           <p className="font-mono text-[8px] tracking-[0.4em] uppercase text-[#b3cdff] mb-4 text-center">Train to This</p>
           <h2 className="font-display text-center uppercase mb-2" style={{ fontSize: "clamp(32px, 4vw, 56px)" }}>My Personal Playlist</h2>
           <p className="font-mono text-[9px] tracking-[0.2em] uppercase text-gray-600 text-center mb-10">What I train to. What you'll train to.</p>
-          <div className="rounded-2xl overflow-hidden border border-[#1e2a38]">
+          <div className="rounded-2xl overflow-hidden border border-[#1f3050]">
             <iframe
               src="https://open.spotify.com/embed/playlist/6hJ4JJSCPrUbb0ZD17ntQJ?utm_source=generator&theme=0"
               width="100%" height="352"
@@ -345,7 +309,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── WAITLIST ──────────────────────────────────────────────────────── */}
-      <section className="relative py-32 md:py-40 px-6 md:px-12 overflow-hidden bg-[#0f141b] border-t border-[#1e2a38]">
+      <section className="relative py-32 md:py-40 px-6 md:px-12 overflow-hidden bg-[#162035] border-t border-[#1f3050]">
         <div className="absolute inset-0 bg-[url('/asian_athlete_running_1777345213125.png')] bg-cover bg-center opacity-10" />
         <div className="relative z-10 max-w-xl mx-auto flex flex-col items-center text-center">
           <p className="font-mono text-[8px] tracking-[0.4em] uppercase text-[#b3cdff] mb-6">Limited Access</p>
@@ -359,10 +323,10 @@ export default function LandingPage() {
             <input
               type="email" value={email} onChange={e => setEmail(e.target.value)} required
               placeholder="Your email address"
-              className="w-full bg-[#0b0e14] border border-[#2d3a4b] rounded-full font-mono px-6 py-4 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
+              className="w-full bg-[#0f172a] border border-[#2d4060] rounded-full font-mono px-6 py-4 text-xs tracking-[0.1em] text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors"
             />
             <button type="submit" disabled={status === 'loading'}
-              className="w-full bg-[#b3cdff] text-[#0b0e14] font-bold font-mono px-8 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50">
+              className="w-full bg-[#b3cdff] text-[#0f172a] font-bold font-mono px-8 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50">
               {status === 'loading' ? 'Submitting...' : 'Join the Waitlist'}
             </button>
             {status === 'error' && <p className="font-mono text-[9px] uppercase tracking-widest text-red-400 text-center">Something went wrong. Try again.</p>}
@@ -374,18 +338,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FOOTER ────────────────────────────────────────────────────────── */}
-      <footer className="bg-[#0b0e14] border-t border-[#1e2a38] px-6 md:px-12 py-10">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <ZanaLogo className="h-4 text-gray-600" />
-          <div className="flex gap-8">
-            {[{href:"/terms",label:"Terms"},{href:"/privacy",label:"Privacy"},{href:"/system",label:"The System"},{href:"/about",label:"About"}].map(l => (
-              <Link key={l.href} href={l.href} className="font-mono text-[8px] tracking-widest uppercase text-gray-600 hover:text-white transition-colors">{l.label}</Link>
-            ))}
-          </div>
-          <p className="font-mono text-[8px] tracking-widest uppercase text-gray-700">© 2025 ZANA Fitness</p>
-        </div>
-      </footer>
+      <Footer />
 
     </main>
   );

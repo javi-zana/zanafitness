@@ -4,76 +4,88 @@ import Link from "next/link";
 import { useState } from "react";
 import { X, Menu } from "lucide-react";
 
-const ZIcon = ({ className = "h-8" }: { className?: string }) => (
-  <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
+const ZanaLogo = ({ className = "h-5" }: { className?: string }) => (
+  <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
     <path d="M0,2 H32 L18.3,14" />
     <path d="M13.7,18 L0,30 H32" />
+    <path d="M48,30 L64,2 L80,30" />
+    <path d="M96,30 V2 L128,30 V2" />
+    <path d="M144,30 L160,2 L176,30" />
   </svg>
 );
 
-export default function Navbar({ active }: { active?: "about" | "system" | "faq" }) {
-  const [open, setOpen] = useState(false);
+const LINKS = [
+  { href: "/about",  label: "About",      key: "about"  },
+  { href: "/system", label: "The System", key: "system" },
+  { href: "/demo",   label: "Preview",    key: "demo"   },
+  { href: "/faq",    label: "FAQ",        key: "faq"    },
+];
 
-  const links = [
-    { href: "/about", label: "About", key: "about" },
-    { href: "/system", label: "The System", key: "system" },
-    { href: "/faq", label: "FAQ", key: "faq" },
-  ];
+export default function Navbar({ active }: { active?: string }) {
+  const [open, setOpen] = useState(false);
 
   return (
     <>
-      <nav className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]/50">
-        <Link href="/" onClick={() => setOpen(false)}>
-          <ZIcon className="h-5 md:h-6 text-white" />
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 bg-[#0f172a]/85 backdrop-blur-md border-b border-white/5">
+        <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
+          <ZanaLogo className="h-5 text-white" />
         </Link>
 
-        {/* Desktop */}
-        <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] uppercase font-semibold text-gray-300">
-          {links.map((l) => (
+        {/* Desktop links */}
+        <div className="hidden md:flex items-center gap-8">
+          {LINKS.map(l => (
             <Link
               key={l.key}
               href={l.href}
-              className={`hover:text-white transition-colors ${active === l.key ? "text-white" : ""}`}
+              className={`font-mono text-[9px] tracking-[0.2em] uppercase transition-colors ${
+                active === l.key ? "text-white" : "text-gray-400 hover:text-white"
+              }`}
             >
               {l.label}
             </Link>
           ))}
-          <Link href="/login" className="font-mono text-[10px] tracking-[0.2em] uppercase font-bold px-6 py-2.5 rounded-full bg-[#1e2d3d] text-white border border-[#2d3a4b] hover:bg-[#2d3a4b] transition-colors">
+        </div>
+
+        {/* Desktop CTAs */}
+        <div className="hidden md:flex items-center gap-3">
+          <Link href="/login" className="font-mono text-[9px] tracking-widest uppercase text-gray-400 hover:text-white transition-colors px-4 py-2">
             Log In
+          </Link>
+          <Link href="/system" className="font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f172a] px-5 py-2.5 rounded-full font-bold hover:bg-white transition-colors">
+            Get Started
           </Link>
         </div>
 
         {/* Mobile hamburger */}
-        <button
-          className="md:hidden text-white p-1"
-          onClick={() => setOpen(!open)}
-          aria-label="Toggle menu"
-        >
+        <button className="md:hidden text-white" onClick={() => setOpen(!open)} aria-label="Toggle menu">
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </nav>
 
-      {/* Mobile dropdown */}
+      {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 z-40 bg-[#121821] flex flex-col pt-28 px-8 md:hidden">
-          <div className="flex flex-col gap-8 text-[11px] uppercase tracking-[0.2em] font-semibold text-gray-300">
-            {links.map((l) => (
+        <div className="fixed inset-0 z-40 bg-[#0f172a] flex flex-col pt-24 px-8 md:hidden">
+          <div className="flex flex-col gap-8">
+            {LINKS.map(l => (
               <Link
                 key={l.key}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className={`hover:text-white transition-colors ${active === l.key ? "text-white" : ""}`}
+                className={`font-mono text-[11px] tracking-[0.2em] uppercase transition-colors ${
+                  active === l.key ? "text-white" : "text-gray-300 hover:text-white"
+                }`}
               >
                 {l.label}
               </Link>
             ))}
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="mt-4 bg-[#1e2d3d] text-white font-bold px-8 py-4 rounded-full text-center border border-[#2d3a4b] hover:bg-[#2d3a4b] transition-colors"
-            >
-              Log In
-            </Link>
+            <div className="pt-6 flex flex-col gap-3 border-t border-[#1f3050]">
+              <Link href="/login" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase text-center py-3 border border-[#2d4060] text-gray-300 rounded-full">
+                Log In
+              </Link>
+              <Link href="/system" onClick={() => setOpen(false)} className="font-mono text-[10px] tracking-widest uppercase bg-[#b3cdff] text-[#0f172a] py-3.5 rounded-full font-bold text-center">
+                Get Started
+              </Link>
+            </div>
           </div>
         </div>
       )}

@@ -172,17 +172,17 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#0f141b] flex items-center justify-center">
+      <main className="min-h-screen bg-[#0f172a] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-[#b3cdff]/30 border-t-[#b3cdff] rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0f141b] text-white">
+    <main className="min-h-screen bg-[#0f172a] text-white">
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-6 py-5 border-b border-[#2d3a4b] sticky top-0 z-10 bg-[#0f141b]/90 backdrop-blur">
+      <nav className="flex items-center justify-between px-6 py-5 border-b border-[#2d4060] sticky top-0 z-10 bg-[#0f172a]/90 backdrop-blur">
         <Link href="/dashboard" className="text-white">
           <ZMark className="h-5" />
         </Link>
@@ -228,7 +228,7 @@ export default function ProfilePage() {
               value={nickname}
               onChange={e => setNickname(e.target.value)}
               placeholder="How you appear in the community"
-              className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+              className="w-full bg-[#1e2d42] border border-[#2d4060] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
             />
           </div>
 
@@ -239,7 +239,7 @@ export default function ProfilePage() {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+              className="w-full bg-[#1e2d42] border border-[#2d4060] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
             />
             <p className="font-mono text-[8px] text-gray-600 tracking-wide">
               Changing your email sends a confirmation link to the new address.
@@ -287,7 +287,7 @@ export default function ProfilePage() {
                   className={`px-3 py-2.5 rounded border text-left font-mono text-[9px] tracking-wide uppercase transition-colors ${
                     fitnessGoal === g
                       ? "bg-[#b3cdff]/10 border-[#b3cdff]/50 text-[#b3cdff]"
-                      : "bg-[#121821] border-[#2d3a4b] text-gray-400 hover:border-[#b3cdff]/30 hover:text-white"
+                      : "bg-[#1e2d42] border-[#2d4060] text-gray-400 hover:border-[#b3cdff]/30 hover:text-white"
                   }`}
                 >
                   {g}
@@ -305,7 +305,7 @@ export default function ProfilePage() {
               placeholder="Tell the community about yourself..."
               rows={3}
               maxLength={200}
-              className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm leading-relaxed resize-none"
+              className="w-full bg-[#1e2d42] border border-[#2d4060] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm leading-relaxed resize-none"
             />
             <p className="font-mono text-[8px] text-gray-600 text-right">{bio.length}/200</p>
           </div>
@@ -321,7 +321,7 @@ export default function ProfilePage() {
                 value={instagram}
                 onChange={e => setInstagram(e.target.value.replace(/^@/, ""))}
                 placeholder="Instagram username"
-                className="w-full bg-[#121821] border border-[#2d3a4b] rounded pl-8 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+                className="w-full bg-[#1e2d42] border border-[#2d4060] rounded pl-8 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#f472b6]/60" fill="currentColor">
@@ -337,7 +337,7 @@ export default function ProfilePage() {
                 value={tiktok}
                 onChange={e => setTiktok(e.target.value.replace(/^@/, ""))}
                 placeholder="TikTok username"
-                className="w-full bg-[#121821] border border-[#2d3a4b] rounded pl-8 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+                className="w-full bg-[#1e2d42] border border-[#2d4060] rounded pl-8 pr-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2">
                 <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/40" fill="currentColor">
@@ -371,7 +371,7 @@ export default function ProfilePage() {
         </form>
 
         {/* Password section */}
-        <form onSubmit={handlePasswordChange} className="space-y-4 border-t border-[#2d3a4b] pt-8">
+        <form onSubmit={handlePasswordChange} className="space-y-4 border-t border-[#2d4060] pt-8">
           <div>
             <p className="font-mono text-[9px] tracking-[0.3em] text-gray-400 uppercase mb-1">Set Password</p>
             <p className="font-mono text-[8px] text-gray-600 tracking-wide">Set or change your login password.</p>
@@ -381,14 +381,14 @@ export default function ProfilePage() {
             placeholder="New password"
             value={newPassword}
             onChange={e => setNewPassword(e.target.value)}
-            className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+            className="w-full bg-[#1e2d42] border border-[#2d4060] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
           />
           <input
             type="password"
             placeholder="Confirm new password"
             value={confirmPassword}
             onChange={e => setConfirmPassword(e.target.value)}
-            className="w-full bg-[#121821] border border-[#2d3a4b] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
+            className="w-full bg-[#1e2d42] border border-[#2d4060] rounded px-4 py-3.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/50 transition-colors font-light text-sm tracking-wide"
           />
           {passwordError && (
             <div className="bg-[#f87171]/10 border border-[#f87171]/30 rounded px-4 py-3">
@@ -398,14 +398,14 @@ export default function ProfilePage() {
           <button
             type="submit"
             disabled={passwordSaving || !newPassword}
-            className="w-full bg-[#1e2d3d] border border-[#2d3a4b] text-white font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:border-[#b3cdff]/40 hover:text-[#b3cdff] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full bg-[#1e2d3d] border border-[#2d4060] text-white font-mono text-[9px] font-bold tracking-[0.3em] uppercase py-4 rounded hover:border-[#b3cdff]/40 hover:text-[#b3cdff] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {passwordSaving ? "Saving..." : passwordSaved ? "Password Updated ✓" : "Set Password"}
           </button>
         </form>
 
         {/* Divider + support */}
-        <div className="border-t border-[#2d3a4b] pt-6 space-y-3 text-center">
+        <div className="border-t border-[#2d4060] pt-6 space-y-3 text-center">
           <a
             href="mailto:hello@zanafitness.com"
             className="block font-mono text-[9px] tracking-widest uppercase text-gray-600 hover:text-[#b3cdff] transition-colors"

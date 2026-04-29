@@ -20,10 +20,10 @@ const ZIcon = ({ className = "h-8" }: { className?: string }) => (
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-[#121821] text-white font-sans">
+    <main className="min-h-screen bg-[#1e2d42] text-white font-sans">
 
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
+      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d4060]">
         <Link href="/"><ZIcon className="h-5 md:h-6 text-white" /></Link>
         <Link href="/" className="font-mono text-[9px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
           &larr; Back
@@ -48,7 +48,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">2. Data We Collect</h2>
               <p>We collect the following information when you use our Service:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d4060]">
                 <li>Email address (for account creation and communication)</li>
                 <li>Fitness goals and preferences (provided during onboarding)</li>
                 <li>Progress data (weight, strength metrics, consistency)</li>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">3. How We Use Your Data</h2>
               <p>Your data is used to:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d4060]">
                 <li>Provide and personalise the ZANA fitness system</li>
                 <li>Process payments and manage your subscription</li>
                 <li>Send coaching guidance and program updates</li>
@@ -72,7 +72,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">4. Third-Party Services</h2>
               <p>We use the following trusted third-party services to operate the platform:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d4060]">
                 <li>Supabase — secure database and authentication</li>
                 <li>Paddle — payment processing and subscription management</li>
                 <li>Resend — transactional email delivery</li>
@@ -93,7 +93,7 @@ export default function PrivacyPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">7. Your Rights</h2>
               <p>You have the right to:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d4060]">
                 <li>Access the personal data we hold about you</li>
                 <li>Request correction of inaccurate data</li>
                 <li>Request deletion of your account and data</li>

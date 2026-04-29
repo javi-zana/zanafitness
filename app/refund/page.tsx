@@ -20,10 +20,10 @@ const ZIcon = ({ className = "h-8" }: { className?: string }) => (
 
 export default function RefundPage() {
   return (
-    <main className="min-h-screen bg-[#121821] text-white font-sans">
+    <main className="min-h-screen bg-[#1e2d42] text-white font-sans">
 
       {/* NAVBAR */}
-      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d3a4b]">
+      <nav className="flex items-center justify-between p-8 md:px-16 border-b border-[#2d4060]">
         <Link href="/"><ZIcon className="h-5 md:h-6 text-white" /></Link>
         <Link href="/" className="font-mono text-[9px] uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
           &larr; Back
@@ -53,7 +53,7 @@ export default function RefundPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">3. 7-Day Satisfaction Guarantee</h2>
               <p>If you are unsatisfied with the Service within the first 7 days of your initial subscription, you may request a full refund of your first payment. To qualify:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d4060]">
                 <li>The request must be submitted within 7 days of your first charge</li>
                 <li>This applies to first-time subscribers only</li>
                 <li>Refund requests after 7 days will not be considered</li>
@@ -78,7 +78,7 @@ export default function RefundPage() {
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">7. How to Request a Refund</h2>
               <p>To submit a refund request, email us at <span className="text-[#b3cdff]">hello@zanafitness.com</span> with the subject line "Refund Request" and include:</p>
-              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d3a4b]">
+              <ul className="mt-4 space-y-2 pl-4 border-l border-[#2d4060]">
                 <li>Your account email address</li>
                 <li>Date of charge</li>
                 <li>Reason for your request</li>

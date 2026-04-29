@@ -1,16 +1,6 @@
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 
-const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
-  <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
-    <path d="M0,2 H32 L18.3,14" />
-    <path d="M13.7,18 L0,30 H32" />
-    <path d="M48,30 L64,2 L80,30" />
-    <path d="M96,30 V2 L128,30 V2" />
-    <path d="M144,30 L160,2 L176,30" />
-  </svg>
-);
-
 const faqs = [
   {
     q: "Who is this for?",
@@ -48,35 +38,34 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <main className="min-h-screen bg-[#121821] text-white font-sans flex flex-col">
+    <main className="min-h-screen bg-[#0f172a] text-white flex flex-col">
 
       <Navbar active="faq" />
 
-      {/* CONTENT */}
       <section className="max-w-4xl mx-auto pt-40 pb-32 px-6 flex-1 w-full">
 
-        <div className="text-center mb-24">
-          <p className="font-mono text-[10px] tracking-widest text-[#b3cdff] uppercase mb-6">Information</p>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tighter uppercase leading-[0.85] text-white">
+        <div className="text-center mb-20">
+          <p className="font-mono text-[8px] tracking-[0.4em] uppercase text-[#b3cdff] mb-6">Information</p>
+          <h1 className="font-display leading-none uppercase" style={{ fontSize: "clamp(48px, 7vw, 96px)" }}>
             Common Questions.
           </h1>
         </div>
 
-        <div className="border-t border-[#2d3a4b]">
+        <div className="border-t border-[#1f3050]">
           {faqs.map((item) => (
-            <div key={item.q} className="py-8 border-b border-[#2d3a4b]">
-              <h3 className="font-bold tracking-widest uppercase text-xs md:text-sm mb-4 text-white">
+            <div key={item.q} className="py-8 border-b border-[#1f3050]">
+              <h3 className="font-mono text-[10px] tracking-[0.25em] uppercase text-white mb-4">
                 {item.q}
               </h3>
-              <p className="text-gray-400 text-sm leading-relaxed font-light">{item.a}</p>
+              <p className="font-mono text-[10px] text-gray-400 leading-loose tracking-[0.1em]">{item.a}</p>
             </div>
           ))}
         </div>
 
-        <div className="text-center mt-32">
+        <div className="text-center mt-24">
           <a
             href="/system"
-            className="inline-block bg-white text-black font-bold px-10 py-4 rounded-full text-[10px] uppercase tracking-widest hover:bg-[#b3cdff] transition-colors"
+            className="inline-flex items-center gap-2 font-mono text-[9px] tracking-widest uppercase bg-[#b3cdff] text-[#0f172a] px-10 py-4 rounded-full font-bold hover:bg-white transition-colors"
           >
             Ready to start? Join Now
           </a>
