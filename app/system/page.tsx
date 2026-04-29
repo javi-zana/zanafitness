@@ -354,13 +354,7 @@ export default function SystemPage() {
             <h2 className="text-xl md:text-3xl font-sans font-light tracking-[0.15em] uppercase text-white mb-4">Choose Your Commitment Level.</h2>
             <p className="font-mono text-[10px] uppercase tracking-widest text-gray-400">All plans include the full system. Choose how long you're in.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            <PlanCard
-              label="Entry"
-              price={500}
-              commitment="3-month commitment"
-              variantId="f0300d4c-3b86-4b56-9bd3-767779edbfaf"
-            />
+          <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             <PlanCard
               label="Committed"
               price={400}

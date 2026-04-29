@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import type { ProfileData } from "./MemberDashboard";
 import { createClient } from "@/utils/supabase/client";
+import { CalendlyPopupButton } from "@/app/components/CalendlyWidget";
 
 // ─── ZANA Logo ────────────────────────────────────────────────────────────────
 
@@ -31,9 +32,9 @@ const MEMBERS: Member[] = [
   { id: 3, name: "Marcus Chen",   email: "marcus@example.com", initials: "MC", plan: "All In",    status: "active", streak: 28, lastSeen: "Today",     checkin: false, phase: 1, weight: "82kg",  goal: "Lean bulk" },
   { id: 4, name: "Sofia Reyes",   email: "sofia@example.com",  initials: "SR", plan: "Committed", status: "active", streak: 21, lastSeen: "Yesterday", checkin: true,  phase: 1, weight: "68kg",  goal: "Fat loss" },
   { id: 5, name: "James Kim",     email: "james@example.com",  initials: "JK", plan: "Committed", status: "active", streak: 19, lastSeen: "Yesterday", checkin: false, phase: 1, weight: "75kg",  goal: "Athletic performance" },
-  { id: 6, name: "Daniel Park",   email: "daniel@example.com", initials: "DP", plan: "Entry",     status: "active", streak: 12, lastSeen: "2 days ago", checkin: false, phase: 1, weight: "70kg", goal: "First cut" },
+  { id: 6, name: "Daniel Park",   email: "daniel@example.com", initials: "DP", plan: "Committed", status: "active", streak: 12, lastSeen: "2 days ago", checkin: false, phase: 1, weight: "70kg", goal: "First cut" },
   { id: 7, name: "Ryan Nguyen",   email: "ryan@example.com",   initials: "RN", plan: "Committed", status: "active", streak: 9,  lastSeen: "3 days ago", checkin: false, phase: 1, weight: "78kg", goal: "Strength" },
-  { id: 8, name: "Kevin Liu",     email: "kevin@example.com",  initials: "KL", plan: "Entry",     status: "active", streak: 5,  lastSeen: "4 days ago", checkin: false, phase: 1, weight: "73kg", goal: "General fitness" },
+  { id: 8, name: "Kevin Liu",     email: "kevin@example.com",  initials: "KL", plan: "Committed", status: "active", streak: 5,  lastSeen: "4 days ago", checkin: false, phase: 1, weight: "73kg", goal: "General fitness" },
 ];
 
 type Post = { id: number; author: string; initials: string; time: string; category: string; content: string; likes: number; liked: boolean; pinned: boolean; replies: { author: string; initials: string; content: string; isCoach: boolean }[] };
@@ -52,13 +53,22 @@ const INITIAL_EVENTS: Event[] = [
   { id: 4, title: "Group Coaching Call",       date: "Thu, May 15", day: "15", month: "May", time: "7:00 PM PHT",   registered: 4,    tag: "LIVE",     link: "https://meet.google.com" },
 ];
 
-type Program = { id: number; title: string; phase: string; members: number; avgProgress: number; active: boolean; color: string };
+type Visibility = "all" | "committed" | "all_in";
+type Program = { id: number; title: string; phase: string; members: number; avgProgress: number; active: boolean; color: string; visibility: Visibility };
 const INITIAL_PROGRAMS: Program[] = [
-  { id: 1, title: "ZANA Training System",  phase: "Phase 1 — Foundations",  members: 8, avgProgress: 34, active: true,  color: "#b3cdff" },
-  { id: 2, title: "Nutrition Blueprint",   phase: "Complete Guide",          members: 6, avgProgress: 17, active: false, color: "#86efac" },
-  { id: 3, title: "Mindset Protocol",      phase: "Mental Edge Series",      members: 3, avgProgress: 0,  active: false, color: "#fbbf24" },
-  { id: 4, title: "Recovery Science",      phase: "Sleep & Stress Module",   members: 2, avgProgress: 0,  active: false, color: "#f472b6" },
+  { id: 1, title: "ZANA Training System",    phase: "Phase 1 — Foundations",   members: 8, avgProgress: 34, active: true,  color: "#b3cdff", visibility: "all" },
+  { id: 2, title: "Nutrition Blueprint",     phase: "Complete Guide",           members: 6, avgProgress: 17, active: true,  color: "#86efac", visibility: "all" },
+  { id: 3, title: "Mindset Protocol",        phase: "Mental Edge Series",       members: 5, avgProgress: 28, active: false, color: "#fbbf24", visibility: "committed" },
+  { id: 4, title: "Recovery Science",        phase: "Sleep & Stress Module",    members: 4, avgProgress: 19, active: false, color: "#f472b6", visibility: "committed" },
+  { id: 5, title: "Advanced Strength Block", phase: "Phase 2 — Strength",       members: 3, avgProgress: 11, active: false, color: "#a78bfa", visibility: "all_in" },
+  { id: 6, title: "Body Recomposition Plan", phase: "Phase 3 — Recomp",         members: 3, avgProgress: 0,  active: false, color: "#fb923c", visibility: "all_in" },
 ];
+
+const VISIBILITY_META: Record<Visibility, { label: string; color: string }> = {
+  all:       { label: "All Members",  color: "#86efac" },
+  committed: { label: "Committed+",   color: "#fbbf24" },
+  all_in:    { label: "All In Only",  color: "#b3cdff" },
+};
 
 type CoachTab = "overview" | "members" | "community" | "messages" | "programs" | "schedule";
 
@@ -97,9 +107,8 @@ function Avatar({ initials, size = "md", color }: { initials: string; size?: "sm
 
 function PlanBadge({ plan }: { plan: string }) {
   const c: Record<string, string> = {
-    "All In": "text-[#b3cdff] border-[#b3cdff]/30 bg-[#b3cdff]/10",
+    "All In":    "text-[#b3cdff] border-[#b3cdff]/30 bg-[#b3cdff]/10",
     "Committed": "text-[#86efac] border-[#86efac]/30 bg-[#86efac]/10",
-    "Entry": "text-[#fbbf24] border-[#fbbf24]/30 bg-[#fbbf24]/10",
   };
   return <span className={`font-mono text-[8px] tracking-widest uppercase px-2 py-0.5 rounded-sm border ${c[plan] ?? "text-gray-400 border-gray-700"}`}>{plan}</span>;
 }
@@ -302,7 +311,7 @@ function MembersTab({ coachEmail }: { coachEmail: string }) {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [invitePlan, setInvitePlan] = useState("Entry");
+  const [invitePlan, setInvitePlan] = useState("Committed");
   const [inviteStatus, setInviteStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [inviteError, setInviteError] = useState("");
 
@@ -330,7 +339,7 @@ function MembersTab({ coachEmail }: { coachEmail: string }) {
       setTimeout(() => {
         setShowInvite(false);
         setInviteEmail("");
-        setInvitePlan("Entry");
+        setInvitePlan("Committed");
         setInviteStatus("idle");
       }, 2000);
     }
@@ -351,8 +360,8 @@ function MembersTab({ coachEmail }: { coachEmail: string }) {
               placeholder="member@email.com"
               className="w-full bg-[#141414] border border-[#242424] rounded px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/40 font-light text-sm"
             />
-            <div className="grid grid-cols-3 gap-2">
-              {["Entry", "Committed", "All In"].map(p => (
+            <div className="grid grid-cols-2 gap-2">
+              {["Committed", "All In"].map(p => (
                 <button key={p} onClick={() => setInvitePlan(p)}
                   className={`font-mono text-[8px] tracking-widest uppercase py-2.5 rounded border transition-colors ${invitePlan === p ? "bg-[#b3cdff] text-[#141414] border-[#b3cdff]" : "text-gray-400 border-[#242424] hover:text-white"}`}
                 >{p}</button>
@@ -380,7 +389,7 @@ function MembersTab({ coachEmail }: { coachEmail: string }) {
           className="flex-1 bg-[#141414] border border-[#242424] rounded px-4 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/40 font-mono text-sm"
         />
         <div className="flex gap-2 flex-wrap">
-          {["All", "All In", "Committed", "Entry"].map(p => (
+          {["All", "All In", "Committed"].map(p => (
             <button key={p} onClick={() => setPlanFilter(p)}
               className={`font-mono text-[8px] tracking-widest uppercase px-3 py-2.5 rounded border transition-colors shrink-0 ${planFilter === p ? "bg-[#b3cdff] text-[#141414] border-[#b3cdff]" : "text-gray-400 border-[#242424] hover:text-white"}`}
             >{p}</button>
@@ -429,52 +438,103 @@ function MembersTab({ coachEmail }: { coachEmail: string }) {
 
 // ─── Tab: Community ───────────────────────────────────────────────────────────
 
-function CommunityTab({ coachName }: { coachName: string }) {
-  const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+type DBPost = { id: string; user_id: string; author_name: string; is_coach: boolean; category: string; content: string; created_at: string; pinned: boolean; likes_count: number; comments_count: number; liked_by_me: boolean };
+type DBComment = { id: string; post_id: string; user_id: string; author_name: string; content: string; created_at: string };
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Announcements: "text-[#b3cdff] bg-[#b3cdff]/10 border-[#b3cdff]/30",
+  "Check-ins":   "text-[#86efac] bg-[#86efac]/10 border-[#86efac]/30",
+  Wins:          "text-[#fbbf24] bg-[#fbbf24]/10 border-[#fbbf24]/30",
+  "Q&A":         "text-[#f472b6] bg-[#f472b6]/10 border-[#f472b6]/30",
+  General:       "text-gray-400 bg-gray-400/10 border-gray-400/30",
+};
+
+function CommunityTab({ coachName, coachId }: { coachName: string; coachId: string }) {
+  const supabase = createClient();
+  const [posts, setPosts] = useState<DBPost[]>([]);
   const [postContent, setPostContent] = useState("");
   const [postCategory, setPostCategory] = useState("Announcements");
-  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [comments, setComments] = useState<Record<string, DBComment[]>>({});
+  const [loading, setLoading] = useState(true);
 
-  const CATEGORY_COLORS: Record<string, string> = {
-    Announcements: "text-[#b3cdff] bg-[#b3cdff]/10 border-[#b3cdff]/30",
-    "Check-ins":   "text-[#86efac] bg-[#86efac]/10 border-[#86efac]/30",
-    Wins:          "text-[#fbbf24] bg-[#fbbf24]/10 border-[#fbbf24]/30",
-    "Q&A":         "text-[#f472b6] bg-[#f472b6]/10 border-[#f472b6]/30",
-    General:       "text-gray-400 bg-gray-400/10 border-gray-400/30",
-  };
+  useEffect(() => {
+    const load = async () => {
+      const [{ data: postsData }, { data: myLikes }] = await Promise.all([
+        supabase.from("community_posts").select("*").order("pinned", { ascending: false }).order("created_at", { ascending: false }),
+        supabase.from("community_likes").select("post_id").eq("user_id", coachId),
+      ]);
+      const likedSet = new Set((myLikes ?? []).map((l: { post_id: string }) => l.post_id));
+      setPosts((postsData ?? []).map((p: DBPost) => ({ ...p, liked_by_me: likedSet.has(p.id) })));
+      setLoading(false);
+    };
+    load();
 
-  const submitPost = () => {
+    const sub = supabase.channel("community_coach")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "community_posts" }, payload => {
+        setPosts(prev => prev.some(p => p.id === payload.new.id) ? prev : [{ ...payload.new as DBPost, liked_by_me: false }, ...prev]);
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "community_posts" }, payload => {
+        setPosts(prev => prev.map(p => p.id === payload.new.id ? { ...p, ...payload.new, liked_by_me: p.liked_by_me } : p));
+      })
+      .on("postgres_changes", { event: "DELETE", schema: "public", table: "community_posts" }, payload => {
+        setPosts(prev => prev.filter(p => p.id !== payload.old.id));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(sub); };
+  }, [coachId]);
+
+  const submitPost = async () => {
     if (!postContent.trim()) return;
-    const initials = coachName.slice(0, 2).toUpperCase();
-    setPosts(prev => [{
-      id: Date.now(), author: coachName, initials, time: "Just now",
-      category: postCategory, content: postContent,
-      likes: 0, liked: false, pinned: false, replies: []
-    }, ...prev]);
+    const { data } = await supabase.from("community_posts").insert({
+      user_id: coachId, author_name: coachName, is_coach: true,
+      category: postCategory, content: postContent.trim(), pinned: false,
+    }).select().single();
+    if (data) setPosts(prev => [{ ...data, liked_by_me: false }, ...prev]);
     setPostContent("");
   };
 
-  const toggleLike = (id: number) => {
-    setPosts(prev => prev.map(p => p.id === id ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 } : p));
+  const toggleLike = async (postId: string, liked: boolean) => {
+    if (liked) {
+      await supabase.from("community_likes").delete().eq("post_id", postId).eq("user_id", coachId);
+      setPosts(ps => ps.map(p => p.id === postId ? { ...p, likes_count: p.likes_count - 1, liked_by_me: false } : p));
+    } else {
+      await supabase.from("community_likes").insert({ post_id: postId, user_id: coachId });
+      setPosts(ps => ps.map(p => p.id === postId ? { ...p, likes_count: p.likes_count + 1, liked_by_me: true } : p));
+    }
   };
 
-  const togglePin = (id: number) => {
-    setPosts(prev => prev.map(p => p.id === id ? { ...p, pinned: !p.pinned } : p));
+  const togglePin = async (postId: string, pinned: boolean) => {
+    await supabase.from("community_posts").update({ pinned: !pinned }).eq("id", postId);
+    setPosts(prev => prev.map(p => p.id === postId ? { ...p, pinned: !pinned } : p)
+      .sort((a, b) => Number(b.pinned) - Number(a.pinned)));
   };
 
-  const submitReply = (postId: number) => {
+  const deletePost = async (postId: string) => {
+    await supabase.from("community_posts").delete().eq("id", postId);
+    setPosts(ps => ps.filter(p => p.id !== postId));
+  };
+
+  const loadComments = async (postId: string) => {
+    if (comments[postId]) return;
+    const { data } = await supabase.from("community_comments").select("*").eq("post_id", postId).order("created_at");
+    setComments(prev => ({ ...prev, [postId]: data ?? [] }));
+  };
+
+  const submitReply = async (postId: string) => {
     if (!replyText.trim()) return;
-    const initials = coachName.slice(0, 2).toUpperCase();
-    setPosts(prev => prev.map(p => p.id === postId
-      ? { ...p, replies: [...p.replies, { author: coachName, initials, content: replyText, isCoach: true }] }
-      : p
-    ));
-    setReplyText("");
-    setReplyingTo(null);
+    const { data } = await supabase.from("community_comments").insert({
+      post_id: postId, user_id: coachId, author_name: coachName, content: replyText.trim(),
+    }).select().single();
+    if (data) {
+      setComments(prev => ({ ...prev, [postId]: [...(prev[postId] ?? []), data] }));
+      setPosts(ps => ps.map(p => p.id === postId ? { ...p, comments_count: p.comments_count + 1 } : p));
+    }
+    setReplyText(""); setReplyingTo(null);
   };
 
-  const sorted = [...posts].sort((a, b) => Number(b.pinned) - Number(a.pinned));
+  if (loading) return <div className="flex justify-center py-16"><div className="w-5 h-5 border-2 border-[#b3cdff]/20 border-t-[#b3cdff] rounded-full animate-spin" /></div>;
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
@@ -499,7 +559,7 @@ function CommunityTab({ coachName }: { coachName: string }) {
         </div>
       </div>
 
-      {sorted.map(post => (
+      {posts.map(post => (
         <div key={post.id} className={`bg-[#141414] border rounded p-5 ${post.pinned ? "border-[#b3cdff]/30" : "border-[#242424]"}`}>
           {post.pinned && (
             <div className="flex items-center gap-1.5 mb-3">
@@ -508,36 +568,28 @@ function CommunityTab({ coachName }: { coachName: string }) {
             </div>
           )}
           <div className="flex items-start gap-3 mb-3">
-            <Avatar initials={post.initials} />
+            <Avatar initials={post.author_name.slice(0, 2).toUpperCase()} />
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="text-sm font-medium text-white">{post.author}</p>
+                <p className="text-sm font-medium text-white">{post.author_name}</p>
+                {post.is_coach && <span className="font-mono text-[7px] tracking-widest uppercase px-1.5 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">Coach</span>}
                 <span className={`font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm border ${CATEGORY_COLORS[post.category] ?? CATEGORY_COLORS.General}`}>{post.category}</span>
-                <span className="font-mono text-[7px] text-gray-600">{post.time}</span>
+                <span className="font-mono text-[7px] text-gray-600">{new Date(post.created_at).toLocaleDateString()}</span>
               </div>
             </div>
           </div>
           <p className="text-sm text-gray-300 leading-relaxed mb-4">{post.content}</p>
 
-          {/* Replies */}
-          {post.replies.length > 0 && (
-            <div className="mb-4 pl-4 border-l-2 border-[#242424] space-y-3">
-              {post.replies.map((r, i) => (
-                <div key={i} className="flex items-start gap-2">
-                  <Avatar initials={r.initials} size="sm" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs text-white">{r.author}</p>
-                      {r.isCoach && <span className="font-mono text-[7px] tracking-widest uppercase px-1.5 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">Coach</span>}
-                    </div>
-                    <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{r.content}</p>
-                  </div>
-                </div>
-              ))}
+          {/* Comments */}
+          {(comments[post.id] ?? []).map(c => (
+            <div key={c.id} className="mb-3 pl-4 border-l-2 border-[#242424]">
+              <div className="flex items-center gap-2">
+                <p className="text-xs text-white">{c.author_name}</p>
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{c.content}</p>
             </div>
-          )}
+          ))}
 
-          {/* Inline reply box */}
           {replyingTo === post.id && (
             <div className="mb-4 flex gap-2">
               <textarea rows={2} placeholder="Write your reply..."
@@ -555,25 +607,29 @@ function CommunityTab({ coachName }: { coachName: string }) {
             </div>
           )}
 
-          <div className="flex items-center gap-4 pt-3 border-t border-[#1a222c]">
-            <button onClick={() => toggleLike(post.id)}
-              className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest transition-colors ${post.liked ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"}`}
+          <div className="flex items-center gap-4 pt-3 border-t border-[#242424]">
+            <button onClick={() => toggleLike(post.id, post.liked_by_me)}
+              className={`flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest transition-colors ${post.liked_by_me ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"}`}
             >
-              <svg viewBox="0 0 14 14" className="w-3 h-3" fill={post.liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5"><path d="M7 12.5S1 8.5 1 4.5a3 3 0 016 0 3 3 0 016 0c0 4-6 8-6 8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              {post.likes}
+              <svg viewBox="0 0 14 14" className="w-3 h-3" fill={post.liked_by_me ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5"><path d="M7 12.5S1 8.5 1 4.5a3 3 0 016 0 3 3 0 016 0c0 4-6 8-6 8z" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              {post.likes_count}
             </button>
-            <button onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}
+            <button onClick={() => { setReplyingTo(replyingTo === post.id ? null : post.id); loadComments(post.id); }}
               className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-widest text-[#b3cdff] hover:text-white transition-colors"
             >
               <svg viewBox="0 0 14 14" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M13 9a2 2 0 01-2 2H3l-2 2V3a2 2 0 012-2h8a2 2 0 012 2v6z" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              Reply
+              Reply{post.comments_count > 0 ? ` (${post.comments_count})` : ""}
             </button>
-            <button onClick={() => togglePin(post.id)}
-              className={`ml-auto font-mono text-[9px] uppercase tracking-widest transition-colors ${post.pinned ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"}`}
+            <button onClick={() => togglePin(post.id, post.pinned)}
+              className={`font-mono text-[9px] uppercase tracking-widest transition-colors ${post.pinned ? "text-[#b3cdff]" : "text-gray-500 hover:text-[#b3cdff]"}`}
             >{post.pinned ? "Unpin" : "Pin"}</button>
+            <button onClick={() => deletePost(post.id)}
+              className="ml-auto font-mono text-[9px] uppercase tracking-widest text-gray-600 hover:text-[#f87171] transition-colors"
+            >Delete</button>
           </div>
         </div>
       ))}
+      {posts.length === 0 && <p className="text-center font-mono text-[9px] uppercase tracking-widest text-gray-600 py-12">No posts yet. Be the first to post.</p>}
     </div>
   );
 }
@@ -596,6 +652,7 @@ function ProgramsTab({ coachId }: { coachId: string }) {
   const [showAddProgram, setShowAddProgram] = useState(false);
   const [newProgTitle, setNewProgTitle] = useState("");
   const [newProgPhase, setNewProgPhase] = useState("");
+  const [newProgVisibility, setNewProgVisibility] = useState<Visibility>("all");
 
   const toggleExpand = async (progId: number) => {
     if (expanded === progId) { setExpanded(null); return; }
@@ -640,8 +697,8 @@ function ProgramsTab({ coachId }: { coachId: string }) {
 
   const addProgram = () => {
     if (!newProgTitle.trim()) return;
-    setPrograms(prev => [...prev, { id: Date.now(), title: newProgTitle, phase: newProgPhase || "New Program", members: 0, avgProgress: 0, active: false, color: "#b3cdff" }]);
-    setNewProgTitle(""); setNewProgPhase(""); setShowAddProgram(false);
+    setPrograms(prev => [...prev, { id: Date.now(), title: newProgTitle, phase: newProgPhase || "New Program", members: 0, avgProgress: 0, active: false, color: "#b3cdff", visibility: newProgVisibility }]);
+    setNewProgTitle(""); setNewProgPhase(""); setNewProgVisibility("all"); setShowAddProgram(false);
   };
 
   const inputCls = "w-full bg-[#141414] border border-[#242424] rounded px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-[#b3cdff]/40 font-light text-sm";
@@ -653,6 +710,16 @@ function ProgramsTab({ coachId }: { coachId: string }) {
           <div className="space-y-3">
             <input value={newProgTitle} onChange={e => setNewProgTitle(e.target.value)} placeholder="Program title" className={inputCls} />
             <input value={newProgPhase} onChange={e => setNewProgPhase(e.target.value)} placeholder="Phase / subtitle" className={inputCls} />
+            <div>
+              <p className="font-mono text-[8px] tracking-[0.25em] uppercase text-gray-500 mb-2">Visibility</p>
+              <div className="grid grid-cols-3 gap-2">
+                {(Object.keys(VISIBILITY_META) as Visibility[]).map(v => (
+                  <button key={v} onClick={() => setNewProgVisibility(v)}
+                    className={`font-mono text-[8px] tracking-widest uppercase py-2 rounded border transition-colors ${newProgVisibility === v ? "border-[#b3cdff] text-[#b3cdff] bg-[#b3cdff]/10" : "border-[#242424] text-gray-400 hover:text-white"}`}
+                  >{VISIBILITY_META[v].label}</button>
+                ))}
+              </div>
+            </div>
             <button onClick={addProgram} disabled={!newProgTitle.trim()} className="w-full font-mono text-[8px] tracking-[0.25em] uppercase py-3 bg-[#b3cdff] text-[#141414] rounded hover:bg-white transition-colors disabled:opacity-30">Add Program</button>
           </div>
         </Modal>
@@ -680,7 +747,11 @@ function ProgramsTab({ coachId }: { coachId: string }) {
               <h3 className="text-base font-light tracking-[0.1em] uppercase text-white">{prog.title}</h3>
               <p className="font-mono text-[9px] text-gray-500 mt-1">{prog.members} enrolled · Avg {prog.avgProgress}%</p>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm border"
+                style={{ color: VISIBILITY_META[prog.visibility].color, borderColor: VISIBILITY_META[prog.visibility].color + "40", background: VISIBILITY_META[prog.visibility].color + "15" }}>
+                {VISIBILITY_META[prog.visibility].label}
+              </span>
               {prog.active && <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">Active</span>}
               <svg viewBox="0 0 16 16" className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${expanded === prog.id ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </div>
@@ -836,6 +907,28 @@ function ScheduleTab() {
           <h2 className="text-lg font-light tracking-[0.12em] uppercase text-white">Schedule</h2>
         </div>
         <button onClick={() => setShowAdd(true)} className="font-mono text-[8px] tracking-widest uppercase px-4 py-2.5 border border-[#b3cdff]/30 text-[#b3cdff] rounded hover:bg-[#b3cdff]/10 transition-colors">+ Add Event</button>
+      </div>
+
+      {/* Calendly booking link card */}
+      <div className="bg-[#141414] border border-[#b3cdff]/20 rounded p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <p className="font-mono text-[8px] tracking-[0.3em] text-gray-500 uppercase mb-1.5">Your Booking Page</p>
+            <p className="text-sm font-light text-white mb-1">Calendly · 1:1 Sessions</p>
+            <p className="font-mono text-[9px] text-gray-500 tracking-wide break-all">calendly.com/zanafitness/1on1</p>
+          </div>
+          <div className="flex flex-col gap-2 shrink-0">
+            <CalendlyPopupButton
+              url="https://calendly.com/zanafitness/1on1"
+              label="Preview"
+              className="font-mono text-[7px] tracking-widest uppercase px-3 py-1.5 bg-[#b3cdff] text-[#141414] rounded hover:bg-white transition-colors"
+            />
+            <button
+              onClick={() => navigator.clipboard.writeText("https://calendly.com/zanafitness/1on1")}
+              className="font-mono text-[7px] tracking-widest uppercase px-3 py-1.5 border border-[#b3cdff]/30 text-[#b3cdff] rounded hover:bg-[#b3cdff]/10 transition-colors"
+            >Copy Link</button>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -1200,7 +1293,7 @@ export default function CoachDashboard({ profile }: { profile: ProfileData }) {
         <div className="flex-1 p-5 pb-28 md:pb-8">
           {activeTab === "overview"  && <OverviewTab  coachName={coachName} onTabChange={setActiveTab} />}
           {activeTab === "members"   && <MembersTab coachEmail={coachEmail} />}
-          {activeTab === "community" && <CommunityTab coachName={coachName} />}
+          {activeTab === "community" && <CommunityTab coachName={coachName} coachId={coachId} />}
           {activeTab === "messages"  && <CoachMessagesTab userId={coachId} userName={coachName} userInitials={initials} avatarColor={avatarColor} />}
           {activeTab === "programs"  && <ProgramsTab coachId={coachId} />}
           {activeTab === "schedule"  && <ScheduleTab />}

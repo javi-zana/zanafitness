@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import { CalendlyPopupButton } from "@/app/components/CalendlyWidget";
 
 export type ProfileData = {
   id: string;
@@ -48,27 +49,14 @@ type DBComment = {
   created_at: string;
 };
 
+type ProgramVisibility = "all" | "committed" | "all_in";
 const PROGRAMS = [
-  {
-    id: 1, title: "ZANA Training System", phase: "Phase 1 — Foundations",
-    description: "12 weeks of structured progressive overload. Build the base before you build the peak.",
-    progress: 34, locked: false, active: true, accentColor: "#b3cdff", href: "/workout",
-  },
-  {
-    id: 2, title: "Nutrition Blueprint", phase: "Complete Guide",
-    description: "Calorie targets, macro splits, meal timing, and the supplement stack that actually matters.",
-    progress: 17, locked: false, active: false, accentColor: "#86efac", href: "/nutrition",
-  },
-  {
-    id: 3, title: "Mindset Protocol", phase: "Mental Edge Series",
-    description: "The psychological framework behind elite physical performance. Not motivation — method.",
-    progress: 0, locked: true, active: false, accentColor: "#fbbf24", href: null,
-  },
-  {
-    id: 4, title: "Recovery Science", phase: "Sleep & Stress Module",
-    description: "Optimize sleep, manage cortisol, train harder by recovering smarter.",
-    progress: 0, locked: true, active: false, accentColor: "#f472b6", href: null,
-  },
+  { id: 1, title: "ZANA Training System",    phase: "Phase 1 — Foundations",  description: "12 weeks of structured progressive overload. Build the base before you build the peak.",                             progress: 34, active: true,  accentColor: "#b3cdff", href: "/workout",   visibility: "all"       as ProgramVisibility },
+  { id: 2, title: "Nutrition Blueprint",     phase: "Complete Guide",          description: "Calorie targets, macro splits, meal timing, and the supplement stack that actually matters.",                          progress: 17, active: false, accentColor: "#86efac", href: "/nutrition", visibility: "all"       as ProgramVisibility },
+  { id: 3, title: "Mindset Protocol",        phase: "Mental Edge Series",      description: "The psychological framework behind elite physical performance. Not motivation — method.",                             progress: 0,  active: false, accentColor: "#fbbf24", href: null,         visibility: "committed" as ProgramVisibility },
+  { id: 4, title: "Recovery Science",        phase: "Sleep & Stress Module",   description: "Optimize sleep, manage cortisol, train harder by recovering smarter.",                                               progress: 0,  active: false, accentColor: "#f472b6", href: null,         visibility: "committed" as ProgramVisibility },
+  { id: 5, title: "Advanced Strength Block", phase: "Phase 2 — Strength",      description: "High-intensity strength protocols for those ready to push past their ceiling. Progressive overload redefined.",      progress: 0,  active: false, accentColor: "#a78bfa", href: null,         visibility: "all_in"    as ProgramVisibility },
+  { id: 6, title: "Body Recomposition Plan", phase: "Phase 3 — Recomp",        description: "The most advanced protocol. Simultaneous fat loss and muscle gain. Exclusive to All In members.",                   progress: 0,  active: false, accentColor: "#fb923c", href: null,         visibility: "all_in"    as ProgramVisibility },
 ];
 
 const EVENTS = [
@@ -1169,7 +1157,14 @@ const CONTENT_META: Record<ContentType, { label: string; color: string }> = {
   video:        { label: "Video",         color: "#f472b6" },
 };
 
-function ProgramsTab() {
+function canAccess(visibility: ProgramVisibility, plan: string): boolean {
+  if (visibility === "all") return true;
+  if (visibility === "committed") return plan === "Committed" || plan === "All In";
+  if (visibility === "all_in") return plan === "All In";
+  return false;
+}
+
+function ProgramsTab({ userPlan }: { userPlan: string }) {
   const supabase = createClient();
   const [expanded, setExpanded] = useState<number | null>(null);
   const [contents, setContents] = useState<Record<number, ContentBlock[]>>({});
@@ -1197,26 +1192,34 @@ function ProgramsTab() {
         <h2 className="text-lg font-light tracking-[0.12em] uppercase text-white">Programs</h2>
       </div>
 
-      {PROGRAMS.map(prog => (
+      {PROGRAMS.map(prog => {
+        const accessible = canAccess(prog.visibility, userPlan);
+        return (
         <div
           key={prog.id}
-          className={`bg-[#141414] border rounded overflow-hidden transition-all ${prog.locked ? "border-[#1a222c] opacity-60" : "border-[#242424]"}`}
+          className={`bg-[#141414] border rounded overflow-hidden transition-all ${!accessible ? "opacity-60" : "border-[#242424]"}`}
+          style={!accessible ? { borderColor: "#1e1e1e" } : {}}
         >
           <div className="h-0.5 w-full" style={{ backgroundColor: prog.accentColor }} />
 
-          {/* Header — clickable to expand (unlocked only) */}
+          {/* Header — clickable to expand (accessible only) */}
           <button
-            onClick={() => toggleExpand(prog.id, prog.locked)}
-            className={`w-full p-5 flex items-start justify-between text-left ${!prog.locked ? "hover:bg-[#111820]/50 transition-colors" : "cursor-default"}`}
+            onClick={() => toggleExpand(prog.id, !accessible)}
+            className={`w-full p-5 flex items-start justify-between text-left ${accessible ? "hover:bg-white/[0.02] transition-colors" : "cursor-default"}`}
           >
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-2">
                 <p className="font-mono text-[8px] tracking-widest uppercase" style={{ color: prog.accentColor }}>{prog.phase}</p>
-                {prog.locked ? (
-                  <svg viewBox="0 0 16 16" className="w-4 h-4 text-gray-600 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <rect x="3" y="7" width="10" height="8" rx="1" />
-                    <path d="M5 7V5a3 3 0 016 0v2" strokeLinecap="round" />
-                  </svg>
+                {!accessible ? (
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm border border-[#fbbf24]/30 text-[#fbbf24] bg-[#fbbf24]/10">
+                      {prog.visibility === "committed" ? "Committed+" : "All In"}
+                    </span>
+                    <svg viewBox="0 0 16 16" className="w-4 h-4 text-gray-600 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <rect x="3" y="7" width="10" height="8" rx="1" />
+                      <path d="M5 7V5a3 3 0 016 0v2" strokeLinecap="round" />
+                    </svg>
+                  </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     {prog.active && <span className="font-mono text-[7px] tracking-widest uppercase px-2 py-0.5 rounded-sm bg-[#b3cdff]/10 text-[#b3cdff] border border-[#b3cdff]/30">Active</span>}
@@ -1229,13 +1232,13 @@ function ProgramsTab() {
               <h3 className="text-base font-light tracking-[0.1em] uppercase text-white mb-1">{prog.title}</h3>
               <p className="text-xs text-gray-400 leading-relaxed">{prog.description}</p>
 
-              {!prog.locked && (
+              {accessible && (
                 <div className="mt-3">
                   <div className="flex justify-between mb-1.5">
                     <span className="font-mono text-[8px] text-gray-500 uppercase tracking-widest">Progress</span>
                     <span className="font-mono text-[8px] text-gray-400">{prog.progress}%</span>
                   </div>
-                  <div className="h-0.5 bg-[#111820] rounded-full overflow-hidden">
+                  <div className="h-0.5 bg-[#1e1e1e] rounded-full overflow-hidden">
                     <div className="h-full rounded-full" style={{ width: `${prog.progress}%`, backgroundColor: prog.accentColor }} />
                   </div>
                 </div>
@@ -1244,7 +1247,7 @@ function ProgramsTab() {
           </button>
 
           {/* Expand: content blocks */}
-          {!prog.locked && expanded === prog.id && (
+          {accessible && expanded === prog.id && (
             <div className="border-t border-[#242424] px-5 pt-4 pb-5 space-y-3">
               {loadingId === prog.id ? (
                 <div className="flex justify-center py-6">
@@ -1288,15 +1291,16 @@ function ProgramsTab() {
           )}
 
           {/* Locked CTA */}
-          {prog.locked && (
+          {!accessible && (
             <div className="px-5 pb-5">
-              <Link href="/system" className="block w-full text-center font-mono text-[8px] tracking-widest uppercase py-3 rounded border border-[#1a222c] text-gray-600 hover:border-[#b3cdff]/30 hover:text-[#b3cdff] transition-colors">
+              <Link href="/system" className="block w-full text-center font-mono text-[8px] tracking-widest uppercase py-3 rounded border border-[#242424] text-gray-600 hover:border-[#b3cdff]/30 hover:text-[#b3cdff] transition-colors">
                 Upgrade to unlock
               </Link>
             </div>
           )}
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -1439,6 +1443,19 @@ function ScheduleTab() {
         </div>
       </div>
 
+      {/* Book a 1:1 Call */}
+      <div className="bg-[#141414] border border-[#b3cdff]/20 rounded p-5 flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-light text-white mb-0.5">Book a 1:1 Call</p>
+          <p className="font-mono text-[9px] text-gray-500 tracking-wide">30-min private coaching session with Javier</p>
+        </div>
+        <CalendlyPopupButton
+          url="https://calendly.com/zanafitness/1on1"
+          label="Schedule"
+          className="shrink-0 font-mono text-[8px] tracking-[0.2em] uppercase px-4 py-2.5 bg-[#b3cdff] text-[#141414] rounded hover:bg-white transition-colors font-medium"
+        />
+      </div>
+
       {/* Recurring note */}
       <div className="bg-[#141414] border border-[#242424] rounded p-4 font-mono text-[9px] text-gray-400 tracking-wide">
         <span className="text-[#b3cdff]">Every Thursday — </span>
@@ -1500,9 +1517,11 @@ function ScheduleTab() {
                   >Join</a>
                 )}
                 {event.tag === "1:1" && (
-                  <a href="mailto:me@javilorenzana.com?subject=1:1 Progress Review Request"
+                  <CalendlyPopupButton
+                    url="https://calendly.com/zanafitness/1on1"
+                    label="Book"
                     className="shrink-0 font-mono text-[8px] tracking-widest uppercase px-3 py-2 border border-[#b3cdff]/30 text-[#b3cdff] rounded hover:bg-[#b3cdff]/10 transition-colors"
-                  >Book</a>
+                  />
                 )}
               </div>
             ))}
@@ -1773,7 +1792,7 @@ export default function MemberDashboard({ profile }: { profile: ProfileData }) {
           {activeTab === "home" && <HomeTab onNavigate={setActiveTab} />}
           {activeTab === "community" && <CommunityTab userInitials={userInitials} userName={displayNameCapitalized} avatarColor={avatarColor} userId={profile?.id ?? ""} />}
           {activeTab === "messages" && <MessagesTab userId={profile?.id ?? ""} userName={displayNameCapitalized} userInitials={userInitials} avatarColor={avatarColor} />}
-          {activeTab === "programs" && <ProgramsTab />}
+          {activeTab === "programs" && <ProgramsTab userPlan={displayPlan} />}
           {activeTab === "schedule" && <ScheduleTab />}
           {activeTab === "members" && <MembersTab />}
           {activeTab === "ranks" && <RanksTab />}
