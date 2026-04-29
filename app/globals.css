@@ -33,3 +33,139 @@ body {
 .animate-marquee {
   animation: marquee 22s linear infinite;
 }
+
+/* ─── Tiptap rich text styles ─────────────────────────────────────────────── */
+
+.prose-dark .ProseMirror {
+  outline: none;
+}
+
+.prose-dark .ProseMirror > * + * {
+  margin-top: 0.75rem;
+}
+
+.prose-dark .ProseMirror h1 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.03em;
+}
+
+.prose-dark .ProseMirror h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.prose-dark .ProseMirror h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.prose-dark .ProseMirror p {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.prose-dark .ProseMirror strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.prose-dark .ProseMirror em {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.prose-dark .ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.4rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.prose-dark .ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.4rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.prose-dark .ProseMirror li + li {
+  margin-top: 0.3rem;
+}
+
+.prose-dark .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose-dark .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.prose-dark .ProseMirror ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.prose-dark .ProseMirror ul[data-type="taskList"] li > label input[type="checkbox"] {
+  accent-color: #AFCBFF;
+  width: 0.9rem;
+  height: 0.9rem;
+}
+
+.prose-dark .ProseMirror blockquote {
+  border-left: 3px solid #AFCBFF;
+  padding-left: 1rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.prose-dark .ProseMirror code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.25rem;
+  font-size: 0.82em;
+  font-family: monospace;
+  color: #AFCBFF;
+}
+
+.prose-dark .ProseMirror hr {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 1.25rem 0;
+}
+
+.prose-dark .ProseMirror img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+
+.prose-dark .ProseMirror iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 0.5rem;
+  border: none;
+}
+
+/* Editor-mode extras */
+.prose-editor .ProseMirror {
+  cursor: text;
+  min-height: 160px;
+}
+
+.prose-editor .ProseMirror p.is-empty:first-child::before {
+  content: 'Start writing…';
+  color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}

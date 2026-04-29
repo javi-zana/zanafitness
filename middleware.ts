@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
   // Paths that require login only
   const authPaths = ['/profile', '/onboarding']
   // Paths that require login AND active subscription
-  const memberPaths = ['/dashboard', '/workout', '/nutrition', '/progress', '/guidance']
+  const memberPaths = ['/dashboard', '/workout', '/nutrition', '/progress', '/guidance', '/stats', '/program', '/messages', '/community', '/schedule', '/coach']
 
   const needsAuth = authPaths.some(p => pathname.startsWith(p))
   const needsMembership = memberPaths.some(p => pathname.startsWith(p))
@@ -70,7 +70,7 @@ export async function middleware(request: NextRequest) {
   // Already logged in → skip /login
   if (user && pathname === '/login') {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/stats'
     return NextResponse.redirect(url)
   }
 

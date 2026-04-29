@@ -1,0 +1,478 @@
+'use client'
+
+import { useState, useRef, FormEvent } from 'react'
+import { createClient } from '@/utils/supabase/client'
+import BottomNav from '@/components/BottomNav'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type Photo = { id: string; storage_path: string }
+type StatUpdate = {
+  id: string
+  weight_kg: number | null
+  confidence: number | null
+  milestone_text: string | null
+  created_at: string
+  stat_update_photos: Photo[]
+}
+
+type Props = {
+  userId: string
+  weightUnit: 'kg' | 'lb'
+  initialStats: StatUpdate[]
+  showNudge: boolean
+}
+
+// ─── Weight helpers ────────────────────────────────────────────────────────────
+
+function toDisplay(kg: number, unit: 'kg' | 'lb') {
+  return unit === 'lb' ? +(kg * 2.20462).toFixed(1) : +kg.toFixed(1)
+}
+function toKg(val: number, unit: 'kg' | 'lb') {
+  return unit === 'lb' ? val / 2.20462 : val
+}
+
+// ─── Confidence label ─────────────────────────────────────────────────────────
+
+function confidenceLabel(v: number) {
+  if (v <= 3) return 'Low'
+  if (v <= 5) return 'Mid'
+  if (v <= 8) return 'High'
+  return 'Max'
+}
+function confidenceColor(v: number) {
+  if (v <= 3) return '#f87171'
+  if (v <= 5) return '#fbbf24'
+  if (v <= 8) return '#86efac'
+  return '#AFCBFF'
+}
+
+// ─── Weight chart (SVG sparkline) ─────────────────────────────────────────────
+
+function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }) {
+  const pts = [...stats]
+    .reverse()
+    .filter(s => s.weight_kg != null)
+    .map(s => toDisplay(s.weight_kg!, unit))
+
+  if (pts.length < 2) {
+    return (
+      <p className="text-xs text-white/30 text-center py-4">
+        Log at least 2 weights to see your trend
+      </p>
+    )
+  }
+
+  const W = 300
+  const H = 60
+  const min = Math.min(...pts)
+  const max = Math.max(...pts)
+  const range = max - min || 1
+
+  const coords = pts.map((w, i) => ({
+    x: (i / (pts.length - 1)) * W,
+    y: H - ((w - min) / range) * (H - 8) - 4,
+  }))
+
+  const polyline = coords.map(c => `${c.x},${c.y}`).join(' ')
+  const fillPath = [
+    `M${coords[0].x},${H}`,
+    ...coords.map(c => `L${c.x},${c.y}`),
+    `L${coords[coords.length - 1].x},${H}`,
+    'Z',
+  ].join(' ')
+
+  const last = coords[coords.length - 1]
+  const lastVal = pts[pts.length - 1]
+
+  return (
+    <div>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full"
+        preserveAspectRatio="none"
+        style={{ height: 72 }}
+      >
+        <defs>
+          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#AFCBFF" stopOpacity="0.25" />
+            <stop offset="100%" stopColor="#AFCBFF" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={fillPath} fill="url(#chartGrad)" />
+        <polyline points={polyline} fill="none" stroke="#AFCBFF" strokeWidth="1.5" />
+        <circle cx={last.x} cy={last.y} r="3" fill="#AFCBFF" />
+      </svg>
+      <div className="flex justify-between text-[10px] text-white/30 font-mono mt-1">
+        <span>{min} {unit}</span>
+        <span className="text-babyblue-500 font-medium">{lastVal} {unit} now</span>
+        <span>{max} {unit}</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── Stat card ────────────────────────────────────────────────────────────────
+
+function StatCard({ stat, unit }: { stat: StatUpdate; unit: 'kg' | 'lb' }) {
+  const date = new Date(stat.created_at)
+  const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+
+  return (
+    <div className="bg-[#1A1F2C] rounded-xl p-4 space-y-3">
+      <p className="text-[10px] text-white/30 font-mono tracking-widest uppercase">
+        {formatted} · {time}
+      </p>
+
+      <div className="flex gap-4">
+        {stat.weight_kg != null && (
+          <div>
+            <p className="text-[10px] text-white/40 tracking-widest uppercase font-mono mb-0.5">Weight</p>
+            <p className="text-lg font-semibold text-white">
+              {toDisplay(stat.weight_kg, unit)}
+              <span className="text-xs text-white/40 ml-1">{unit}</span>
+            </p>
+          </div>
+        )}
+        {stat.confidence != null && (
+          <div>
+            <p className="text-[10px] text-white/40 tracking-widest uppercase font-mono mb-0.5">Confidence</p>
+            <p className="text-lg font-semibold" style={{ color: confidenceColor(stat.confidence) }}>
+              {stat.confidence}
+              <span className="text-xs opacity-60 ml-1">/ 10</span>
+            </p>
+          </div>
+        )}
+      </div>
+
+      {stat.milestone_text && (
+        <p className="text-sm text-white/80 leading-relaxed">{stat.milestone_text}</p>
+      )}
+
+      {stat.stat_update_photos.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {stat.stat_update_photos.map(photo => (
+            <PhotoThumb key={photo.id} path={photo.storage_path} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PhotoThumb({ path }: { path: string }) {
+  const supabase = createClient()
+  const { data } = supabase.storage.from('stat-photos').getPublicUrl(path)
+  return (
+    <img
+      src={data.publicUrl}
+      alt=""
+      className="w-20 h-20 rounded-lg object-cover shrink-0 bg-white/5"
+    />
+  )
+}
+
+// ─── Log form ─────────────────────────────────────────────────────────────────
+
+function LogForm({
+  userId,
+  weightUnit,
+  onSaved,
+  onCancel,
+}: {
+  userId: string
+  weightUnit: 'kg' | 'lb'
+  onSaved: (stat: StatUpdate) => void
+  onCancel: () => void
+}) {
+  const supabase = createClient()
+  const [weight, setWeight] = useState('')
+  const [confidence, setConfidence] = useState(7)
+  const [milestone, setMilestone] = useState('')
+  const [photos, setPhotos] = useState<File[]>([])
+  const [previews, setPreviews] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const PRESETS = [
+    { label: 'Low', value: 2 },
+    { label: 'Mid', value: 5 },
+    { label: 'High', value: 7 },
+    { label: 'Max', value: 10 },
+  ]
+
+  function onFilesChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    setPhotos(files)
+    setPreviews(files.map(f => URL.createObjectURL(f)))
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (!weight && !milestone && confidence === 7 && photos.length === 0) {
+      setError('Add at least one field before saving.')
+      return
+    }
+    setError('')
+    setLoading(true)
+
+    const weightKg = weight ? toKg(parseFloat(weight), weightUnit) : null
+
+    const { data: update, error: insertErr } = await supabase
+      .from('stat_updates')
+      .insert({
+        member_id: userId,
+        weight_kg: weightKg,
+        confidence,
+        milestone_text: milestone || null,
+      })
+      .select('id, weight_kg, confidence, milestone_text, created_at')
+      .single()
+
+    if (insertErr || !update) {
+      setError('Failed to save. Try again.')
+      setLoading(false)
+      return
+    }
+
+    const savedPhotos: Photo[] = []
+    for (const file of photos) {
+      const path = `${userId}/${update.id}/${Date.now()}-${file.name}`
+      const { error: uploadErr } = await supabase.storage.from('stat-photos').upload(path, file)
+      if (!uploadErr) {
+        const { data: photoRow } = await supabase
+          .from('stat_update_photos')
+          .insert({ stat_update_id: update.id, storage_path: path })
+          .select('id, storage_path')
+          .single()
+        if (photoRow) savedPhotos.push(photoRow)
+      }
+    }
+
+    onSaved({ ...update, stat_update_photos: savedPhotos })
+    setLoading(false)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Weight */}
+      <div>
+        <label className="text-[10px] text-white/40 tracking-widest uppercase font-mono block mb-2">
+          Weight ({weightUnit})
+        </label>
+        <input
+          type="number"
+          step="0.1"
+          min="0"
+          placeholder={`e.g. ${weightUnit === 'kg' ? '72.5' : '159.8'}`}
+          value={weight}
+          onChange={e => setWeight(e.target.value)}
+          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-babyblue-500/60 transition"
+        />
+      </div>
+
+      {/* Confidence */}
+      <div>
+        <div className="flex justify-between items-baseline mb-2">
+          <label className="text-[10px] text-white/40 tracking-widest uppercase font-mono">
+            Confidence
+          </label>
+          <span className="text-sm font-semibold" style={{ color: confidenceColor(confidence) }}>
+            {confidence} / 10 · {confidenceLabel(confidence)}
+          </span>
+        </div>
+        <input
+          type="range"
+          min="1"
+          max="10"
+          value={confidence}
+          onChange={e => setConfidence(Number(e.target.value))}
+          className="w-full accent-babyblue-500"
+        />
+        <div className="flex justify-between mt-2 gap-2">
+          {PRESETS.map(p => (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => setConfidence(p.value)}
+              className={`flex-1 py-1.5 rounded text-[10px] tracking-widest uppercase font-mono transition border ${
+                confidence === p.value
+                  ? 'border-babyblue-500 text-babyblue-500 bg-babyblue-500/10'
+                  : 'border-white/10 text-white/40 hover:border-white/30'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Milestone */}
+      <div>
+        <div className="flex justify-between items-baseline mb-2">
+          <label className="text-[10px] text-white/40 tracking-widest uppercase font-mono">
+            Milestone
+          </label>
+          <span className="text-[10px] text-white/30 font-mono">{milestone.length} / 280</span>
+        </div>
+        <textarea
+          maxLength={280}
+          rows={3}
+          placeholder="What did you hit this week? Any wins, realizations, momentum?"
+          value={milestone}
+          onChange={e => setMilestone(e.target.value)}
+          className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-babyblue-500/60 transition resize-none"
+        />
+      </div>
+
+      {/* Photos */}
+      <div>
+        <label className="text-[10px] text-white/40 tracking-widest uppercase font-mono block mb-2">
+          Photos (optional)
+        </label>
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="w-full border border-dashed border-white/15 rounded-lg py-3 text-xs text-white/40 hover:border-babyblue-500/40 hover:text-babyblue-500/60 transition"
+        >
+          + Add photos
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={onFilesChange} />
+        {previews.length > 0 && (
+          <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+            {previews.map((src, i) => (
+              <img key={i} src={src} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0 bg-white/5" />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {error && <p className="text-xs text-red-400">{error}</p>}
+
+      <div className="flex gap-3 pt-1">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 py-3 rounded-lg border border-white/10 text-sm text-white/50 hover:text-white hover:border-white/30 transition tracking-widest uppercase font-mono text-xs"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex-1 py-3 rounded-lg bg-babyblue-500 text-navy-900 text-xs tracking-widest uppercase font-mono font-semibold hover:bg-babyblue-400 transition disabled:opacity-50"
+        >
+          {loading ? 'Saving…' : 'Save'}
+        </button>
+      </div>
+    </form>
+  )
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
+
+export default function StatsClient({ userId, weightUnit, initialStats, showNudge }: Props) {
+  const [stats, setStats] = useState<StatUpdate[]>(initialStats)
+  const [nudgeDismissed, setNudgeDismissed] = useState(false)
+  const [formOpen, setFormOpen] = useState(false)
+
+  function handleSaved(stat: StatUpdate) {
+    setStats(prev => [stat, ...prev])
+    setFormOpen(false)
+    setNudgeDismissed(true)
+  }
+
+  const chartStats = [...stats].filter(s => s.weight_kg != null)
+
+  return (
+    <div className="min-h-screen bg-[#0b0e14] text-white flex flex-col">
+      {/* Header */}
+      <div className="px-5 pt-12 pb-4 flex items-center justify-between">
+        <div>
+          <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono">Zana</p>
+          <h1 className="text-xl font-semibold tracking-tight mt-0.5">My Stats</h1>
+        </div>
+        {!formOpen && (
+          <button
+            onClick={() => setFormOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-babyblue-500 text-navy-900 text-xs tracking-widest uppercase font-mono font-semibold hover:bg-babyblue-400 transition"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+            </svg>
+            Log
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-5 pb-28 space-y-5">
+        {/* 3-day nudge banner */}
+        {showNudge && !nudgeDismissed && !formOpen && (
+          <div className="flex items-start gap-3 bg-babyblue-500/10 border border-babyblue-500/20 rounded-xl p-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#AFCBFF" strokeWidth="1.5" className="w-4 h-4 mt-0.5 shrink-0">
+              <path d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-xs text-babyblue-500 font-semibold">Time to log</p>
+              <p className="text-xs text-white/50 mt-0.5">
+                {stats.length === 0
+                  ? "You haven't logged any stats yet. Drop your first update."
+                  : "It's been 3+ days since your last update. Keep the momentum going."}
+              </p>
+            </div>
+            <button
+              onClick={() => setNudgeDismissed(true)}
+              className="text-white/20 hover:text-white/50 transition shrink-0 mt-0.5"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Log form */}
+        {formOpen && (
+          <div className="bg-[#1A1F2C] rounded-xl p-5">
+            <h2 className="text-xs tracking-widest uppercase font-mono text-white/50 mb-5">New Update</h2>
+            <LogForm
+              userId={userId}
+              weightUnit={weightUnit}
+              onSaved={handleSaved}
+              onCancel={() => setFormOpen(false)}
+            />
+          </div>
+        )}
+
+        {/* Weight trend */}
+        {chartStats.length > 0 && !formOpen && (
+          <div className="bg-[#1A1F2C] rounded-xl p-4">
+            <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono mb-3">Weight trend</p>
+            <WeightChart stats={chartStats} unit={weightUnit} />
+          </div>
+        )}
+
+        {/* History feed */}
+        {stats.length === 0 && !formOpen ? (
+          <div className="text-center py-16">
+            <p className="text-white/20 text-sm">No updates yet.</p>
+            <p className="text-white/15 text-xs mt-1">Tap Log to add your first one.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {stats.length > 0 && (
+              <p className="text-[10px] text-white/30 tracking-widest uppercase font-mono">History</p>
+            )}
+            {stats.map(stat => (
+              <StatCard key={stat.id} stat={stat} unit={weightUnit} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <BottomNav />
+    </div>
+  )
+}

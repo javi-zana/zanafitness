@@ -1,0 +1,77 @@
+import { redirect } from 'next/navigation'
+import { createClient } from '@/utils/supabase/server'
+import CoachClient from './CoachClient'
+
+export default async function CoachPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('first_name, role, email')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || !['coach', 'head_coach'].includes(profile.role ?? '')) {
+    redirect('/stats')
+  }
+
+  // Assigned members
+  const { data: assignments } = await supabase
+    .from('coach_assignments')
+    .select('member_id')
+    .eq('coach_id', user.id)
+
+  const memberIds = (assignments ?? []).map(a => a.member_id)
+
+  const [{ data: members }, { data: allStats }, { data: threads }] = await Promise.all([
+    memberIds.length
+      ? supabase.from('profiles').select('id, first_name, email, role').in('id', memberIds)
+      : Promise.resolve({ data: [] }),
+    memberIds.length
+      ? supabase
+          .from('stat_updates')
+          .select('id, member_id, weight_kg, confidence, created_at')
+          .in('member_id', memberIds)
+          .order('created_at', { ascending: false })
+          .limit(memberIds.length * 10)
+      : Promise.resolve({ data: [] }),
+    memberIds.length
+      ? supabase.from('threads').select('id, member_id').in('member_id', memberIds)
+      : Promise.resolve({ data: [] }),
+  ])
+
+  const threadIds = (threads ?? []).map(t => t.id)
+
+  const [{ data: lastMessages }, { data: myReads }] = await Promise.all([
+    threadIds.length
+      ? supabase
+          .from('messages')
+          .select('thread_id, body, created_at, author_id')
+          .in('thread_id', threadIds)
+          .order('created_at', { ascending: false })
+          .limit(threadIds.length * 3)
+      : Promise.resolve({ data: [] }),
+    threadIds.length
+      ? supabase
+          .from('message_reads')
+          .select('thread_id, last_read_at')
+          .eq('user_id', user.id)
+          .in('thread_id', threadIds)
+      : Promise.resolve({ data: [] }),
+  ])
+
+  return (
+    <CoachClient
+      userId={user.id}
+      userEmail={user.email ?? ''}
+      userRole={profile.role ?? 'coach'}
+      members={(members ?? []) as { id: string; first_name: string | null; email: string; role: string }[]}
+      allStats={(allStats ?? []) as { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }[]}
+      threads={(threads ?? []) as { id: string; member_id: string }[]}
+      lastMessages={(lastMessages ?? []) as { thread_id: string; body: string; created_at: string; author_id: string }[]}
+      myReads={(myReads ?? []) as { thread_id: string; last_read_at: string }[]}
+    />
+  )
+}
