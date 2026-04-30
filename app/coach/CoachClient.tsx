@@ -83,51 +83,51 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   return (
     <>
       {/* ── Desktop sidebar ────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed right-0 top-0 h-screen w-64 flex-col bg-[#0b1509] border-l border-[#b0e455]/12 z-50">
+      <aside className="hidden lg:flex fixed right-0 top-0 h-screen w-72 flex-col bg-[#0b1509] border-l border-[#b0e455]/12 z-50">
         {/* Logo */}
-        <div className="px-5 pt-7 pb-6 border-b border-[#b0e455]/8">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#b0e455] flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 32 32" className="h-5 w-5" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
+        <div className="px-6 pt-8 pb-7 border-b border-[#b0e455]/8">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-[#b0e455] flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 32 32" className="h-6 w-6" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
                 <path d="M0,2 H32 L18.3,14" />
                 <path d="M13.7,18 L0,30 H32" />
               </svg>
             </div>
             <div>
-              <p className="text-[#edf5e2] font-bold text-lg tracking-tight leading-none">Zana</p>
-              <p className="text-[9px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1">Coach Portal</p>
+              <p className="text-[#edf5e2] font-bold text-xl tracking-tight leading-none">Zana</p>
+              <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1.5">Coach Portal</p>
             </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => onChange(t.id)}
-              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-left ${
+              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all text-left ${
                 active === t.id
                   ? 'bg-[#b0e455] text-[#0b1509]'
                   : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
               }`}
             >
               {t.icon}
-              <span className="text-sm font-semibold">{t.label}</span>
+              <span className="text-base font-semibold">{t.label}</span>
             </button>
           ))}
         </nav>
 
         {/* Profile */}
-        <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-1">
-          <Link href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
+        <div className="px-4 py-5 border-t border-[#b0e455]/8 space-y-1">
+          <Link href="/profile" className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
             <div
-              className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
+              className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-sm font-bold overflow-hidden shrink-0"
               style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
             >
               {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initials}
             </div>
-            <span className="text-sm font-semibold">Profile</span>
+            <span className="text-base font-semibold">Profile</span>
           </Link>
           <p className="text-[10px] text-[#edf5e2]/15 uppercase tracking-widest px-4 pt-2">© 2026 Zana Fitness</p>
         </div>
@@ -720,12 +720,12 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-64">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-72">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
+      <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach</p>
-          <h1 className="text-xl font-semibold tracking-tight mt-0.5">{TAB_TITLES[activeTab]}</h1>
+          <p className="text-[10px] lg:text-sm text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach</p>
+          <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-3xl">{TAB_TITLES[activeTab]}</h1>
         </div>
         <Link href="/profile" className="shrink-0 mt-1 lg:hidden">
           <div
@@ -741,7 +741,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:max-w-3xl lg:w-full lg:pb-10 lg:pt-4">
+      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:max-w-5xl lg:w-full lg:pb-10 lg:pt-6">
         {activeTab === 'members' && (
           <MembersTab members={members} allStats={allStats} />
         )}

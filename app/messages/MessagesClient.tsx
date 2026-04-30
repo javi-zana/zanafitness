@@ -58,7 +58,7 @@ function AttachmentImage({ path }: { path: string }) {
 
 function NoThread() {
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-64">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-72">
       <div className="px-5 pt-12 pb-4 lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
         <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight">Messages</h1>
@@ -219,15 +219,15 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
     : false
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-64">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-72">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 border-b border-[#b0e455]/8 lg:pt-8">
-        <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
-        <h1 className="text-xl font-bold tracking-tight">Messages</h1>
+      <div className="px-5 pt-12 pb-4 border-b border-[#b0e455]/8 lg:px-10 lg:pt-10 lg:pb-5">
+        <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+        <h1 className="text-xl font-bold tracking-tight lg:text-3xl">Messages</h1>
       </div>
 
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 space-y-1" style={{ paddingBottom: '140px' }}>
+      <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 space-y-1 lg:px-10 lg:max-w-3xl" style={{ paddingBottom: '140px' }}>
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-sm text-[#edf5e2]/20">No messages yet.</p>

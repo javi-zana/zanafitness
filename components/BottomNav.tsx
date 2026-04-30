@@ -63,50 +63,50 @@ export default function BottomNav() {
   return (
     <>
       {/* ── Desktop sidebar ─────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed right-0 top-0 h-screen w-64 flex-col bg-[#0b1509] border-l border-[#b0e455]/12 z-50">
+      <aside className="hidden lg:flex fixed right-0 top-0 h-screen w-72 flex-col bg-[#0b1509] border-l border-[#b0e455]/12 z-50">
 
         {/* Logo */}
-        <div className="px-5 pt-7 pb-6 border-b border-[#b0e455]/8">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#b0e455] flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 32 32" className="h-5 w-5" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
+        <div className="px-6 pt-8 pb-7 border-b border-[#b0e455]/8">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-[#b0e455] flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 32 32" className="h-6 w-6" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
                 <path d="M0,2 H32 L18.3,14" />
                 <path d="M13.7,18 L0,30 H32" />
               </svg>
             </div>
             <div>
-              <p className="text-[#edf5e2] font-bold text-lg tracking-tight leading-none">Zana</p>
-              <p className="text-[9px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1">Fitness Platform</p>
+              <p className="text-[#edf5e2] font-bold text-xl tracking-tight leading-none">Zana</p>
+              <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1.5">Fitness Platform</p>
             </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {NAV.map(item => {
             const active = isActive(item.href)
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all ${
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all ${
                   active
                     ? 'bg-[#b0e455] text-[#0b1509]'
                     : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
                 }`}
               >
                 <span className={active ? 'text-[#0b1509]' : ''}>{item.icon}</span>
-                <span className="text-sm font-semibold">{item.label}</span>
+                <span className="text-base font-semibold">{item.label}</span>
               </Link>
             )
           })}
         </nav>
 
         {/* Profile + footer */}
-        <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-1">
+        <div className="px-4 py-5 border-t border-[#b0e455]/8 space-y-1">
           <Link
             href="/profile"
-            className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all ${
+            className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all ${
               pathname === '/profile'
                 ? 'bg-[#b0e455] text-[#0b1509]'
                 : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
@@ -115,7 +115,7 @@ export default function BottomNav() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 shrink-0">
               <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span className="text-sm font-semibold">Profile</span>
+            <span className="text-base font-semibold">Profile</span>
           </Link>
           <p className="text-[10px] text-[#edf5e2]/15 uppercase tracking-widest px-4 pt-2">© 2026 Zana Fitness</p>
         </div>

@@ -377,11 +377,11 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
   const chartStats = [...stats].filter(s => s.weight_kg != null)
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-64">
-      <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-72">
+      <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
         <div>
-          <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
-          <h1 className="text-xl font-bold tracking-tight">My Stats</h1>
+          <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+          <h1 className="text-xl font-bold tracking-tight lg:text-3xl">My Stats</h1>
         </div>
         {!formOpen && (
           <button
@@ -396,7 +396,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-28 space-y-4 lg:max-w-2xl lg:pb-10">
+      <div className="flex-1 overflow-y-auto px-5 pb-28 space-y-4 lg:px-10 lg:max-w-4xl lg:pb-10 lg:space-y-5">
         {showNudge && !nudgeDismissed && !formOpen && (
           <div className="flex items-start gap-3 bg-[#b0e455]/8 border border-[#b0e455]/15 rounded-2xl p-4">
             <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-4 h-4 mt-0.5 shrink-0">
