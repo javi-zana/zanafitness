@@ -1043,7 +1043,7 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
       <div>
         <div className="flex items-center justify-between mb-3">
           <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Coaches ({coaches.length})</p>
-          <button onClick={loadData} className="text-[10px] text-[#edf5e2]/20 hover:text-[#edf5e2]/50 font-mono transition">Refresh</button>
+          <button onClick={() => loadData()} className="text-[10px] text-[#edf5e2]/20 hover:text-[#edf5e2]/50 font-mono transition">Refresh</button>
         </div>
         {coaches.length === 0 ? (
           <p className="text-xs text-[#edf5e2]/20 font-mono">No coaches found. Set role to coach or head_coach in Supabase.</p>
