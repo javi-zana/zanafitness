@@ -342,13 +342,13 @@ export default function SystemPage() {
           <div className="grid md:grid-cols-2 gap-5">
             <PlanCard
               label="Committed"
-              price={400}
+              price={500}
               commitment="6-month commitment"
               variantId="218015ad-39b5-4d64-9158-c4864fb8038a"
             />
             <PlanCard
               label="All In"
-              price={300}
+              price={400}
               commitment="12-month commitment"
               variantId="174b1e98-247a-41e2-bcfe-7ce449e329a7"
               featured

@@ -28,17 +28,34 @@ export default function ScheduleClient() {
             />
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center py-24 text-center px-8">
-            <div className="w-12 h-12 rounded-full bg-[#b0e455]/8 border border-[#b0e455]/12 flex items-center justify-center mb-4">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[#edf5e2]/25">
-                <rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+          <div className="px-5 pb-8 space-y-4 pt-2">
+            <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
+              <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">What happens on a coaching call</p>
+              {[
+                { label: 'Progress review', desc: 'We go through your stats, what changed, and what your numbers mean.' },
+                { label: 'Program adjustments', desc: 'Your training or nutrition plan gets updated based on how the last weeks went.' },
+                { label: 'Mindset check-in', desc: 'Honest conversation about what\'s working, what isn\'t, and how you\'re feeling.' },
+                { label: 'Next steps', desc: 'Clear focus areas for the coming weeks so you always know what to do.' },
+              ].map(item => (
+                <div key={item.label} className="flex gap-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455] mt-2 shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold">{item.label}</p>
+                    <p className="text-xs text-[#edf5e2]/40 mt-0.5 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-            <p className="text-sm text-[#edf5e2]/30">Scheduling coming soon.</p>
-            <p className="text-xs text-[#edf5e2]/20 mt-1">
-              Set <code className="text-[#edf5e2]/35">NEXT_PUBLIC_CALENDLY_URL</code> to enable booking.
-            </p>
+            <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
+              <p className="text-sm font-semibold mb-2">How often are calls?</p>
+              <p className="text-sm text-[#edf5e2]/45 leading-relaxed">
+                Bi-weekly — every two weeks. Calls are 30–45 minutes and happen over video. They're the engine of the whole system.
+              </p>
+            </div>
+            <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-4 text-center">
+              <p className="text-xs text-[#b0e455] font-medium mb-1">Booking coming soon</p>
+              <p className="text-xs text-[#edf5e2]/40">Your coach will activate scheduling when you're fully onboarded.</p>
+            </div>
           </div>
         )}
       </div>

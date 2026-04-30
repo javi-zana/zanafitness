@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import BottomNav from '@/components/BottomNav'
@@ -77,6 +77,8 @@ function PostCard({
   onReact,
   onComment,
   onHide,
+  onEdit,
+  onDelete,
 }: {
   post: Post
   userId: string
@@ -84,11 +86,21 @@ function PostCard({
   onReact: (postId: string, reacted: boolean) => void
   onComment: (postId: string, body: string) => void
   onHide: (postId: string) => void
+  onEdit: (postId: string, title: string, bodyJson: object | null) => Promise<void>
+  onDelete: (postId: string) => Promise<void>
 }) {
   const [expanded, setExpanded] = useState(false)
   const [comment, setComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const supabase = createClient()
+  const [editing, setEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState(post.title)
+  const [editBody, setEditBody] = useState<object | null>(post.body_json)
+  const [editSaving, setEditSaving] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  const isAuthor = post.author_id === userId
+  const canEdit = isAuthor || userRole === 'head_coach'
   const hasReacted = post.reactions.some(r => r.user_id === userId)
   const reactionCount = post.reactions.length
   const visibleComments = post.comments.filter(c => !c.hidden || userRole === 'head_coach')
@@ -101,6 +113,46 @@ function PostCard({
     setComment('')
     onComment(post.id, text)
     setSubmitting(false)
+  }
+
+  async function saveEdit() {
+    if (!editTitle.trim()) return
+    setEditSaving(true)
+    await onEdit(post.id, editTitle.trim(), editBody)
+    setEditSaving(false)
+    setEditing(false)
+  }
+
+  async function doDelete() {
+    setDeleting(true)
+    await onDelete(post.id)
+    setDeleting(false)
+    setConfirmDelete(false)
+  }
+
+  // Edit mode
+  if (editing) {
+    return (
+      <div className="bg-[#1c2e16] rounded-2xl overflow-hidden border border-[#b0e455]/20 p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-[#b0e455]/70 uppercase tracking-wide">Editing post</p>
+          <button onClick={() => setEditing(false)} className="text-xs text-[#edf5e2]/30 hover:text-[#edf5e2]/60 transition">Cancel</button>
+        </div>
+        <input
+          value={editTitle}
+          onChange={e => setEditTitle(e.target.value)}
+          className="w-full bg-[#0f1a0c] border border-[#b0e455]/12 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/35 transition"
+        />
+        <RichTextEditor content={editBody} onChange={setEditBody} />
+        <button
+          onClick={saveEdit}
+          disabled={editSaving || !editTitle.trim()}
+          className="w-full py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
+        >
+          {editSaving ? 'Saving…' : 'Save Changes'}
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -154,14 +206,44 @@ function PostCard({
           <span className="text-xs">{visibleComments.length > 0 ? visibleComments.length : ''}</span>
         </button>
 
-        {userRole === 'head_coach' && !post.hidden && (
-          <button
-            onClick={() => onHide(post.id)}
-            className="ml-auto text-xs text-[#edf5e2]/20 hover:text-red-400/60 transition"
-          >
-            Hide
-          </button>
-        )}
+        <div className="ml-auto flex items-center gap-3">
+          {canEdit && (
+            <button
+              onClick={() => { setEditTitle(post.title); setEditBody(post.body_json); setEditing(true) }}
+              className="text-xs text-[#edf5e2]/20 hover:text-[#b0e455]/70 transition"
+            >
+              Edit
+            </button>
+          )}
+          {(userRole === 'head_coach' || isAuthor) && !confirmDelete && (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="text-xs text-[#edf5e2]/20 hover:text-red-400/70 transition"
+            >
+              Delete
+            </button>
+          )}
+          {confirmDelete && (
+            <div className="flex items-center gap-2">
+              <button onClick={() => setConfirmDelete(false)} className="text-xs text-[#edf5e2]/30 hover:text-[#edf5e2]/60 transition">No</button>
+              <button
+                onClick={doDelete}
+                disabled={deleting}
+                className="text-xs text-red-400/80 hover:text-red-400 transition"
+              >
+                {deleting ? '…' : 'Confirm delete'}
+              </button>
+            </div>
+          )}
+          {userRole === 'head_coach' && !post.hidden && !canEdit && (
+            <button
+              onClick={() => onHide(post.id)}
+              className="text-xs text-[#edf5e2]/20 hover:text-red-400/60 transition"
+            >
+              Hide
+            </button>
+          )}
+        </div>
       </div>
 
       {expanded && (
@@ -300,6 +382,13 @@ const SUB_TABS: { id: SubTab; label: string }[] = [
   { id: 'random', label: 'Random' },
 ]
 
+const POST_SELECT = `
+  id, author_id, sub_tab, title, body_json, created_at, hidden,
+  author:profiles!author_id(first_name, role),
+  reactions:community_post_reactions(user_id),
+  comments:community_post_comments(id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role))
+`
+
 export default function CommunityClient({ userId, userRole, initialTab, initialPosts }: Props) {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<SubTab>(initialTab)
@@ -317,6 +406,82 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
     userRole === 'head_coach' ||
     (activeTab !== 'announcements' && (userRole === 'member' || userRole === 'coach'))
 
+  // ─── Realtime ───────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`community-${activeTab}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'community_posts', filter: `sub_tab=eq.${activeTab}` },
+        async payload => {
+          const { data } = await supabase
+            .from('community_posts')
+            .select(POST_SELECT)
+            .eq('id', payload.new.id)
+            .single()
+          if (!data) return
+          setPostsByTab(prev => {
+            const tab = activeTab
+            if (prev[tab].some(p => p.id === data.id)) return prev
+            return { ...prev, [tab]: [data as unknown as Post, ...prev[tab]] }
+          })
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'community_post_reactions' },
+        payload => {
+          const { post_id, user_id } = payload.new as { post_id: string; user_id: string }
+          setPostsByTab(prev => ({
+            ...prev,
+            [activeTab]: prev[activeTab].map(p => {
+              if (p.id !== post_id || p.reactions.some(r => r.user_id === user_id)) return p
+              return { ...p, reactions: [...p.reactions, { user_id }] }
+            }),
+          }))
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'community_post_reactions' },
+        payload => {
+          const { post_id, user_id } = payload.old as { post_id: string; user_id: string }
+          setPostsByTab(prev => ({
+            ...prev,
+            [activeTab]: prev[activeTab].map(p => {
+              if (p.id !== post_id) return p
+              return { ...p, reactions: p.reactions.filter(r => r.user_id !== user_id) }
+            }),
+          }))
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'community_post_comments' },
+        async payload => {
+          const { data: comment } = await supabase
+            .from('community_post_comments')
+            .select('id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role)')
+            .eq('id', payload.new.id)
+            .single()
+          if (!comment) return
+          setPostsByTab(prev => ({
+            ...prev,
+            [activeTab]: prev[activeTab].map(p => {
+              if (p.id !== payload.new.post_id || p.comments.some(c => c.id === comment.id)) return p
+              return { ...p, comments: [...p.comments, comment as unknown as Comment] }
+            }),
+          }))
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ─── Tab switching ──────────────────────────────────────────────────────────
+
   async function switchTab(tab: SubTab) {
     setActiveTab(tab)
     setComposing(false)
@@ -324,18 +489,15 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
     setLoadingTab(true)
     const { data } = await supabase
       .from('community_posts')
-      .select(`
-        id, author_id, sub_tab, title, body_json, created_at, hidden,
-        author:profiles!author_id(first_name, role),
-        reactions:community_post_reactions(user_id),
-        comments:community_post_comments(id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role))
-      `)
+      .select(POST_SELECT)
       .eq('sub_tab', tab)
       .order('created_at', { ascending: false })
       .limit(20)
     setPostsByTab(prev => ({ ...prev, [tab]: (data ?? []) as unknown as Post[] }))
     setLoadingTab(false)
   }
+
+  // ─── Handlers ───────────────────────────────────────────────────────────────
 
   function handleReact(postId: string, alreadyReacted: boolean) {
     setPostsByTab(prev => ({
@@ -348,13 +510,10 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
         return { ...p, reactions }
       }),
     }))
-
     if (alreadyReacted) {
-      supabase.from('community_post_reactions')
-        .delete().eq('post_id', postId).eq('user_id', userId)
+      supabase.from('community_post_reactions').delete().eq('post_id', postId).eq('user_id', userId)
     } else {
-      supabase.from('community_post_reactions')
-        .insert({ post_id: postId, user_id: userId })
+      supabase.from('community_post_reactions').insert({ post_id: postId, user_id: userId })
     }
   }
 
@@ -362,14 +521,13 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
     const { data: comment } = await supabase
       .from('community_post_comments')
       .insert({ post_id: postId, author_id: userId, body })
-      .select(`id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role)`)
+      .select('id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role)')
       .single()
-
     if (!comment) return
     setPostsByTab(prev => ({
       ...prev,
       [activeTab]: prev[activeTab].map(p => {
-        if (p.id !== postId) return p
+        if (p.id !== postId || p.comments.some(c => c.id === comment.id)) return p
         return { ...p, comments: [...p.comments, comment as unknown as Comment] }
       }),
     }))
@@ -379,9 +537,28 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
     await supabase.from('community_posts').update({ hidden: true }).eq('id', postId)
     setPostsByTab(prev => ({
       ...prev,
+      [activeTab]: prev[activeTab].map(p => p.id === postId ? { ...p, hidden: true } : p),
+    }))
+  }
+
+  async function handleEdit(postId: string, title: string, bodyJson: object | null) {
+    await supabase
+      .from('community_posts')
+      .update({ title, body_json: bodyJson ?? {} })
+      .eq('id', postId)
+    setPostsByTab(prev => ({
+      ...prev,
       [activeTab]: prev[activeTab].map(p =>
-        p.id === postId ? { ...p, hidden: true } : p
+        p.id === postId ? { ...p, title, body_json: bodyJson ?? {} } : p
       ),
+    }))
+  }
+
+  async function handleDelete(postId: string) {
+    await supabase.from('community_posts').delete().eq('id', postId)
+    setPostsByTab(prev => ({
+      ...prev,
+      [activeTab]: prev[activeTab].filter(p => p.id !== postId),
     }))
   }
 
@@ -389,6 +566,8 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
     setPostsByTab(prev => ({ ...prev, [activeTab]: [post, ...prev[activeTab]] }))
     setComposing(false)
   }
+
+  // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
@@ -440,13 +619,20 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
 
         {loadingTab && (
           <div className="flex justify-center py-12">
-            <p className="text-sm text-[#edf5e2]/20">Loading…</p>
+            <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
           </div>
         )}
 
         {!loadingTab && posts.filter(p => !p.hidden || userRole === 'head_coach').length === 0 && !composing && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <p className="text-sm text-[#edf5e2]/20">Nothing here yet.</p>
+            <div className="w-12 h-12 rounded-full bg-[#b0e455]/8 border border-[#b0e455]/12 flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-[#edf5e2]/25">
+                <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <p className="text-sm text-[#edf5e2]/25">Nothing here yet.</p>
             {canPost && (
               <button
                 onClick={() => setComposing(true)}
@@ -469,6 +655,8 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
               onReact={handleReact}
               onComment={handleComment}
               onHide={handleHide}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           ))}
       </div>

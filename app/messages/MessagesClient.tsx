@@ -63,14 +63,27 @@ function NoThread() {
         <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight">Messages</h1>
       </div>
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-8 pb-28">
-        <div className="w-12 h-12 rounded-full bg-[#b0e455]/8 border border-[#b0e455]/12 flex items-center justify-center mb-4">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[#edf5e2]/25">
-            <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+      <div className="flex-1 overflow-y-auto px-5 pb-28 pt-4 space-y-4">
+        <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
+          <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">Direct line to your coach</p>
+          {[
+            { label: 'Ask anything', desc: 'Questions about your program, nutrition, a specific workout — nothing is too small.' },
+            { label: 'Log between calls', desc: 'Share a win, flag something that felt off, or just check in. Your coach reads it all.' },
+            { label: 'Fast responses', desc: 'Coaches check messages daily. You\'re not waiting days to hear back.' },
+          ].map(item => (
+            <div key={item.label} className="flex gap-3">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455] mt-2 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold">{item.label}</p>
+                <p className="text-xs text-[#edf5e2]/40 mt-0.5 leading-relaxed">{item.desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
-        <p className="text-sm text-[#edf5e2]/30">Your messaging thread hasn't been set up yet.</p>
-        <p className="text-xs text-[#edf5e2]/20 mt-1">Your coach will activate it when you're onboarded.</p>
+        <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-4 text-center">
+          <p className="text-xs text-[#b0e455] font-medium mb-1">Thread not active yet</p>
+          <p className="text-xs text-[#edf5e2]/40">Your coach will open your direct message thread once you're fully onboarded.</p>
+        </div>
       </div>
       <BottomNav />
     </div>

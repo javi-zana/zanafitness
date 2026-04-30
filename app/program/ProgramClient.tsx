@@ -150,8 +150,37 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     const updatedAt = section?.updated_at
 
     if (!hasContent(content)) {
+      const sectionInfo: Record<string, { title: string; desc: string }> = {
+        split: {
+          title: 'Your Training Split',
+          desc: 'Your coach will write a personalised workout plan here — days, exercises, sets, and reps structured around your goal and schedule.',
+        },
+        food: {
+          title: 'Your Nutrition Plan',
+          desc: 'Calorie targets, macro splits, meal timing guidance, and food choices tailored to your body and goal.',
+        },
+        habits: {
+          title: 'Your Daily Habits',
+          desc: 'The small daily actions — sleep, steps, stress management — that compound over time and make the rest of the program work.',
+        },
+      }
+      const info = sectionInfo[activeTab] ?? { title: 'Coming soon', desc: 'Your coach is working on this section.' }
       return (
-        <EmptyState message="Your coach hasn't written this section yet. Check back soon." />
+        <div className="space-y-3 pt-2">
+          <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
+            <div className="w-10 h-10 rounded-xl bg-[#b0e455]/10 border border-[#b0e455]/15 flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-5 h-5">
+                <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <p className="text-sm font-semibold text-[#edf5e2]/80 mb-2">{info.title}</p>
+            <p className="text-sm text-[#edf5e2]/45 leading-relaxed">{info.desc}</p>
+          </div>
+          <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-4">
+            <p className="text-xs text-[#b0e455] font-medium">Your coach is preparing this section.</p>
+            <p className="text-xs text-[#edf5e2]/40 mt-1">You'll see it here as soon as it's ready.</p>
+          </div>
+        </div>
       )
     }
 

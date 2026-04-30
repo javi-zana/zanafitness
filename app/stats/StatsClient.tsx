@@ -441,9 +441,37 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
         )}
 
         {stats.length === 0 && !formOpen ? (
-          <div className="text-center py-16">
-            <p className="text-[#edf5e2]/20 text-sm">No updates yet.</p>
-            <p className="text-[#edf5e2]/15 text-xs mt-1">Tap Log to add your first one.</p>
+          <div className="space-y-3 pt-2">
+            <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
+              <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">What you'll track</p>
+              {[
+                { icon: <path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />, label: "Body weight", desc: "Logged in kg or lbs, charted over time so you can see the trend clearly." },
+                { icon: <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />, label: "Confidence score", desc: "How you're feeling about your progress on a 1–10 scale. Tells your coach a lot." },
+                { icon: <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />, label: "Progress photos", desc: "Optional. Attach photos to any check-in to build a visual record over time." },
+              ].map(item => (
+                <div key={item.label} className="flex gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-4.5 h-4.5 w-5 h-5">{item.icon}</svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{item.label}</p>
+                    <p className="text-xs text-[#edf5e2]/40 mt-0.5 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
+              <p className="text-sm font-semibold mb-2">How often should I log?</p>
+              <p className="text-sm text-[#edf5e2]/45 leading-relaxed">
+                At least once a week — ideally every 3–4 days. Consistency matters more than frequency. Even weekly data gives your coach a clear picture of what's actually happening.
+              </p>
+            </div>
+            <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-5">
+              <p className="text-sm font-semibold text-[#b0e455] mb-1">Ready to start?</p>
+              <p className="text-sm text-[#edf5e2]/50 leading-relaxed">
+                Tap <strong className="text-[#edf5e2]/70">Log</strong> above to drop your first check-in. It takes less than a minute.
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">

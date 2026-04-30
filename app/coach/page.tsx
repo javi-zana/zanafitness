@@ -9,7 +9,7 @@ export default async function CoachPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, role, email')
+    .select('first_name, role, email, avatar_color, avatar_url')
     .eq('id', user.id)
     .single()
 
@@ -67,6 +67,9 @@ export default async function CoachPage() {
       userId={user.id}
       userEmail={user.email ?? ''}
       userRole={profile.role ?? 'coach'}
+      firstName={profile.first_name ?? null}
+      avatarColor={(profile as { avatar_color?: string }).avatar_color ?? '#b0e455'}
+      avatarUrl={(profile as { avatar_url?: string }).avatar_url ?? null}
       members={(members ?? []) as { id: string; first_name: string | null; email: string; role: string }[]}
       allStats={(allStats ?? []) as { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }[]}
       threads={(threads ?? []) as { id: string; member_id: string }[]}

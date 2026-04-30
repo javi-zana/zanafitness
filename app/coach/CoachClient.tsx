@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from 'react'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 
@@ -22,6 +23,9 @@ type Props = {
   userId: string
   userEmail: string
   userRole: string
+  firstName: string | null
+  avatarColor: string
+  avatarUrl: string | null
   members: Member[]
   allStats: Stat[]
   threads: Thread[]
@@ -605,7 +609,7 @@ function AdminTab({ userId, userEmail, members, threads }: { userId: string; use
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function CoachClient({ userId, userEmail, userRole, members, allStats, threads, lastMessages, myReads }: Props) {
+export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads }: Props) {
   const [activeTab, setActiveTab] = useState<CoachTab>('members')
   const isHeadCoach = userRole === 'head_coach'
 
@@ -616,12 +620,27 @@ export default function CoachClient({ userId, userEmail, userRole, members, allS
     admin: 'Admin',
   }
 
+  const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
+
   return (
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4">
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach</p>
-        <h1 className="text-xl font-semibold tracking-tight mt-0.5">{TAB_TITLES[activeTab]}</h1>
+      <div className="px-5 pt-12 pb-4 flex items-start justify-between">
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach</p>
+          <h1 className="text-xl font-semibold tracking-tight mt-0.5">{TAB_TITLES[activeTab]}</h1>
+        </div>
+        <Link href="/profile" className="shrink-0 mt-1">
+          <div
+            className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden"
+            style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
+          >
+            {avatarUrl
+              ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              : initials
+            }
+          </div>
+        </Link>
       </div>
 
       {/* Tab content */}
