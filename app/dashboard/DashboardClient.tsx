@@ -112,8 +112,8 @@ function WeekStrip({ stats }: { stats: StatUpdate[] }) {
   const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
   return (
-    <div className="bg-[#162212] rounded-2xl p-4 lg:p-6 border border-[#b0e455]/8">
-      <p className="text-[10px] lg:text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-3 lg:mb-5">This Week</p>
+    <div className="bg-[#162212] rounded-2xl p-4 border border-[#b0e455]/8">
+      <p className="text-[10px] text-[#edf5e2]/30 tracking-wider uppercase mb-3">This Week</p>
       <div className="flex justify-between">
         {weekDays.map((day, i) => {
           const isToday = day.toDateString() === todayStr
@@ -121,13 +121,13 @@ function WeekStrip({ stats }: { stats: StatUpdate[] }) {
           const isPast = day < today
 
           return (
-            <div key={i} className="flex flex-col items-center gap-1.5 lg:gap-2">
-              <span className={`text-[10px] lg:text-xs font-medium uppercase ${
+            <div key={i} className="flex flex-col items-center gap-1.5">
+              <span className={`text-[10px] font-medium uppercase ${
                 isToday ? 'text-[#b0e455]' : isPast ? 'text-[#edf5e2]/30' : 'text-[#edf5e2]/15'
               }`}>
                 {DAY_LABELS[i]}
               </span>
-              <div className={`w-8 h-8 lg:w-11 lg:h-11 rounded-full flex items-center justify-center text-sm lg:text-base font-semibold ${
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                 isToday
                   ? 'bg-[#b0e455] text-[#0f1a0c]'
                   : isPast
@@ -136,7 +136,7 @@ function WeekStrip({ stats }: { stats: StatUpdate[] }) {
               }`}>
                 {day.getDate()}
               </div>
-              <div className={`w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full ${hasLog ? 'bg-[#b0e455]' : 'bg-transparent'}`} />
+              <div className={`w-1.5 h-1.5 rounded-full ${hasLog ? 'bg-[#b0e455]' : 'bg-transparent'}`} />
             </div>
           )
         })}
@@ -194,7 +194,7 @@ function computeStreak(dates: string[]): number {
 
 function StreakCard({ streak }: { streak: number }) {
   return (
-    <div className="bg-[#162212] rounded-2xl p-4 lg:p-6 border border-[#b0e455]/10 flex items-center gap-4">
+    <div className="bg-[#162212] rounded-2xl p-4 border border-[#b0e455]/10 flex items-center gap-4">
       <div className="w-11 h-11 rounded-xl bg-[#b0e455]/15 flex items-center justify-center shrink-0">
         <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-5 h-5">
           <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" />
@@ -387,30 +387,30 @@ export default function DashboardClient({
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
+      <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[#b0e455]/8">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase lg:text-sm">Zana</p>
+            <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase">Zana</p>
             <Link href="/" className="lg:hidden text-[9px] text-[#edf5e2]/20 hover:text-[#edf5e2]/50 transition tracking-widest uppercase font-medium">
               ← Website
             </Link>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight lg:text-4xl">
+          <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
             {greeting()}, {name}.
           </h1>
-          <p className="text-xs lg:text-sm text-[#edf5e2]/35 mt-1 max-w-xs">{subtext}</p>
+          <p className="text-xs text-[#edf5e2]/35 mt-1 max-w-xs">{subtext}</p>
         </div>
         <Link href="/profile">
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt="Profile"
-              className="w-10 h-10 lg:w-14 lg:h-14 rounded-full object-cover border-2 active:scale-95 transition-transform"
+              className="w-10 h-10 rounded-full object-cover border-2 active:scale-95 transition-transform"
               style={{ borderColor: avatarColor + '50' }}
             />
           ) : (
             <div
-              className="w-10 h-10 lg:w-14 lg:h-14 rounded-full flex items-center justify-center text-sm lg:text-lg font-bold border-2 transition-transform active:scale-95"
+              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-transform active:scale-95"
               style={{ color: avatarColor, borderColor: avatarColor + '50', backgroundColor: avatarColor + '18' }}
             >
               {initials}
@@ -419,7 +419,7 @@ export default function DashboardClient({
         </Link>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-4 pt-2 lg:px-10 lg:max-w-4xl lg:pt-8 lg:pb-10 lg:space-y-6">
+      <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-4 pt-2 lg:px-8 lg:max-w-3xl lg:pt-5 lg:pb-8 lg:space-y-4">
 
         {/* Latest announcement */}
         {latestAnnouncement && (
@@ -452,29 +452,29 @@ export default function DashboardClient({
 
         {/* Progress card */}
         {latest ? (
-          <div className="bg-[#162212] rounded-2xl p-5 lg:p-8 border border-[#b0e455]/10">
-            <div className="flex items-start justify-between mb-4 lg:mb-6">
+          <div className="bg-[#162212] rounded-2xl p-5 border border-[#b0e455]/10">
+            <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-xs lg:text-sm font-medium text-[#edf5e2]/40">Latest check-in</p>
+                <p className="text-xs font-medium text-[#edf5e2]/40">Latest check-in</p>
                 <p className="text-xs text-[#edf5e2]/25 mt-0.5">{relTime(latest.created_at)}</p>
               </div>
               {fitnessGoal && (
-                <span className="text-[10px] lg:text-xs bg-[#b0e455]/10 border border-[#b0e455]/20 text-[#b0e455] px-2.5 py-1 rounded-full font-medium">
+                <span className="text-[10px] bg-[#b0e455]/10 border border-[#b0e455]/20 text-[#b0e455] px-2.5 py-1 rounded-full font-medium">
                   {fitnessGoal}
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-5 lg:gap-10">
+            <div className="flex items-center gap-5 lg:gap-8">
               {latestWeight !== null && (
                 <div>
-                  <p className="text-[10px] lg:text-xs text-[#edf5e2]/35 uppercase tracking-wider mb-1">Weight</p>
+                  <p className="text-[10px] text-[#edf5e2]/35 uppercase tracking-wider mb-1">Weight</p>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-3xl lg:text-5xl font-bold tracking-tight">{latestWeight}</span>
-                    <span className="text-sm lg:text-base text-[#edf5e2]/40">{weightUnit}</span>
+                    <span className="text-3xl lg:text-4xl font-bold tracking-tight">{latestWeight}</span>
+                    <span className="text-sm text-[#edf5e2]/40">{weightUnit}</span>
                   </div>
                   {weightDelta !== null && (
-                    <p className="text-xs lg:text-sm mt-1 font-medium" style={{ color: weightDelta <= 0 ? '#86efac' : '#f87171' }}>
+                    <p className="text-xs mt-1 font-medium" style={{ color: weightDelta <= 0 ? '#86efac' : '#f87171' }}>
                       {weightDelta > 0 ? '+' : ''}{weightDelta.toFixed(1)} {weightUnit}
                     </p>
                   )}
@@ -483,7 +483,7 @@ export default function DashboardClient({
 
               {latest.confidence !== null && (
                 <div className="ml-2">
-                  <p className="text-[10px] lg:text-xs text-[#edf5e2]/35 uppercase tracking-wider mb-2">Confidence</p>
+                  <p className="text-[10px] text-[#edf5e2]/35 uppercase tracking-wider mb-2">Confidence</p>
                   <ConfidenceRing value={latest.confidence} />
                   <p className="text-xs mt-1.5 font-medium text-center" style={{ color: confidenceColor(latest.confidence) }}>
                     {confidenceLabel(latest.confidence)}
@@ -497,8 +497,8 @@ export default function DashboardClient({
             </div>
 
             {latest.milestone_text && (
-              <div className="mt-4 lg:mt-6 pt-4 lg:pt-6 border-t border-[#b0e455]/8">
-                <p className="text-xs lg:text-sm text-[#edf5e2]/45 italic leading-relaxed">
+              <div className="mt-4 pt-4 border-t border-[#b0e455]/8">
+                <p className="text-xs text-[#edf5e2]/45 italic leading-relaxed">
                   "{latest.milestone_text}"
                 </p>
               </div>

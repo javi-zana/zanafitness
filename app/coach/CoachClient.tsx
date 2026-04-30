@@ -859,20 +859,20 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   return (
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
+      <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[#b0e455]/8">
         <div>
-          <p className="text-[10px] lg:text-sm text-[#edf5e2]/30 tracking-widest uppercase font-mono">
+          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">
             Zana · Coach Portal
           </p>
           {activeTab === 'members' ? (
             <>
-              <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-3xl">
+              <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-2xl">
                 {coachGreeting()}, {firstName ?? userEmail.split('@')[0]}.
               </h1>
               <p className="text-xs text-[#edf5e2]/35 mt-1">Here's how your members are doing.</p>
             </>
           ) : (
-            <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-3xl">{TAB_TITLES[activeTab]}</h1>
+            <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-2xl">{TAB_TITLES[activeTab]}</h1>
           )}
         </div>
         <Link href="/profile" className="shrink-0 mt-1 lg:hidden">
@@ -889,7 +889,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:max-w-5xl lg:w-full lg:pb-10 lg:pt-6">
+      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-8 lg:max-w-4xl lg:w-full lg:pb-10 lg:pt-5">
         {activeTab === 'members' && (
           <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} />
         )}
