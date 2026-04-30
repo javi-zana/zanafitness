@@ -83,53 +83,53 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   return (
     <>
       {/* ── Desktop sidebar ────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-72 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-52 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
         {/* Logo */}
-        <div className="px-6 pt-8 pb-7 border-b border-[#b0e455]/8">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-[#b0e455] flex items-center justify-center shrink-0">
-              <svg viewBox="0 0 32 32" className="h-6 w-6" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
+        <div className="px-5 pt-6 pb-5 border-b border-[#b0e455]/8">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#b0e455] flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 32 32" className="h-4 w-4" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
                 <path d="M0,2 H32 L18.3,14" />
                 <path d="M13.7,18 L0,30 H32" />
               </svg>
             </div>
             <div>
-              <p className="text-[#edf5e2] font-bold text-xl tracking-tight leading-none">Zana</p>
-              <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1.5">Coach Portal</p>
+              <p className="text-[#edf5e2] font-bold text-base tracking-tight leading-none">Zana</p>
+              <p className="text-[9px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1">Coach Portal</p>
             </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => onChange(t.id)}
-              className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all text-left ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
                 active === t.id
                   ? 'bg-[#b0e455] text-[#0b1509]'
                   : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
               }`}
             >
               {t.icon}
-              <span className="text-base font-semibold">{t.label}</span>
+              <span className="text-sm font-semibold">{t.label}</span>
             </button>
           ))}
         </nav>
 
         {/* Profile */}
-        <div className="px-4 py-5 border-t border-[#b0e455]/8 space-y-1">
-          <Link href="/profile" className="flex items-center gap-4 px-4 py-3.5 rounded-xl text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
+        <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-0.5">
+          <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
             <div
-              className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-sm font-bold overflow-hidden shrink-0"
+              className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
               style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
             >
               {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initials}
             </div>
-            <span className="text-base font-semibold">Profile</span>
+            <span className="text-sm font-semibold">Profile</span>
           </Link>
-          <p className="text-[10px] text-[#edf5e2]/15 uppercase tracking-widest px-4 pt-2">© 2026 Zana Fitness</p>
+          <p className="text-[9px] text-[#edf5e2]/15 uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
         </div>
       </aside>
 
@@ -662,33 +662,64 @@ function MessagesTab({
 
 // ─── Admin tab ────────────────────────────────────────────────────────────────
 
-function AdminTab({ userId, userEmail, members, threads }: { userId: string; userEmail: string; members: Member[]; threads: Thread[] }) {
+type AdminProfile = { id: string; email: string; first_name: string | null; role: string; status: string | null }
+type Assignment = { member_id: string; coach_id: string }
+
+function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) {
   const supabase = createClient()
+
+  // Live data
+  const [coaches, setCoaches] = useState<AdminProfile[]>([])
+  const [members, setMembers] = useState<AdminProfile[]>([])
+  const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [threads, setThreads] = useState<Thread[]>([])
+  const [loading, setLoading] = useState(true)
+
+  // Invite
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
   const [inviteMsg, setInviteMsg] = useState('')
+
+  // Thread setup
   const [setupStatus, setSetupStatus] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
+
+  // Assign
+  const [assignMemberId, setAssignMemberId] = useState('')
+  const [assignCoachId, setAssignCoachId] = useState('')
+  const [assignStatus, setAssignStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
+
+  // Broadcast
   const [broadcastBody, setBroadcastBody] = useState('')
   const [broadcastStatus, setBroadcastStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
 
+  async function loadData() {
+    setLoading(true)
+    const [
+      { data: coachRows },
+      { data: memberRows },
+      { data: assignRows },
+      { data: threadRows },
+    ] = await Promise.all([
+      supabase.from('profiles').select('id, email, first_name, role, status').in('role', ['coach', 'head_coach']),
+      supabase.from('profiles').select('id, email, first_name, role, status').eq('role', 'member'),
+      supabase.from('coach_assignments').select('member_id, coach_id'),
+      supabase.from('threads').select('id, member_id'),
+    ])
+    setCoaches(coachRows ?? [])
+    setMembers(memberRows ?? [])
+    setAssignments(assignRows ?? [])
+    setThreads(threadRows ?? [])
+    setLoading(false)
+  }
+
+  useEffect(() => { loadData() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const assignMap = Object.fromEntries(assignments.map(a => [a.member_id, a.coach_id]))
   const threadMemberIds = new Set(threads.map(t => t.member_id))
   const membersWithoutThread = members.filter(m => !threadMemberIds.has(m.id))
 
-  async function handleBroadcast(e: FormEvent) {
-    e.preventDefault()
-    if (!broadcastBody.trim() || !threads.length) return
-    setBroadcastStatus('loading')
-    for (const thread of threads) {
-      await supabase.from('messages').insert({
-        thread_id: thread.id,
-        author_id: userId,
-        body: broadcastBody.trim(),
-      })
-    }
-    setBroadcastBody('')
-    setBroadcastStatus('done')
-    setTimeout(() => setBroadcastStatus('idle'), 3000)
-  }
+  function profileName(p: AdminProfile) { return p.first_name ?? p.email.split('@')[0] }
+  function coachName(id: string) { return coaches.find(c => c.id === id) }
 
   async function handleInvite(e: FormEvent) {
     e.preventDefault()
@@ -701,63 +732,203 @@ function AdminTab({ userId, userEmail, members, threads }: { userId: string; use
         body: JSON.stringify({ email: inviteEmail.trim(), plan: 'member' }),
       })
       const json = await res.json()
-      if (res.ok) { setInviteStatus('ok'); setInviteMsg('Invite sent!'); setInviteEmail('') }
-      else { setInviteStatus('error'); setInviteMsg(json.error ?? 'Failed to send invite.') }
+      if (res.ok) {
+        setInviteStatus('ok')
+        setInviteMsg('Invite sent! Refresh to see them in the list.')
+        setInviteEmail('')
+        setTimeout(() => loadData(), 2000)
+      } else {
+        setInviteStatus('error')
+        setInviteMsg(json.error ?? 'Failed to send invite.')
+      }
     } catch {
       setInviteStatus('error'); setInviteMsg('Network error.')
     }
-    setTimeout(() => setInviteStatus('idle'), 3000)
+    setTimeout(() => { setInviteStatus('idle'); setInviteMsg('') }, 4000)
   }
 
-  async function setupThread(member: Member) {
+  async function handleAssign(e: FormEvent) {
+    e.preventDefault()
+    if (!assignMemberId || !assignCoachId) return
+    setAssignStatus('loading')
+    await supabase.from('coach_assignments').upsert(
+      { member_id: assignMemberId, coach_id: assignCoachId },
+      { onConflict: 'member_id' }
+    )
+    setAssignStatus('done')
+    setAssignMemberId('')
+    setAssignCoachId('')
+    await loadData()
+    setTimeout(() => setAssignStatus('idle'), 2000)
+  }
+
+  async function setupThread(member: AdminProfile) {
     setSetupStatus(s => ({ ...s, [member.id]: 'loading' }))
-    // Create thread
     const { data: thread, error: te } = await supabase
       .from('threads')
       .insert({ member_id: member.id })
       .select('id')
       .single()
     if (te || !thread) { setSetupStatus(s => ({ ...s, [member.id]: 'error' })); return }
-
-    // Add member + coach as participants
     await supabase.from('thread_participants').insert([
-      { thread_id: thread.id, user_id: member.id, role: member.role },
+      { thread_id: thread.id, user_id: member.id, role: 'member' },
       { thread_id: thread.id, user_id: userId, role: 'head_coach' },
     ])
     setSetupStatus(s => ({ ...s, [member.id]: 'done' }))
+    await loadData()
+  }
+
+  async function handleBroadcast(e: FormEvent) {
+    e.preventDefault()
+    if (!broadcastBody.trim() || !threads.length) return
+    setBroadcastStatus('loading')
+    for (const thread of threads) {
+      await supabase.from('messages').insert({ thread_id: thread.id, author_id: userId, body: broadcastBody.trim() })
+    }
+    setBroadcastBody('')
+    setBroadcastStatus('done')
+    setTimeout(() => setBroadcastStatus('idle'), 3000)
+  }
+
+  if (loading) {
+    return <div className="py-12 text-center text-xs text-[#edf5e2]/20 font-mono">Loading…</div>
   }
 
   return (
     <div className="space-y-8">
 
-      {/* Broadcast message */}
-      {threads.length > 0 && (
+      {/* ── Coaches ── */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Coaches ({coaches.length})</p>
+          <button onClick={loadData} className="text-[10px] text-[#edf5e2]/20 hover:text-[#edf5e2]/50 font-mono transition">Refresh</button>
+        </div>
+        {coaches.length === 0 ? (
+          <p className="text-xs text-[#edf5e2]/20 font-mono">No coaches found. Set role to coach or head_coach in Supabase.</p>
+        ) : (
+          <div className="space-y-2">
+            {coaches.map(c => (
+              <div key={c.id} className="bg-[#1c2e16] rounded-xl px-4 py-3 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#b0e455]/15 border border-[#b0e455]/25 flex items-center justify-center text-xs font-bold text-[#b0e455] shrink-0">
+                  {profileName(c).charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-[#edf5e2]">{profileName(c)}</p>
+                  <p className="text-[10px] text-[#edf5e2]/30 font-mono truncate">{c.email}</p>
+                </div>
+                <span className="text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border text-[#b0e455] border-[#b0e455]/25 bg-[#b0e455]/8">
+                  {c.role === 'head_coach' ? 'Head Coach' : 'Coach'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Members ── */}
+      <div>
+        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Members ({members.length})</p>
+        {members.length === 0 ? (
+          <p className="text-xs text-[#edf5e2]/20 font-mono">No members yet. Invite one below.</p>
+        ) : (
+          <div className="space-y-2">
+            {members.map(m => {
+              const coach = coachName(assignMap[m.id])
+              const hasThread = threadMemberIds.has(m.id)
+              return (
+                <div key={m.id} className="bg-[#1c2e16] rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#edf5e2]/5 border border-[#edf5e2]/10 flex items-center justify-center text-xs font-bold text-[#edf5e2]/50 shrink-0">
+                    {profileName(m).charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#edf5e2]">{profileName(m)}</p>
+                    <p className="text-[10px] text-[#edf5e2]/30 font-mono truncate">{m.email}</p>
+                    <p className="text-[10px] text-[#edf5e2]/20 font-mono mt-0.5">
+                      {coach ? `Coach: ${profileName(coach)}` : 'No coach assigned'}
+                      {' · '}
+                      {hasThread ? 'Messaging active' : 'No thread'}
+                    </p>
+                  </div>
+                  <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border ${
+                    m.status === 'active'
+                      ? 'text-[#86efac] border-[#86efac]/20 bg-[#86efac]/8'
+                      : 'text-[#edf5e2]/20 border-[#edf5e2]/8'
+                  }`}>
+                    {m.status ?? 'pending'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ── Assign member to coach ── */}
+      {coaches.length > 0 && members.length > 0 && (
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">
-            Broadcast to All Members ({threads.length})
-          </p>
-          <form onSubmit={handleBroadcast} className="space-y-3">
-            <textarea
-              value={broadcastBody}
-              onChange={e => setBroadcastBody(e.target.value)}
-              rows={3}
-              placeholder="Send one message to every member's inbox…"
-              className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-[#edf5e2] text-sm placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/60 transition resize-none"
-            />
+          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Assign Member to Coach</p>
+          <form onSubmit={handleAssign} className="space-y-2">
+            <select
+              value={assignMemberId}
+              onChange={e => setAssignMemberId(e.target.value)}
+              className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-sm text-[#edf5e2] focus:outline-none focus:border-[#b0e455]/50 transition"
+            >
+              <option value="">Select member…</option>
+              {members.map(m => (
+                <option key={m.id} value={m.id}>{profileName(m)} ({m.email})</option>
+              ))}
+            </select>
+            <select
+              value={assignCoachId}
+              onChange={e => setAssignCoachId(e.target.value)}
+              className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-sm text-[#edf5e2] focus:outline-none focus:border-[#b0e455]/50 transition"
+            >
+              <option value="">Select coach…</option>
+              {coaches.map(c => (
+                <option key={c.id} value={c.id}>{profileName(c)} — {c.role === 'head_coach' ? 'Head Coach' : 'Coach'}</option>
+              ))}
+            </select>
             <button
               type="submit"
-              disabled={broadcastStatus === 'loading' || !broadcastBody.trim()}
+              disabled={assignStatus === 'loading' || !assignMemberId || !assignCoachId}
               className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
             >
-              {broadcastStatus === 'loading' ? 'Sending…' : broadcastStatus === 'done' ? 'Sent!' : 'Send to All'}
+              {assignStatus === 'loading' ? 'Assigning…' : assignStatus === 'done' ? 'Assigned!' : 'Assign'}
             </button>
           </form>
         </div>
       )}
 
-      {/* Invite member */}
+      {/* ── Setup messaging threads ── */}
+      {membersWithoutThread.length > 0 && (
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Setup Messaging Thread</p>
+          <div className="space-y-2">
+            {membersWithoutThread.map(m => (
+              <div key={m.id} className="bg-[#1c2e16] rounded-xl px-4 py-3 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#edf5e2]/5 border border-[#edf5e2]/10 flex items-center justify-center text-xs font-bold text-[#edf5e2]/50 shrink-0">
+                  {profileName(m).charAt(0).toUpperCase()}
+                </div>
+                <p className="text-sm text-[#edf5e2] flex-1 truncate">{profileName(m)}</p>
+                <button
+                  onClick={() => setupThread(m)}
+                  disabled={setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
+                  className="text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:text-[#c9f070] transition disabled:opacity-40 shrink-0"
+                >
+                  {setupStatus[m.id] === 'loading' ? 'Setting up…'
+                    : setupStatus[m.id] === 'done' ? 'Done!'
+                    : setupStatus[m.id] === 'error' ? 'Error - retry'
+                    : 'Setup Thread'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Invite member ── */}
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Invite Member</p>
+        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Invite New Member</p>
         <form onSubmit={handleInvite} className="space-y-3">
           <input
             type="email"
@@ -774,62 +945,36 @@ function AdminTab({ userId, userEmail, members, threads }: { userId: string; use
             {inviteStatus === 'loading' ? 'Sending…' : 'Send Invite'}
           </button>
           {inviteMsg && (
-            <p className={`text-xs font-mono ${inviteStatus === 'ok' ? 'text-green-400' : 'text-red-400'}`}>{inviteMsg}</p>
+            <p className={`text-xs font-mono ${inviteStatus === 'ok' ? 'text-[#86efac]' : 'text-[#f87171]'}`}>{inviteMsg}</p>
           )}
         </form>
       </div>
 
-      {/* Setup messaging threads */}
-      {membersWithoutThread.length > 0 && (
+      {/* ── Broadcast ── */}
+      {threads.length > 0 && (
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Setup Messaging Thread</p>
-          <div className="space-y-2">
-            {membersWithoutThread.map(m => (
-              <div key={m.id} className="bg-[#1c2e16] rounded-xl p-4 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
-                  {memberName(m).charAt(0).toUpperCase()}
-                </div>
-                <p className="text-sm text-[#edf5e2] flex-1">{memberName(m)}</p>
-                <button
-                  onClick={() => setupThread(m)}
-                  disabled={setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
-                  className="text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:text-[#c9f070] transition disabled:opacity-40"
-                >
-                  {setupStatus[m.id] === 'loading' ? 'Setting up…'
-                    : setupStatus[m.id] === 'done' ? 'Done ✓'
-                    : setupStatus[m.id] === 'error' ? 'Error'
-                    : 'Setup'}
-                </button>
-              </div>
-            ))}
-          </div>
+          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">
+            Broadcast to All Members ({threads.length})
+          </p>
+          <form onSubmit={handleBroadcast} className="space-y-3">
+            <textarea
+              value={broadcastBody}
+              onChange={e => setBroadcastBody(e.target.value)}
+              rows={3}
+              placeholder="Send one message to every member's inbox…"
+              className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-[#edf5e2] text-sm placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/60 transition resize-none"
+            />
+            <button
+              type="submit"
+              disabled={broadcastStatus === 'loading' || !broadcastBody.trim()}
+              className="w-full py-3 rounded-lg border border-[#b0e455]/30 text-[#b0e455] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#b0e455]/8 transition disabled:opacity-50"
+            >
+              {broadcastStatus === 'loading' ? 'Sending…' : broadcastStatus === 'done' ? 'Sent to All!' : 'Broadcast'}
+            </button>
+          </form>
         </div>
       )}
 
-      {/* Member list */}
-      <div>
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">All Members ({members.length})</p>
-        <div className="space-y-2">
-          {members.map(m => (
-            <div key={m.id} className="bg-[#1c2e16] rounded-xl p-4 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
-                {memberName(m).charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-[#edf5e2]">{memberName(m)}</p>
-                <p className="text-[10px] text-[#edf5e2]/30 font-mono truncate">{m.email}</p>
-              </div>
-              <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border ${
-                threadMemberIds.has(m.id)
-                  ? 'text-green-400 border-green-400/20 bg-green-400/10'
-                  : 'text-[#edf5e2]/20 border-[#b0e455]/12'
-              }`}>
-                {threadMemberIds.has(m.id) ? 'Active' : 'No thread'}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   )
 }
@@ -857,7 +1002,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   }
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
       {/* Header */}
       <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[#b0e455]/8">
         <div>
@@ -906,7 +1051,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
           />
         )}
         {activeTab === 'admin' && isHeadCoach && (
-          <AdminTab userId={userId} userEmail={userEmail} members={members} threads={threads} />
+          <AdminTab userId={userId} userEmail={userEmail} />
         )}
       </div>
 

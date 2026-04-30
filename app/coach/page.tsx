@@ -17,13 +17,23 @@ export default async function CoachPage() {
     redirect('/dashboard')
   }
 
-  // Assigned members
-  const { data: assignments } = await supabase
-    .from('coach_assignments')
-    .select('member_id')
-    .eq('coach_id', user.id)
+  const isHeadCoach = profile.role === 'head_coach'
 
-  const memberIds = (assignments ?? []).map(a => a.member_id)
+  // Head coach sees all members; regular coach sees only assigned members
+  let memberIds: string[] = []
+  if (isHeadCoach) {
+    const { data: allMemberProfiles } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'member')
+    memberIds = (allMemberProfiles ?? []).map(m => m.id)
+  } else {
+    const { data: assignments } = await supabase
+      .from('coach_assignments')
+      .select('member_id')
+      .eq('coach_id', user.id)
+    memberIds = (assignments ?? []).map(a => a.member_id)
+  }
 
   const [{ data: members }, { data: allStats }, { data: threads }] = await Promise.all([
     memberIds.length

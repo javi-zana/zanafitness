@@ -384,7 +384,7 @@ export default function DashboardClient({
   const subtext = greetingSubtext(streak, daysSinceLast, fitnessGoal)
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
 
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[#b0e455]/8">
