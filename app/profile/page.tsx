@@ -160,7 +160,7 @@ export default function ProfilePage() {
         { onConflict: "id" }
       );
     } else {
-      setError("Photo upload failed - make sure the profile-photos storage bucket exists.");
+      setError(`Photo upload failed: ${upErr.message}`);
     }
 
     setUploadingPhoto(false);
