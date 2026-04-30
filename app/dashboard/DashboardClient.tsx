@@ -42,6 +42,18 @@ function greeting() {
   return 'Evening'
 }
 
+function greetingSubtext(streak: number, daysSinceLast: number | null, fitnessGoal: string | null): string {
+  if (streak >= 30) return 'You\'re unstoppable. 30 days and counting.'
+  if (streak >= 14) return 'Two weeks strong. Keep the momentum going.'
+  if (streak >= 7) return 'A full week of showing up. That\'s the work.'
+  if (streak >= 3) return 'Three days in a row. Momentum is building.'
+  if (streak >= 1) return 'You showed up. That\'s the hardest part.'
+  if (daysSinceLast === null) return fitnessGoal ? `Your goal: ${fitnessGoal}. Let\'s get started.` : 'Ready to begin your journey?'
+  if (daysSinceLast >= 7) return 'It\'s been a while. Today\'s a fresh start.'
+  if (daysSinceLast >= 3) return 'Time to check back in. You\'ve got this.'
+  return fitnessGoal ? `Focused on: ${fitnessGoal}` : 'Stay consistent. Small steps add up.'
+}
+
 function relTime(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
   const mins = Math.floor(diff / 60_000)
@@ -369,13 +381,15 @@ export default function DashboardClient({
   const prevWeight = weightPts[1] ? toDisplay(weightPts[1].weight_kg!, weightUnit) : null
   const weightDelta = latestWeight !== null && prevWeight !== null ? latestWeight - prevWeight : null
 
+  const subtext = greetingSubtext(streak, daysSinceLast, fitnessGoal)
+
   return (
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
 
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
         <div>
-          <div className="flex items-center gap-3 mb-0.5">
+          <div className="flex items-center gap-3 mb-1">
             <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase lg:text-sm">Zana</p>
             <Link href="/" className="lg:hidden text-[9px] text-[#edf5e2]/20 hover:text-[#edf5e2]/50 transition tracking-widest uppercase font-medium">
               ← Website
@@ -384,6 +398,7 @@ export default function DashboardClient({
           <h1 className="text-2xl font-bold tracking-tight lg:text-4xl">
             {greeting()}, {name}.
           </h1>
+          <p className="text-xs lg:text-sm text-[#edf5e2]/35 mt-1 max-w-xs">{subtext}</p>
         </div>
         <Link href="/profile">
           {avatarUrl ? (
@@ -534,8 +549,8 @@ export default function DashboardClient({
           <p className="text-[10px] lg:text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-3">Quick Actions</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
 
-            <Link href="/stats" className="bg-[#1c2e16] border border-[#b0e455]/8 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#b0e455]/25 active:scale-[0.98] transition-all">
-              <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center">
+            <Link href="/stats" className="group bg-[#1c2e16] border border-[#b0e455]/10 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#b0e455]/30 hover:bg-[#223318] active:scale-[0.98] transition-all">
+              <div className="w-9 h-9 rounded-xl bg-[#b0e455]/15 flex items-center justify-center group-hover:bg-[#b0e455]/25 transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-5 h-5">
                   <path d="M18 20V10M12 20V4M6 20v-6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -546,9 +561,9 @@ export default function DashboardClient({
               </div>
             </Link>
 
-            <Link href="/program" className="bg-[#1c2e16] border border-[#b0e455]/8 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#b0e455]/25 active:scale-[0.98] transition-all">
-              <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-5 h-5">
+            <Link href="/program" className="group bg-[#1a2630] border border-[#60a5fa]/10 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#60a5fa]/30 hover:bg-[#1e2e3a] active:scale-[0.98] transition-all">
+              <div className="w-9 h-9 rounded-xl bg-[#60a5fa]/15 flex items-center justify-center group-hover:bg-[#60a5fa]/25 transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2" className="w-5 h-5">
                   <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
@@ -560,15 +575,15 @@ export default function DashboardClient({
 
             <Link
               href="/messages"
-              className="bg-[#1c2e16] border border-[#b0e455]/8 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#b0e455]/25 active:scale-[0.98] transition-all relative"
+              className="group bg-[#261a2a] border border-[#c084fc]/10 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#c084fc]/30 hover:bg-[#2d1f33] active:scale-[0.98] transition-all relative"
             >
               {unreadCount > 0 && (
                 <span className="absolute top-3 right-3 min-w-[20px] h-5 rounded-full bg-[#b0e455] text-[#0f1a0c] text-[10px] font-bold flex items-center justify-center px-1">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
-              <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-5 h-5">
+              <div className="w-9 h-9 rounded-xl bg-[#c084fc]/15 flex items-center justify-center group-hover:bg-[#c084fc]/25 transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth="2" className="w-5 h-5">
                   <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
@@ -580,9 +595,9 @@ export default function DashboardClient({
               </div>
             </Link>
 
-            <Link href="/schedule" className="bg-[#1c2e16] border border-[#b0e455]/8 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#b0e455]/25 active:scale-[0.98] transition-all">
-              <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-5 h-5">
+            <Link href="/schedule" className="group bg-[#261e14] border border-[#fb923c]/10 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#fb923c]/30 hover:bg-[#2e2318] active:scale-[0.98] transition-all">
+              <div className="w-9 h-9 rounded-xl bg-[#fb923c]/15 flex items-center justify-center group-hover:bg-[#fb923c]/25 transition-colors">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="2" className="w-5 h-5">
                   <rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>

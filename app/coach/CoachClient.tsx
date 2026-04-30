@@ -160,6 +160,28 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
 
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
+function checkinStatus(stat: Stat | null): 'fresh' | 'ok' | 'overdue' | 'none' {
+  if (!stat) return 'none'
+  const days = Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000)
+  if (days <= 3) return 'fresh'
+  if (days <= 7) return 'ok'
+  return 'overdue'
+}
+
+const STATUS_DOT: Record<string, string> = {
+  fresh: 'bg-[#86efac]',
+  ok: 'bg-[#fbbf24]',
+  overdue: 'bg-[#f87171]',
+  none: 'bg-[#edf5e2]/15',
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  fresh: 'Active',
+  ok: 'Due soon',
+  overdue: 'Overdue',
+  none: 'No data',
+}
+
 function MembersTab({ members, allStats, threads, lastMessages }: {
   members: Member[]
   allStats: Stat[]
@@ -185,7 +207,6 @@ function MembersTab({ members, allStats, threads, lastMessages }: {
     return () => { supabase.removeChannel(channel) }
   }, [members]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // last message per member (via thread)
   const threadToMember = Object.fromEntries(threads.map(t => [t.id, t.member_id]))
   const lastMsgByMember: Record<string, MsgPreview> = {}
   for (const msg of lastMessages) {
@@ -205,44 +226,90 @@ function MembersTab({ members, allStats, threads, lastMessages }: {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 20)
 
+  // Summary counts
+  const totalMembers = members.length
+  const activeThisWeek = latestPerMember.filter(({ stat }) => {
+    if (!stat) return false
+    return Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) <= 7
+  }).length
+  const needAttention = latestPerMember.filter(({ stat }) => checkinStatus(stat) === 'overdue' || checkinStatus(stat) === 'none').length
+
+  // Sort: overdue first, then ok, then fresh
+  const sortedMembers = [...latestPerMember].sort((a, b) => {
+    const order = { overdue: 0, none: 1, ok: 2, fresh: 3 }
+    return order[checkinStatus(a.stat)] - order[checkinStatus(b.stat)]
+  })
+
   if (members.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <p className="text-sm text-[#edf5e2]/20">No members assigned yet.</p>
-        <p className="text-xs text-[#edf5e2]/15 mt-1">Use Admin → Invite to add members.</p>
+        <p className="text-xs text-[#edf5e2]/15 mt-1">Use Admin to invite members.</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
+
+      {/* Summary stats */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
+          <p className="text-2xl font-bold text-[#edf5e2]">{totalMembers}</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Total</p>
+        </div>
+        <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[#1c2e16] border-[#b0e455]/8'}`}>
+          <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[#edf5e2]/30'}`}>{needAttention}</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Attention</p>
+        </div>
+        <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
+          <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Active</p>
+        </div>
+      </div>
+
+      {/* Roster */}
       <div>
         <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Roster</p>
         <div className="space-y-2">
-          {latestPerMember.map(({ member, stat, lastMsg }) => (
-            <div key={member.id} className="bg-[#1c2e16] rounded-xl p-4 flex items-center gap-4">
-              <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
-                {memberName(member).charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[#edf5e2] truncate">{memberName(member)}</p>
-                <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                  {stat ? (
-                    <p className="text-[10px] text-[#edf5e2]/30 font-mono">
-                      Check-in {relTime(stat.created_at)} ago
-                      {stat.weight_kg != null ? ` · ${toDisplay(stat.weight_kg, member.weight_unit)}` : ''}
-                      {stat.confidence != null ? <span style={{ color: confidenceColor(stat.confidence) }}> · {stat.confidence}/10</span> : null}
-                    </p>
-                  ) : (
-                    <p className="text-[10px] text-[#edf5e2]/20 font-mono">No check-ins</p>
-                  )}
-                  {lastMsg && (
-                    <p className="text-[10px] text-[#edf5e2]/20 font-mono">Msg {relTime(lastMsg.created_at)} ago</p>
-                  )}
+          {sortedMembers.map(({ member, stat, lastMsg }) => {
+            const status = checkinStatus(stat)
+            return (
+              <div key={member.id} className="bg-[#1c2e16] rounded-xl p-4 flex items-center gap-4 border border-transparent hover:border-[#b0e455]/10 transition-colors">
+                <div className="relative shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
+                    {memberName(member).charAt(0).toUpperCase()}
+                  </div>
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#1c2e16] ${STATUS_DOT[status]}`} />
                 </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-[#edf5e2] truncate">{memberName(member)}</p>
+                  <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                    {stat ? (
+                      <p className="text-[10px] text-[#edf5e2]/30 font-mono">
+                        Check-in {relTime(stat.created_at)} ago
+                        {stat.weight_kg != null ? ` · ${toDisplay(stat.weight_kg, member.weight_unit)}` : ''}
+                        {stat.confidence != null ? <span style={{ color: confidenceColor(stat.confidence) }}> · {stat.confidence}/10</span> : null}
+                      </p>
+                    ) : (
+                      <p className="text-[10px] text-[#edf5e2]/20 font-mono">No check-ins</p>
+                    )}
+                    {lastMsg && (
+                      <p className="text-[10px] text-[#edf5e2]/20 font-mono">Msg {relTime(lastMsg.created_at)} ago</p>
+                    )}
+                  </div>
+                </div>
+                <span className={`shrink-0 text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded-full ${
+                  status === 'fresh' ? 'text-[#86efac] bg-[#86efac]/10'
+                  : status === 'ok' ? 'text-[#fbbf24] bg-[#fbbf24]/10'
+                  : status === 'overdue' ? 'text-[#f87171] bg-[#f87171]/10'
+                  : 'text-[#edf5e2]/20 bg-[#edf5e2]/5'
+                }`}>
+                  {STATUS_LABEL[status]}
+                </span>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -782,13 +849,31 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
 
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
 
+  function coachGreeting() {
+    const h = new Date().getHours()
+    if (h < 12) return 'Good morning'
+    if (h < 17) return 'Good afternoon'
+    return 'Good evening'
+  }
+
   return (
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
       {/* Header */}
       <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
         <div>
-          <p className="text-[10px] lg:text-sm text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach</p>
-          <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-3xl">{TAB_TITLES[activeTab]}</h1>
+          <p className="text-[10px] lg:text-sm text-[#edf5e2]/30 tracking-widest uppercase font-mono">
+            Zana · Coach Portal
+          </p>
+          {activeTab === 'members' ? (
+            <>
+              <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-3xl">
+                {coachGreeting()}, {firstName ?? userEmail.split('@')[0]}.
+              </h1>
+              <p className="text-xs text-[#edf5e2]/35 mt-1">Here's how your members are doing.</p>
+            </>
+          ) : (
+            <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-3xl">{TAB_TITLES[activeTab]}</h1>
+          )}
         </div>
         <Link href="/profile" className="shrink-0 mt-1 lg:hidden">
           <div
