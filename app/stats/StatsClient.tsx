@@ -396,7 +396,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-28 space-y-4 lg:px-10 lg:max-w-4xl lg:pb-10 lg:space-y-5">
+      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-28 space-y-4 lg:px-10 lg:pt-8 lg:max-w-4xl lg:pb-10 lg:space-y-5">
         {showNudge && !nudgeDismissed && !formOpen && (
           <div className="relative bg-[#b0e455] rounded-2xl p-5 overflow-hidden">
             <div className="absolute inset-0 opacity-10"
