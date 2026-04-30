@@ -398,26 +398,34 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
 
       <div className="flex-1 overflow-y-auto px-5 pb-28 space-y-4 lg:px-10 lg:max-w-4xl lg:pb-10 lg:space-y-5">
         {showNudge && !nudgeDismissed && !formOpen && (
-          <div className="flex items-start gap-3 bg-[#b0e455]/8 border border-[#b0e455]/15 rounded-2xl p-4">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-4 h-4 mt-0.5 shrink-0">
-              <path d="M13 16h-1v-4h-1m1-4h.01M12 22a10 10 0 100-20 10 10 0 000 20z" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-[#b0e455]">Time to log</p>
-              <p className="text-sm text-[#edf5e2]/50 mt-0.5">
-                {stats.length === 0
-                  ? "You haven't logged any stats yet. Drop your first update."
-                  : "It's been 3+ days since your last update. Keep the momentum going."}
-              </p>
+          <div className="relative bg-[#b0e455] rounded-2xl p-5 overflow-hidden">
+            <div className="absolute inset-0 opacity-10"
+              style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #fff 0%, transparent 60%)' }}
+            />
+            <div className="relative flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <p className="text-base font-bold text-[#0f1a0c] tracking-tight">Time to log</p>
+                <p className="text-sm text-[#0f1a0c]/70 mt-1 leading-relaxed">
+                  {stats.length === 0
+                    ? "You haven't logged any stats yet. Drop your first update."
+                    : "It's been 3+ days since your last update. Keep the momentum going."}
+                </p>
+                <button
+                  onClick={() => setFormOpen(true)}
+                  className="mt-4 inline-flex items-center gap-2 bg-[#0f1a0c] text-[#b0e455] text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-[#162212] transition"
+                >
+                  Log now
+                </button>
+              </div>
+              <button
+                onClick={() => setNudgeDismissed(true)}
+                className="text-[#0f1a0c]/30 hover:text-[#0f1a0c]/60 transition shrink-0 mt-0.5"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+                </svg>
+              </button>
             </div>
-            <button
-              onClick={() => setNudgeDismissed(true)}
-              className="text-[#edf5e2]/20 hover:text-[#edf5e2]/50 transition shrink-0 mt-0.5"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-              </svg>
-            </button>
           </div>
         )}
 
