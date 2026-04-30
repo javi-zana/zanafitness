@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 
 export async function middleware(request: NextRequest) {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -51,8 +52,14 @@ export async function middleware(request: NextRequest) {
   const isCoach = COACH_EMAILS.includes(user?.email ?? '')
 
   // Logged in but needs active subscription → check profile (coaches skip this)
+  // Uses service role to bypass RLS — profile lookup must never be blocked by policies
   if (user && needsMembership && !isCoach) {
-    const { data: profile } = await supabase
+    const serviceClient = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    const { data: profile } = await serviceClient
       .from('profiles')
       .select('status, role')
       .eq('id', user.id)
