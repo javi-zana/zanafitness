@@ -803,14 +803,19 @@ type AdminProfile = { id: string; email: string; first_name: string | null; role
 type Assignment = { member_id: string; coach_id: string }
 
 function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) {
-  const supabase = createClient()
-
   // Live data
   const [coaches, setCoaches] = useState<AdminProfile[]>([])
   const [members, setMembers] = useState<AdminProfile[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [threads, setThreads] = useState<Thread[]>([])
   const [loading, setLoading] = useState(true)
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null)
+
+  // New member notifications
+  const [newMembers, setNewMembers] = useState<AdminProfile[]>([])
+  const [newMemberCoach, setNewMemberCoach] = useState<Record<string, string>>({})
+  const knownMemberIds = useRef<Set<string>>(new Set())
+  const isFirstLoad = useRef(true)
 
   // Invite
   const [inviteEmail, setInviteEmail] = useState('')
@@ -829,21 +834,42 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
   const [broadcastBody, setBroadcastBody] = useState('')
   const [broadcastStatus, setBroadcastStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
 
-  async function loadData() {
-    setLoading(true)
+  async function loadData(showLoading = true) {
+    if (showLoading) setLoading(true)
     const res = await fetch('/api/admin-data')
-    const json = await res.json()
-    console.log('[AdminTab] /api/admin-data response:', res.status, json)
     if (res.ok) {
+      const json = await res.json()
+      const freshMembers: AdminProfile[] = json.members ?? []
+
+      // Detect new members on subsequent polls (not on first load)
+      if (!isFirstLoad.current) {
+        const appeared = freshMembers.filter(m => !knownMemberIds.current.has(m.id))
+        if (appeared.length > 0) {
+          setNewMembers(prev => {
+            const existingIds = new Set(prev.map(m => m.id))
+            return [...prev, ...appeared.filter(m => !existingIds.has(m.id))]
+          })
+        }
+      } else {
+        isFirstLoad.current = false
+      }
+
+      knownMemberIds.current = new Set(freshMembers.map(m => m.id))
       setCoaches(json.coaches ?? [])
-      setMembers(json.members ?? [])
+      setMembers(freshMembers)
       setAssignments(json.assignments ?? [])
       setThreads(json.threads ?? [])
+      setLastRefreshed(new Date())
     }
-    setLoading(false)
+    if (showLoading) setLoading(false)
   }
 
-  useEffect(() => { loadData() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Initial load + poll every 30 seconds
+  useEffect(() => {
+    loadData()
+    const interval = setInterval(() => loadData(false), 30_000)
+    return () => clearInterval(interval)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const assignMap = Object.fromEntries(assignments.map(a => [a.member_id, a.coach_id]))
   const threadMemberIds = new Set(threads.map(t => t.member_id))
@@ -906,6 +932,17 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
     await loadData()
   }
 
+  async function handleQuickAssign(memberId: string) {
+    const coachId = newMemberCoach[memberId]
+    if (!coachId) return
+    await fetch('/api/admin-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'assign', memberId, coachId }),
+    })
+    await loadData()
+  }
+
   async function handleBroadcast(e: FormEvent) {
     e.preventDefault()
     if (!broadcastBody.trim() || !threads.length) return
@@ -926,6 +963,81 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
 
   return (
     <div className="space-y-8">
+
+      {/* ── New member notifications ── */}
+      {newMembers.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#fbbf24] animate-pulse shrink-0" />
+            <p className="text-[10px] text-[#fbbf24] tracking-widest uppercase font-mono">
+              New Signup{newMembers.length > 1 ? 's' : ''} ({newMembers.length})
+            </p>
+          </div>
+          {newMembers.map(m => {
+            const hasThread = threadMemberIds.has(m.id)
+            const alreadyAssigned = !!assignMap[m.id]
+            return (
+              <div key={m.id} className="bg-[#221b0c] border border-[#fbbf24]/25 rounded-xl p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-full bg-[#fbbf24]/12 border border-[#fbbf24]/25 flex items-center justify-center text-xs font-bold text-[#fbbf24] shrink-0">
+                    {profileName(m).charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#edf5e2]">{profileName(m)}</p>
+                    <p className="text-[10px] text-[#edf5e2]/40 font-mono truncate">{m.email}</p>
+                    <p className="text-[10px] text-[#fbbf24]/70 font-mono mt-0.5">Just joined — assign a coach &amp; set up messaging</p>
+                  </div>
+                  <button
+                    onClick={() => setNewMembers(prev => prev.filter(x => x.id !== m.id))}
+                    className="text-[#edf5e2]/20 hover:text-[#edf5e2]/60 transition shrink-0 mt-0.5"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                      <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+
+                {coaches.length > 0 && !alreadyAssigned && (
+                  <div className="flex gap-2">
+                    <select
+                      value={newMemberCoach[m.id] ?? ''}
+                      onChange={e => setNewMemberCoach(prev => ({ ...prev, [m.id]: e.target.value }))}
+                      className="flex-1 bg-[#162212] border border-[#fbbf24]/15 rounded-lg px-3 py-2 text-xs text-[#edf5e2] focus:outline-none focus:border-[#fbbf24]/40 transition"
+                    >
+                      <option value="">Assign coach…</option>
+                      {coaches.map(c => (
+                        <option key={c.id} value={c.id}>{profileName(c)}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => handleQuickAssign(m.id)}
+                      disabled={!newMemberCoach[m.id]}
+                      className="px-3 py-2 rounded-lg bg-[#fbbf24]/12 border border-[#fbbf24]/25 text-[10px] tracking-widest uppercase font-mono text-[#fbbf24] hover:bg-[#fbbf24]/22 transition disabled:opacity-40 shrink-0"
+                    >
+                      Assign
+                    </button>
+                  </div>
+                )}
+                {alreadyAssigned && (
+                  <p className="text-[10px] text-[#86efac] font-mono">Coach assigned ✓</p>
+                )}
+
+                <button
+                  onClick={() => setupThread(m)}
+                  disabled={hasThread || setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
+                  className="w-full py-2 rounded-lg border border-[#b0e455]/20 text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:bg-[#b0e455]/8 transition disabled:opacity-40"
+                >
+                  {hasThread || setupStatus[m.id] === 'done'
+                    ? 'Messaging Active ✓'
+                    : setupStatus[m.id] === 'loading' ? 'Setting up…'
+                    : setupStatus[m.id] === 'error' ? 'Error — retry'
+                    : 'Setup Messaging Thread'}
+                </button>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* ── Coaches ── */}
       <div>

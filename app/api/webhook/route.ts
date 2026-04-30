@@ -55,6 +55,7 @@ export async function POST(req: Request) {
         email,
         plan,
         status: "active",
+        role: "member",
         subscribed_at: now.toISOString(),
         expires_at: expiresAt.toISOString(),
         ls_subscription_id: subscriptionId,
