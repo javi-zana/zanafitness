@@ -570,7 +570,7 @@ export default function CommunityClient({ userId, userRole, initialTab, initialP
   // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-64">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-64">
       <div className="px-5 pt-12 pb-2 flex items-center justify-between lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
         <div>
           <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>

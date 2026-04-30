@@ -213,7 +213,7 @@ export default function DashboardClient({
   const weightDelta = latestWeight !== null && prevWeight !== null ? latestWeight - prevWeight : null
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-64">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-64">
 
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:pt-8 lg:border-b lg:border-[#b0e455]/8">

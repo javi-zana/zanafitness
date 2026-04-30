@@ -58,7 +58,7 @@ function AttachmentImage({ path }: { path: string }) {
 
 function NoThread() {
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-64">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-64">
       <div className="px-5 pt-12 pb-4 lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
         <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight">Messages</h1>
@@ -219,7 +219,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
     : false
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-64">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-64">
       {/* Header */}
       <div className="px-5 pt-12 pb-4 border-b border-[#b0e455]/8 lg:pt-8">
         <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
