@@ -57,7 +57,7 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50 pb-safe">
       {NAV.map(item => {
         const active = item.href === '/dashboard'
           ? pathname === '/dashboard'
@@ -66,12 +66,18 @@ export default function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex-1 flex flex-col items-center gap-1 py-3 transition ${
-              active ? 'text-[#b0e455]' : 'text-[#edf5e2]/25 hover:text-[#edf5e2]/50'
-            }`}
+            className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
-            {item.icon(active)}
-            <span className="text-[9px] tracking-wide uppercase font-medium">{item.label}</span>
+            <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
+              active ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
+            }`}>
+              {item.icon(active)}
+            </div>
+            <span className={`text-[9px] tracking-wide uppercase font-medium ${
+              active ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
+            }`}>
+              {item.label}
+            </span>
           </Link>
         )
       })}

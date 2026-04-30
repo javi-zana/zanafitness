@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 type StatUpdate = {
   id: string
   weight_kg: number | null
@@ -13,13 +15,17 @@ type StatUpdate = {
 
 type Props = {
   firstName: string | null
+  avatarUrl: string | null
   avatarColor: string
   fitnessGoal: string | null
   weightUnit: 'kg' | 'lb'
   recentStats: StatUpdate[]
   hasThread: boolean
   unreadCount: number
+  latestAnnouncement: { id: string; title: string; created_at: string } | null
 }
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function toDisplay(kg: number, unit: 'kg' | 'lb') {
   return unit === 'lb' ? +(kg * 2.20462).toFixed(1) : +kg.toFixed(1)
@@ -42,6 +48,13 @@ function relTime(dateStr: string) {
   return `${days}d ago`
 }
 
+function annRelTime(dateStr: string) {
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000)
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  return `${days}d ago`
+}
+
 function confidenceLabel(v: number) {
   if (v <= 3) return 'Low'
   if (v <= 5) return 'Mid'
@@ -56,6 +69,94 @@ function confidenceColor(v: number): string {
   return '#b0e455'
 }
 
+// ─── WeekStrip ────────────────────────────────────────────────────────────────
+
+function WeekStrip({ stats }: { stats: StatUpdate[] }) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayStr = today.toDateString()
+
+  const dayOfWeek = today.getDay()
+  const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+  const monday = new Date(today)
+  monday.setDate(today.getDate() + mondayOffset)
+
+  const weekDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    return d
+  })
+
+  const loggedSet = new Set(stats.map(s => {
+    const d = new Date(s.created_at)
+    d.setHours(0, 0, 0, 0)
+    return d.toDateString()
+  }))
+
+  const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+
+  return (
+    <div className="bg-[#162212] rounded-2xl p-4 border border-[#b0e455]/8">
+      <p className="text-[10px] text-[#edf5e2]/30 tracking-wider uppercase mb-3">This Week</p>
+      <div className="flex justify-between">
+        {weekDays.map((day, i) => {
+          const isToday = day.toDateString() === todayStr
+          const hasLog = loggedSet.has(day.toDateString())
+          const isPast = day < today
+
+          return (
+            <div key={i} className="flex flex-col items-center gap-1.5">
+              <span className={`text-[10px] font-medium uppercase ${
+                isToday ? 'text-[#b0e455]' : isPast ? 'text-[#edf5e2]/30' : 'text-[#edf5e2]/15'
+              }`}>
+                {DAY_LABELS[i]}
+              </span>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
+                isToday
+                  ? 'bg-[#b0e455] text-[#0f1a0c]'
+                  : isPast
+                  ? 'text-[#edf5e2]/45'
+                  : 'text-[#edf5e2]/15'
+              }`}>
+                {day.getDate()}
+              </div>
+              <div className={`w-1.5 h-1.5 rounded-full ${hasLog ? 'bg-[#b0e455]' : 'bg-transparent'}`} />
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── ConfidenceRing ───────────────────────────────────────────────────────────
+
+function ConfidenceRing({ value }: { value: number }) {
+  const r = 28
+  const circ = 2 * Math.PI * r
+  const progress = (value / 10) * circ
+  const color = confidenceColor(value)
+
+  return (
+    <div className="relative w-[72px] h-[72px] flex items-center justify-center">
+      <svg viewBox="0 0 72 72" className="absolute inset-0 w-full h-full" style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx="36" cy="36" r={r} fill="none" stroke={color} strokeOpacity="0.12" strokeWidth="5" />
+        <circle
+          cx="36" cy="36" r={r} fill="none" stroke={color} strokeWidth="5"
+          strokeDasharray={`${progress} ${circ}`}
+          strokeLinecap="round"
+        />
+      </svg>
+      <div className="flex flex-col items-center relative z-10">
+        <span className="text-xl font-bold leading-none" style={{ color }}>{value}</span>
+        <span className="text-[9px] text-[#edf5e2]/30 font-medium leading-none mt-0.5">/10</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── MiniSparkline ────────────────────────────────────────────────────────────
+
 function MiniSparkline({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }) {
   const pts = [...stats]
     .reverse()
@@ -65,38 +166,37 @@ function MiniSparkline({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb'
 
   if (pts.length < 2) return null
 
-  const W = 72, H = 28
+  const W = 80, H = 32
   const min = Math.min(...pts), max = Math.max(...pts)
   const range = max - min || 1
   const coords = pts.map((w, i) => ({
     x: (i / (pts.length - 1)) * W,
-    y: H - ((w - min) / range) * (H - 6) - 3,
+    y: H - ((w - min) / range) * (H - 8) - 4,
   }))
   const polyline = coords.map(c => `${c.x},${c.y}`).join(' ')
   const delta = pts[pts.length - 1] - pts[0]
   const color = delta <= 0 ? '#b0e455' : '#f87171'
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: 72, height: 28 }} className="opacity-80">
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: 80, height: 32 }} className="opacity-80">
       <polyline points={polyline} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-      <circle
-        cx={coords[coords.length - 1].x}
-        cy={coords[coords.length - 1].y}
-        r="2.5"
-        fill={color}
-      />
+      <circle cx={coords[coords.length - 1].x} cy={coords[coords.length - 1].y} r="2.5" fill={color} />
     </svg>
   )
 }
 
+// ─── Main ─────────────────────────────────────────────────────────────────────
+
 export default function DashboardClient({
   firstName,
+  avatarUrl,
   avatarColor,
   fitnessGoal,
   weightUnit,
   recentStats,
   hasThread,
   unreadCount,
+  latestAnnouncement,
 }: Props) {
   const name = firstName ?? 'there'
   const latest = recentStats[0] ?? null
@@ -124,20 +224,51 @@ export default function DashboardClient({
           </h1>
         </div>
         <Link href="/profile">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-transform active:scale-95"
-            style={{
-              color: avatarColor,
-              borderColor: avatarColor + '50',
-              backgroundColor: avatarColor + '18',
-            }}
-          >
-            {initials}
-          </div>
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt="Profile"
+              className="w-10 h-10 rounded-full object-cover border-2 active:scale-95 transition-transform"
+              style={{ borderColor: avatarColor + '50' }}
+            />
+          ) : (
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-transform active:scale-95"
+              style={{ color: avatarColor, borderColor: avatarColor + '50', backgroundColor: avatarColor + '18' }}
+            >
+              {initials}
+            </div>
+          )}
         </Link>
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-4 pt-2">
+
+        {/* Latest announcement */}
+        {latestAnnouncement && (
+          <Link href="/community" className="block bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-2xl p-4 hover:border-[#b0e455]/35 active:scale-[0.99] transition-all">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#b0e455]/15 flex items-center justify-center shrink-0 mt-0.5">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-4 h-4">
+                  <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-[#b0e455] font-semibold uppercase tracking-wider mb-1">Announcement</p>
+                <p className="text-sm font-semibold text-[#edf5e2]/90 leading-snug line-clamp-2">
+                  {latestAnnouncement.title}
+                </p>
+                <p className="text-xs text-[#edf5e2]/30 mt-1">{annRelTime(latestAnnouncement.created_at)}</p>
+              </div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[#edf5e2]/20 shrink-0 mt-1">
+                <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+          </Link>
+        )}
+
+        {/* Week strip */}
+        <WeekStrip stats={recentStats} />
 
         {/* Progress card */}
         {latest ? (
@@ -154,7 +285,7 @@ export default function DashboardClient({
               )}
             </div>
 
-            <div className="flex items-end gap-5">
+            <div className="flex items-center gap-5">
               {latestWeight !== null && (
                 <div>
                   <p className="text-[10px] text-[#edf5e2]/35 uppercase tracking-wider mb-1">Weight</p>
@@ -171,24 +302,16 @@ export default function DashboardClient({
               )}
 
               {latest.confidence !== null && (
-                <div>
-                  <p className="text-[10px] text-[#edf5e2]/35 uppercase tracking-wider mb-1">Confidence</p>
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      className="text-3xl font-bold tracking-tight"
-                      style={{ color: confidenceColor(latest.confidence) }}
-                    >
-                      {latest.confidence}
-                    </span>
-                    <span className="text-sm text-[#edf5e2]/40">/10</span>
-                  </div>
-                  <p className="text-xs mt-1 font-medium" style={{ color: confidenceColor(latest.confidence) }}>
+                <div className="ml-2">
+                  <p className="text-[10px] text-[#edf5e2]/35 uppercase tracking-wider mb-2">Confidence</p>
+                  <ConfidenceRing value={latest.confidence} />
+                  <p className="text-xs mt-1.5 font-medium text-center" style={{ color: confidenceColor(latest.confidence) }}>
                     {confidenceLabel(latest.confidence)}
                   </p>
                 </div>
               )}
 
-              <div className="ml-auto pb-1">
+              <div className="ml-auto self-end pb-1">
                 <MiniSparkline stats={recentStats} unit={weightUnit} />
               </div>
             </div>

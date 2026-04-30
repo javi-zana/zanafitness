@@ -10,7 +10,7 @@ const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ss
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Member = { id: string; first_name: string | null; email: string; role: string }
+type Member = { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null }
 type Stat = { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }
 type Thread = { id: string; member_id: string }
 type MsgPreview = { thread_id: string; body: string; created_at: string; author_id: string }
@@ -55,6 +55,11 @@ function confidenceColor(v: number) {
   return '#b0e455'
 }
 
+function toDisplay(kg: number, unit: string | null) {
+  if (unit === 'lb') return `${+(kg * 2.20462).toFixed(1)} lb`
+  return `${+kg.toFixed(1)} kg`
+}
+
 // ─── Coach nav ────────────────────────────────────────────────────────────────
 
 function CoachNav({ active, onChange, isHeadCoach }: { active: CoachTab; onChange: (t: CoachTab) => void; isHeadCoach: boolean }) {
@@ -65,15 +70,23 @@ function CoachNav({ active, onChange, isHeadCoach }: { active: CoachTab; onChang
     ...(isHeadCoach ? [{ id: 'admin' as CoachTab, label: 'Admin', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active === 'admin' ? 2 : 1.5} className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg> }] : []),
   ]
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#0f1a0c] border-t border-[#b0e455]/8 flex z-50">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
       {tabs.map(t => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
-          className={`flex-1 flex flex-col items-center gap-1 py-3 transition ${active === t.id ? 'text-[#b0e455]' : 'text-[#edf5e2]/25 hover:text-[#edf5e2]/50'}`}
+          className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
         >
-          {t.icon}
-          <span className="text-[9px] tracking-widest uppercase font-mono">{t.label}</span>
+          <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
+            active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
+          }`}>
+            {t.icon}
+          </div>
+          <span className={`text-[9px] tracking-wide uppercase font-medium ${
+            active === t.id ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
+          }`}>
+            {t.label}
+          </span>
         </button>
       ))}
     </nav>
@@ -83,16 +96,35 @@ function CoachNav({ active, onChange, isHeadCoach }: { active: CoachTab; onChang
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
 function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[] }) {
-  const latestPerMember = members.map(m => ({
-    member: m,
-    stat: allStats.find(s => s.member_id === m.id) ?? null,
-  }))
+  const supabase = createClient()
+  const [stats, setStats] = useState<Stat[]>(allStats)
 
-  const recentStream = [...allStats]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 20)
+  useEffect(() => {
+    const memberIds = members.map(m => m.id)
+    if (!memberIds.length) return
+    const channel = supabase
+      .channel('coach-member-stats')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'stat_updates', filter: `member_id=in.(${memberIds.join(',')})` },
+        payload => {
+          setStats(prev => [payload.new as Stat, ...prev])
+        }
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [members]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
+
+  const latestPerMember = members.map(m => ({
+    member: m,
+    stat: stats.find(s => s.member_id === m.id) ?? null,
+  }))
+
+  const recentStream = [...stats]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 20)
 
   if (members.length === 0) {
     return (
@@ -117,8 +149,8 @@ function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[]
                 <p className="text-sm font-semibold text-[#edf5e2] truncate">{memberName(member)}</p>
                 {stat ? (
                   <p className="text-[10px] text-[#edf5e2]/30 font-mono mt-0.5">
-                    {stat.weight_kg ? `${stat.weight_kg} kg · ` : ''}
-                    {stat.confidence ? <span style={{ color: confidenceColor(stat.confidence) }}>{stat.confidence}/10</span> : null}
+                    {stat.weight_kg != null ? `${toDisplay(stat.weight_kg, member.weight_unit)} · ` : ''}
+                    {stat.confidence != null ? <span style={{ color: confidenceColor(stat.confidence) }}>{stat.confidence}/10</span> : null}
                     {' · '}{relTime(stat.created_at)} ago
                   </p>
                 ) : (
@@ -147,7 +179,7 @@ function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[]
                     {s.weight_kg != null && (
                       <div>
                         <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Weight</p>
-                        <p className="text-sm font-semibold text-[#edf5e2]">{s.weight_kg} kg</p>
+                        <p className="text-sm font-semibold text-[#edf5e2]">{toDisplay(s.weight_kg, m.weight_unit)}</p>
                       </div>
                     )}
                     {s.confidence != null && (

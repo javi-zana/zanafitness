@@ -14,7 +14,7 @@ export default async function CoachPage() {
     .single()
 
   if (!profile || !['coach', 'head_coach'].includes(profile.role ?? '')) {
-    redirect('/stats')
+    redirect('/dashboard')
   }
 
   // Assigned members
@@ -27,7 +27,7 @@ export default async function CoachPage() {
 
   const [{ data: members }, { data: allStats }, { data: threads }] = await Promise.all([
     memberIds.length
-      ? supabase.from('profiles').select('id, first_name, email, role').in('id', memberIds)
+      ? supabase.from('profiles').select('id, first_name, email, role, weight_unit').in('id', memberIds)
       : Promise.resolve({ data: [] }),
     memberIds.length
       ? supabase
@@ -70,7 +70,7 @@ export default async function CoachPage() {
       firstName={profile.first_name ?? null}
       avatarColor={(profile as { avatar_color?: string }).avatar_color ?? '#b0e455'}
       avatarUrl={(profile as { avatar_url?: string }).avatar_url ?? null}
-      members={(members ?? []) as { id: string; first_name: string | null; email: string; role: string }[]}
+      members={(members ?? []) as { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null }[]}
       allStats={(allStats ?? []) as { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }[]}
       threads={(threads ?? []) as { id: string; member_id: string }[]}
       lastMessages={(lastMessages ?? []) as { thread_id: string; body: string; created_at: string; author_id: string }[]}

@@ -313,6 +313,9 @@ export default function ProfilePage() {
           </div>
         </div>
 
+        {/* Profile form */}
+        <form onSubmit={handleSave}>
+
         {/* Personal info */}
         <Section title="Personal">
           <Field label="First name">
@@ -448,13 +451,14 @@ export default function ProfilePage() {
 
         {/* Save button */}
         <button
-          type="button"
-          onClick={handleSave as unknown as React.MouseEventHandler}
+          type="submit"
           disabled={saving}
           className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40"
         >
           {saving ? "Saving..." : saved ? "Saved ✓" : "Save Profile"}
         </button>
+
+        </form>
 
         {/* Password */}
         <Section title="Change Password">

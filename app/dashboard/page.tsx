@@ -11,7 +11,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, role, avatar_color, fitness_goal, weight_unit')
+    .select('first_name, role, avatar_color, avatar_url, fitness_goal, weight_unit')
     .eq('id', user.id)
     .single()
 
@@ -21,7 +21,7 @@ export default async function DashboardPage() {
 
   if (isCoach) redirect('/coach')
 
-  const [{ data: stats }, { data: thread }] = await Promise.all([
+  const [{ data: stats }, { data: thread }, { data: latestAnn }] = await Promise.all([
     supabase
       .from('stat_updates')
       .select('id, weight_kg, confidence, milestone_text, created_at')
@@ -32,6 +32,14 @@ export default async function DashboardPage() {
       .from('threads')
       .select('id')
       .eq('member_id', user.id)
+      .maybeSingle(),
+    supabase
+      .from('community_posts')
+      .select('id, title, created_at')
+      .eq('sub_tab', 'announcements')
+      .eq('hidden', false)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .maybeSingle(),
   ])
 
@@ -58,15 +66,19 @@ export default async function DashboardPage() {
     ).length
   }
 
+  const p = profile as Record<string, unknown> | null
+
   return (
     <DashboardClient
-      firstName={profile?.first_name ?? null}
-      avatarColor={profile?.avatar_color ?? '#b0e455'}
-      fitnessGoal={profile?.fitness_goal ?? null}
-      weightUnit={(profile?.weight_unit as 'kg' | 'lb') ?? 'kg'}
+      firstName={(p?.first_name as string | null) ?? null}
+      avatarUrl={(p?.avatar_url as string | null) ?? null}
+      avatarColor={(p?.avatar_color as string | null) ?? '#b0e455'}
+      fitnessGoal={(p?.fitness_goal as string | null) ?? null}
+      weightUnit={((p?.weight_unit as string | null) as 'kg' | 'lb') ?? 'kg'}
       recentStats={stats ?? []}
       hasThread={!!thread}
       unreadCount={unreadCount}
+      latestAnnouncement={latestAnn ?? null}
     />
   )
 }
