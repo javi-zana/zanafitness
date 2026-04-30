@@ -109,11 +109,13 @@ export default function ProfilePage() {
       setCurrentEmail(user.email ?? "");
       setEmail(user.email ?? "");
 
-      const { data: profile } = await supabase
+      const { data: profile, error: profileLoadError } = await supabase
         .from("profiles")
         .select("first_name, nickname, avatar_color, avatar_url, fitness_goal, instagram, tiktok, bio")
         .eq("id", user.id)
         .single();
+
+      if (profileLoadError) setError(`Load error: ${profileLoadError.message}`);
 
       if (profile) {
         setFirstName(profile.first_name ?? "");
@@ -179,8 +181,7 @@ export default function ProfilePage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/login"); return; }
 
-    const { error: profileError } = await supabase.from("profiles").upsert({
-      id: user.id,
+    const { error: profileError } = await supabase.from("profiles").update({
       first_name: firstName.trim() || null,
       nickname: nickname.trim() || null,
       avatar_color: avatarColor,
@@ -188,7 +189,7 @@ export default function ProfilePage() {
       instagram: instagram.trim() || null,
       tiktok: tiktok.trim() || null,
       bio: bio.trim() || null,
-    }, { onConflict: "id" });
+    }).eq("id", user.id);
 
     if (profileError) {
       setError(profileError.message);
