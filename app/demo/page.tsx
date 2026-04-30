@@ -340,10 +340,13 @@ export default function DemoPage() {
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
 
       {/* Preview Banner */}
-      <div className="bg-[#b0e455] text-[#0f1a0c] text-center py-3 px-4 flex items-center justify-center gap-4 flex-wrap shrink-0">
-        <p className="text-[10px] tracking-widest uppercase font-bold">Preview Mode - This is what your dashboard looks like inside</p>
+      <div className="bg-[#b0e455] text-[#0f1a0c] py-3 px-4 flex items-center justify-between gap-4 shrink-0">
+        <Link href="/" className="text-[9px] tracking-widest uppercase font-bold hover:opacity-70 transition whitespace-nowrap">
+          ← Home
+        </Link>
+        <p className="text-[10px] tracking-widest uppercase font-bold text-center hidden sm:block">Preview Mode - This is what your dashboard looks like inside</p>
         <Link href="/system" className="text-[9px] tracking-widest uppercase bg-[#0f1a0c] text-[#b0e455] px-4 py-1.5 rounded-full font-bold hover:bg-[#162212] transition whitespace-nowrap">
-          Join the System →
+          Join →
         </Link>
       </div>
 
