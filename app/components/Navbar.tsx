@@ -31,7 +31,7 @@ export default function Navbar({ active }: { active?: string }) {
           <ZanaLogo className="h-5 text-[#edf5e2]" />
         </Link>
 
-        {/* Desktop links */}
+        {/* Desktop nav + CTAs (all right-aligned) */}
         <div className="hidden md:flex items-center gap-8">
           {LINKS.map(l => (
             <Link
@@ -44,16 +44,14 @@ export default function Navbar({ active }: { active?: string }) {
               {l.label}
             </Link>
           ))}
-        </div>
-
-        {/* Desktop CTAs */}
-        <div className="hidden md:flex items-center gap-3">
-          <Link href="/login" className="text-sm font-medium text-[#edf5e2]/50 hover:text-[#edf5e2] transition-colors px-4 py-2">
-            Log In
-          </Link>
-          <Link href="/system" className="text-sm font-semibold bg-[#b0e455] text-[#0f1a0c] px-5 py-2.5 rounded-full hover:bg-[#c9f070] transition-colors">
-            Get Started
-          </Link>
+          <div className="flex items-center gap-3 pl-2 border-l border-[#b0e455]/15">
+            <Link href="/login" className="text-sm font-medium text-[#edf5e2]/50 hover:text-[#edf5e2] transition-colors px-4 py-2">
+              Log In
+            </Link>
+            <Link href="/system" className="text-sm font-semibold bg-[#b0e455] text-[#0f1a0c] px-5 py-2.5 rounded-full hover:bg-[#c9f070] transition-colors">
+              Get Started
+            </Link>
+          </div>
         </div>
 
         {/* Mobile hamburger */}

@@ -195,7 +195,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
   }
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-72">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
       <div className="px-5 pt-12 pb-2 lg:px-10 lg:pt-10 lg:pb-4">
         <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight lg:text-3xl">My Program</h1>

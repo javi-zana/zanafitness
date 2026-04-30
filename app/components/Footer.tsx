@@ -14,28 +14,38 @@ export default function Footer() {
   return (
     <footer className="bg-[#0c1509] border-t border-[#b0e455]/8 px-6 md:px-12 py-10">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <ZanaLogo className="h-4 text-[#edf5e2]/30" />
-        <div className="flex flex-wrap justify-center gap-6">
+
+        {/* Left: logo + page links */}
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <ZanaLogo className="h-4 text-[#edf5e2]/30" />
+          <div className="flex flex-wrap justify-center gap-6">
+            {[
+              { href: "/about",   label: "About"      },
+              { href: "/system",  label: "The System" },
+              { href: "/terms",   label: "Terms"      },
+              { href: "/privacy", label: "Privacy"    },
+            ].map(l => (
+              <Link key={l.href} href={l.href} className="text-xs text-[#edf5e2]/35 hover:text-[#edf5e2] transition-colors">
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: social links */}
+        <div className="flex items-center gap-6">
           {[
-            { href: "/terms",   label: "Terms"      },
-            { href: "/privacy", label: "Privacy"    },
-            { href: "/system",  label: "The System" },
-            { href: "/about",   label: "About"      },
             { href: "https://www.instagram.com/javi_zana/", label: "Instagram" },
             { href: "https://www.tiktok.com/@javi_zana",    label: "TikTok"    },
           ].map(l => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="text-xs text-[#edf5e2]/35 hover:text-[#edf5e2] transition-colors"
-              {...(l.href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
+            <Link key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="text-xs text-[#edf5e2]/35 hover:text-[#edf5e2] transition-colors">
               {l.label}
             </Link>
           ))}
         </div>
-        <p className="text-xs text-[#edf5e2]/25">© 2025 ZANA Fitness</p>
+
       </div>
+      <p className="max-w-5xl mx-auto mt-6 text-xs text-[#edf5e2]/20">© 2025 ZANA Fitness</p>
     </footer>
   );
 }

@@ -83,7 +83,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   return (
     <>
       {/* ── Desktop sidebar ────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed right-0 top-0 h-screen w-72 flex-col bg-[#0b1509] border-l border-[#b0e455]/12 z-50">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-72 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
         {/* Logo */}
         <div className="px-6 pt-8 pb-7 border-b border-[#b0e455]/8">
           <div className="flex items-center gap-3.5">
@@ -720,7 +720,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-72">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
       {/* Header */}
       <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
         <div>

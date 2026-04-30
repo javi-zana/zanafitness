@@ -377,7 +377,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
   const chartStats = [...stats].filter(s => s.weight_kg != null)
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pr-72">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-72">
       <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
         <div>
           <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>

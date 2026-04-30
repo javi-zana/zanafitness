@@ -63,7 +63,7 @@ export default function BottomNav() {
   return (
     <>
       {/* ── Desktop sidebar ─────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed right-0 top-0 h-screen w-72 flex-col bg-[#0b1509] border-l border-[#b0e455]/12 z-50">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-72 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
 
         {/* Logo */}
         <div className="px-6 pt-8 pb-7 border-b border-[#b0e455]/8">
