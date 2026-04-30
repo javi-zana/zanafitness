@@ -375,7 +375,12 @@ export default function DashboardClient({
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
         <div>
-          <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5 lg:text-sm">Zana</p>
+          <div className="flex items-center gap-3 mb-0.5">
+            <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase lg:text-sm">Zana</p>
+            <Link href="/" className="lg:hidden text-[9px] text-[#edf5e2]/20 hover:text-[#edf5e2]/50 transition tracking-widest uppercase font-medium">
+              ← Website
+            </Link>
+          </div>
           <h1 className="text-2xl font-bold tracking-tight lg:text-4xl">
             {greeting()}, {name}.
           </h1>

@@ -117,6 +117,15 @@ export default function BottomNav() {
             </svg>
             <span className="text-base font-semibold">Profile</span>
           </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 shrink-0">
+              <path d="M10 19l-7-7m0 0l7-7m-7 7h18" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <span className="text-base font-semibold">Website</span>
+          </Link>
           <p className="text-[10px] text-[#edf5e2]/15 uppercase tracking-widest px-4 pt-2">© 2026 Zana Fitness</p>
         </div>
       </aside>
