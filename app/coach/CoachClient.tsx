@@ -1261,7 +1261,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-8 lg:max-w-4xl lg:w-full lg:pb-10 lg:pt-5">
+      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-8 lg:max-w-3xl lg:w-full lg:pb-10 lg:pt-6 lg:mx-auto">
         {activeTab === 'home' && (
           <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} userEmail={userEmail} />
         )}

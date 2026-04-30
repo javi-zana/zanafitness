@@ -21,6 +21,10 @@ export default async function CommunityPage() {
     .eq('id', user.id)
     .single()
 
+  const COACH_EMAILS = ['me@javilorenzana.com', 'bea.ongg@gmail.com']
+  const isCoachEmail = COACH_EMAILS.includes(user.email ?? '')
+  const resolvedRole = profile?.role ?? (isCoachEmail ? 'coach' : 'member')
+
   const { data: posts } = await supabase
     .from('community_posts')
     .select(`
@@ -39,7 +43,7 @@ export default async function CommunityPage() {
   return (
     <CommunityClient
       userId={user.id}
-      userRole={profile?.role ?? 'member'}
+      userRole={resolvedRole}
       firstName={profile?.first_name ?? null}
       avatarColor={profile?.avatar_color ?? '#b0e455'}
       avatarUrl={profile?.avatar_url ?? null}
