@@ -13,11 +13,16 @@ export default async function CoachPage() {
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['coach', 'head_coach'].includes(profile.role ?? '')) {
-    redirect('/dashboard')
+  // Coaches whose email is whitelisted always get through even if profile row is missing
+  const COACH_EMAILS = ['me@javilorenzana.com', 'bea.ongg@gmail.com']
+  const isWhitelisted = COACH_EMAILS.includes(user.email ?? '')
+  if (!profile && !isWhitelisted) redirect('/login')
+  if (profile && !['coach', 'head_coach'].includes(profile.role ?? '') && !isWhitelisted) {
+    redirect('/login')
   }
 
-  const isHeadCoach = profile.role === 'head_coach'
+  const role = profile?.role ?? (isWhitelisted ? 'head_coach' : 'coach')
+  const isHeadCoach = role === 'head_coach'
 
   // Head coach sees all members; regular coach sees only assigned members
   let memberIds: string[] = []
@@ -76,10 +81,10 @@ export default async function CoachPage() {
     <CoachClient
       userId={user.id}
       userEmail={user.email ?? ''}
-      userRole={profile.role ?? 'coach'}
-      firstName={profile.first_name ?? null}
-      avatarColor={(profile as { avatar_color?: string }).avatar_color ?? '#b0e455'}
-      avatarUrl={(profile as { avatar_url?: string }).avatar_url ?? null}
+      userRole={role}
+      firstName={profile?.first_name ?? null}
+      avatarColor={profile?.avatar_color ?? '#b0e455'}
+      avatarUrl={profile?.avatar_url ?? null}
       members={(members ?? []) as { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null }[]}
       allStats={(allStats ?? []) as { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }[]}
       threads={(threads ?? []) as { id: string; member_id: string }[]}
