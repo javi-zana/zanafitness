@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import CommunityClient, { type Post } from './CommunityClient'
 
 export default async function CommunityPage() {
@@ -7,9 +8,16 @@ export default async function CommunityPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  // Service role client so coach/head_coach role is reliably fetched
+  const admin = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  const { data: profile } = await admin
     .from('profiles')
-    .select('first_name, role')
+    .select('first_name, role, avatar_color, avatar_url')
     .eq('id', user.id)
     .single()
 
@@ -32,6 +40,9 @@ export default async function CommunityPage() {
     <CommunityClient
       userId={user.id}
       userRole={profile?.role ?? 'member'}
+      firstName={profile?.first_name ?? null}
+      avatarColor={profile?.avatar_color ?? '#b0e455'}
+      avatarUrl={profile?.avatar_url ?? null}
       initialTab="announcements"
       initialPosts={(posts ?? []) as unknown as Post[]}
     />

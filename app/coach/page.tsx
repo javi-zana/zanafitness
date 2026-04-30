@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import CoachClient from './CoachClient'
 
 export default async function CoachPage() {
@@ -7,7 +8,14 @@ export default async function CoachPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
+  // Use service role client for cross-user data fetches (bypasses RLS)
+  const admin = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+
+  const { data: profile } = await admin
     .from('profiles')
     .select('first_name, role, email, avatar_color, avatar_url')
     .eq('id', user.id)
@@ -27,13 +35,13 @@ export default async function CoachPage() {
   // Head coach sees all members; regular coach sees only assigned members
   let memberIds: string[] = []
   if (isHeadCoach) {
-    const { data: allMemberProfiles } = await supabase
+    const { data: allMemberProfiles } = await admin
       .from('profiles')
       .select('id')
       .eq('role', 'member')
     memberIds = (allMemberProfiles ?? []).map(m => m.id)
   } else {
-    const { data: assignments } = await supabase
+    const { data: assignments } = await admin
       .from('coach_assignments')
       .select('member_id')
       .eq('coach_id', user.id)
@@ -42,10 +50,10 @@ export default async function CoachPage() {
 
   const [{ data: members }, { data: allStats }, { data: threads }] = await Promise.all([
     memberIds.length
-      ? supabase.from('profiles').select('id, first_name, email, role, weight_unit').in('id', memberIds)
+      ? admin.from('profiles').select('id, first_name, email, role, weight_unit').in('id', memberIds)
       : Promise.resolve({ data: [] }),
     memberIds.length
-      ? supabase
+      ? admin
           .from('stat_updates')
           .select('id, member_id, weight_kg, confidence, created_at')
           .in('member_id', memberIds)
@@ -53,7 +61,7 @@ export default async function CoachPage() {
           .limit(memberIds.length * 10)
       : Promise.resolve({ data: [] }),
     memberIds.length
-      ? supabase.from('threads').select('id, member_id').in('member_id', memberIds)
+      ? admin.from('threads').select('id, member_id').in('member_id', memberIds)
       : Promise.resolve({ data: [] }),
   ])
 
@@ -61,7 +69,7 @@ export default async function CoachPage() {
 
   const [{ data: lastMessages }, { data: myReads }] = await Promise.all([
     threadIds.length
-      ? supabase
+      ? admin
           .from('messages')
           .select('thread_id, body, created_at, author_id')
           .in('thread_id', threadIds)
