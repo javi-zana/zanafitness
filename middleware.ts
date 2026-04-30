@@ -58,17 +58,17 @@ export async function middleware(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    const hasAccess = profile?.status === 'active' || profile?.role === 'coach'
+    const hasAccess = profile?.status === 'active' || profile?.role === 'coach' || profile?.role === 'member'
     if (!hasAccess) {
       const url = request.nextUrl.clone()
-      url.pathname = '/system'
-      url.searchParams.set('access', 'required')
+      url.pathname = '/login'
+      url.searchParams.set('error', 'no_access')
       return NextResponse.redirect(url)
     }
   }
 
-  // Already logged in → skip /login
-  if (user && pathname === '/login') {
+  // Already logged in → skip /login (unless they're being shown a no-access message)
+  if (user && pathname === '/login' && !request.nextUrl.searchParams.has('error')) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)

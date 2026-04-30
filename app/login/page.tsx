@@ -21,7 +21,8 @@ function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(searchParams.get('error') ?? '');
+  const noAccess = searchParams.get('error') === 'no_access';
+  const [error, setError] = useState(!noAccess ? (searchParams.get('error') ?? '') : '');
   const [forgotSent, setForgotSent] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
@@ -105,6 +106,42 @@ function LoginForm() {
           ← Back to login
         </button>
       </form>
+    );
+  }
+
+  if (noAccess) {
+    return (
+      <div className="space-y-5 text-center">
+        <div className="w-14 h-14 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center mx-auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[#b0e455]">
+            <path d="M12 15v2m0-10v4m-7.07 7.07A10 10 0 1019.07 4.93 10 10 0 004.93 19.07z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-base font-semibold text-[#edf5e2]">Membership required</p>
+          <p className="text-sm text-[#edf5e2]/45 mt-1.5 leading-relaxed">
+            Your account doesn't have an active membership.<br />
+            Join The System to get access.
+          </p>
+        </div>
+        <Link
+          href="/system"
+          className="block w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors text-center"
+        >
+          View Membership Plans
+        </Link>
+        <button
+          type="button"
+          onClick={async () => {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            window.location.href = '/login';
+          }}
+          className="text-sm text-[#edf5e2]/30 hover:text-[#edf5e2] transition-colors"
+        >
+          Sign in with a different account
+        </button>
+      </div>
     );
   }
 
