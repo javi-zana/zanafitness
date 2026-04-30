@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import BottomNav from "@/components/BottomNav";
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 
@@ -250,11 +251,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2]">
+    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] lg:pl-64">
+      <BottomNav />
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-5 py-4 border-b border-[#b0e455]/8 sticky top-0 z-10 bg-[#0f1a0c]/95 backdrop-blur">
-        <Link href="/dashboard" className="text-[#edf5e2]">
+        <Link href="/dashboard" className="text-[#edf5e2] lg:hidden">
           <ZMark className="h-5" />
         </Link>
         <p className="text-xs font-semibold text-[#edf5e2]/40 uppercase tracking-widest">Profile</p>

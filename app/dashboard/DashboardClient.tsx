@@ -213,10 +213,10 @@ export default function DashboardClient({
   const weightDelta = latestWeight !== null && prevWeight !== null ? latestWeight - prevWeight : null
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-64">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-14 pb-3">
+      <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
         <div>
           <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
           <h1 className="text-2xl font-bold tracking-tight">
@@ -242,7 +242,7 @@ export default function DashboardClient({
         </Link>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-4 pt-2">
+      <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-4 pt-2 lg:max-w-2xl lg:pt-6 lg:pb-10">
 
         {/* Latest announcement */}
         {latestAnnouncement && (

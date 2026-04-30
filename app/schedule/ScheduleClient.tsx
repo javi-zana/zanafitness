@@ -7,14 +7,14 @@ const CALENDLY_URL = process.env.NEXT_PUBLIC_CALENDLY_URL ?? ''
 
 export default function ScheduleClient() {
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
-      <div className="px-5 pt-12 pb-4">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-64">
+      <div className="px-5 pt-12 pb-4 lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
         <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight">Schedule</h1>
         <p className="text-sm text-[#edf5e2]/40 mt-1">Book your bi-weekly coaching call below.</p>
       </div>
 
-      <div className="flex-1 pb-20">
+      <div className="flex-1 pb-20 lg:max-w-2xl">
         {CALENDLY_URL ? (
           <>
             <Script

@@ -62,34 +62,99 @@ function toDisplay(kg: number, unit: string | null) {
 
 // ─── Coach nav ────────────────────────────────────────────────────────────────
 
-function CoachNav({ active, onChange, isHeadCoach }: { active: CoachTab; onChange: (t: CoachTab) => void; isHeadCoach: boolean }) {
+function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avatarUrl, userEmail }: {
+  active: CoachTab
+  onChange: (t: CoachTab) => void
+  isHeadCoach: boolean
+  firstName: string | null
+  avatarColor: string
+  avatarUrl: string | null
+  userEmail: string
+}) {
   const tabs: { id: CoachTab; label: string; icon: JSX.Element }[] = [
-    { id: 'members', label: 'Members', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active === 'members' ? 2 : 1.5} className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg> },
-    { id: 'programs', label: 'Programs', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active === 'programs' ? 2 : 1.5} className="w-5 h-5"><path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg> },
-    { id: 'messages', label: 'Messages', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active === 'messages' ? 2 : 1.5} className="w-5 h-5"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
-    ...(isHeadCoach ? [{ id: 'admin' as CoachTab, label: 'Admin', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active === 'admin' ? 2 : 1.5} className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg> }] : []),
+    { id: 'members', label: 'Members', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg> },
+    { id: 'programs', label: 'Programs', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg> },
+    { id: 'messages', label: 'Messages', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
+    ...(isHeadCoach ? [{ id: 'admin' as CoachTab, label: 'Admin', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg> }] : []),
   ]
+
+  const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
-      {tabs.map(t => (
-        <button
-          key={t.id}
-          onClick={() => onChange(t.id)}
-          className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
-        >
-          <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
-            active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
-          }`}>
-            {t.icon}
+    <>
+      {/* ── Desktop sidebar ────────────────────────────────────────────────── */}
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-64 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
+        {/* Logo */}
+        <div className="px-5 pt-7 pb-6 border-b border-[#b0e455]/8">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-[#b0e455] flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 32 32" className="h-5 w-5" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
+                <path d="M0,2 H32 L18.3,14" />
+                <path d="M13.7,18 L0,30 H32" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-[#edf5e2] font-bold text-lg tracking-tight leading-none">Zana</p>
+              <p className="text-[9px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1">Coach Portal</p>
+            </div>
           </div>
-          <span className={`text-[9px] tracking-wide uppercase font-medium ${
-            active === t.id ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
-          }`}>
-            {t.label}
-          </span>
-        </button>
-      ))}
-    </nav>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 px-3 py-5 space-y-0.5 overflow-y-auto">
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => onChange(t.id)}
+              className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all text-left ${
+                active === t.id
+                  ? 'bg-[#b0e455] text-[#0b1509]'
+                  : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
+              }`}
+            >
+              {t.icon}
+              <span className="text-sm font-semibold">{t.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Profile */}
+        <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-1">
+          <Link href="/profile" className="flex items-center gap-3 px-4 py-3 rounded-xl text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
+            <div
+              className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
+              style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
+            >
+              {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initials}
+            </div>
+            <span className="text-sm font-semibold">Profile</span>
+          </Link>
+          <p className="text-[10px] text-[#edf5e2]/15 uppercase tracking-widest px-4 pt-2">© 2026 Zana Fitness</p>
+        </div>
+      </aside>
+
+      {/* ── Mobile bottom bar ─────────────────────────────────────────────── */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
+        {tabs.map(t => (
+          <button
+            key={t.id}
+            onClick={() => onChange(t.id)}
+            className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
+          >
+            <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
+              active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
+            }`}>
+              {t.icon}
+            </div>
+            <span className={`text-[9px] tracking-wide uppercase font-medium ${
+              active === t.id ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
+            }`}>
+              {t.label}
+            </span>
+          </button>
+        ))}
+      </nav>
+    </>
   )
 }
 
@@ -655,14 +720,14 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
+    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-64">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 flex items-start justify-between">
+      <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
         <div>
           <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach</p>
           <h1 className="text-xl font-semibold tracking-tight mt-0.5">{TAB_TITLES[activeTab]}</h1>
         </div>
-        <Link href="/profile" className="shrink-0 mt-1">
+        <Link href="/profile" className="shrink-0 mt-1 lg:hidden">
           <div
             className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden"
             style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
@@ -676,7 +741,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto px-5 pb-28">
+      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:max-w-3xl lg:w-full lg:pb-10 lg:pt-4">
         {activeTab === 'members' && (
           <MembersTab members={members} allStats={allStats} />
         )}
@@ -697,7 +762,15 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
         )}
       </div>
 
-      <CoachNav active={activeTab} onChange={setActiveTab} isHeadCoach={isHeadCoach} />
+      <CoachNav
+        active={activeTab}
+        onChange={setActiveTab}
+        isHeadCoach={isHeadCoach}
+        firstName={firstName}
+        avatarColor={avatarColor}
+        avatarUrl={avatarUrl}
+        userEmail={userEmail}
+      />
     </div>
   )
 }
