@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
@@ -32,7 +31,6 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-sans bg-[#0f1a0c] text-[#edf5e2] min-h-screen antialiased`}>
         {children}
-        <Script src="https://app.lemonsqueezy.com/js/lemon.js" strategy="afterInteractive" />
       </body>
     </html>
   );

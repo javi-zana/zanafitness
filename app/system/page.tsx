@@ -27,16 +27,15 @@ function PlanCard({
   label,
   price,
   commitment,
-  variantId,
+  checkoutUrl,
   featured,
 }: {
   label: string;
   price: number;
   commitment: string;
-  variantId: string;
+  checkoutUrl: string;
   featured?: boolean;
 }) {
-  const checkoutUrl = `https://zana-fitness.lemonsqueezy.com/checkout/buy/${variantId}?checkout[redirect_url]=https://zanafitness.com/dashboard&embed=1`;
 
   return (
     <div
@@ -75,7 +74,7 @@ function PlanCard({
 
       <a
         href={checkoutUrl}
-        className={`lemonsqueezy-button w-full py-4 rounded-2xl text-sm font-semibold transition-colors text-center ${
+        className={`w-full py-4 rounded-2xl text-sm font-semibold transition-colors text-center ${
           featured
             ? "bg-[#0f1a0c] text-[#b0e455] hover:bg-[#162212]"
             : "bg-[#b0e455] text-[#0f1a0c] hover:bg-[#c9f070]"
@@ -344,13 +343,13 @@ export default function SystemPage() {
               label="Committed"
               price={500}
               commitment="4-month commitment"
-              variantId="218015ad-39b5-4d64-9158-c4864fb8038a"
+              checkoutUrl="https://whop.com/checkout/plan_DAY1fwI5NfqJe"
             />
             <PlanCard
               label="All In"
               price={400}
               commitment="12-month commitment"
-              variantId="174b1e98-247a-41e2-bcfe-7ce449e329a7"
+              checkoutUrl="https://whop.com/checkout/plan_BwaPVLzVFjYWL"
               featured
             />
           </div>
