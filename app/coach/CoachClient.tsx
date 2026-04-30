@@ -160,7 +160,12 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
 
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
-function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[] }) {
+function MembersTab({ members, allStats, threads, lastMessages }: {
+  members: Member[]
+  allStats: Stat[]
+  threads: Thread[]
+  lastMessages: MsgPreview[]
+}) {
   const supabase = createClient()
   const [stats, setStats] = useState<Stat[]>(allStats)
 
@@ -180,11 +185,20 @@ function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[]
     return () => { supabase.removeChannel(channel) }
   }, [members]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // last message per member (via thread)
+  const threadToMember = Object.fromEntries(threads.map(t => [t.id, t.member_id]))
+  const lastMsgByMember: Record<string, MsgPreview> = {}
+  for (const msg of lastMessages) {
+    const mid = threadToMember[msg.thread_id]
+    if (mid && !lastMsgByMember[mid]) lastMsgByMember[mid] = msg
+  }
+
   const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
 
   const latestPerMember = members.map(m => ({
     member: m,
     stat: stats.find(s => s.member_id === m.id) ?? null,
+    lastMsg: lastMsgByMember[m.id] ?? null,
   }))
 
   const recentStream = [...stats]
@@ -205,22 +219,27 @@ function MembersTab({ members, allStats }: { members: Member[]; allStats: Stat[]
       <div>
         <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Roster</p>
         <div className="space-y-2">
-          {latestPerMember.map(({ member, stat }) => (
+          {latestPerMember.map(({ member, stat, lastMsg }) => (
             <div key={member.id} className="bg-[#1c2e16] rounded-xl p-4 flex items-center gap-4">
               <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
                 {memberName(member).charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-[#edf5e2] truncate">{memberName(member)}</p>
-                {stat ? (
-                  <p className="text-[10px] text-[#edf5e2]/30 font-mono mt-0.5">
-                    {stat.weight_kg != null ? `${toDisplay(stat.weight_kg, member.weight_unit)} · ` : ''}
-                    {stat.confidence != null ? <span style={{ color: confidenceColor(stat.confidence) }}>{stat.confidence}/10</span> : null}
-                    {' · '}{relTime(stat.created_at)} ago
-                  </p>
-                ) : (
-                  <p className="text-[10px] text-[#edf5e2]/20 font-mono mt-0.5">No stats yet</p>
-                )}
+                <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                  {stat ? (
+                    <p className="text-[10px] text-[#edf5e2]/30 font-mono">
+                      Check-in {relTime(stat.created_at)} ago
+                      {stat.weight_kg != null ? ` · ${toDisplay(stat.weight_kg, member.weight_unit)}` : ''}
+                      {stat.confidence != null ? <span style={{ color: confidenceColor(stat.confidence) }}> · {stat.confidence}/10</span> : null}
+                    </p>
+                  ) : (
+                    <p className="text-[10px] text-[#edf5e2]/20 font-mono">No check-ins</p>
+                  )}
+                  {lastMsg && (
+                    <p className="text-[10px] text-[#edf5e2]/20 font-mono">Msg {relTime(lastMsg.created_at)} ago</p>
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -582,9 +601,27 @@ function AdminTab({ userId, userEmail, members, threads }: { userId: string; use
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
   const [inviteMsg, setInviteMsg] = useState('')
   const [setupStatus, setSetupStatus] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
+  const [broadcastBody, setBroadcastBody] = useState('')
+  const [broadcastStatus, setBroadcastStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
 
   const threadMemberIds = new Set(threads.map(t => t.member_id))
   const membersWithoutThread = members.filter(m => !threadMemberIds.has(m.id))
+
+  async function handleBroadcast(e: FormEvent) {
+    e.preventDefault()
+    if (!broadcastBody.trim() || !threads.length) return
+    setBroadcastStatus('loading')
+    for (const thread of threads) {
+      await supabase.from('messages').insert({
+        thread_id: thread.id,
+        author_id: userId,
+        body: broadcastBody.trim(),
+      })
+    }
+    setBroadcastBody('')
+    setBroadcastStatus('done')
+    setTimeout(() => setBroadcastStatus('idle'), 3000)
+  }
 
   async function handleInvite(e: FormEvent) {
     e.preventDefault()
@@ -625,6 +662,32 @@ function AdminTab({ userId, userEmail, members, threads }: { userId: string; use
 
   return (
     <div className="space-y-8">
+
+      {/* Broadcast message */}
+      {threads.length > 0 && (
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">
+            Broadcast to All Members ({threads.length})
+          </p>
+          <form onSubmit={handleBroadcast} className="space-y-3">
+            <textarea
+              value={broadcastBody}
+              onChange={e => setBroadcastBody(e.target.value)}
+              rows={3}
+              placeholder="Send one message to every member's inbox…"
+              className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-[#edf5e2] text-sm placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/60 transition resize-none"
+            />
+            <button
+              type="submit"
+              disabled={broadcastStatus === 'loading' || !broadcastBody.trim()}
+              className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
+            >
+              {broadcastStatus === 'loading' ? 'Sending…' : broadcastStatus === 'done' ? 'Sent!' : 'Send to All'}
+            </button>
+          </form>
+        </div>
+      )}
+
       {/* Invite member */}
       <div>
         <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Invite Member</p>
@@ -743,7 +806,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:max-w-5xl lg:w-full lg:pb-10 lg:pt-6">
         {activeTab === 'members' && (
-          <MembersTab members={members} allStats={allStats} />
+          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} />
         )}
         {activeTab === 'programs' && (
           <ProgramsTab members={members} userId={userId} />

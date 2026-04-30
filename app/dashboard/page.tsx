@@ -21,7 +21,9 @@ export default async function DashboardPage() {
 
   if (isCoach) redirect('/coach')
 
-  const [{ data: stats }, { data: thread }, { data: latestAnn }] = await Promise.all([
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0]
+
+  const [{ data: stats }, { data: thread }, { data: latestAnn }, { data: workoutLogs }, { data: milestoneRows }, { data: referralRow }] = await Promise.all([
     supabase
       .from('stat_updates')
       .select('id, weight_kg, confidence, milestone_text, created_at')
@@ -41,7 +43,33 @@ export default async function DashboardPage() {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from('workout_logs')
+      .select('logged_date')
+      .eq('member_id', user.id)
+      .gte('logged_date', ninetyDaysAgo)
+      .order('logged_date', { ascending: false }),
+    supabase
+      .from('member_milestones')
+      .select('type')
+      .eq('member_id', user.id),
+    supabase
+      .from('referrals')
+      .select('code')
+      .eq('referrer_id', user.id)
+      .maybeSingle(),
   ])
+
+  let referralCode = referralRow?.code ?? null
+  if (!referralCode) {
+    const code = user.id.replace(/-/g, '').slice(0, 8).toUpperCase()
+    const { data: newRef } = await supabase
+      .from('referrals')
+      .insert({ code, referrer_id: user.id })
+      .select('code')
+      .maybeSingle()
+    referralCode = newRef?.code ?? null
+  }
 
   let unreadCount = 0
   if (thread) {
@@ -79,6 +107,9 @@ export default async function DashboardPage() {
       hasThread={!!thread}
       unreadCount={unreadCount}
       latestAnnouncement={latestAnn ?? null}
+      workoutDates={(workoutLogs ?? []).map(w => w.logged_date as string)}
+      milestones={(milestoneRows ?? []).map(m => m.type as string)}
+      referralCode={referralCode}
     />
   )
 }

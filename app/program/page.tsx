@@ -7,7 +7,9 @@ export default async function ProgramPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: profile }, { data: sections }, { data: principles }] = await Promise.all([
+  const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0]
+
+  const [{ data: profile }, { data: sections }, { data: principles }, { data: workoutLogs }, { data: milestoneRows }] = await Promise.all([
     supabase
       .from('profiles')
       .select('first_name, role')
@@ -22,6 +24,16 @@ export default async function ProgramPage() {
       .select('content_json, updated_at')
       .eq('id', '00000000-0000-0000-0000-000000000001')
       .single(),
+    supabase
+      .from('workout_logs')
+      .select('logged_date')
+      .eq('member_id', user.id)
+      .gte('logged_date', ninetyDaysAgo)
+      .order('logged_date', { ascending: false }),
+    supabase
+      .from('member_milestones')
+      .select('type')
+      .eq('member_id', user.id),
   ])
 
   const sectionMap = Object.fromEntries(
@@ -37,6 +49,8 @@ export default async function ProgramPage() {
       food={sectionMap['food'] ?? null}
       habits={sectionMap['habits'] ?? null}
       principles={principles ?? null}
+      workoutDates={(workoutLogs ?? []).map(w => w.logged_date as string)}
+      milestones={(milestoneRows ?? []).map(m => m.type as string)}
     />
   )
 }

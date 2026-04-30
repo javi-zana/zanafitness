@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 
@@ -23,6 +24,9 @@ type Props = {
   hasThread: boolean
   unreadCount: number
   latestAnnouncement: { id: string; title: string; created_at: string } | null
+  workoutDates: string[]
+  milestones: string[]
+  referralCode: string | null
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -155,6 +159,155 @@ function ConfidenceRing({ value }: { value: number }) {
   )
 }
 
+// ─── Streak ───────────────────────────────────────────────────────────────────
+
+function computeStreak(dates: string[]): number {
+  if (!dates.length) return 0
+  const dateSet = new Set(dates)
+  const toKey = (d: Date) => d.toISOString().split('T')[0]
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  let check = new Date(today)
+  if (!dateSet.has(toKey(check))) {
+    check.setDate(check.getDate() - 1)
+    if (!dateSet.has(toKey(check))) return 0
+  }
+  let streak = 0
+  while (dateSet.has(toKey(check))) {
+    streak++
+    check.setDate(check.getDate() - 1)
+  }
+  return streak
+}
+
+function StreakCard({ streak }: { streak: number }) {
+  return (
+    <div className="bg-[#162212] rounded-2xl p-4 lg:p-6 border border-[#b0e455]/10 flex items-center gap-4">
+      <div className="w-11 h-11 rounded-xl bg-[#b0e455]/15 flex items-center justify-center shrink-0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-5 h-5">
+          <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <div>
+        <p className="text-[10px] lg:text-xs text-[#edf5e2]/30 tracking-wider uppercase">Workout Streak</p>
+        <p className="text-2xl font-bold text-[#edf5e2] leading-none mt-0.5">
+          {streak} <span className="text-sm font-normal text-[#edf5e2]/40">{streak === 1 ? 'day' : 'days'}</span>
+        </p>
+      </div>
+      {streak >= 7 && (
+        <span className="ml-auto text-[10px] font-semibold bg-[#b0e455]/15 text-[#b0e455] px-2.5 py-1 rounded-full border border-[#b0e455]/20">
+          On fire
+        </span>
+      )}
+    </div>
+  )
+}
+
+// ─── Badges ───────────────────────────────────────────────────────────────────
+
+const MILESTONE_DEF: Record<string, { label: string; iconPath: string; color: string }> = {
+  first_workout: {
+    label: 'First Workout',
+    iconPath: 'M6.5 6.5h11M6.5 17.5h11M8 12h8',
+    color: '#b0e455',
+  },
+  first_checkin: {
+    label: 'First Check-in',
+    iconPath: 'M18 20V10M12 20V4M6 20v-6',
+    color: '#86efac',
+  },
+  streak_3: {
+    label: '3-Day Streak',
+    iconPath: 'M13 10V3L4 14h7v7l9-11h-7z',
+    color: '#fbbf24',
+  },
+  streak_7: {
+    label: '7-Day Streak',
+    iconPath: 'M13 10V3L4 14h7v7l9-11h-7z',
+    color: '#f97316',
+  },
+  streak_14: {
+    label: '2-Week Streak',
+    iconPath: 'M13 10V3L4 14h7v7l9-11h-7z',
+    color: '#ef4444',
+  },
+  streak_30: {
+    label: '30-Day Streak',
+    iconPath: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z',
+    color: '#b0e455',
+  },
+}
+
+function BadgesSection({ milestones }: { milestones: string[] }) {
+  const earned = milestones.filter(m => MILESTONE_DEF[m])
+  if (!earned.length) return null
+  return (
+    <div>
+      <p className="text-[10px] lg:text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-3">Achievements</p>
+      <div className="flex gap-2 overflow-x-auto pb-1">
+        {earned.map(type => {
+          const def = MILESTONE_DEF[type]
+          return (
+            <div
+              key={type}
+              className="shrink-0 flex flex-col items-center gap-1.5 bg-[#1c2e16] border border-[#b0e455]/8 rounded-2xl px-4 py-3"
+            >
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: def.color + '18', border: `1px solid ${def.color}30` }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke={def.color} strokeWidth="1.8" className="w-4 h-4">
+                  <path d={def.iconPath} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <p className="text-[9px] text-[#edf5e2]/50 whitespace-nowrap font-medium">{def.label}</p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ─── Referral ─────────────────────────────────────────────────────────────────
+
+function ReferralCard({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false)
+  const link = `https://zanafitness.com/system?ref=${code}`
+
+  function copy() {
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <div className="bg-[#162212] border border-[#b0e455]/8 rounded-2xl p-4">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-8 h-8 rounded-xl bg-[#b0e455]/10 flex items-center justify-center shrink-0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
+            <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-sm font-semibold">Refer a friend</p>
+          <p className="text-xs text-[#edf5e2]/35">Share your link. They get access, you get credit.</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 bg-[#0f1a0c] border border-[#b0e455]/10 rounded-xl px-3 py-2">
+        <p className="text-xs text-[#edf5e2]/40 flex-1 truncate font-mono">{link}</p>
+        <button
+          onClick={copy}
+          className="shrink-0 text-[10px] font-semibold text-[#b0e455] hover:text-[#c9f070] transition"
+        >
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── MiniSparkline ────────────────────────────────────────────────────────────
 
 function MiniSparkline({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }) {
@@ -197,8 +350,12 @@ export default function DashboardClient({
   hasThread,
   unreadCount,
   latestAnnouncement,
+  workoutDates,
+  milestones,
+  referralCode,
 }: Props) {
   const name = firstName ?? 'there'
+  const streak = computeStreak(workoutDates)
   const latest = recentStats[0] ?? null
   const daysSinceLast = latest
     ? Math.floor((Date.now() - new Date(latest.created_at).getTime()) / 86_400_000)
@@ -269,6 +426,9 @@ export default function DashboardClient({
 
         {/* Week strip */}
         <WeekStrip stats={recentStats} />
+
+        {/* Streak */}
+        {streak > 0 && <StreakCard streak={streak} />}
 
         {/* Progress card */}
         {latest ? (
@@ -460,6 +620,9 @@ export default function DashboardClient({
           </div>
         )}
 
+        {/* Badges */}
+        <BadgesSection milestones={milestones} />
+
         {/* Community */}
         <Link href="/community" className="block bg-[#162212] border border-[#b0e455]/8 rounded-2xl p-4 hover:border-[#b0e455]/20 active:scale-[0.99] transition-all">
           <div className="flex items-center gap-3">
@@ -479,6 +642,9 @@ export default function DashboardClient({
             </svg>
           </div>
         </Link>
+
+        {/* Referral */}
+        {referralCode && <ReferralCard code={referralCode} />}
 
       </div>
 

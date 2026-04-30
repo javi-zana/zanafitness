@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import BottomNav from '@/components/BottomNav'
@@ -21,6 +21,8 @@ type Props = {
   food: SectionData
   habits: SectionData
   principles: PrinciplesData
+  workoutDates: string[]
+  milestones: string[]
 }
 
 type Tab = 'split' | 'food' | 'habits' | 'principles'
@@ -40,6 +42,146 @@ function relativeTime(dateStr: string) {
   return `Updated ${days} days ago`
 }
 
+// ─── Streak helper ────────────────────────────────────────────────────────────
+
+function computeStreak(dates: string[]): number {
+  if (!dates.length) return 0
+  const dateSet = new Set(dates)
+  const toKey = (d: Date) => d.toISOString().split('T')[0]
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  let check = new Date(today)
+  if (!dateSet.has(toKey(check))) {
+    check.setDate(check.getDate() - 1)
+    if (!dateSet.has(toKey(check))) return 0
+  }
+  let streak = 0
+  while (dateSet.has(toKey(check))) {
+    streak++
+    check.setDate(check.getDate() - 1)
+  }
+  return streak
+}
+
+// ─── Workout log section ──────────────────────────────────────────────────────
+
+function WorkoutLogSection({
+  userId,
+  workoutDates,
+  milestones,
+  onLogged,
+}: {
+  userId: string
+  workoutDates: string[]
+  milestones: string[]
+  onLogged: (date: string, newMilestones: string[]) => void
+}) {
+  const supabase = createClient()
+  const today = new Date().toISOString().split('T')[0]
+  const todayLogged = workoutDates.includes(today)
+  const [open, setOpen] = useState(false)
+  const [notes, setNotes] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    setLoading(true)
+    await supabase
+      .from('workout_logs')
+      .upsert({ member_id: userId, logged_date: today, notes: notes.trim() || null }, { onConflict: 'member_id,logged_date' })
+
+    const newDates = workoutDates.includes(today) ? workoutDates : [today, ...workoutDates]
+    const streak = computeStreak(newDates)
+    const toAward: string[] = []
+
+    const STREAK_MILESTONES: [number, string][] = [[3, 'streak_3'], [7, 'streak_7'], [14, 'streak_14'], [30, 'streak_30']]
+    if (!milestones.includes('first_workout')) toAward.push('first_workout')
+    for (const [n, type] of STREAK_MILESTONES) {
+      if (streak >= n && !milestones.includes(type)) toAward.push(type)
+    }
+
+    if (toAward.length) {
+      await supabase.from('member_milestones').insert(
+        toAward.map(type => ({ member_id: userId, type }))
+      )
+    }
+
+    onLogged(today, toAward)
+    setNotes('')
+    setOpen(false)
+    setLoading(false)
+  }
+
+  if (todayLogged) {
+    return (
+      <div className="flex items-center gap-3 bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-2xl p-4 mt-6">
+        <div className="w-8 h-8 rounded-full bg-[#b0e455] flex items-center justify-center shrink-0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="2.5" className="w-4 h-4">
+            <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-[#b0e455]">Workout logged for today</p>
+          <p className="text-xs text-[#edf5e2]/40 mt-0.5">Streak: {computeStreak(workoutDates)} day{computeStreak(workoutDates) !== 1 ? 's' : ''}</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (open) {
+    return (
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[#1c2e16] rounded-2xl p-5 border border-[#b0e455]/8">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-[#edf5e2]/70">Log today's workout</p>
+          <button type="button" onClick={() => setOpen(false)} className="text-[#edf5e2]/30 hover:text-[#edf5e2] transition">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+        <textarea
+          value={notes}
+          onChange={e => setNotes(e.target.value)}
+          maxLength={500}
+          rows={3}
+          placeholder="Optional notes — what did you do? How did it feel?"
+          className="w-full bg-[#0f1a0c] border border-[#b0e455]/15 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
+        />
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="flex-1 py-3 rounded-2xl border border-[#edf5e2]/10 text-sm text-[#edf5e2]/50 hover:text-[#edf5e2] transition"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
+          >
+            {loading ? 'Saving…' : 'Done — Log It'}
+          </button>
+        </div>
+      </form>
+    )
+  }
+
+  return (
+    <div className="mt-6 pt-6 border-t border-[#b0e455]/8">
+      <button
+        onClick={() => setOpen(true)}
+        className="w-full flex items-center justify-center gap-2 bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl text-sm font-semibold hover:bg-[#c9f070] transition active:scale-[0.98]"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+          <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Log Today's Workout
+      </button>
+    </div>
+  )
+}
+
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState({ message }: { message: string }) {
@@ -57,7 +199,7 @@ function EmptyState({ message }: { message: string }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ userId, firstName, role, split, food, habits, principles }: Props) {
+export default function ProgramClient({ userId, firstName, role, split, food, habits, principles, workoutDates: initialWorkoutDates, milestones: initialMilestones }: Props) {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<Tab>('split')
   const [editingPrinciples, setEditingPrinciples] = useState(false)
@@ -65,6 +207,13 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     principles?.content_json ?? null
   )
   const [saving, setSaving] = useState(false)
+  const [workoutDates, setWorkoutDates] = useState<string[]>(initialWorkoutDates)
+  const [milestones, setMilestones] = useState<string[]>(initialMilestones)
+
+  function handleWorkoutLogged(date: string, newMilestones: string[]) {
+    if (!workoutDates.includes(date)) setWorkoutDates(prev => [date, ...prev])
+    if (newMilestones.length) setMilestones(prev => [...prev, ...newMilestones])
+  }
 
   const isHeadCoach = role === 'head_coach'
   const name = firstName ? `${firstName}'s` : 'Your'
@@ -224,6 +373,14 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
 
       <div className="flex-1 overflow-y-auto px-5 py-6 pb-28 lg:px-10 lg:max-w-4xl lg:pb-10 lg:py-8">
         {renderContent()}
+        {activeTab === 'split' && !isHeadCoach && (
+          <WorkoutLogSection
+            userId={userId}
+            workoutDates={workoutDates}
+            milestones={milestones}
+            onLogged={handleWorkoutLogged}
+          />
+        )}
       </div>
 
       <BottomNav />
