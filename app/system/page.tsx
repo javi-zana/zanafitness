@@ -343,7 +343,7 @@ export default function SystemPage() {
             <PlanCard
               label="Committed"
               price={500}
-              commitment="6-month commitment"
+              commitment="4-month commitment"
               variantId="218015ad-39b5-4d64-9158-c4864fb8038a"
             />
             <PlanCard

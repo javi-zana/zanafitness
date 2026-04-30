@@ -4,7 +4,7 @@ import Footer from "@/app/components/Footer";
 const faqs = [
   {
     q: "Who is this for?",
-    a: "Asian male professionals, 25–34. You're earning well, dressing well, but the body doesn't match the life you've built. You've tried programs before and fallen off. You have 2–3 free hours a day and flexible schedules — you just need a system that fits your actual life.",
+    a: "Professionals who are earning well, dressing well, but the body doesn't match the life you've built. You've tried programs before and fallen off. You have 2–3 free hours a day and flexible schedules — you just need a system that fits your actual life.",
   },
   {
     q: "What makes this different from other programs?",
@@ -28,7 +28,7 @@ const faqs = [
   },
   {
     q: "Is there a required commitment?",
-    a: "Yes — 3, 6, or 12 months. Meaningful physical change takes time. We don't offer month-to-month because 30 days isn't enough to build the habits or see the physique shift. The longer the commitment, the lower the monthly rate.",
+    a: "Yes — 4 or 12 months. Meaningful physical change takes time. We don't offer month-to-month because 30 days isn't enough to build the habits or see the physique shift. The longer the commitment, the lower the monthly rate.",
   },
   {
     q: "What's the refund policy?",
