@@ -16,7 +16,7 @@ type Thread = { id: string; member_id: string }
 type MsgPreview = { thread_id: string; body: string; created_at: string; author_id: string }
 type ReadReceipt = { thread_id: string; last_read_at: string }
 type ChatMessage = { id: string; author_id: string; body: string; created_at: string; message_attachments: { id: string; storage_path: string; kind: string }[] }
-type CoachTab = 'members' | 'programs' | 'messages' | 'admin'
+type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'admin'
 type Section = 'split' | 'food' | 'habits'
 
 type Props = {
@@ -72,11 +72,14 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   userEmail: string
 }) {
   const tabs: { id: CoachTab; label: string; icon: JSX.Element }[] = [
+    { id: 'home', label: 'Home', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" /></svg> },
     { id: 'members', label: 'Members', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg> },
     { id: 'programs', label: 'Programs', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg> },
     { id: 'messages', label: 'Messages', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
     ...(isHeadCoach ? [{ id: 'admin' as CoachTab, label: 'Admin', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg> }] : []),
   ]
+
+  const communityIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg>
 
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
 
@@ -116,6 +119,13 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
               <span className="text-sm font-semibold">{t.label}</span>
             </button>
           ))}
+          <Link
+            href="/community"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]"
+          >
+            {communityIcon}
+            <span className="text-sm font-semibold">Community</span>
+          </Link>
         </nav>
 
         {/* Profile */}
@@ -153,8 +163,135 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             </span>
           </button>
         ))}
+        <Link href="/community" className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors">
+          <div className="w-12 h-7 flex items-center justify-center rounded-full text-[#edf5e2]/25">
+            {communityIcon}
+          </div>
+          <span className="text-[9px] tracking-wide uppercase font-medium text-[#edf5e2]/25">Community</span>
+        </Link>
       </nav>
     </>
+  )
+}
+
+// ─── Home tab ─────────────────────────────────────────────────────────────────
+
+function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstName, userEmail }: {
+  members: Member[]
+  allStats: Stat[]
+  threads: Thread[]
+  lastMessages: MsgPreview[]
+  isHeadCoach: boolean
+  firstName: string | null
+  userEmail: string
+}) {
+  const name = firstName ?? userEmail.split('@')[0]
+  const h = new Date().getHours()
+  const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
+
+  const threadToMember = Object.fromEntries(threads.map(t => [t.id, t.member_id]))
+  const lastMsgByMember: Record<string, MsgPreview> = {}
+  for (const msg of lastMessages) {
+    const mid = threadToMember[msg.thread_id]
+    if (mid && !lastMsgByMember[mid]) lastMsgByMember[mid] = msg
+  }
+
+  const latestPerMember = members.map(m => ({
+    member: m,
+    stat: allStats.find(s => s.member_id === m.id) ?? null,
+  }))
+
+  const activeThisWeek = latestPerMember.filter(({ stat }) =>
+    stat && Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) <= 7
+  ).length
+
+  const needAttention = latestPerMember.filter(({ stat }) => {
+    if (!stat) return true
+    return Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) > 7
+  }).length
+
+  const recentActivity = [...allStats]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5)
+
+  const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
+
+  return (
+    <div className="space-y-5">
+      {/* Greeting */}
+      <div>
+        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach Portal</p>
+        <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-2xl">{greet}, {name}.</h1>
+        <p className="text-xs text-[#edf5e2]/35 mt-1">
+          {isHeadCoach ? 'Full access · Head coach' : 'Coach view'}
+        </p>
+      </div>
+
+      {/* Summary row */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
+          <p className="text-2xl font-bold text-[#edf5e2]">{members.length}</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Members</p>
+        </div>
+        <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[#1c2e16] border-[#b0e455]/8'}`}>
+          <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[#edf5e2]/30'}`}>{needAttention}</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Need Attention</p>
+        </div>
+        <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
+          <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Active</p>
+        </div>
+      </div>
+
+      {/* Quick links */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-[#1a2630] border border-[#60a5fa]/10 rounded-xl p-4">
+          <p className="text-[10px] text-[#60a5fa] uppercase tracking-widest font-mono mb-1">Programs</p>
+          <p className="text-sm font-semibold text-[#edf5e2]">{members.length} member{members.length !== 1 ? 's' : ''}</p>
+          <p className="text-[10px] text-[#edf5e2]/30 mt-0.5">Click Programs to edit</p>
+        </div>
+        <div className="bg-[#261a2a] border border-[#c084fc]/10 rounded-xl p-4">
+          <p className="text-[10px] text-[#c084fc] uppercase tracking-widest font-mono mb-1">Messages</p>
+          <p className="text-sm font-semibold text-[#edf5e2]">{threads.length} thread{threads.length !== 1 ? 's' : ''}</p>
+          <p className="text-[10px] text-[#edf5e2]/30 mt-0.5">Click Messages to chat</p>
+        </div>
+      </div>
+
+      {/* Recent check-ins */}
+      {recentActivity.length > 0 && (
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Recent Check-ins</p>
+          <div className="space-y-2">
+            {recentActivity.map(s => {
+              const m = memberMap[s.member_id]
+              if (!m) return null
+              return (
+                <div key={s.id} className="bg-[#1c2e16] rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-[10px] font-bold text-[#b0e455] shrink-0">
+                    {memberName(m).charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-[#edf5e2] truncate">{memberName(m)}</p>
+                    <p className="text-[10px] text-[#edf5e2]/30 font-mono">
+                      {relTime(s.created_at)} ago
+                      {s.weight_kg != null ? ` · ${toDisplay(s.weight_kg, m.weight_unit)}` : ''}
+                      {s.confidence != null ? ` · ${s.confidence}/10` : ''}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {members.length === 0 && (
+        <div className="text-center py-10">
+          <p className="text-sm text-[#edf5e2]/20">No members assigned yet.</p>
+          {isHeadCoach && <p className="text-xs text-[#edf5e2]/15 mt-1">Use Admin to invite and set up members.</p>}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -982,10 +1119,11 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads }: Props) {
-  const [activeTab, setActiveTab] = useState<CoachTab>('members')
+  const [activeTab, setActiveTab] = useState<CoachTab>('home')
   const isHeadCoach = userRole === 'head_coach'
 
   const TAB_TITLES: Record<CoachTab, string> = {
+    home: 'Home',
     members: 'Members',
     programs: 'Programs',
     messages: 'Messages',
@@ -993,13 +1131,6 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   }
 
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
-
-  function coachGreeting() {
-    const h = new Date().getHours()
-    if (h < 12) return 'Good morning'
-    if (h < 17) return 'Good afternoon'
-    return 'Good evening'
-  }
 
   return (
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
@@ -1009,16 +1140,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
           <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">
             Zana · Coach Portal
           </p>
-          {activeTab === 'members' ? (
-            <>
-              <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-2xl">
-                {coachGreeting()}, {firstName ?? userEmail.split('@')[0]}.
-              </h1>
-              <p className="text-xs text-[#edf5e2]/35 mt-1">Here's how your members are doing.</p>
-            </>
-          ) : (
-            <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-2xl">{TAB_TITLES[activeTab]}</h1>
-          )}
+          <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-2xl">{TAB_TITLES[activeTab]}</h1>
         </div>
         <Link href="/profile" className="shrink-0 mt-1 lg:hidden">
           <div
@@ -1035,6 +1157,9 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
 
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-8 lg:max-w-4xl lg:w-full lg:pb-10 lg:pt-5">
+        {activeTab === 'home' && (
+          <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} userEmail={userEmail} />
+        )}
         {activeTab === 'members' && (
           <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} />
         )}
