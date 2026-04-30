@@ -1,8 +1,19 @@
--- Allow coaches and head_coach to read member profiles
--- The profiles table by default only lets users see their own row.
--- These policies extend that so coach pages can load member data.
+-- Allow coaches and head_coach to read member profiles.
+-- Uses a SECURITY DEFINER function to avoid infinite recursion
+-- (policies on profiles cannot subquery profiles directly).
 
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+
+-- Helper: reads current user's role bypassing RLS
+CREATE OR REPLACE FUNCTION public.get_my_role()
+RETURNS text
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT role FROM profiles WHERE id = auth.uid()
+$$;
 
 -- Users can always see and update their own profile
 DROP POLICY IF EXISTS "users manage own profile" ON profiles;
@@ -15,7 +26,7 @@ CREATE POLICY "users manage own profile"
 DROP POLICY IF EXISTS "head coach reads all profiles" ON profiles;
 CREATE POLICY "head coach reads all profiles"
   ON profiles FOR SELECT
-  USING ((SELECT role FROM profiles WHERE id = auth.uid()) = 'head_coach');
+  USING (get_my_role() = 'head_coach');
 
 -- Coaches can read profiles of their assigned members
 DROP POLICY IF EXISTS "coach reads assigned member profiles" ON profiles;
@@ -35,5 +46,5 @@ CREATE POLICY "coaches see other coaches"
   ON profiles FOR SELECT
   USING (
     role IN ('coach', 'head_coach')
-    AND (SELECT role FROM profiles WHERE id = auth.uid()) IN ('coach', 'head_coach')
+    AND get_my_role() IN ('coach', 'head_coach')
   );
