@@ -70,7 +70,7 @@ export async function middleware(request: NextRequest) {
   // Already logged in → skip /login
   if (user && pathname === '/login') {
     const url = request.nextUrl.clone()
-    url.pathname = '/stats'
+    url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
