@@ -143,26 +143,16 @@ export default function ProfilePage() {
     setAvatarUrl(preview);
     setUploadingPhoto(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setUploadingPhoto(false); return; }
+    const form = new FormData();
+    form.append("file", file);
 
-    const ext = file.name.split(".").pop() ?? "jpg";
-    const path = `${user.id}/avatar.${ext}`;
+    const res = await fetch("/api/upload-avatar", { method: "POST", body: form });
+    const json = await res.json();
 
-    const { error: upErr } = await supabase.storage
-      .from("profile-photos")
-      .upload(path, file, { upsert: true, contentType: file.type });
-
-    if (!upErr) {
-      const { data: { publicUrl } } = supabase.storage.from("profile-photos").getPublicUrl(path);
-      const busted = `${publicUrl}?t=${Date.now()}`;
-      setAvatarUrl(busted);
-      await supabase.from("profiles").upsert(
-        { id: user.id, avatar_url: publicUrl },
-        { onConflict: "id" }
-      );
+    if (res.ok && json.url) {
+      setAvatarUrl(`${json.url}?t=${Date.now()}`);
     } else {
-      setError(`Photo upload failed: ${upErr.message}`);
+      setError(`Photo upload failed: ${json.error ?? "unknown error"}`);
     }
 
     setUploadingPhoto(false);
