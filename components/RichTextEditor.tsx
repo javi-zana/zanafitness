@@ -71,7 +71,7 @@ function Toolbar({ editor }: { editor: Editor | null }) {
       </ToolBtn>
       <div className="w-px bg-white/10 mx-1" />
       <ToolBtn active={false} onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-        —
+        -
       </ToolBtn>
     </div>
   )

@@ -67,7 +67,7 @@ function NoThread() {
         <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
           <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">Direct line to your coach</p>
           {[
-            { label: 'Ask anything', desc: 'Questions about your program, nutrition, a specific workout — nothing is too small.' },
+            { label: 'Ask anything', desc: 'Questions about your program, nutrition, a specific workout - nothing is too small.' },
             { label: 'Log between calls', desc: 'Share a win, flag something that felt off, or just check in. Your coach reads it all.' },
             { label: 'Fast responses', desc: 'Coaches check messages daily. You\'re not waiting days to hear back.' },
           ].map(item => (
@@ -211,7 +211,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
     setTimeout(() => scrollToBottom(true), 50)
   }
 
-  // "Seen" — show under last message sent by current user if coach has read it
+  // "Seen" - show under last message sent by current user if coach has read it
   const myMessages = messages.filter(m => m.author_id === userId)
   const lastMine = myMessages[myMessages.length - 1]
   const coachHasSeen = coachReadAt && lastMine
@@ -277,7 +277,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
         <div ref={bottomRef} />
       </div>
 
-      {/* Composer — fixed above bottom nav */}
+      {/* Composer - fixed above bottom nav */}
       <div className="fixed bottom-16 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 px-4 py-3 z-40">
         {previews.length > 0 && (
           <div className="flex gap-2 mb-2 overflow-x-auto pb-1">

@@ -101,7 +101,7 @@ export default function LandingPage() {
         {/* Main content */}
         <div className="relative z-10 px-6 md:px-12 max-w-5xl">
           <h1 className="font-display leading-[0.95] mb-6" style={{ fontSize: "clamp(52px, 7vw, 88px)" }}>
-            Lose 3–5%<br />
+            Lose 3-5%<br />
             <span className="text-[#b0e455]">Body Fat.</span><br />
             In 4 Months.
           </h1>
@@ -130,7 +130,7 @@ export default function LandingPage() {
         <div className="flex whitespace-nowrap animate-marquee">
           {Array(8).fill(null).map((_, i) => (
             <span key={i} className="text-sm font-semibold tracking-wide px-8">
-              3–5% Body Fat &nbsp;·&nbsp; 4 Months &nbsp;·&nbsp; Direct Coaching &nbsp;·&nbsp; Real Results &nbsp;·&nbsp; No Fluff &nbsp;·&nbsp;
+              3-5% Body Fat &nbsp;·&nbsp; 4 Months &nbsp;·&nbsp; Direct Coaching &nbsp;·&nbsp; Real Results &nbsp;·&nbsp; No Fluff &nbsp;·&nbsp;
             </span>
           ))}
         </div>
@@ -149,7 +149,7 @@ export default function LandingPage() {
             </div>
             <div className="md:w-80 space-y-5">
               <p className="text-base text-[#edf5e2]/60 leading-relaxed">
-                Skinny-fat. Soft in clothes. Not where you want to be — despite having the income, the wardrobe, the career.
+                Skinny-fat. Soft in clothes. Not where you want to be - despite having the income, the wardrobe, the career.
               </p>
               <div className="w-8 h-px bg-[#b0e455]/20" />
               <p className="text-base text-[#edf5e2]/45 leading-relaxed">
@@ -161,7 +161,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── SPLIT — SYSTEM PILLARS ────────────────────────────────────────── */}
+      {/* ── SPLIT - SYSTEM PILLARS ────────────────────────────────────────── */}
       <section className="grid grid-cols-1 md:grid-cols-2 min-h-[70vh]">
         <div className="relative h-[50vh] md:h-auto">
           <div className="absolute inset-0 bg-[url('/A502086F-E304-43B4-87C1-93658EDB79F0.PNG')] bg-cover bg-center" />
@@ -174,9 +174,9 @@ export default function LandingPage() {
           </h2>
           <div className="space-y-8">
             {[
-              { n: "01", title: "Training", desc: "Progressive split built for your schedule. 45–60 min sessions, no fluff, structured for the lean aesthetic look." },
+              { n: "01", title: "Training", desc: "Progressive split built for your schedule. 45-60 min sessions, no fluff, structured for the lean aesthetic look." },
               { n: "02", title: "Nutrition", desc: "Real food, clear macros. No extreme cuts. Fits your life in Singapore, Manila, Jakarta, or wherever you are." },
-              { n: "03", title: "Guidance", desc: "Weekly check-ins. Constant adjustments. A coach who understands your world — the travel, the client dinners." },
+              { n: "03", title: "Guidance", desc: "Weekly check-ins. Constant adjustments. A coach who understands your world - the travel, the client dinners." },
             ].map(p => (
               <div key={p.n} className="flex gap-5 items-start">
                 <span className="text-sm text-[#b0e455] mt-0.5 shrink-0 font-semibold">{p.n}</span>
@@ -205,7 +205,7 @@ export default function LandingPage() {
           </h2>
           <div className="mt-10 inline-flex items-center gap-3 bg-[#b0e455]/10 border border-[#b0e455]/25 rounded-full px-6 py-2.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
-            <p className="text-sm text-[#b0e455] font-medium">3–5% body fat · 4 months</p>
+            <p className="text-sm text-[#b0e455] font-medium">3-5% body fat · 4 months</p>
           </div>
         </div>
       </section>
@@ -276,7 +276,7 @@ export default function LandingPage() {
                 {[
                   "Your training plan, updated as you progress",
                   "Weekly check-ins reviewed by Javi",
-                  "Direct messaging — coach + community",
+                  "Direct messaging - coach + community",
                   "Community feed to stay accountable",
                   "Weekly calendar & upcoming events",
                 ].map(f => (

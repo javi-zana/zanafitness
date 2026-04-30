@@ -88,7 +88,7 @@ export default function RefundPage() {
 
             <div>
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">8. Processing Time</h2>
-              <p>Approved refunds are processed through Paddle and typically appear on your statement within 5–10 business days depending on your bank or card provider.</p>
+              <p>Approved refunds are processed through Paddle and typically appear on your statement within 5-10 business days depending on your bank or card provider.</p>
             </div>
 
             <div>

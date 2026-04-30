@@ -144,7 +144,7 @@ function WorkoutLogSection({
           onChange={e => setNotes(e.target.value)}
           maxLength={500}
           rows={3}
-          placeholder="Optional notes — what did you do? How did it feel?"
+          placeholder="Optional notes - what did you do? How did it feel?"
           className="w-full bg-[#0f1a0c] border border-[#b0e455]/15 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
         />
         <div className="flex gap-3">
@@ -160,7 +160,7 @@ function WorkoutLogSection({
             disabled={loading}
             className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
           >
-            {loading ? 'Saving…' : 'Done — Log It'}
+            {loading ? 'Saving…' : 'Done - Log It'}
           </button>
         </div>
       </form>
@@ -302,7 +302,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
       const sectionInfo: Record<string, { title: string; desc: string }> = {
         split: {
           title: 'Your Training Split',
-          desc: 'Your coach will write a personalised workout plan here — days, exercises, sets, and reps structured around your goal and schedule.',
+          desc: 'Your coach will write a personalised workout plan here - days, exercises, sets, and reps structured around your goal and schedule.',
         },
         food: {
           title: 'Your Nutrition Plan',
@@ -310,7 +310,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
         },
         habits: {
           title: 'Your Daily Habits',
-          desc: 'The small daily actions — sleep, steps, stress management — that compound over time and make the rest of the program work.',
+          desc: 'The small daily actions - sleep, steps, stress management - that compound over time and make the rest of the program work.',
         },
       }
       const info = sectionInfo[activeTab] ?? { title: 'Coming soon', desc: 'Your coach is working on this section.' }

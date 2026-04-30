@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
-  // Invite the user — sends a magic link / invite email
+  // Invite the user - sends a magic link / invite email
   const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://zanafitness.com"}/auth/callback`,
   });
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       role: "member",
     }, { onConflict: "id" });
   } else {
-    // User already existed — find them by email and update profile
+    // User already existed - find them by email and update profile
     const { data: existingUser } = await supabase.auth.admin.listUsers();
     const user = existingUser?.users?.find(u => u.email === email);
     if (user) {

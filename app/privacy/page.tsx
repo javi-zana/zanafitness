@@ -52,7 +52,7 @@ export default function PrivacyPage() {
                 <li>Email address (for account creation and communication)</li>
                 <li>Fitness goals and preferences (provided during onboarding)</li>
                 <li>Progress data (weight, strength metrics, consistency)</li>
-                <li>Payment information (processed securely by Paddle — we never store card details)</li>
+                <li>Payment information (processed securely by Paddle - we never store card details)</li>
                 <li>Usage data (pages visited, features used)</li>
               </ul>
             </div>
@@ -73,9 +73,9 @@ export default function PrivacyPage() {
               <h2 className="text-white text-xs uppercase tracking-widest font-bold mb-4">4. Third-Party Services</h2>
               <p>We use the following trusted third-party services to operate the platform:</p>
               <ul className="mt-4 space-y-2 pl-4 border-l border-[#b0e455/10]">
-                <li>Supabase — secure database and authentication</li>
-                <li>Paddle — payment processing and subscription management</li>
-                <li>Resend — transactional email delivery</li>
+                <li>Supabase - secure database and authentication</li>
+                <li>Paddle - payment processing and subscription management</li>
+                <li>Resend - transactional email delivery</li>
               </ul>
               <p className="mt-4">Each of these providers operates under their own privacy policies and data protection standards.</p>
             </div>

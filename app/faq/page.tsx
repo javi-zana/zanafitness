@@ -4,19 +4,19 @@ import Footer from "@/app/components/Footer";
 const faqs = [
   {
     q: "Who is this for?",
-    a: "Professionals who are earning well, dressing well, but the body doesn't match the life you've built. You've tried programs before and fallen off. You have 2–3 free hours a day and flexible schedules — you just need a system that fits your actual life.",
+    a: "Professionals who are earning well, dressing well, but the body doesn't match the life you've built. You've tried programs before and fallen off. You have 2-3 free hours a day and flexible schedules - you just need a system that fits your actual life.",
   },
   {
     q: "What makes this different from other programs?",
-    a: "Most programs are built around the gym. ZANA is built around your lifestyle. The training is simple and effective — not designed to turn you into a bodybuilder. The real work happens in the habits around it: how you eat, how you recover, how you structure your days. That's what makes the physique stick.",
+    a: "Most programs are built around the gym. ZANA is built around your lifestyle. The training is simple and effective - not designed to turn you into a bodybuilder. The real work happens in the habits around it: how you eat, how you recover, how you structure your days. That's what makes the physique stick.",
   },
   {
     q: "What results should I expect?",
-    a: "A lean, aesthetic build — typically 12–15% body fat with visible shoulders, chest, and arms. The 'looks good in a fitted shirt or suit' physique. Most members see significant changes in the first 8–12 weeks. You will not look like a bodybuilder. You will look like someone who clearly takes care of himself.",
+    a: "A lean, aesthetic build - typically 12-15% body fat with visible shoulders, chest, and arms. The 'looks good in a fitted shirt or suit' physique. Most members see significant changes in the first 8-12 weeks. You will not look like a bodybuilder. You will look like someone who clearly takes care of himself.",
   },
   {
     q: "How much time does it require each day?",
-    a: "Training sessions run 45–60 minutes, 4–5 days per week. The nutrition system is habit-based — no meal prepping for hours. If you have 2–3 free hours a day, you have enough time.",
+    a: "Training sessions run 45-60 minutes, 4-5 days per week. The nutrition system is habit-based - no meal prepping for hours. If you have 2-3 free hours a day, you have enough time.",
   },
   {
     q: "What's included in the program?",
@@ -24,11 +24,11 @@ const faqs = [
   },
   {
     q: "Do I need a gym?",
-    a: "Yes. The training system is built around standard commercial gym equipment — barbells, dumbbells, cables, machines. Any decent gym will have everything you need.",
+    a: "Yes. The training system is built around standard commercial gym equipment - barbells, dumbbells, cables, machines. Any decent gym will have everything you need.",
   },
   {
     q: "Is there a required commitment?",
-    a: "Yes — 4 or 12 months. Meaningful physical change takes time. We don't offer month-to-month because 30 days isn't enough to build the habits or see the physique shift. The longer the commitment, the lower the monthly rate.",
+    a: "Yes - 4 or 12 months. Meaningful physical change takes time. We don't offer month-to-month because 30 days isn't enough to build the habits or see the physique shift. The longer the commitment, the lower the monthly rate.",
   },
   {
     q: "What's the refund policy?",

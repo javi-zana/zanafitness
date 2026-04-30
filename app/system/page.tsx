@@ -122,7 +122,7 @@ export default function SystemPage() {
                 num: "01",
                 title: "Training",
                 sub: "Calculated Overload",
-                desc: "A simple, progressive split built for your schedule — not a bodybuilder's. 45–60 minute sessions, structured to build the lean aesthetic look: shoulders, chest, arms.",
+                desc: "A simple, progressive split built for your schedule - not a bodybuilder's. 45-60 minute sessions, structured to build the lean aesthetic look: shoulders, chest, arms.",
               },
               {
                 icon: <Leaf className="w-7 h-7 text-[#b0e455] stroke-1" />,
@@ -136,7 +136,7 @@ export default function SystemPage() {
                 num: "03",
                 title: "Guidance",
                 sub: "Constant Adaptation",
-                desc: "Weekly check-ins. Adjustments when life gets busy. A coach who understands your world — the travel, the client dinners, the demanding schedule.",
+                desc: "Weekly check-ins. Adjustments when life gets busy. A coach who understands your world - the travel, the client dinners, the demanding schedule.",
               },
             ].map(p => (
               <div key={p.num} className="bg-[#1c2e16] rounded-3xl p-8 border border-[#b0e455]/8">
@@ -156,7 +156,7 @@ export default function SystemPage() {
           <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-8">The Result</p>
           <h2 className="font-display leading-none" style={{ fontSize: "clamp(32px, 4.5vw, 60px)" }}>
             The physique compounds into everything<br />
-            you've built — career, confidence, presence.<br />
+            you've built - career, confidence, presence.<br />
             Start building it <span className="text-[#b0e455]">right.</span>
           </h2>
         </div>
@@ -233,7 +233,7 @@ export default function SystemPage() {
                   { title: "Weekly Check-ins", desc: "Submit your check-in every week. Javi reviews it and adjusts your plan accordingly." },
                   { title: "Direct Messaging", desc: "Message Javi or other members directly. Real-time chat, full history saved." },
                   { title: "Community Feed", desc: "Post wins, ask questions, stay accountable. Grouped by date with likes and comments." },
-                  { title: "Weekly Calendar", desc: "See what's coming — training days, live calls, deadlines — all in one view." },
+                  { title: "Weekly Calendar", desc: "See what's coming - training days, live calls, deadlines - all in one view." },
                   { title: "Streak Tracking", desc: "Daily check-in streak keeps you consistent. Simple but effective." },
                 ].map(f => (
                   <div key={f.title} className="flex gap-4">

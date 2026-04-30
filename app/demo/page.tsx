@@ -145,11 +145,11 @@ function HomeTab() {
 function ProgramsTab() {
   const [open, setOpen] = useState<number | null>(0);
   const days = [
-    { day: "Day 1", title: "Upper Body A", tag: "Chest / Shoulders / Tris", exercises: ["Bench Press 4×6–8", "Incline DB Press 3×10", "Cable Fly 3×12", "Shoulder Press 4×8", "Lateral Raises 3×15", "Tricep Pushdown 3×12"] },
+    { day: "Day 1", title: "Upper Body A", tag: "Chest / Shoulders / Tris", exercises: ["Bench Press 4×6-8", "Incline DB Press 3×10", "Cable Fly 3×12", "Shoulder Press 4×8", "Lateral Raises 3×15", "Tricep Pushdown 3×12"] },
     { day: "Day 2", title: "Lower Body A", tag: "Quads / Hamstrings / Glutes", exercises: ["Squat 4×5", "Romanian DL 3×10", "Leg Press 3×12", "Leg Curl 3×12", "Walking Lunge 3×10 each", "Calf Raise 4×15"] },
-    { day: "Day 3", title: "Upper Body B", tag: "Back / Biceps / Rear Delts", exercises: ["Pull-up 4×6–8", "Barbell Row 4×8", "Seated Row 3×10", "Face Pull 3×15", "DB Curl 3×10", "Hammer Curl 3×12"] },
+    { day: "Day 3", title: "Upper Body B", tag: "Back / Biceps / Rear Delts", exercises: ["Pull-up 4×6-8", "Barbell Row 4×8", "Seated Row 3×10", "Face Pull 3×15", "DB Curl 3×10", "Hammer Curl 3×12"] },
     { day: "Day 4", title: "Rest / Active Recovery", tag: "Walk · Stretch · Sleep", exercises: [] },
-    { day: "Day 5", title: "Lower Body B", tag: "Posterior Chain Focus", exercises: ["Deadlift 4×4–5", "Bulgarian Split Squat 3×8", "Hip Thrust 3×12", "Leg Curl 3×10", "Seated Calf Raise 4×15"] },
+    { day: "Day 5", title: "Lower Body B", tag: "Posterior Chain Focus", exercises: ["Deadlift 4×4-5", "Bulgarian Split Squat 3×8", "Hip Thrust 3×12", "Leg Curl 3×10", "Seated Calf Raise 4×15"] },
   ];
 
   return (
@@ -197,9 +197,9 @@ function ProgramsTab() {
 
 function CommunityTab() {
   const posts = [
-    { initials: "JL", name: "Javi", color: "#b0e455", time: "Today", category: "Announcement", content: "Big win from the team this week — 4 members hit PRs on deadlift. This is what consistent overload looks like. Keep going.", likes: 24, isCoach: true },
-    { initials: "PS", name: "Priya S.", color: "#86efac", time: "Today", category: "Check-in", content: "Week 7 Day 3 — Deadlifts felt strong. Hit 145kg × 3. Sleep has been 8hrs consistently. Feel like it's clicking now.", likes: 18, isCoach: false },
-    { initials: "MC", name: "Marcus C.", color: "#fbbf24", time: "Today", category: "Win", content: "New bench PR — 185 lbs × 5. Three weeks in and the numbers are moving. No going back now.", likes: 31, isCoach: false },
+    { initials: "JL", name: "Javi", color: "#b0e455", time: "Today", category: "Announcement", content: "Big win from the team this week - 4 members hit PRs on deadlift. This is what consistent overload looks like. Keep going.", likes: 24, isCoach: true },
+    { initials: "PS", name: "Priya S.", color: "#86efac", time: "Today", category: "Check-in", content: "Week 7 Day 3 - Deadlifts felt strong. Hit 145kg × 3. Sleep has been 8hrs consistently. Feel like it's clicking now.", likes: 18, isCoach: false },
+    { initials: "MC", name: "Marcus C.", color: "#fbbf24", time: "Today", category: "Win", content: "New bench PR - 185 lbs × 5. Three weeks in and the numbers are moving. No going back now.", likes: 31, isCoach: false },
   ];
 
   return (
@@ -341,7 +341,7 @@ export default function DemoPage() {
 
       {/* Preview Banner */}
       <div className="bg-[#b0e455] text-[#0f1a0c] text-center py-3 px-4 flex items-center justify-center gap-4 flex-wrap shrink-0">
-        <p className="text-[10px] tracking-widest uppercase font-bold">Preview Mode — This is what your dashboard looks like inside</p>
+        <p className="text-[10px] tracking-widest uppercase font-bold">Preview Mode - This is what your dashboard looks like inside</p>
         <Link href="/system" className="text-[9px] tracking-widest uppercase bg-[#0f1a0c] text-[#b0e455] px-4 py-1.5 rounded-full font-bold hover:bg-[#162212] transition whitespace-nowrap">
           Join the System →
         </Link>
@@ -361,7 +361,7 @@ export default function DemoPage() {
           </div>
         </main>
 
-        {/* Desktop sidebar — RIGHT side */}
+        {/* Desktop sidebar - RIGHT side */}
         <aside className="hidden md:flex flex-col fixed right-0 top-[44px] bottom-0 w-64 bg-[#0b1509] border-l border-[#b0e455]/12 z-20">
           {/* Logo */}
           <div className="px-5 pt-7 pb-6 border-b border-[#b0e455]/8">

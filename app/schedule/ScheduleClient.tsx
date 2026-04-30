@@ -49,7 +49,7 @@ export default function ScheduleClient() {
             <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
               <p className="text-sm font-semibold mb-2">How often are calls?</p>
               <p className="text-sm text-[#edf5e2]/45 leading-relaxed">
-                Bi-weekly — every two weeks. Calls are 30–45 minutes and happen over video. They're the engine of the whole system.
+                Bi-weekly - every two weeks. Calls are 30-45 minutes and happen over video. They're the engine of the whole system.
               </p>
             </div>
             <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-4 text-center">

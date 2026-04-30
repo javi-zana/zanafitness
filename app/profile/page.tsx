@@ -160,7 +160,7 @@ export default function ProfilePage() {
         { onConflict: "id" }
       );
     } else {
-      setError("Photo upload failed — make sure the profile-photos storage bucket exists.");
+      setError("Photo upload failed - make sure the profile-photos storage bucket exists.");
     }
 
     setUploadingPhoto(false);
@@ -501,7 +501,7 @@ export default function ProfilePage() {
             href="mailto:hello@zanafitness.com"
             className="block text-xs text-[#edf5e2]/25 hover:text-[#b0e455] transition-colors"
           >
-            Support — hello@zanafitness.com
+            Support - hello@zanafitness.com
           </a>
           <p className="text-[10px] text-[#edf5e2]/15 uppercase tracking-widest">
             © 2026 ZANA Fitness

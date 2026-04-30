@@ -15,7 +15,7 @@ const emailHtml = () => `
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>You're on the list — ZANA Fitness</title>
+  <title>You're on the list - ZANA Fitness</title>
 </head>
 <body style="margin:0;padding:0;background-color:#141414;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#141414;">
@@ -45,7 +45,7 @@ const emailHtml = () => `
 
           <!-- EYEBROW -->
           <p style="margin:0 0 24px;font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:4px;color:#b3cdff;text-transform:uppercase;text-align:center;">
-            — Access Confirmed —
+            - Access Confirmed -
           </p>
 
           <!-- HEADING -->
@@ -66,7 +66,7 @@ const emailHtml = () => `
             We'll reach out the moment slots for ZANA open.
           </p>
           <p style="margin:0 0 48px;font-family:'Courier New',Courier,monospace;font-size:13px;line-height:1.8;letter-spacing:1px;color:#9ca3af;text-align:center;">
-            When they do — move fast. Access is limited.
+            When they do - move fast. Access is limited.
           </p>
 
           <!-- CTA -->
