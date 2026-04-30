@@ -882,10 +882,11 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
     e.preventDefault()
     if (!assignMemberId || !assignCoachId) return
     setAssignStatus('loading')
-    await supabase.from('coach_assignments').upsert(
-      { member_id: assignMemberId, coach_id: assignCoachId },
-      { onConflict: 'member_id' }
-    )
+    await fetch('/api/admin-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'assign', memberId: assignMemberId, coachId: assignCoachId }),
+    })
     setAssignStatus('done')
     setAssignMemberId('')
     setAssignCoachId('')
@@ -895,16 +896,12 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
 
   async function setupThread(member: AdminProfile) {
     setSetupStatus(s => ({ ...s, [member.id]: 'loading' }))
-    const { data: thread, error: te } = await supabase
-      .from('threads')
-      .insert({ member_id: member.id })
-      .select('id')
-      .single()
-    if (te || !thread) { setSetupStatus(s => ({ ...s, [member.id]: 'error' })); return }
-    await supabase.from('thread_participants').insert([
-      { thread_id: thread.id, user_id: member.id, role: 'member' },
-      { thread_id: thread.id, user_id: userId, role: 'head_coach' },
-    ])
+    const res = await fetch('/api/admin-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'setup_thread', memberId: member.id }),
+    })
+    if (!res.ok) { setSetupStatus(s => ({ ...s, [member.id]: 'error' })); return }
     setSetupStatus(s => ({ ...s, [member.id]: 'done' }))
     await loadData()
   }
@@ -913,9 +910,11 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
     e.preventDefault()
     if (!broadcastBody.trim() || !threads.length) return
     setBroadcastStatus('loading')
-    for (const thread of threads) {
-      await supabase.from('messages').insert({ thread_id: thread.id, author_id: userId, body: broadcastBody.trim() })
-    }
+    await fetch('/api/admin-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'broadcast', threadIds: threads.map(t => t.id), body: broadcastBody.trim() }),
+    })
     setBroadcastBody('')
     setBroadcastStatus('done')
     setTimeout(() => setBroadcastStatus('idle'), 3000)
