@@ -220,8 +220,8 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
     <div className="space-y-5">
       {/* Greeting */}
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Zana · Coach Portal</p>
-        <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-2xl">{greet}, {name}.</h1>
+        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono lg:hidden">Zana · Coach Portal</p>
+        <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-3xl">{greet}, {name}.</h1>
         <p className="text-xs text-[#edf5e2]/35 mt-1">
           {isHeadCoach ? 'Full access · Head coach' : 'Coach view'}
         </p>
@@ -1261,7 +1261,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       </div>
 
       {/* Tab content */}
-      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-8 lg:max-w-3xl lg:w-full lg:pb-10 lg:pt-6 lg:mx-auto">
+      <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:pb-10 lg:pt-6">
         {activeTab === 'home' && (
           <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} userEmail={userEmail} />
         )}

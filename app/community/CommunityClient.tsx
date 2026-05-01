@@ -296,23 +296,24 @@ function PostCard({
 
 // ─── Coach nav for community page ─────────────────────────────────────────────
 
-function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userEmail }: {
+function CoachCommunityNav({ firstName, avatarColor, avatarUrl }: {
   firstName: string | null
   avatarColor: string
   avatarUrl: string | null
-  userEmail?: string
 }) {
-  const initials = (firstName ?? (userEmail ?? '?').split('@')[0]).slice(0, 1).toUpperCase()
+  const initials = (firstName ?? 'C').slice(0, 1).toUpperCase()
 
-  const navItems = [
+  const coachLinks = [
     { href: '/coach', label: 'Home', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" /></svg> },
-    { href: '/community', label: 'Community', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg> },
-    { href: '/profile', label: 'Profile', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
+    { href: '/coach', label: 'Members', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg> },
+    { href: '/coach', label: 'Programs', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg> },
+    { href: '/coach', label: 'Messages', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
+    { href: '/community', label: 'Community', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
   ]
 
   return (
     <>
-      {/* Desktop sidebar */}
+      {/* Desktop sidebar — identical layout to coach portal */}
       <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-52 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
         <div className="px-5 pt-6 pb-5 border-b border-[#b0e455]/8">
           <div className="flex items-center gap-3">
@@ -327,12 +328,12 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userEmail }: {
             </div>
           </div>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
-          {navItems.map(item => {
-            const active = item.href === '/community'
+        <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
+          {coachLinks.map(item => {
+            const active = item.label === 'Community'
             return (
               <Link
-                key={item.href}
+                key={item.label}
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                   active ? 'bg-[#b0e455] text-[#0b1509]' : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
@@ -344,27 +345,27 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userEmail }: {
             )
           })}
         </nav>
-        <div className="px-3 py-4 border-t border-[#b0e455]/8">
-          <div className="flex items-center gap-3 px-3 py-2">
+        <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-0.5">
+          <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
             <div
               className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
               style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
             >
               {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" /> : initials}
             </div>
-            <span className="text-xs text-[#edf5e2]/30 truncate">{firstName ?? 'Coach'}</span>
-          </div>
+            <span className="text-sm font-semibold">Profile</span>
+          </Link>
           <p className="text-[9px] text-[#edf5e2]/15 uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
         </div>
       </aside>
 
-      {/* Mobile bottom bar */}
+      {/* Mobile bottom bar — full coach tabs */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
-        {navItems.map(item => {
-          const active = item.href === '/community'
+        {coachLinks.map(item => {
+          const active = item.label === 'Community'
           return (
             <Link
-              key={item.href}
+              key={item.label}
               href={item.href}
               className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
             >
