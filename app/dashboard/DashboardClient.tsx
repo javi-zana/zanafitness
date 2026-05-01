@@ -385,6 +385,7 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
+      <div className="flex-1 flex flex-col lg:max-w-3xl lg:mx-auto lg:w-full">
 
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[#b0e455]/8">
@@ -419,7 +420,7 @@ export default function DashboardClient({
         </Link>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-4 pt-2 lg:px-8 lg:max-w-3xl lg:pt-5 lg:pb-8 lg:space-y-4">
+      <div className="flex-1 overflow-y-auto px-5 pb-24 space-y-4 pt-2 lg:px-8 lg:pt-5 lg:pb-8 lg:space-y-4">
 
         {/* Latest announcement */}
         {latestAnnouncement && (
@@ -666,6 +667,7 @@ export default function DashboardClient({
         {/* Referral */}
         {referralCode && <ReferralCard code={referralCode} />}
 
+      </div>
       </div>
 
       <BottomNav />
