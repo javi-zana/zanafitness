@@ -392,11 +392,15 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl }: {
 function NewPostForm({
   subTab,
   userId,
+  firstName,
+  userRole,
   onPosted,
   onCancel,
 }: {
   subTab: SubTab
   userId: string
+  firstName: string | null
+  userRole: string
   onPosted: (post: Post) => void
   onCancel: () => void
 }) {
@@ -412,7 +416,7 @@ function NewPostForm({
     setError('')
     setLoading(true)
 
-    const { data: post, error: err } = await supabase
+    const { data: inserted, error: err } = await supabase
       .from('community_posts')
       .insert({
         author_id: userId,
@@ -420,17 +424,18 @@ function NewPostForm({
         title: title.trim(),
         body_json: bodyJson ?? {},
       })
-      .select(`
-        id, author_id, sub_tab, title, body_json, created_at, hidden,
-        author:profiles!author_id(first_name, role),
-        reactions:community_post_reactions(user_id),
-        comments:community_post_comments(id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role))
-      `)
+      .select('id, author_id, sub_tab, title, body_json, created_at, hidden')
       .single()
 
     setLoading(false)
-    if (err || !post) { setError('Failed to post. Try again.'); return }
-    onPosted(post as unknown as Post)
+    if (err || !inserted) { setError('Failed to post. Try again.'); return }
+    const post: Post = {
+      ...inserted,
+      author: { first_name: firstName, role: userRole },
+      reactions: [],
+      comments: [],
+    }
+    onPosted(post)
   }
 
   return (
@@ -479,13 +484,6 @@ const SUB_TABS: { id: SubTab; label: string }[] = [
   { id: 'random', label: 'Random' },
 ]
 
-const POST_SELECT = `
-  id, author_id, sub_tab, title, body_json, created_at, hidden,
-  author:profiles!author_id(first_name, role),
-  reactions:community_post_reactions(user_id),
-  comments:community_post_comments(id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role))
-`
-
 export default function CommunityClient({ userId, userRole, firstName, avatarColor, avatarUrl, initialTab, initialPosts }: Props) {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<SubTab>(initialTab)
@@ -512,16 +510,14 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'community_posts', filter: `sub_tab=eq.${activeTab}` },
         async payload => {
-          const { data } = await supabase
-            .from('community_posts')
-            .select(POST_SELECT)
-            .eq('id', payload.new.id)
-            .single()
+          const res = await fetch(`/api/get-community-posts?post_id=${payload.new.id}`)
+          const json = await res.json()
+          const data = json.post
           if (!data) return
           setPostsByTab(prev => {
             const tab = activeTab
             if (prev[tab].some(p => p.id === data.id)) return prev
-            return { ...prev, [tab]: [data as unknown as Post, ...prev[tab]] }
+            return { ...prev, [tab]: [data as Post, ...prev[tab]] }
           })
         }
       )
@@ -557,17 +553,15 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'community_post_comments' },
         async payload => {
-          const { data: comment } = await supabase
-            .from('community_post_comments')
-            .select('id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role)')
-            .eq('id', payload.new.id)
-            .single()
+          const res = await fetch(`/api/get-community-comment?comment_id=${payload.new.id}`)
+          const json = await res.json()
+          const comment = json.comment
           if (!comment) return
           setPostsByTab(prev => ({
             ...prev,
             [activeTab]: prev[activeTab].map(p => {
               if (p.id !== payload.new.post_id || p.comments.some(c => c.id === comment.id)) return p
-              return { ...p, comments: [...p.comments, comment as unknown as Comment] }
+              return { ...p, comments: [...p.comments, comment as Comment] }
             }),
           }))
         }
@@ -584,13 +578,9 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
     setComposing(false)
     if (postsByTab[tab].length > 0) return
     setLoadingTab(true)
-    const { data } = await supabase
-      .from('community_posts')
-      .select(POST_SELECT)
-      .eq('sub_tab', tab)
-      .order('created_at', { ascending: false })
-      .limit(20)
-    setPostsByTab(prev => ({ ...prev, [tab]: (data ?? []) as unknown as Post[] }))
+    const res = await fetch(`/api/get-community-posts?tab=${tab}`)
+    const json = await res.json()
+    setPostsByTab(prev => ({ ...prev, [tab]: (json.posts ?? []) as Post[] }))
     setLoadingTab(false)
   }
 
@@ -615,17 +605,21 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
   }
 
   async function handleComment(postId: string, body: string) {
-    const { data: comment } = await supabase
+    const { data: inserted } = await supabase
       .from('community_post_comments')
       .insert({ post_id: postId, author_id: userId, body })
-      .select('id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role)')
+      .select('id, author_id, body, created_at, hidden')
       .single()
-    if (!comment) return
+    if (!inserted) return
+    const comment: Comment = {
+      ...inserted,
+      author: { first_name: firstName, role: userRole },
+    }
     setPostsByTab(prev => ({
       ...prev,
       [activeTab]: prev[activeTab].map(p => {
         if (p.id !== postId || p.comments.some(c => c.id === comment.id)) return p
-        return { ...p, comments: [...p.comments, comment as unknown as Comment] }
+        return { ...p, comments: [...p.comments, comment] }
       }),
     }))
   }
@@ -711,6 +705,8 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
           <NewPostForm
             subTab={activeTab}
             userId={userId}
+            firstName={firstName}
+            userRole={userRole}
             onPosted={handlePosted}
             onCancel={() => setComposing(false)}
           />

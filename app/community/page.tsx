@@ -25,7 +25,7 @@ export default async function CommunityPage() {
   const isCoachEmail = COACH_EMAILS.includes(user.email ?? '')
   const resolvedRole = profile?.role ?? (isCoachEmail ? 'coach' : 'member')
 
-  const { data: posts } = await supabase
+  const { data: posts } = await admin
     .from('community_posts')
     .select(`
       id, author_id, sub_tab, title, body_json, created_at, hidden,

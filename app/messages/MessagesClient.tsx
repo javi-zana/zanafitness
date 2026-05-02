@@ -102,6 +102,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
   const [coachReadAt, setCoachReadAt] = useState<string | null>(
     otherReads[0]?.last_read_at ?? null
   )
+  const [sendError, setSendError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -174,41 +175,52 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
   async function sendMessage() {
     if (sending || (!body.trim() && attachmentFiles.length === 0)) return
     setSending(true)
+    setSendError(null)
     const text = body.trim()
-    setBody('')
-    setPreviews([])
-    if (textareaRef.current) textareaRef.current.style.height = 'auto'
 
-    const { data: msg, error } = await supabase
-      .from('messages')
-      .insert({ thread_id: threadId, author_id: userId, body: text })
-      .select('id, author_id, body, created_at')
-      .single()
-
-    if (error || !msg) { setSending(false); return }
-
-    const savedAtts: Attachment[] = []
-    for (const file of attachmentFiles) {
-      const path = `${threadId}/${msg.id}/${Date.now()}-${file.name}`
-      const { error: upErr } = await supabase.storage.from('message-attachments').upload(path, file)
-      if (!upErr) {
-        const kind = file.type.startsWith('image/') ? 'image' : file.type === 'application/pdf' ? 'pdf' : 'other'
-        const { data: att } = await supabase
-          .from('message_attachments')
-          .insert({ message_id: msg.id, storage_path: path, kind })
-          .select('id, storage_path, kind')
-          .single()
-        if (att) savedAtts.push(att)
+    try {
+      const res = await fetch('/api/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thread_id: threadId, body: text }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.msg) {
+        setSendError(json.error ?? 'Failed to send message.')
+        setSending(false)
+        return
       }
-    }
 
-    setAttachmentFiles([])
-    setMessages(prev => {
-      if (prev.some(m => m.id === msg.id)) return prev
-      return [...prev, { ...msg, message_attachments: savedAtts }]
-    })
+      const msg = json.msg
+      setBody('')
+      setPreviews([])
+      if (textareaRef.current) textareaRef.current.style.height = 'auto'
+
+      const savedAtts: Attachment[] = []
+      for (const file of attachmentFiles) {
+        const path = `${threadId}/${msg.id}/${Date.now()}-${file.name}`
+        const { error: upErr } = await supabase.storage.from('message-attachments').upload(path, file)
+        if (!upErr) {
+          const kind = file.type.startsWith('image/') ? 'image' : file.type === 'application/pdf' ? 'pdf' : 'other'
+          const { data: att } = await supabase
+            .from('message_attachments')
+            .insert({ message_id: msg.id, storage_path: path, kind })
+            .select('id, storage_path, kind')
+            .single()
+          if (att) savedAtts.push(att)
+        }
+      }
+
+      setAttachmentFiles([])
+      setMessages(prev => {
+        if (prev.some(m => m.id === msg.id)) return prev
+        return [...prev, { ...msg, message_attachments: savedAtts }]
+      })
+      setTimeout(() => scrollToBottom(true), 50)
+    } catch {
+      setSendError('Network error — check your connection.')
+    }
     setSending(false)
-    setTimeout(() => scrollToBottom(true), 50)
   }
 
   // "Seen" - show under last message sent by current user if coach has read it
@@ -279,6 +291,11 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
 
       {/* Composer - fixed above bottom nav */}
       <div className="fixed bottom-16 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 px-4 py-3 z-40">
+        {sendError && (
+          <div className="mb-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20">
+            <p className="text-xs text-red-400">{sendError}</p>
+          </div>
+        )}
         {previews.length > 0 && (
           <div className="flex gap-2 mb-2 overflow-x-auto pb-1">
             {previews.map((src, i) => (
