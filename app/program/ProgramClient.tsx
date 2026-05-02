@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, FormEvent } from 'react'
+import { useState, useEffect, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import BottomNav from '@/components/BottomNav'
@@ -9,6 +9,20 @@ const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ss
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false })
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+
+type BmrContent = {
+  type: 'bmr'
+  bmr: number
+  tdee: number
+  calorie_target: number
+  protein_g: number
+  notes: string
+}
+
+type HabitsContent = {
+  type: 'habits'
+  habits: { id: string; text: string }[]
+}
 
 type SectionData = { section: string; content_json: object; updated_at: string } | null
 type PrinciplesData = { content_json: object; updated_at: string } | null
@@ -182,6 +196,145 @@ function WorkoutLogSection({
   )
 }
 
+// ─── Habits display (member-facing habits tab) ────────────────────────────────
+
+function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }) {
+  const [checked, setChecked] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    const key = `habits-${userId}-${new Date().toISOString().split('T')[0]}`
+    try {
+      const stored = localStorage.getItem(key)
+      if (stored) setChecked(JSON.parse(stored))
+    } catch { /* ignore */ }
+  }, [userId])
+
+  function toggle(id: string) {
+    const key = `habits-${userId}-${new Date().toISOString().split('T')[0]}`
+    const next = { ...checked, [id]: !checked[id] }
+    setChecked(next)
+    try { localStorage.setItem(key, JSON.stringify(next)) } catch { /* ignore */ }
+  }
+
+  const doneCount = data.habits.filter(h => checked[h.id]).length
+  const total = data.habits.length
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Today's Habits</p>
+        <p className="text-[10px] text-[#edf5e2]/30 font-mono">{doneCount}/{total} done</p>
+      </div>
+      <div className="space-y-2">
+        {data.habits.map(habit => (
+          <button
+            key={habit.id}
+            onClick={() => toggle(habit.id)}
+            className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all text-left ${
+              checked[habit.id]
+                ? 'bg-[#b0e455]/8 border-[#b0e455]/20'
+                : 'bg-[#1c2e16] border-transparent hover:border-[#b0e455]/10'
+            }`}
+          >
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
+              checked[habit.id] ? 'bg-[#b0e455] border-[#b0e455]' : 'border-[#edf5e2]/20'
+            }`}>
+              {checked[habit.id] && (
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="3" className="w-3 h-3">
+                  <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <span className={`text-sm transition-all ${checked[habit.id] ? 'text-[#edf5e2]/40 line-through' : 'text-[#edf5e2]'}`}>
+              {habit.text}
+            </span>
+          </button>
+        ))}
+      </div>
+      {doneCount === total && total > 0 && (
+        <div className="bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-2xl p-4 text-center">
+          <p className="text-sm font-semibold text-[#b0e455]">All habits done today</p>
+          <p className="text-xs text-[#edf5e2]/30 mt-0.5">Check back tomorrow to reset</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── BMR display (member-facing food tab) ─────────────────────────────────────
+
+function BmrDisplay({ data }: { data: BmrContent }) {
+  const [calories, setCalories] = useState('')
+  const calN = parseFloat(calories)
+  const remaining = !isNaN(calN) ? data.calorie_target - calN : null
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/12">
+          <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Daily Calories</p>
+          <p className="text-2xl font-bold text-[#b0e455] mt-1">{data.calorie_target}</p>
+          <p className="text-[10px] text-[#edf5e2]/25 mt-0.5">kcal target</p>
+        </div>
+        {data.protein_g > 0 && (
+          <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/12">
+            <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Protein</p>
+            <p className="text-2xl font-bold text-[#edf5e2] mt-1">{data.protein_g}<span className="text-sm text-[#edf5e2]/40">g</span></p>
+            <p className="text-[10px] text-[#edf5e2]/25 mt-0.5">daily target</p>
+          </div>
+        )}
+      </div>
+
+      <div className="bg-[#162212] rounded-2xl p-4 border border-[#b0e455]/8 space-y-2">
+        <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-2">Your Numbers</p>
+        <div className="flex justify-between text-sm">
+          <span className="text-[#edf5e2]/50">BMR (at rest)</span>
+          <span className="text-[#edf5e2] font-mono">{data.bmr} kcal</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-[#edf5e2]/50">TDEE (with activity)</span>
+          <span className="text-[#edf5e2] font-mono">{data.tdee} kcal</span>
+        </div>
+        <div className="flex justify-between text-sm border-t border-[#b0e455]/8 pt-2 mt-1">
+          <span className="text-[#b0e455]">Your target</span>
+          <span className="text-[#b0e455] font-mono font-semibold">{data.calorie_target} kcal</span>
+        </div>
+      </div>
+
+      {data.notes ? (
+        <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8">
+          <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-2">Coach's Notes</p>
+          <p className="text-sm text-[#edf5e2]/70 leading-relaxed">{data.notes}</p>
+        </div>
+      ) : null}
+
+      <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8 space-y-3">
+        <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Track Today's Calories</p>
+        <div className="flex gap-3 items-center">
+          <input
+            type="number"
+            value={calories}
+            onChange={e => setCalories(e.target.value)}
+            placeholder="Enter calories eaten"
+            className="flex-1 bg-[#0f1a0c] border border-[#b0e455]/15 rounded-xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition"
+          />
+          <span className="text-sm text-[#edf5e2]/30 shrink-0">kcal</span>
+        </div>
+        {remaining !== null && (
+          <div className={`rounded-xl px-4 py-3 flex items-center justify-between ${
+            remaining >= 0 ? 'bg-[#86efac]/8 border border-[#86efac]/15' : 'bg-[#f87171]/8 border border-[#f87171]/15'
+          }`}>
+            <span className="text-sm text-[#edf5e2]/60">{remaining >= 0 ? 'Remaining' : 'Over by'}</span>
+            <span className={`text-lg font-bold font-mono ${remaining >= 0 ? 'text-[#86efac]' : 'text-[#f87171]'}`}>
+              {Math.abs(remaining)} kcal
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState({ message }: { message: string }) {
@@ -277,7 +430,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
             <>
               <RichTextViewer content={content} />
               {updatedAt && (
-                <p className="text-xs text-[#edf5e2]/20 pt-2">{relativeTime(updatedAt)}</p>
+                <p className="text-xs text-[#edf5e2]/20 pt-2" suppressHydrationWarning>{relativeTime(updatedAt)}</p>
               )}
             </>
           ) : (
@@ -297,6 +450,14 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     const section = sectionMap[activeTab]
     const content = section?.content_json ?? null
     const updatedAt = section?.updated_at
+
+    if (activeTab === 'food' && content && (content as { type?: string }).type === 'bmr') {
+      return <BmrDisplay data={content as BmrContent} />
+    }
+
+    if (activeTab === 'habits' && content && (content as { type?: string }).type === 'habits') {
+      return <HabitsDisplay data={content as HabitsContent} userId={userId} />
+    }
 
     if (!hasContent(content)) {
       const sectionInfo: Record<string, { title: string; desc: string }> = {

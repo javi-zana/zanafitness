@@ -1,6 +1,7 @@
 'use client'
 
 import { useEditor, EditorContent, Editor } from '@tiptap/react'
+import { useRef, useEffect } from 'react'
 import StarterKit from '@tiptap/starter-kit'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
@@ -84,13 +85,18 @@ export default function RichTextEditor({
   content: object | null
   onChange: (json: object) => void
 }) {
+  // Keep a stable ref so TipTap's onUpdate always calls the latest onChange
+  // without needing to recreate the editor (fixes stale-closure bug across tab switches)
+  const onChangeRef = useRef(onChange)
+  useEffect(() => { onChangeRef.current = onChange }, [onChange])
+
   const editor = useEditor({
     extensions,
     content: content && Object.keys(content).length > 0 ? content : undefined,
     editable: true,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      onChange(editor.getJSON())
+      onChangeRef.current(editor.getJSON())
     },
   })
 

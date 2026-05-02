@@ -172,7 +172,7 @@ function PostCard({
             </div>
             <span className="text-xs text-[#edf5e2]/50">{displayName(post.author)}</span>
           </div>
-          <span className="text-xs text-[#edf5e2]/25 shrink-0">{relativeTime(post.created_at)}</span>
+          <span className="text-xs text-[#edf5e2]/25 shrink-0" suppressHydrationWarning>{relativeTime(post.created_at)}</span>
         </div>
         <h3 className="text-sm font-semibold text-[#edf5e2] leading-snug text-left">{post.title}</h3>
       </button>
@@ -262,7 +262,7 @@ function PostCard({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2">
                       <span className="text-xs text-[#edf5e2]/40">{displayName(c.author)}</span>
-                      <span className="text-[10px] text-[#edf5e2]/20">{relativeTime(c.created_at)}</span>
+                      <span className="text-[10px] text-[#edf5e2]/20" suppressHydrationWarning>{relativeTime(c.created_at)}</span>
                     </div>
                     <p className="text-sm text-[#edf5e2]/70 leading-relaxed mt-0.5">{c.body}</p>
                   </div>

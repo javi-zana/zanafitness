@@ -457,7 +457,7 @@ export default function DashboardClient({
             <div className="flex items-start justify-between mb-4">
               <div>
                 <p className="text-xs font-medium text-[#edf5e2]/40">Latest check-in</p>
-                <p className="text-xs text-[#edf5e2]/25 mt-0.5">{relTime(latest.created_at)}</p>
+                <p className="text-xs text-[#edf5e2]/25 mt-0.5" suppressHydrationWarning>{relTime(latest.created_at)}</p>
               </div>
               {fitnessGoal && (
                 <span className="text-[10px] bg-[#b0e455]/10 border border-[#b0e455]/20 text-[#b0e455] px-2.5 py-1 rounded-full font-medium">
@@ -535,7 +535,7 @@ export default function DashboardClient({
               <div className="flex-1">
                 <p className="text-sm font-semibold text-[#b0e455]">Time to check in</p>
                 <p className="text-xs text-[#edf5e2]/40">
-                  {daysSinceLast === 1 ? '1 day' : `${daysSinceLast} days`} since your last update
+                  <span suppressHydrationWarning>{daysSinceLast === 1 ? '1 day' : `${daysSinceLast} days`} since your last update</span>
                 </p>
               </div>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[#edf5e2]/25 shrink-0">

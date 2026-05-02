@@ -6,7 +6,6 @@ import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false })
-const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ssr: false })
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -18,6 +17,25 @@ type ReadReceipt = { thread_id: string; last_read_at: string }
 type ChatMessage = { id: string; author_id: string; body: string; created_at: string; message_attachments: { id: string; storage_path: string; kind: string }[] }
 type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'admin'
 type Section = 'split' | 'food' | 'habits'
+
+type BmrData = {
+  type: 'bmr'
+  gender: 'male' | 'female'
+  age: number
+  height_cm: number
+  weight_kg: number
+  activity: number
+  bmr: number
+  tdee: number
+  calorie_target: number
+  protein_g: number
+  notes: string
+}
+
+type HabitsData = {
+  type: 'habits'
+  habits: { id: string; text: string }[]
+}
 
 type Props = {
   userId: string
@@ -58,6 +76,220 @@ function confidenceColor(v: number) {
 function toDisplay(kg: number, unit: string | null) {
   if (unit === 'lb') return `${+(kg * 2.20462).toFixed(1)} lb`
   return `${+kg.toFixed(1)} kg`
+}
+
+const ACTIVITY_LEVELS = [
+  { label: 'Sedentary (desk job, little movement)', value: 1.2 },
+  { label: 'Light (1–2 workouts/week)', value: 1.375 },
+  { label: 'Moderate (3–4 workouts/week)', value: 1.55 },
+  { label: 'Active (5+ workouts/week)', value: 1.725 },
+  { label: 'Very Active (intense daily training)', value: 1.9 },
+]
+
+function calcBmr(gender: string, age: number, height_cm: number, weight_kg: number) {
+  const base = 10 * weight_kg + 6.25 * height_cm - 5 * age
+  return Math.round(gender === 'male' ? base + 5 : base - 161)
+}
+
+// ─── Habits section (coach Programs > Habits tab) ────────────────────────────
+
+function HabitsSection({ initial, onSave, saving, saved }: {
+  initial: HabitsData | null
+  onSave: (data: HabitsData) => void
+  saving: boolean
+  saved: boolean
+}) {
+  const [habits, setHabits] = useState<{ id: string; text: string }[]>(initial?.habits ?? [])
+  const [newText, setNewText] = useState('')
+
+  function addHabit() {
+    const text = newText.trim()
+    if (!text) return
+    setHabits(prev => [...prev, { id: crypto.randomUUID(), text }])
+    setNewText('')
+  }
+
+  function removeHabit(id: string) {
+    setHabits(prev => prev.filter(h => h.id !== id))
+  }
+
+  function updateHabit(id: string, text: string) {
+    setHabits(prev => prev.map(h => h.id === id ? { ...h, text } : h))
+  }
+
+  return (
+    <div className="space-y-3">
+      {habits.length > 0 && (
+        <div className="space-y-2">
+          {habits.map((habit, idx) => (
+            <div key={habit.id} className="flex items-center gap-2">
+              <span className="text-[10px] text-[#edf5e2]/20 font-mono w-4 shrink-0 text-right">{idx + 1}</span>
+              <input
+                type="text"
+                value={habit.text}
+                onChange={e => updateHabit(habit.id, e.target.value)}
+                className="flex-1 bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] focus:outline-none focus:border-[#b0e455]/40 transition"
+              />
+              <button onClick={() => removeHabit(habit.id)} className="text-[#edf5e2]/20 hover:text-[#f87171] transition shrink-0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={newText}
+          onChange={e => setNewText(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addHabit() } }}
+          placeholder="Add a habit…"
+          className="flex-1 bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition"
+        />
+        <button
+          onClick={addHabit}
+          disabled={!newText.trim()}
+          className="px-4 py-2 rounded-lg bg-[#1c2e16] border border-[#b0e455]/20 text-[10px] text-[#b0e455] font-mono uppercase tracking-widest hover:bg-[#233019] transition disabled:opacity-30 shrink-0"
+        >
+          Add
+        </button>
+      </div>
+
+      <button
+        onClick={() => onSave({ type: 'habits', habits })}
+        disabled={saving || habits.length === 0}
+        className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+      >
+        {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save Habits'}
+      </button>
+    </div>
+  )
+}
+
+// ─── BMR section (coach Programs > Food tab) ──────────────────────────────────
+
+function BmrSection({ initial, onSave, saving, saved }: {
+  initial: BmrData | null
+  onSave: (data: BmrData) => void
+  saving: boolean
+  saved: boolean
+}) {
+  const [gender, setGender] = useState<'male' | 'female'>(initial?.gender ?? 'female')
+  const [age, setAge] = useState(String(initial?.age ?? ''))
+  const [height, setHeight] = useState(String(initial?.height_cm ?? ''))
+  const [weight, setWeight] = useState(String(initial?.weight_kg ?? ''))
+  const [activity, setActivity] = useState(String(initial?.activity ?? '1.55'))
+  const [calorieTarget, setCalorieTarget] = useState(String(initial?.calorie_target ?? ''))
+  const [protein, setProtein] = useState(String(initial?.protein_g ?? ''))
+  const [notes, setNotes] = useState(initial?.notes ?? '')
+
+  const ageN = parseFloat(age)
+  const heightN = parseFloat(height)
+  const weightN = parseFloat(weight)
+  const activityN = parseFloat(activity)
+  const valid = ageN > 0 && heightN > 0 && weightN > 0
+
+  const bmr = valid ? calcBmr(gender, ageN, heightN, weightN) : null
+  const tdee = valid ? Math.round((bmr ?? 0) * activityN) : null
+
+  function handleSave() {
+    if (!valid || !bmr || !tdee) return
+    const ct = parseFloat(calorieTarget) || tdee
+    const pg = parseFloat(protein) || 0
+    onSave({ type: 'bmr', gender, age: ageN, height_cm: heightN, weight_kg: weightN, activity: activityN, bmr, tdee, calorie_target: ct, protein_g: pg, notes })
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Gender</p>
+          <div className="flex gap-2">
+            {(['female', 'male'] as const).map(g => (
+              <button
+                key={g}
+                onClick={() => setGender(g)}
+                className={`flex-1 py-2 rounded-lg text-xs font-mono capitalize transition ${
+                  gender === g ? 'bg-[#b0e455] text-[#0f1a0c]' : 'bg-[#162212] border border-[#b0e455]/12 text-[#edf5e2]/50 hover:text-[#edf5e2]'
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Age</p>
+          <input type="number" value={age} onChange={e => setAge(e.target.value)} placeholder="e.g. 28"
+            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+        </div>
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Height (cm)</p>
+          <input type="number" value={height} onChange={e => setHeight(e.target.value)} placeholder="e.g. 165"
+            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+        </div>
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Weight (kg)</p>
+          <input type="number" value={weight} onChange={e => setWeight(e.target.value)} placeholder="e.g. 65"
+            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+        </div>
+      </div>
+
+      <div>
+        <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Activity Level</p>
+        <select value={activity} onChange={e => setActivity(e.target.value)}
+          className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] focus:outline-none focus:border-[#b0e455]/40 transition">
+          {ACTIVITY_LEVELS.map(a => (
+            <option key={a.value} value={a.value}>{a.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {valid && bmr && tdee && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-[#1c2e16] rounded-xl p-3 border border-[#b0e455]/8">
+            <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">BMR</p>
+            <p className="text-lg font-bold text-[#edf5e2] mt-0.5">{bmr} <span className="text-xs text-[#edf5e2]/40">kcal</span></p>
+          </div>
+          <div className="bg-[#1c2e16] rounded-xl p-3 border border-[#b0e455]/8">
+            <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">TDEE</p>
+            <p className="text-lg font-bold text-[#b0e455] mt-0.5">{tdee} <span className="text-xs text-[#edf5e2]/40">kcal</span></p>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Daily Calorie Target</p>
+          <input type="number" value={calorieTarget} onChange={e => setCalorieTarget(e.target.value)} placeholder={tdee ? String(tdee) : 'kcal'}
+            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+        </div>
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Protein Target (g)</p>
+          <input type="number" value={protein} onChange={e => setProtein(e.target.value)} placeholder="e.g. 130"
+            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+        </div>
+      </div>
+
+      <div>
+        <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Notes (optional)</p>
+        <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+          placeholder="Timing notes, meal quality guidance, exceptions…"
+          className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition resize-none" />
+      </div>
+
+      <button
+        onClick={handleSave}
+        disabled={!valid || saving}
+        className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+      >
+        {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save Nutrition Plan'}
+      </button>
+    </div>
+  )
 }
 
 // ─── Coach nav ────────────────────────────────────────────────────────────────
@@ -176,16 +408,15 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
 
 // ─── Home tab ─────────────────────────────────────────────────────────────────
 
-function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstName, userEmail }: {
+function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstName }: {
   members: Member[]
   allStats: Stat[]
   threads: Thread[]
   lastMessages: MsgPreview[]
   isHeadCoach: boolean
   firstName: string | null
-  userEmail: string
 }) {
-  const name = firstName ?? userEmail.split('@')[0]
+  const name = firstName ?? 'Coach'
   const h = new Date().getHours()
   const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
 
@@ -272,7 +503,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-[#edf5e2] truncate">{memberName(m)}</p>
-                    <p className="text-[10px] text-[#edf5e2]/30 font-mono">
+                    <p className="text-[10px] text-[#edf5e2]/30 font-mono" suppressHydrationWarning>
                       {relTime(s.created_at)} ago
                       {s.weight_kg != null ? ` · ${toDisplay(s.weight_kg, m.weight_unit)}` : ''}
                       {s.confidence != null ? ` · ${s.confidence}/10` : ''}
@@ -319,11 +550,12 @@ const STATUS_LABEL: Record<string, string> = {
   none: 'No data',
 }
 
-function MembersTab({ members, allStats, threads, lastMessages }: {
+function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }: {
   members: Member[]
   allStats: Stat[]
   threads: Thread[]
   lastMessages: MsgPreview[]
+  onOpenProgram: (memberId: string) => void
 }) {
   const supabase = createClient()
   const [stats, setStats] = useState<Stat[]>(allStats)
@@ -412,7 +644,11 @@ function MembersTab({ members, allStats, threads, lastMessages }: {
           {sortedMembers.map(({ member, stat, lastMsg }) => {
             const status = checkinStatus(stat)
             return (
-              <div key={member.id} className="bg-[#1c2e16] rounded-xl p-4 flex items-center gap-4 border border-transparent hover:border-[#b0e455]/10 transition-colors">
+              <button
+                key={member.id}
+                onClick={() => onOpenProgram(member.id)}
+                className="w-full bg-[#1c2e16] rounded-xl p-4 flex items-center gap-4 border border-transparent hover:border-[#b0e455]/10 transition-colors text-left"
+              >
                 <div className="relative shrink-0">
                   <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
                     {memberName(member).charAt(0).toUpperCase()}
@@ -423,7 +659,7 @@ function MembersTab({ members, allStats, threads, lastMessages }: {
                   <p className="text-sm font-semibold text-[#edf5e2] truncate">{memberName(member)}</p>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     {stat ? (
-                      <p className="text-[10px] text-[#edf5e2]/30 font-mono">
+                      <p className="text-[10px] text-[#edf5e2]/30 font-mono" suppressHydrationWarning>
                         Check-in {relTime(stat.created_at)} ago
                         {stat.weight_kg != null ? ` · ${toDisplay(stat.weight_kg, member.weight_unit)}` : ''}
                         {stat.confidence != null ? <span style={{ color: confidenceColor(stat.confidence) }}> · {stat.confidence}/10</span> : null}
@@ -432,19 +668,24 @@ function MembersTab({ members, allStats, threads, lastMessages }: {
                       <p className="text-[10px] text-[#edf5e2]/20 font-mono">No check-ins</p>
                     )}
                     {lastMsg && (
-                      <p className="text-[10px] text-[#edf5e2]/20 font-mono">Msg {relTime(lastMsg.created_at)} ago</p>
+                      <p className="text-[10px] text-[#edf5e2]/20 font-mono" suppressHydrationWarning>Msg {relTime(lastMsg.created_at)} ago</p>
                     )}
                   </div>
                 </div>
-                <span className={`shrink-0 text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded-full ${
-                  status === 'fresh' ? 'text-[#86efac] bg-[#86efac]/10'
-                  : status === 'ok' ? 'text-[#fbbf24] bg-[#fbbf24]/10'
-                  : status === 'overdue' ? 'text-[#f87171] bg-[#f87171]/10'
-                  : 'text-[#edf5e2]/20 bg-[#edf5e2]/5'
-                }`}>
-                  {STATUS_LABEL[status]}
-                </span>
-              </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded-full ${
+                    status === 'fresh' ? 'text-[#86efac] bg-[#86efac]/10'
+                    : status === 'ok' ? 'text-[#fbbf24] bg-[#fbbf24]/10'
+                    : status === 'overdue' ? 'text-[#f87171] bg-[#f87171]/10'
+                    : 'text-[#edf5e2]/20 bg-[#edf5e2]/5'
+                  }`}>
+                    {STATUS_LABEL[status]}
+                  </span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[#edf5e2]/20">
+                    <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+              </button>
             )
           })}
         </div>
@@ -461,7 +702,7 @@ function MembersTab({ members, allStats, threads, lastMessages }: {
                 <div key={s.id} className="bg-[#1c2e16] rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs font-semibold text-[#edf5e2]">{memberName(m)}</p>
-                    <p className="text-[10px] text-[#edf5e2]/25 font-mono">{relTime(s.created_at)} ago</p>
+                    <p className="text-[10px] text-[#edf5e2]/25 font-mono" suppressHydrationWarning>{relTime(s.created_at)} ago</p>
                   </div>
                   <div className="flex gap-4">
                     {s.weight_kg != null && (
@@ -489,7 +730,7 @@ function MembersTab({ members, allStats, threads, lastMessages }: {
 
 // ─── Programs tab ─────────────────────────────────────────────────────────────
 
-function ProgramsTab({ members, userId }: { members: Member[]; userId: string }) {
+function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; userId: string; initialMemberId?: string | null }) {
   const supabase = createClient()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<Section>('split')
@@ -499,6 +740,12 @@ function ProgramsTab({ members, userId }: { members: Member[]; userId: string })
 
   const selected = members.find(m => m.id === selectedId) ?? null
   const SECTIONS: Section[] = ['split', 'food', 'habits']
+
+  useEffect(() => {
+    if (initialMemberId && initialMemberId !== selectedId) {
+      selectMember(initialMemberId)
+    }
+  }, [initialMemberId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function selectMember(id: string) {
     setSelectedId(id)
@@ -519,6 +766,32 @@ function ProgramsTab({ members, userId }: { members: Member[]; userId: string })
       { member_id: selectedId, section: activeSection, content_json: sections[activeSection] ?? {}, updated_by: userId },
       { onConflict: 'member_id,section' }
     )
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function saveHabitsSection(data: HabitsData) {
+    if (!selectedId) return
+    setSaving(true)
+    await supabase.from('program_sections').upsert(
+      { member_id: selectedId, section: 'habits', content_json: data, updated_by: userId },
+      { onConflict: 'member_id,section' }
+    )
+    setSections(prev => ({ ...prev, habits: data }))
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function saveFoodSection(data: BmrData) {
+    if (!selectedId) return
+    setSaving(true)
+    await supabase.from('program_sections').upsert(
+      { member_id: selectedId, section: 'food', content_json: data, updated_by: userId },
+      { onConflict: 'member_id,section' }
+    )
+    setSections(prev => ({ ...prev, food: data }))
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
@@ -561,13 +834,15 @@ function ProgramsTab({ members, userId }: { members: Member[]; userId: string })
           </svg>
         </button>
         <p className="text-sm font-semibold text-[#edf5e2]">{memberName(selected!)}</p>
-        <button
-          onClick={saveSection}
-          disabled={saving}
-          className="ml-auto text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:text-[#c9f070] transition disabled:opacity-50"
-        >
-          {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save'}
-        </button>
+        {activeSection === 'split' && (
+          <button
+            onClick={saveSection}
+            disabled={saving}
+            className="ml-auto text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:text-[#c9f070] transition disabled:opacity-50"
+          >
+            {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save'}
+          </button>
+        )}
       </div>
 
       {/* Section tabs */}
@@ -585,10 +860,29 @@ function ProgramsTab({ members, userId }: { members: Member[]; userId: string })
         ))}
       </div>
 
-      <RichTextEditor
-        content={sections[activeSection] ?? null}
-        onChange={json => setSections(prev => ({ ...prev, [activeSection]: json }))}
-      />
+      {activeSection === 'food' ? (
+        <BmrSection
+          key={selectedId}
+          initial={(sections.food as BmrData | null | undefined) ?? null}
+          onSave={saveFoodSection}
+          saving={saving}
+          saved={saved}
+        />
+      ) : activeSection === 'habits' ? (
+        <HabitsSection
+          key={selectedId}
+          initial={(sections.habits as HabitsData | null | undefined) ?? null}
+          onSave={saveHabitsSection}
+          saving={saving}
+          saved={saved}
+        />
+      ) : (
+        <RichTextEditor
+          key={`${selectedId}-${activeSection}`}
+          content={sections[activeSection] ?? null}
+          onChange={json => setSections(prev => ({ ...prev, [activeSection]: json }))}
+        />
+      )}
     </div>
   )
 }
@@ -613,6 +907,8 @@ function MessagesTab({
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -644,13 +940,19 @@ function MessagesTab({
 
   async function openThread(threadId: string) {
     setSelectedThreadId(threadId)
-    const { data } = await supabase
+    setLoadError(null)
+    const { data, error } = await supabase
       .from('messages')
       .select('id, author_id, body, created_at, message_attachments(id, storage_path, kind)')
       .eq('thread_id', threadId)
       .order('created_at', { ascending: true })
       .limit(100)
-    setChatMessages((data ?? []) as ChatMessage[])
+    if (error) {
+      setLoadError('Could not load messages. The RLS fix migration may need to be applied — see console.')
+      console.error('openThread error:', error)
+    } else {
+      setChatMessages((data ?? []) as ChatMessage[])
+    }
     await supabase.from('message_reads').upsert({
       thread_id: threadId, user_id: userId, last_read_at: new Date().toISOString(),
     })
@@ -678,17 +980,29 @@ function MessagesTab({
   async function send() {
     if (!selectedThreadId || !body.trim() || sending) return
     setSending(true)
+    setSendError(null)
     const text = body.trim()
-    setBody('')
-    if (textareaRef.current) textareaRef.current.style.height = 'auto'
-    const { data: msg } = await supabase
-      .from('messages')
-      .insert({ thread_id: selectedThreadId, author_id: userId, body: text })
-      .select('id, author_id, body, created_at')
-      .single()
-    if (msg) setChatMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, message_attachments: [] }])
+    try {
+      const res = await fetch('/api/send-message', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ thread_id: selectedThreadId, body: text }),
+      })
+      const json = await res.json()
+      if (!res.ok || !json.msg) {
+        setSendError(`Failed to send: ${json.error ?? 'Unknown error'}`)
+        console.error('send-message error:', json.error)
+      } else {
+        setBody('')
+        if (textareaRef.current) textareaRef.current.style.height = 'auto'
+        setChatMessages(prev => prev.some(m => m.id === json.msg.id) ? prev : [...prev, { ...json.msg, message_attachments: [] }])
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+      }
+    } catch (err) {
+      setSendError('Network error — check your connection.')
+      console.error('send-message fetch error:', err)
+    }
     setSending(false)
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -733,7 +1047,7 @@ function MessagesTab({
                 )}
               </div>
               {last && (
-                <p className="text-[10px] text-[#edf5e2]/25 font-mono shrink-0">{relTime(last.created_at)}</p>
+                <p className="text-[10px] text-[#edf5e2]/25 font-mono shrink-0" suppressHydrationWarning>{relTime(last.created_at)}</p>
               )}
             </button>
           )
@@ -758,6 +1072,15 @@ function MessagesTab({
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-1 pb-4" style={{ maxHeight: 'calc(100vh - 340px)' }}>
+        {loadError && (
+          <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-3 text-xs text-[#f87171]">{loadError}</div>
+        )}
+        {!loadError && chatMessages.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-sm text-[#edf5e2]/20">No messages yet.</p>
+            <p className="text-xs text-[#edf5e2]/12 mt-1">Send the first message below.</p>
+          </div>
+        )}
         {chatMessages.map(msg => {
           const isMine = msg.author_id === userId
           return (
@@ -773,11 +1096,17 @@ function MessagesTab({
         <div ref={bottomRef} />
       </div>
 
+      {sendError && (
+        <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-2.5 text-xs text-[#f87171] mb-2">
+          {sendError}
+        </div>
+      )}
+
       <div className="flex items-end gap-2 pt-3 border-t border-[#b0e455]/8">
         <textarea
           ref={textareaRef}
           value={body}
-          onChange={e => { setBody(e.target.value); const ta = textareaRef.current; if (ta) { ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight}px` } }}
+          onChange={e => { setBody(e.target.value); setSendError(null); const ta = textareaRef.current; if (ta) { ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight}px` } }}
           onKeyDown={handleKeyDown}
           placeholder="Message…"
           rows={1}
@@ -802,14 +1131,13 @@ function MessagesTab({
 type AdminProfile = { id: string; email: string; first_name: string | null; role: string }
 type Assignment = { member_id: string; coach_id: string }
 
-function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) {
+function AdminTab({ userEmail }: { userEmail: string }) {
   // Live data
   const [coaches, setCoaches] = useState<AdminProfile[]>([])
   const [members, setMembers] = useState<AdminProfile[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [threads, setThreads] = useState<Thread[]>([])
   const [loading, setLoading] = useState(true)
-  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null)
 
   // New member notifications
   const [newMembers, setNewMembers] = useState<AdminProfile[]>([])
@@ -859,7 +1187,6 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
       setMembers(freshMembers)
       setAssignments(json.assignments ?? [])
       setThreads(json.threads ?? [])
-      setLastRefreshed(new Date())
     }
     if (showLoading) setLoading(false)
   }
@@ -1225,7 +1552,13 @@ function AdminTab({ userId, userEmail }: { userId: string; userEmail: string }) 
 
 export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads }: Props) {
   const [activeTab, setActiveTab] = useState<CoachTab>('home')
+  const [programMemberId, setProgramMemberId] = useState<string | null>(null)
   const isHeadCoach = userRole === 'head_coach'
+
+  function openMemberProgram(memberId: string) {
+    setProgramMemberId(memberId)
+    setActiveTab('programs')
+  }
 
   const TAB_TITLES: Record<CoachTab, string> = {
     home: 'Home',
@@ -1263,13 +1596,13 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:pb-10 lg:pt-6">
         {activeTab === 'home' && (
-          <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} userEmail={userEmail} />
+          <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} />
         )}
         {activeTab === 'members' && (
-          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} />
+          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} onOpenProgram={openMemberProgram} />
         )}
         {activeTab === 'programs' && (
-          <ProgramsTab members={members} userId={userId} />
+          <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} />
         )}
         {activeTab === 'messages' && (
           <MessagesTab
@@ -1281,7 +1614,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
           />
         )}
         {activeTab === 'admin' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
-          <AdminTab userId={userId} userEmail={userEmail} />
+          <AdminTab userEmail={userEmail} />
         )}
       </div>
 

@@ -29,7 +29,9 @@ export default async function CoachPage() {
     redirect('/login')
   }
 
-  const role = profile?.role ?? (isWhitelisted ? 'head_coach' : 'coach')
+  const profileRole = profile?.role ?? null
+  const isValidCoachRole = profileRole === 'coach' || profileRole === 'head_coach'
+  const role = isValidCoachRole ? profileRole : (isWhitelisted ? 'head_coach' : 'coach')
   const isHeadCoach = role === 'head_coach'
 
   // Head coach sees all members; regular coach sees only assigned members
