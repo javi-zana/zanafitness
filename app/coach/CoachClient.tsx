@@ -388,7 +388,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             }`}>
               {t.icon}
             </div>
-            <span className={`text-[9px] tracking-wide uppercase font-medium ${
+            <span className={`text-[9px] uppercase font-medium ${
               active === t.id ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
             }`}>
               {t.label}
@@ -399,7 +399,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
           <div className="w-12 h-7 flex items-center justify-center rounded-full text-[#edf5e2]/25">
             {communityIcon}
           </div>
-          <span className="text-[9px] tracking-wide uppercase font-medium text-[#edf5e2]/25">Community</span>
+          <span className="text-[9px] uppercase font-medium text-[#edf5e2]/25">Community</span>
         </Link>
       </nav>
     </>
@@ -466,7 +466,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
         </div>
         <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[#1c2e16] border-[#b0e455]/8'}`}>
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[#edf5e2]/30'}`}>{needAttention}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Need Attention</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Attention</p>
         </div>
         <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
           <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
@@ -477,12 +477,12 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
       {/* Quick links */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-[#1a2630] border border-[#60a5fa]/10 rounded-xl p-4">
-          <p className="text-[10px] text-[#60a5fa] uppercase tracking-widest font-mono mb-1">Programs</p>
+          <p className="text-[10px] text-[#60a5fa] uppercase tracking-wider font-mono mb-1">Programs</p>
           <p className="text-sm font-semibold text-[#edf5e2]">{members.length} member{members.length !== 1 ? 's' : ''}</p>
           <p className="text-[10px] text-[#edf5e2]/30 mt-0.5">Click Programs to edit</p>
         </div>
         <div className="bg-[#261a2a] border border-[#c084fc]/10 rounded-xl p-4">
-          <p className="text-[10px] text-[#c084fc] uppercase tracking-widest font-mono mb-1">Messages</p>
+          <p className="text-[10px] text-[#c084fc] uppercase tracking-wider font-mono mb-1">Messages</p>
           <p className="text-sm font-semibold text-[#edf5e2]">{threads.length} thread{threads.length !== 1 ? 's' : ''}</p>
           <p className="text-[10px] text-[#edf5e2]/30 mt-0.5">Click Messages to chat</p>
         </div>
@@ -735,6 +735,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<Section>('split')
   const [sections, setSections] = useState<Partial<Record<Section, object | null>>>({})
+  const [sectionLoadKey, setSectionLoadKey] = useState(0)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -750,6 +751,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
   async function selectMember(id: string) {
     setSelectedId(id)
     setActiveSection('split')
+    setSections({})
     const { data } = await supabase
       .from('program_sections')
       .select('section, content_json')
@@ -757,6 +759,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
     const map: Partial<Record<Section, object | null>> = {}
     for (const row of data ?? []) map[row.section as Section] = row.content_json
     setSections(map)
+    setSectionLoadKey(k => k + 1)
   }
 
   async function saveSection() {
@@ -862,7 +865,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
 
       {activeSection === 'food' ? (
         <BmrSection
-          key={selectedId}
+          key={`${selectedId}-${sectionLoadKey}`}
           initial={(sections.food as BmrData | null | undefined) ?? null}
           onSave={saveFoodSection}
           saving={saving}
@@ -870,7 +873,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
         />
       ) : activeSection === 'habits' ? (
         <HabitsSection
-          key={selectedId}
+          key={`${selectedId}-${sectionLoadKey}`}
           initial={(sections.habits as HabitsData | null | undefined) ?? null}
           onSave={saveHabitsSection}
           saving={saving}
@@ -878,7 +881,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
         />
       ) : (
         <RichTextEditor
-          key={`${selectedId}-${activeSection}`}
+          key={`${selectedId}-${activeSection}-${sectionLoadKey}`}
           content={sections[activeSection] ?? null}
           onChange={json => setSections(prev => ({ ...prev, [activeSection]: json }))}
         />
@@ -905,6 +908,7 @@ function MessagesTab({
   const supabase = createClient()
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [lastMsgState, setLastMsgState] = useState<MsgPreview[]>(lastMessages)
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
@@ -915,9 +919,9 @@ function MessagesTab({
   const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
   const threadMap = Object.fromEntries(threads.map(t => [t.id, t]))
 
-  // Last message per thread (already sorted desc by server)
+  // Last message per thread — kept in sync as messages are loaded/sent
   const lastMsgByThread: Record<string, MsgPreview> = {}
-  for (const msg of lastMessages) {
+  for (const msg of lastMsgState) {
     if (!lastMsgByThread[msg.thread_id]) lastMsgByThread[msg.thread_id] = msg
   }
 
@@ -948,7 +952,15 @@ function MessagesTab({
         setLoadError(`Could not load messages: ${json.error ?? 'Unknown error'}`)
         console.error('get-thread-messages error:', json.error)
       } else {
-        setChatMessages(json.messages as ChatMessage[])
+        const msgs = json.messages as ChatMessage[]
+        setChatMessages(msgs)
+        if (msgs.length > 0) {
+          const latest = msgs[msgs.length - 1]
+          setLastMsgState(prev => {
+            const filtered = prev.filter(m => m.thread_id !== threadId)
+            return [{ thread_id: threadId, body: latest.body, created_at: latest.created_at, author_id: latest.author_id }, ...filtered]
+          })
+        }
       }
     } catch (err) {
       setLoadError('Network error loading messages.')
@@ -997,6 +1009,10 @@ function MessagesTab({
         setBody('')
         if (textareaRef.current) textareaRef.current.style.height = 'auto'
         setChatMessages(prev => prev.some(m => m.id === json.msg.id) ? prev : [...prev, { ...json.msg, message_attachments: [] }])
+        setLastMsgState(prev => {
+          const filtered = prev.filter(m => m.thread_id !== selectedThreadId)
+          return [{ thread_id: selectedThreadId!, body: text, created_at: json.msg.created_at, author_id: userId }, ...filtered]
+        })
         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
       }
     } catch (err) {
