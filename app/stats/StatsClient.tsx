@@ -15,12 +15,20 @@ type StatUpdate = {
   created_at: string
   stat_update_photos: Photo[]
 }
+type ProgressPhoto = {
+  id: string
+  photo_url: string
+  photo_type: 'before' | 'weekly'
+  taken_at: string
+  created_at: string
+}
 
 type Props = {
   userId: string
   weightUnit: 'kg' | 'lb'
   initialStats: StatUpdate[]
   showNudge: boolean
+  initialProgressPhotos: ProgressPhoto[]
 }
 
 // ─── Weight helpers ────────────────────────────────────────────────────────────
@@ -170,6 +178,236 @@ function PhotoThumb({ path }: { path: string }) {
       alt=""
       className="w-20 h-20 rounded-xl object-cover shrink-0 bg-[#edf5e2]/5"
     />
+  )
+}
+
+// ─── Progress photos ──────────────────────────────────────────────────────────
+
+function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
+  const [photos, setPhotos] = useState<ProgressPhoto[]>(
+    [...initialPhotos].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+  )
+  const [uploading, setUploading] = useState<'before' | 'weekly' | null>(null)
+  const [error, setError] = useState('')
+  const [lightbox, setLightbox] = useState<string | null>(null)
+  const beforeInputRef = useRef<HTMLInputElement>(null)
+  const weeklyInputRef = useRef<HTMLInputElement>(null)
+
+  const beforePhoto = photos.find(p => p.photo_type === 'before') ?? null
+  const weeklyPhotos = photos.filter(p => p.photo_type === 'weekly')
+  const latestWeekly = weeklyPhotos[weeklyPhotos.length - 1] ?? null
+
+  async function uploadPhoto(file: File, type: 'before' | 'weekly') {
+    setUploading(type)
+    setError('')
+    if (beforeInputRef.current) beforeInputRef.current.value = ''
+    if (weeklyInputRef.current) weeklyInputRef.current.value = ''
+
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('photo_type', type)
+    const res = await fetch('/api/upload-progress-photo', { method: 'POST', body: fd })
+    const json = await res.json()
+
+    if (!res.ok) {
+      setError(json.error ?? 'Upload failed')
+    } else {
+      setPhotos(prev =>
+        [...prev, json.photo as ProgressPhoto].sort((a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        )
+      )
+    }
+    setUploading(null)
+  }
+
+  async function deletePhoto(id: string) {
+    const res = await fetch('/api/upload-progress-photo', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    })
+    if (res.ok) setPhotos(prev => prev.filter(p => p.id !== id))
+  }
+
+  function photoLabel(photo: ProgressPhoto) {
+    if (photo.photo_type === 'before') return 'Before'
+    const idx = photos.filter(p => p.photo_type === 'weekly').findIndex(p => p.id === photo.id)
+    return `Week ${idx + 1}`
+  }
+
+  const cameraIcon = (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7">
+      <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="13" r="3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+
+  return (
+    <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-[#edf5e2]/35 uppercase tracking-wide font-medium">Progress Photos</p>
+        {photos.length > 0 && (
+          <button
+            onClick={() => weeklyInputRef.current?.click()}
+            disabled={uploading !== null}
+            className="text-xs text-[#b0e455]/60 hover:text-[#b0e455] transition font-medium disabled:opacity-40"
+          >
+            + Add weekly
+          </button>
+        )}
+      </div>
+
+      {/* Before vs Latest comparison */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Before slot */}
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 uppercase tracking-wide mb-1.5">Before</p>
+          {beforePhoto ? (
+            <div
+              className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#0f1a0c] cursor-pointer"
+              onClick={() => setLightbox(beforePhoto.photo_url)}
+            >
+              <img src={beforePhoto.photo_url} alt="Before" className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => beforeInputRef.current?.click()}
+              disabled={uploading !== null}
+              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[#edf5e2]/10 flex flex-col items-center justify-center gap-2 text-[#edf5e2]/25 hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+            >
+              {uploading === 'before' ? (
+                <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+              ) : (
+                <>
+                  {cameraIcon}
+                  <span className="text-xs font-medium">Upload</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Latest weekly slot */}
+        <div>
+          <p className="text-[10px] text-[#edf5e2]/30 uppercase tracking-wide mb-1.5">
+            {latestWeekly ? `Week ${weeklyPhotos.length}` : 'Latest'}
+          </p>
+          {latestWeekly ? (
+            <div
+              className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#0f1a0c] cursor-pointer"
+              onClick={() => setLightbox(latestWeekly.photo_url)}
+            >
+              <img src={latestWeekly.photo_url} alt="Latest" className="w-full h-full object-cover" />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => weeklyInputRef.current?.click()}
+              disabled={uploading !== null}
+              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[#edf5e2]/10 flex flex-col items-center justify-center gap-2 text-[#edf5e2]/25 hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+            >
+              {uploading === 'weekly' ? (
+                <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+              ) : (
+                <>
+                  {cameraIcon}
+                  <span className="text-xs font-medium">Add weekly</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* No photos CTA */}
+      {photos.length === 0 && !uploading && (
+        <p className="text-xs text-[#edf5e2]/25 text-center leading-relaxed">
+          Upload a &quot;Before&quot; photo to start tracking your visual progress over time.
+        </p>
+      )}
+
+      {/* Timeline strip */}
+      {photos.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {photos.map(photo => (
+            <div key={photo.id} className="shrink-0 flex flex-col items-center gap-1">
+              <div
+                className="relative w-14 h-14 rounded-xl overflow-hidden bg-[#162212] cursor-pointer"
+                onClick={() => setLightbox(photo.photo_url)}
+              >
+                <img src={photo.photo_url} alt="" className="w-full h-full object-cover" />
+                <button
+                  onClick={e => { e.stopPropagation(); deletePhoto(photo.id) }}
+                  className="absolute top-0.5 right-0.5 w-4 h-4 bg-[#0f1a0c]/80 rounded-full flex items-center justify-center"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2 h-2 text-[#edf5e2]/60">
+                    <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-[9px] text-[#edf5e2]/25 uppercase tracking-wide">{photoLabel(photo)}</p>
+            </div>
+          ))}
+          {/* Add weekly button */}
+          <div className="shrink-0 flex flex-col items-center gap-1">
+            <button
+              onClick={() => weeklyInputRef.current?.click()}
+              disabled={uploading !== null}
+              className="w-14 h-14 rounded-xl border border-dashed border-[#edf5e2]/10 flex items-center justify-center text-[#edf5e2]/20 hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+              </svg>
+            </button>
+            <p className="text-[9px] text-[#edf5e2]/20 uppercase tracking-wide">Add</p>
+          </div>
+        </div>
+      )}
+
+      {error && <p className="text-xs text-red-400">{error}</p>}
+
+      {/* Hidden file inputs */}
+      <input
+        ref={beforeInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto(f, 'before') }}
+      />
+      <input
+        ref={weeklyInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={e => { const f = e.target.files?.[0]; if (f) uploadPhoto(f, 'weekly') }}
+      />
+
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <img
+            src={lightbox}
+            alt=""
+            className="max-w-full max-h-[90vh] object-contain rounded-2xl"
+            onClick={e => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
+              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -363,7 +601,7 @@ function LogForm({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function StatsClient({ userId, weightUnit, initialStats, showNudge }: Props) {
+export default function StatsClient({ userId, weightUnit, initialStats, showNudge, initialProgressPhotos }: Props) {
   const [stats, setStats] = useState<StatUpdate[]>(initialStats)
   const [nudgeDismissed, setNudgeDismissed] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
@@ -378,119 +616,126 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
 
   return (
     <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
-      <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
-        <div>
-          <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
-          <h1 className="text-xl font-bold tracking-tight lg:text-3xl">My Stats</h1>
-        </div>
-        {!formOpen && (
-          <button
-            onClick={() => setFormOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
-              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-            </svg>
-            Log
-          </button>
-        )}
-      </div>
+      <div className="flex-1 flex flex-col lg:max-w-4xl lg:mx-auto lg:w-full">
 
-      <div className="flex-1 overflow-y-auto px-5 pt-4 pb-28 space-y-4 lg:px-10 lg:pt-8 lg:max-w-4xl lg:pb-10 lg:space-y-5">
-        {showNudge && !nudgeDismissed && !formOpen && (
-          <div className="relative bg-[#b0e455] rounded-2xl p-5 overflow-hidden">
-            <div className="absolute inset-0 opacity-10"
-              style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #fff 0%, transparent 60%)' }}
-            />
-            <div className="relative flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <p className="text-base font-bold text-[#0f1a0c] tracking-tight">Time to log</p>
-                <p className="text-sm text-[#0f1a0c]/70 mt-1 leading-relaxed">
-                  {stats.length === 0
-                    ? "You haven't logged any stats yet. Drop your first update."
-                    : "It's been 3+ days since your last update. Keep the momentum going."}
-                </p>
+        <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
+          <div>
+            <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+            <h1 className="text-xl font-bold tracking-tight lg:text-3xl">My Stats</h1>
+          </div>
+          {!formOpen && (
+            <button
+              onClick={() => setFormOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+              </svg>
+              Log
+            </button>
+          )}
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 pt-4 pb-28 space-y-4 lg:px-10 lg:pt-8 lg:pb-10 lg:space-y-5">
+
+          {showNudge && !nudgeDismissed && !formOpen && (
+            <div className="relative bg-[#b0e455] rounded-2xl p-5 overflow-hidden">
+              <div className="absolute inset-0 opacity-10"
+                style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, #fff 0%, transparent 60%)' }}
+              />
+              <div className="relative flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <p className="text-base font-bold text-[#0f1a0c] tracking-tight">Time to log</p>
+                  <p className="text-sm text-[#0f1a0c]/70 mt-1 leading-relaxed">
+                    {stats.length === 0
+                      ? "You haven't logged any stats yet. Drop your first update."
+                      : "It's been 3+ days since your last update. Keep the momentum going."}
+                  </p>
+                  <button
+                    onClick={() => setFormOpen(true)}
+                    className="mt-4 inline-flex items-center gap-2 bg-[#0f1a0c] text-[#b0e455] text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-[#162212] transition"
+                  >
+                    Log now
+                  </button>
+                </div>
                 <button
-                  onClick={() => setFormOpen(true)}
-                  className="mt-4 inline-flex items-center gap-2 bg-[#0f1a0c] text-[#b0e455] text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-[#162212] transition"
+                  onClick={() => setNudgeDismissed(true)}
+                  className="text-[#0f1a0c]/30 hover:text-[#0f1a0c]/60 transition shrink-0 mt-0.5"
                 >
-                  Log now
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                    <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+                  </svg>
                 </button>
               </div>
-              <button
-                onClick={() => setNudgeDismissed(true)}
-                className="text-[#0f1a0c]/30 hover:text-[#0f1a0c]/60 transition shrink-0 mt-0.5"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-                </svg>
-              </button>
             </div>
-          </div>
-        )}
+          )}
 
-        {formOpen && (
-          <div className="bg-[#1c2e16] rounded-2xl p-5 border border-[#b0e455]/8">
-            <h2 className="text-sm font-semibold text-[#edf5e2]/60 mb-5">New Update</h2>
-            <LogForm
-              userId={userId}
-              weightUnit={weightUnit}
-              onSaved={handleSaved}
-              onCancel={() => setFormOpen(false)}
-            />
-          </div>
-        )}
+          {formOpen && (
+            <div className="bg-[#1c2e16] rounded-2xl p-5 border border-[#b0e455]/8">
+              <h2 className="text-sm font-semibold text-[#edf5e2]/60 mb-5">New Update</h2>
+              <LogForm
+                userId={userId}
+                weightUnit={weightUnit}
+                onSaved={handleSaved}
+                onCancel={() => setFormOpen(false)}
+              />
+            </div>
+          )}
 
-        {chartStats.length > 0 && !formOpen && (
-          <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8">
-            <p className="text-xs text-[#edf5e2]/35 uppercase tracking-wide mb-3">Weight trend</p>
-            <WeightChart stats={chartStats} unit={weightUnit} />
-          </div>
-        )}
+          {chartStats.length > 0 && !formOpen && (
+            <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8">
+              <p className="text-xs text-[#edf5e2]/35 uppercase tracking-wide mb-3">Weight trend</p>
+              <WeightChart stats={chartStats} unit={weightUnit} />
+            </div>
+          )}
 
-        {stats.length === 0 && !formOpen ? (
-          <div className="space-y-3 pt-2">
-            <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
-              <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">What you'll track</p>
-              {[
-                { icon: <path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />, label: "Body weight", desc: "Logged in kg or lbs, charted over time so you can see the trend clearly." },
-                { icon: <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />, label: "Confidence score", desc: "How you're feeling about your progress on a 1-10 scale. Tells your coach a lot." },
-                { icon: <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />, label: "Progress photos", desc: "Optional. Attach photos to any check-in to build a visual record over time." },
-              ].map(item => (
-                <div key={item.label} className="flex gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-4.5 h-4.5 w-5 h-5">{item.icon}</svg>
+          <ProgressPhotos initialPhotos={initialProgressPhotos} />
+
+          {stats.length === 0 && !formOpen ? (
+            <div className="space-y-3 pt-2">
+              <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
+                <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">What you&apos;ll track</p>
+                {[
+                  { icon: <path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />, label: "Body weight", desc: "Logged in kg or lbs, charted over time so you can see the trend clearly." },
+                  { icon: <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />, label: "Confidence score", desc: "How you're feeling about your progress on a 1-10 scale. Tells your coach a lot." },
+                  { icon: <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />, label: "Progress photos", desc: "Before and weekly photos to visually track your transformation over time." },
+                ].map(item => (
+                  <div key={item.label} className="flex gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-5 h-5">{item.icon}</svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{item.label}</p>
+                      <p className="text-xs text-[#edf5e2]/40 mt-0.5 leading-relaxed">{item.desc}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-semibold">{item.label}</p>
-                    <p className="text-xs text-[#edf5e2]/40 mt-0.5 leading-relaxed">{item.desc}</p>
-                  </div>
-                </div>
+                ))}
+              </div>
+              <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
+                <p className="text-sm font-semibold mb-2">How often should I log?</p>
+                <p className="text-sm text-[#edf5e2]/45 leading-relaxed">
+                  At least once a week - ideally every 3-4 days. Consistency matters more than frequency. Even weekly data gives your coach a clear picture of what's actually happening.
+                </p>
+              </div>
+              <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-5">
+                <p className="text-sm font-semibold text-[#b0e455] mb-1">Ready to start?</p>
+                <p className="text-sm text-[#edf5e2]/50 leading-relaxed">
+                  Tap <strong className="text-[#edf5e2]/70">Log</strong> above to drop your first check-in. It takes less than a minute.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {stats.length > 0 && (
+                <p className="text-xs text-[#edf5e2]/30 uppercase tracking-wide">History</p>
+              )}
+              {stats.map(stat => (
+                <StatCard key={stat.id} stat={stat} unit={weightUnit} />
               ))}
             </div>
-            <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
-              <p className="text-sm font-semibold mb-2">How often should I log?</p>
-              <p className="text-sm text-[#edf5e2]/45 leading-relaxed">
-                At least once a week - ideally every 3-4 days. Consistency matters more than frequency. Even weekly data gives your coach a clear picture of what's actually happening.
-              </p>
-            </div>
-            <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-5">
-              <p className="text-sm font-semibold text-[#b0e455] mb-1">Ready to start?</p>
-              <p className="text-sm text-[#edf5e2]/50 leading-relaxed">
-                Tap <strong className="text-[#edf5e2]/70">Log</strong> above to drop your first check-in. It takes less than a minute.
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {stats.length > 0 && (
-              <p className="text-xs text-[#edf5e2]/30 uppercase tracking-wide">History</p>
-            )}
-            {stats.map(stat => (
-              <StatCard key={stat.id} stat={stat} unit={weightUnit} />
-            ))}
-          </div>
-        )}
+          )}
+
+        </div>
       </div>
 
       <BottomNav />
