@@ -941,17 +941,18 @@ function MessagesTab({
   async function openThread(threadId: string) {
     setSelectedThreadId(threadId)
     setLoadError(null)
-    const { data, error } = await supabase
-      .from('messages')
-      .select('id, author_id, body, created_at, message_attachments(id, storage_path, kind)')
-      .eq('thread_id', threadId)
-      .order('created_at', { ascending: true })
-      .limit(100)
-    if (error) {
-      setLoadError('Could not load messages. The RLS fix migration may need to be applied — see console.')
-      console.error('openThread error:', error)
-    } else {
-      setChatMessages((data ?? []) as ChatMessage[])
+    try {
+      const res = await fetch(`/api/get-thread-messages?thread_id=${threadId}`)
+      const json = await res.json()
+      if (!res.ok) {
+        setLoadError(`Could not load messages: ${json.error ?? 'Unknown error'}`)
+        console.error('get-thread-messages error:', json.error)
+      } else {
+        setChatMessages(json.messages as ChatMessage[])
+      }
+    } catch (err) {
+      setLoadError('Network error loading messages.')
+      console.error('get-thread-messages fetch error:', err)
     }
     await supabase.from('message_reads').upsert({
       thread_id: threadId, user_id: userId, last_read_at: new Date().toISOString(),
