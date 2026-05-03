@@ -54,13 +54,17 @@ export default function ApplyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState<Form>(empty);
-  const firstInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const set = (field: keyof Form, value: string | number) =>
     setForm(f => ({ ...f, [field]: value }));
 
   useEffect(() => {
-    if (step >= 0) setTimeout(() => firstInputRef.current?.focus(), 60);
+    if (step >= 0) setTimeout(() => {
+      inputRef.current?.focus();
+      textareaRef.current?.focus();
+    }, 60);
   }, [step]);
 
   const canContinue = () => {
@@ -198,7 +202,7 @@ export default function ApplyPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>First name *</label>
-                  <input ref={firstInputRef} type="text" value={form.firstName}
+                  <input ref={inputRef} type="text" value={form.firstName}
                     onChange={e => set('firstName', e.target.value)}
                     placeholder="Marco" className={inputCls} autoComplete="given-name" />
                 </div>
@@ -279,7 +283,7 @@ export default function ApplyPage() {
                   Be specific. "Lose weight" tells me nothing. "Look good with my shirt off at Bali in October" tells me everything.
                 </p>
               </div>
-              <textarea ref={firstInputRef as React.RefObject<HTMLTextAreaElement>} value={form.mirrorGoal} rows={5}
+              <textarea ref={textareaRef} value={form.mirrorGoal} rows={5}
                 onChange={e => set('mirrorGoal', e.target.value)}
                 placeholder="Be honest and specific…" className={textareaCls} />
             </>
@@ -296,7 +300,7 @@ export default function ApplyPage() {
                   Diet? Inconsistency? Doesn't fit your life? Tried programs and fell off? No judgment — just need to know what we're solving.
                 </p>
               </div>
-              <textarea ref={firstInputRef as React.RefObject<HTMLTextAreaElement>} value={form.whatStopped} rows={5}
+              <textarea ref={textareaRef} value={form.whatStopped} rows={5}
                 onChange={e => set('whatStopped', e.target.value)}
                 placeholder="Be real with me…" className={textareaCls} />
             </>
@@ -394,7 +398,7 @@ export default function ApplyPage() {
                   What's making you reach out now vs. 6 months ago? <span className="text-white/20">(Optional)</span>
                 </p>
               </div>
-              <textarea ref={firstInputRef as React.RefObject<HTMLTextAreaElement>} value={form.whyNow} rows={5}
+              <textarea ref={textareaRef} value={form.whyNow} rows={5}
                 onChange={e => set('whyNow', e.target.value)}
                 placeholder="Totally optional — but I always read these." className={textareaCls} />
             </>
