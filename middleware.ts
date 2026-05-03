@@ -40,10 +40,10 @@ export async function middleware(request: NextRequest) {
   const needsAuth = authPaths.some(p => pathname.startsWith(p))
   const needsMembership = memberPaths.some(p => pathname.startsWith(p))
 
-  // Not logged in → /login
+  // Not logged in → /
   if (!user && (needsAuth || needsMembership)) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    url.pathname = '/'
     return NextResponse.redirect(url)
   }
 
@@ -68,14 +68,14 @@ export async function middleware(request: NextRequest) {
     const hasAccess = profile?.status === 'active' || profile?.role === 'coach' || profile?.role === 'member'
     if (!hasAccess) {
       const url = request.nextUrl.clone()
-      url.pathname = '/login'
+      url.pathname = '/'
       url.searchParams.set('error', 'no_access')
       return NextResponse.redirect(url)
     }
   }
 
-  // Already logged in → skip /login (unless they're being shown a no-access message)
-  if (user && pathname === '/login' && !request.nextUrl.searchParams.has('error')) {
+  // Already logged in → skip login screens (unless showing a no-access message)
+  if (user && (pathname === '/' || pathname === '/login') && !request.nextUrl.searchParams.has('error')) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)

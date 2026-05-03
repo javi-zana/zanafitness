@@ -1,14 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState, FormEvent, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Lock, X, ArrowUpRight } from 'lucide-react';
-import Navbar from '@/app/components/Navbar';
-import Footer from '@/app/components/Footer';
+import { createClient } from '@/utils/supabase/client';
 
-// ─── Logo ─────────────────────────────────────────────────────────────────────
-
-const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
+const ZanaLogo = ({ className = "h-5" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
     <path d="M0,2 H32 L18.3,14" />
     <path d="M13.7,18 L0,30 H32" />
@@ -18,356 +15,221 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
-// ─── Modals ───────────────────────────────────────────────────────────────────
+// ── Replace this href with the actual application form URL ───────────────────
+const APPLICATION_FORM_URL = '#apply';
 
-function WaitlistModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-      <div className="relative bg-[var(--c-card2)] border border-[var(--c-border2)] rounded-3xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-2xl" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-5 right-5 text-[var(--c-text4)] hover:text-[var(--c-text)] transition-colors">
-          <X className="w-4 h-4" />
-        </button>
-        <ZanaLogo className="h-5 text-[var(--c-text4)] mb-10" />
-        <div className="w-8 h-px bg-[#b0e455]/30 mb-8" />
-        <p className="text-xs font-medium text-[#b0e455] mb-3 tracking-wider uppercase">You're on the list</p>
-        <h2 className="text-2xl font-bold text-[var(--c-text)] mb-4">We'll be in touch soon.</h2>
-        <p className="text-sm text-[var(--c-text3)] leading-relaxed">We'll reach out when slots open. Get ready.</p>
-        <div className="w-8 h-px bg-[var(--c-border)] mt-8 mb-8" />
-        <p className="text-xs text-[var(--c-text4)]">Built for results. Not motivation.</p>
-      </div>
-    </div>
-  );
-}
-
-function DuplicateModal({ onClose }: { onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
-      <div className="relative bg-[var(--c-card2)] border border-[var(--c-border2)] rounded-3xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-2xl" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-5 right-5 text-[var(--c-text4)] hover:text-[var(--c-text)] transition-colors">
-          <X className="w-4 h-4" />
-        </button>
-        <ZanaLogo className="h-5 text-[var(--c-text4)] mb-10" />
-        <p className="text-xs text-[var(--c-text4)] mb-3">Already Registered</p>
-        <h2 className="text-2xl font-bold text-[var(--c-text)] mb-4">Love the commitment.</h2>
-        <p className="text-sm text-[var(--c-text3)] leading-relaxed">You're already on the list.<br />We'll reach out when it's time.</p>
-      </div>
-    </div>
-  );
-}
-
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
-export default function LandingPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const noAccess = searchParams.get('error') === 'no_access';
+  const [error, setError] = useState(!noAccess ? (searchParams.get('error') ?? '') : '');
+  const [forgotSent, setForgotSent] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotLoading, setForgotLoading] = useState(false);
 
-  const handleWaitlist = async (e: React.FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    setStatus('loading');
-    const res = await fetch('/api/waitlist', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    if (res.ok) { setStatus('success'); setEmail(''); }
-    else if (res.status === 409) { setStatus('duplicate'); }
-    else { setStatus('error'); }
+    setLoading(true);
+    setError('');
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+
+    setLoading(false);
+    if (error) {
+      setError(error.message === 'Invalid login credentials'
+        ? 'Incorrect email or password.'
+        : error.message);
+    } else {
+      router.push('/dashboard');
+      router.refresh();
+    }
   };
 
-  return (
-    <main className="bg-[var(--c-bg)] text-[var(--c-text)] selection:bg-[#b0e455] selection:text-[#0f1a0c]">
+  const handleForgotPassword = async (e: FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    const supabase = createClient();
+    await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setForgotLoading(false);
+    setForgotSent(true);
+  };
 
-      {status === 'success'   && <WaitlistModal   onClose={() => setStatus('idle')} />}
-      {status === 'duplicate' && <DuplicateModal  onClose={() => setStatus('idle')} />}
-
-      <Navbar />
-
-      {/* ── HERO ─────────────────────────────────────────────────────────────
-          Always dark — full-bleed photo with gradient overlay. Text must stay
-          white regardless of the page theme. */}
-      <section className="relative min-h-screen flex flex-col justify-end pb-20 md:pb-28 overflow-hidden">
-
-        <div className="absolute inset-0">
-          <div className="w-full h-full bg-[url('/671A2489-147A-4CFB-9BE4-8E41C0B1B66A.PNG')] bg-cover bg-[60%_20%]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/55 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-black/35 to-transparent" />
+  if (showForgot) {
+    return forgotSent ? (
+      <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-8 text-center space-y-4">
+        <div className="w-12 h-12 rounded-full border-2 border-[var(--c-accent-text)] flex items-center justify-center mx-auto bg-[var(--c-accent-text)]/8">
+          <svg viewBox="0 0 16 16" className="w-5 h-5 text-[var(--c-accent-text)]" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M2 8l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
+        <p className="text-sm font-semibold text-[var(--c-accent-text)]">Check your inbox</p>
+        <p className="text-sm text-[var(--c-text)]/55 leading-relaxed">
+          A reset link was sent to<br />
+          <span className="text-[var(--c-text)] font-medium">{forgotEmail}</span>
+        </p>
+        <button
+          onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(''); }}
+          className="text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
+        >
+          ← Back to sign in
+        </button>
+      </div>
+    ) : (
+      <form onSubmit={handleForgotPassword} className="space-y-4">
+        <p className="text-sm text-[var(--c-text3)] text-center leading-relaxed">
+          Enter your email and we'll send a reset link.
+        </p>
+        <input
+          type="email"
+          placeholder="Email address"
+          required
+          value={forgotEmail}
+          onChange={e => setForgotEmail(e.target.value)}
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={forgotLoading}
+          className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40"
+        >
+          {forgotLoading ? 'Sending...' : 'Send Reset Link'}
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowForgot(false)}
+          className="w-full text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
+        >
+          ← Back to sign in
+        </button>
+      </form>
+    );
+  }
 
-        <div className="absolute top-32 left-6 md:left-12 z-10">
-          <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-full px-4 py-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
-            <p className="text-xs font-medium text-[#b0e455]">Online Coaching Program</p>
-          </span>
+  if (noAccess) {
+    return (
+      <div className="space-y-5 text-center">
+        <div className="w-14 h-14 rounded-full bg-[var(--c-accent-text)]/8 border border-[var(--c-border2)] flex items-center justify-center mx-auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[var(--c-accent-text)]">
+            <path d="M12 15v2m0-10v4m-7.07 7.07A10 10 0 1019.07 4.93 10 10 0 004.93 19.07z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
-
-        <div className="relative z-10 px-6 md:px-12 max-w-5xl">
-          <h1 className="font-display leading-[0.95] mb-6 text-white" style={{ fontSize: "clamp(52px, 7vw, 88px)" }}>
-            Lose 3-5%<br />
-            <span className="text-[#b0e455]">Body Fat.</span><br />
-            In 4 Months.
-          </h1>
-          <p className="text-base text-white/60 mb-10 max-w-xs leading-relaxed">
-            Without overhauling your life. A system built around how you actually live.
+        <div>
+          <p className="text-base font-semibold text-[var(--c-text)]">Membership required</p>
+          <p className="text-sm text-[var(--c-text3)] mt-1.5 leading-relaxed">
+            Your account doesn't have an active membership.<br />
+            Apply to get access.
           </p>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/system" className="inline-flex items-center gap-2 bg-[#b0e455] text-[#0f1a0c] px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#c9f070] transition-colors">
-              Get Started <ArrowUpRight className="w-4 h-4" />
-            </Link>
-            <Link href="/about" className="inline-flex items-center gap-2 border border-white/20 text-white px-7 py-3.5 rounded-full text-sm hover:border-white/40 hover:bg-white/5 transition-colors">
-              About Javi
-            </Link>
-          </div>
         </div>
+        <a
+          href={APPLICATION_FORM_URL}
+          className="block w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors text-center"
+        >
+          Apply to Join
+        </a>
+        <button
+          type="button"
+          onClick={async () => {
+            const supabase = createClient();
+            await supabase.auth.signOut();
+            window.location.href = '/';
+          }}
+          className="text-sm text-[var(--c-text4)] hover:text-[var(--c-text)] transition-colors"
+        >
+          Sign in with a different account
+        </button>
+      </div>
+    );
+  }
 
-        <div className="absolute bottom-20 right-6 md:right-12 z-10 text-right">
-          <p className="text-xs text-white/35">Javier Lorenzana</p>
-          <p className="text-xs text-white/25 mt-0.5">Online Coach</p>
+  return (
+    <form onSubmit={handleLogin} className="space-y-3">
+      <input
+        type="email"
+        placeholder="Email address"
+        required
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        required
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+      />
+
+      {error && (
+        <div className="bg-red-500/8 border border-red-500/20 rounded-xl px-4 py-3">
+          <p className="text-sm text-red-400 text-center">{error}</p>
         </div>
-      </section>
+      )}
 
-      {/* ── MARQUEE ───────────────────────────────────────────────────────── */}
-      <div className="bg-[#b0e455] text-[#0f1a0c] py-3 overflow-hidden">
-        <div className="flex whitespace-nowrap animate-marquee">
-          {Array(8).fill(null).map((_, i) => (
-            <span key={i} className="text-sm font-semibold tracking-wide px-8">
-              3-5% Body Fat &nbsp;·&nbsp; 4 Months &nbsp;·&nbsp; Direct Coaching &nbsp;·&nbsp; Real Results &nbsp;·&nbsp; No Fluff &nbsp;·&nbsp;
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {loading ? 'Signing in...' : 'Sign In'}
+      </button>
+
+      <div className="flex items-center justify-between pt-1">
+        <button
+          type="button"
+          onClick={() => setShowForgot(true)}
+          className="text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
+        >
+          Forgot password?
+        </button>
+        <a
+          href={APPLICATION_FORM_URL}
+          className="text-sm text-[var(--c-accent-text)] hover:opacity-75 transition-colors"
+        >
+          Apply to join
+        </a>
+      </div>
+    </form>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col">
+
+      <nav className="flex items-center justify-center px-8 py-5 border-b border-[var(--c-border)]">
+        <ZanaLogo className="h-5 text-[var(--c-text)]" />
+      </nav>
+
+      <div className="flex-1 flex items-center justify-center px-6 py-16">
+        <div className="w-full max-w-sm">
+
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-2 bg-[var(--c-accent-text)]/8 border border-[var(--c-border2)] rounded-full px-4 py-1.5 mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--c-accent-text)]" />
+              <p className="text-xs font-medium text-[var(--c-accent-text)]">Member Access</p>
             </span>
-          ))}
+            <h1 className="font-display leading-none mb-3" style={{ fontSize: "clamp(40px, 6vw, 60px)" }}>
+              Welcome<br />back.
+            </h1>
+            <p className="text-sm text-[var(--c-text3)]">
+              Sign in to your account
+            </p>
+          </div>
+
+          <Suspense fallback={<div className="h-32" />}>
+            <LoginForm />
+          </Suspense>
+
         </div>
       </div>
-
-      {/* ── METRICS ───────────────────────────────────────────────────────── */}
-      <section className="py-16 md:py-20 px-6 md:px-12 border-b border-[var(--c-border)]">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
-          {[
-            { num: '3–5%', label: 'Body fat reduced', sub: 'In 4 months on average' },
-            { num: '16 wks', label: 'Start to results', sub: 'Visible transformation' },
-            { num: '1:1', label: 'Direct coaching', sub: 'No group chat ghosting' },
-            { num: 'Weekly', label: 'Check-ins with Javi', sub: 'Reviewed personally' },
-          ].map(m => (
-            <div key={m.num} className="flex flex-col gap-1.5">
-              <p className="font-display text-4xl md:text-5xl text-[#b0e455] leading-none">{m.num}</p>
-              <p className="text-sm font-semibold text-[var(--c-text)] mt-1">{m.label}</p>
-              <p className="text-xs text-[var(--c-text4)]">{m.sub}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── WHO IT'S FOR ──────────────────────────────────────────────────── */}
-      <section className="py-24 md:py-36 px-6 md:px-12">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end gap-12 md:gap-20">
-            <div className="flex-1">
-              <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-5">The Reality</p>
-              <h2 className="font-display leading-none" style={{ fontSize: "clamp(40px, 5.5vw, 72px)" }}>
-                You've built<br />a great life.<br />
-                <span className="text-[var(--c-text4)]">Your body<br />hasn't kept up.</span>
-              </h2>
-            </div>
-            <div className="md:w-80 space-y-5">
-              <p className="text-base text-[var(--c-text3)] leading-relaxed">
-                Skinny-fat. Soft in clothes. Not where you want to be — despite having the income, the wardrobe, the career.
-              </p>
-              <div className="w-8 h-px bg-[#b0e455]/30" />
-              <p className="text-base text-[var(--c-text4)] leading-relaxed">
-                You know what to do. You just never had a system that fit your actual life.
-              </p>
-              <p className="text-base font-semibold text-[#b0e455]">Now you do.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SPLIT - SYSTEM PILLARS ────────────────────────────────────────── */}
-      <section className="grid grid-cols-1 md:grid-cols-2 min-h-[70vh]">
-        <div className="relative h-[50vh] md:h-auto">
-          <div className="absolute inset-0 bg-[url('/A502086F-E304-43B4-87C1-93658EDB79F0.PNG')] bg-cover bg-center" />
-          <div className="absolute inset-0 bg-black/25" />
-        </div>
-        <div className="bg-[var(--c-card)] flex flex-col justify-center px-10 md:px-16 py-16 border-l border-[var(--c-border)]">
-          <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-8">How It Works</p>
-          <h2 className="font-display leading-none mb-10" style={{ fontSize: "clamp(36px, 4.5vw, 60px)" }}>
-            A system<br />built on<br />structure.
-          </h2>
-          <div className="space-y-8">
-            {[
-              { n: "01", title: "Training", desc: "Progressive split built for your schedule. 45-60 min sessions, no fluff, structured for the lean aesthetic look." },
-              { n: "02", title: "Nutrition", desc: "Real food, clear macros. No extreme cuts. Fits your life in Singapore, Manila, Jakarta, or wherever you are." },
-              { n: "03", title: "Guidance", desc: "Weekly check-ins. Constant adjustments. A coach who understands your world — the travel, the client dinners." },
-            ].map(p => (
-              <div key={p.n} className="flex gap-5 items-start">
-                <span className="text-sm text-[#b0e455] mt-0.5 shrink-0 font-semibold">{p.n}</span>
-                <div>
-                  <p className="text-sm font-semibold text-[var(--c-text)] mb-1">{p.title}</p>
-                  <p className="text-sm text-[var(--c-text3)] leading-relaxed">{p.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FULL-WIDTH QUOTE ─────────────────────────────────────────────────
-          Always dark — photo section with heavy overlay. Text stays white. */}
-      <section className="relative py-28 md:py-44 px-6 md:px-12 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="w-full h-full bg-[url('/F52D6DDD-5F62-414C-9B2D-5E12C333F2D3.PNG')] bg-cover bg-[50%_30%]" />
-          <div className="absolute inset-0 bg-black/85" />
-        </div>
-        <div className="relative z-10 max-w-4xl mx-auto text-center">
-          <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-8">The Outcome</p>
-          <h2 className="font-display leading-none mb-6 text-white" style={{ fontSize: "clamp(36px, 5vw, 68px)" }}>
-            Not a workout plan.<br />
-            A system that fits<br />your life and gets<br />
-            <span className="text-[#b0e455]">you lean.</span>
-          </h2>
-          <div className="mt-10 inline-flex items-center gap-3 bg-[#b0e455]/10 border border-[#b0e455]/25 rounded-full px-6 py-2.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
-            <p className="text-sm text-[#b0e455] font-medium">3-5% body fat · 4 months</p>
-          </div>
-        </div>
-      </section>
-
-      {/* ── APP PREVIEW ───────────────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-[var(--c-card)] border-y border-[var(--c-border)]">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
-
-            {/* Mock phone — intentionally dark as a device preview */}
-            <div className="w-full max-w-[240px] mx-auto md:mx-0 shrink-0">
-              <div className="bg-[#111] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-                <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/8">
-                  <ZanaLogo className="h-3.5 text-white/80" />
-                  <span className="text-[9px] font-semibold px-2 py-0.5 bg-[#86efac]/10 border border-[#86efac]/25 text-[#86efac] rounded-full">Member</span>
-                </div>
-                <div className="p-4 space-y-3">
-                  <div>
-                    <p className="text-[10px] text-white/35 uppercase tracking-wider mb-0.5">Welcome back</p>
-                    <p className="text-sm font-semibold text-white">Priya.</p>
-                  </div>
-                  <div className="flex gap-2">
-                    {[
-                      { label: "Streak", value: "67", unit: "d", color: "text-[#b0e455]" },
-                      { label: "Phase",  value: "03", unit: "",  color: "text-white"     },
-                      { label: "Check-ins", value: "12", unit: "", color: "text-[#86efac]" },
-                    ].map(stat => (
-                      <div key={stat.label} className="flex-1 bg-white/5 border border-white/8 rounded-xl p-2.5 text-center">
-                        <p className="text-[9px] text-white/35 uppercase mb-1">{stat.label}</p>
-                        <p className={`text-base font-bold ${stat.color}`}>{stat.value}<span className="text-[9px] text-white/30 ml-0.5">{stat.unit}</span></p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="bg-white/5 border border-[#b0e455]/20 rounded-xl p-3">
-                    <p className="text-[9px] text-[#b0e455] uppercase tracking-wide mb-1.5">Today</p>
-                    <p className="text-xs font-semibold text-white">Upper Body A</p>
-                    <p className="text-[9px] text-white/40 mt-0.5">6 exercises · 55 min</p>
-                    <div className="mt-2.5 w-full bg-white/8 rounded-full h-1">
-                      <div className="bg-[#b0e455] h-1 rounded-full w-[45%]" />
-                    </div>
-                  </div>
-                  <div className="bg-white/5 border border-white/8 rounded-xl p-3">
-                    <p className="text-[9px] text-white/35 uppercase mb-1.5">Coach's Note</p>
-                    <p className="text-[10px] text-white/60 leading-relaxed">Control the eccentric. Drop the ego.</p>
-                  </div>
-                </div>
-                <div className="border-t border-white/8 flex">
-                  {["Home","Programs","Community","Messages","Schedule"].map((t, i) => (
-                    <div key={t} className={`flex-1 py-2.5 flex flex-col items-center gap-0.5 ${i === 0 ? "text-[#b0e455]" : "text-white/20"}`}>
-                      <div className={`w-2.5 h-2.5 rounded-sm ${i === 0 ? "bg-[#b0e455]/30" : "bg-white/5"}`} />
-                      <span className="text-[5px] uppercase tracking-wide">{t}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Text */}
-            <div className="flex-1">
-              <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-5">Inside the Platform</p>
-              <h2 className="font-display leading-none mb-8" style={{ fontSize: "clamp(36px, 4.5vw, 60px)" }}>
-                Everything<br />you need.<br />
-                <span className="text-[var(--c-text4)]">Nothing<br />you don't.</span>
-              </h2>
-              <div className="space-y-4 mb-10">
-                {[
-                  "Your training plan, updated as you progress",
-                  "Weekly check-ins reviewed by Javi",
-                  "Direct messaging — coach + community",
-                  "Community feed to stay accountable",
-                  "Weekly calendar & upcoming events",
-                ].map(f => (
-                  <div key={f} className="flex gap-3 items-center">
-                    <div className="w-5 h-5 rounded-full bg-[#b0e455]/12 border border-[#b0e455]/25 flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 12 12" fill="none" className="w-3 h-3">
-                        <path d="M2 6l3 3 5-5" stroke="#b0e455" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    </div>
-                    <p className="text-sm text-[var(--c-text3)]">{f}</p>
-                  </div>
-                ))}
-              </div>
-              <Link href="/system" className="inline-flex items-center gap-2 text-sm font-medium text-[#b0e455] hover:text-[#c9f070] transition-colors border border-[#b0e455]/25 px-6 py-3 rounded-full hover:border-[#b0e455]/50">
-                View Plans <ArrowUpRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── SPOTIFY ───────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 md:px-12">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-3 text-center">Train to This</p>
-          <h2 className="font-display text-center mb-2" style={{ fontSize: "clamp(28px, 3.5vw, 44px)" }}>My Personal Playlist</h2>
-          <p className="text-sm text-[var(--c-text4)] text-center mb-10">What I train to. What you'll train to.</p>
-          <div className="rounded-3xl overflow-hidden border border-[var(--c-border)]">
-            <iframe
-              src="https://open.spotify.com/embed/playlist/6hJ4JJSCPrUbb0ZD17ntQJ?utm_source=generator&theme=0"
-              width="100%" height="352"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* ── WAITLIST ──────────────────────────────────────────────────────── */}
-      <section className="relative py-28 md:py-40 px-6 md:px-12 overflow-hidden bg-[var(--c-card)] border-t border-[var(--c-border)]">
-        <div className="absolute inset-0 bg-[url('/asian_athlete_running_1777345213125.png')] bg-cover bg-center opacity-[0.04]" />
-        <div className="relative z-10 max-w-xl mx-auto flex flex-col items-center text-center">
-          <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-full px-4 py-1.5 mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
-            <p className="text-xs font-medium text-[#b0e455]">Limited Access</p>
-          </span>
-          <h2 className="font-display leading-none mb-5" style={{ fontSize: "clamp(40px, 6vw, 76px)" }}>
-            Ready to<br />get <span className="text-[#b0e455]">lean?</span>
-          </h2>
-          <p className="text-base text-[var(--c-text3)] mb-10 leading-relaxed">
-            Join the waitlist. First access when doors open.
-          </p>
-          <form onSubmit={handleWaitlist} className="w-full flex flex-col gap-3">
-            <input
-              type="email" value={email} onChange={e => setEmail(e.target.value)} required
-              placeholder="Your email address"
-              className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-2xl px-6 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
-            />
-            <button type="submit" disabled={status === 'loading'}
-              className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold px-8 py-4 rounded-2xl text-sm hover:bg-[#c9f070] transition-colors disabled:opacity-50">
-              {status === 'loading' ? 'Submitting...' : 'Join the Waitlist'}
-            </button>
-            {status === 'error' && <p className="text-xs text-red-400 text-center">Something went wrong. Try again.</p>}
-          </form>
-          <div className="flex items-center gap-2 mt-5 text-[var(--c-text4)] text-xs">
-            <Lock className="w-3 h-3" />
-            <p>Limited first access.</p>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
 
     </main>
   );
