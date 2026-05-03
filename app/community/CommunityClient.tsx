@@ -11,7 +11,7 @@ const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ss
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Author = { first_name: string | null; role: string } | null
+type Author = { first_name: string | null; role: string; avatar_url?: string | null; avatar_color?: string | null } | null
 type Comment = {
   id: string
   author_id: string
@@ -72,6 +72,24 @@ function hasContent(json: object | null | undefined) {
   return Object.keys(json).length > 0 && (j.content?.length ?? 0) > 0
 }
 
+// ─── Avatar bubble ────────────────────────────────────────────────────────────
+
+function AvatarBubble({ author, xs = false }: { author: Author; xs?: boolean }) {
+  const name = displayName(author)
+  const initial = name.charAt(0).toUpperCase()
+  const color = author?.avatar_color ?? '#b0e455'
+  const cls = xs ? 'w-5 h-5 text-[8px]' : 'w-6 h-6 text-[9px]'
+  if (author?.avatar_url) {
+    return <img src={author.avatar_url} alt={name} className={`${cls} rounded-full object-cover shrink-0`} style={{ border: `1.5px solid ${color}50` }} />
+  }
+  return (
+    <div className={`${cls} rounded-full flex items-center justify-center font-bold shrink-0`}
+      style={{ backgroundColor: color + '20', border: `1px solid ${color}40`, color }}>
+      {initial}
+    </div>
+  )
+}
+
 // ─── Post card ────────────────────────────────────────────────────────────────
 
 function PostCard({
@@ -93,7 +111,7 @@ function PostCard({
   onEdit: (postId: string, title: string, bodyJson: object | null) => Promise<void>
   onDelete: (postId: string) => Promise<void>
 }) {
-  const [expanded, setExpanded] = useState(false)
+  const [commentsOpen, setCommentsOpen] = useState(false)
   const [comment, setComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [editing, setEditing] = useState(false)
@@ -161,28 +179,26 @@ function PostCard({
 
   return (
     <div className="bg-[var(--c-card)] shadow-sm rounded-2xl overflow-hidden border border-[var(--c-border)]">
-      <button
-        className="w-full text-left px-4 pt-4 pb-3"
-        onClick={() => setExpanded(e => !e)}
-      >
+      {/* Header: avatar + name + time */}
+      <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#b0e455]/12 border border-[var(--c-border2)] flex items-center justify-center text-[9px] font-bold text-[var(--c-accent-text)] shrink-0">
-              {displayName(post.author).charAt(0).toUpperCase()}
-            </div>
+            <AvatarBubble author={post.author} />
             <span className="text-xs text-[var(--c-text3)]">{displayName(post.author)}</span>
           </div>
           <span className="text-xs text-[var(--c-text4)] shrink-0" suppressHydrationWarning>{relativeTime(post.created_at)}</span>
         </div>
-        <h3 className="text-sm font-semibold text-[var(--c-text)] leading-snug text-left">{post.title}</h3>
-      </button>
+        <h3 className="text-sm font-semibold text-[var(--c-text)] leading-snug">{post.title}</h3>
+      </div>
 
-      {expanded && hasContent(post.body_json) && (
+      {/* Body — always visible */}
+      {hasContent(post.body_json) && (
         <div className="px-4 pb-3 border-t border-[#b0e455]/5 pt-3">
           <RichTextViewer content={post.body_json} />
         </div>
       )}
 
+      {/* Action bar */}
       <div className="px-4 pb-3 flex items-center gap-4 border-t border-[#b0e455]/5 pt-2.5">
         <button
           onClick={() => onReact(post.id, hasReacted)}
@@ -201,13 +217,13 @@ function PostCard({
         </button>
 
         <button
-          onClick={() => setExpanded(e => !e)}
-          className="flex items-center gap-1.5 text-[var(--c-text4)] hover:text-[var(--c-text)]/60 transition"
+          onClick={() => setCommentsOpen(o => !o)}
+          className={`flex items-center gap-1.5 transition ${commentsOpen ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)] hover:text-[var(--c-text)]/60'}`}
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
             <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className="text-xs">{visibleComments.length > 0 ? visibleComments.length : ''}</span>
+          <span className="text-xs">{visibleComments.length > 0 ? visibleComments.length : 'Comment'}</span>
         </button>
 
         <div className="ml-auto flex items-center gap-3">
@@ -250,18 +266,17 @@ function PostCard({
         </div>
       </div>
 
-      {expanded && (
+      {/* Comments section — toggled by comment button */}
+      {commentsOpen && (
         <div className="border-t border-[#b0e455]/5 px-4 py-3 space-y-3">
           {visibleComments.length > 0 && (
             <div className="space-y-2.5">
               {visibleComments.map(c => (
                 <div key={c.id} className="flex gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center text-[8px] font-medium text-[var(--c-text3)] shrink-0 mt-0.5">
-                    {displayName(c.author).charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
+                  <AvatarBubble author={c.author} xs />
+                  <div className="flex-1 min-w-0 mt-0.5">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xs text-[var(--c-text3)]">{displayName(c.author)}</span>
+                      <span className="text-xs font-medium text-[var(--c-text3)]">{displayName(c.author)}</span>
                       <span className="text-[10px] text-[var(--c-text4)]" suppressHydrationWarning>{relativeTime(c.created_at)}</span>
                     </div>
                     <p className="text-sm text-[var(--c-text2)] leading-relaxed mt-0.5">{c.body}</p>
@@ -416,6 +431,8 @@ function NewPostForm({
   userId,
   firstName,
   userRole,
+  avatarUrl,
+  avatarColor,
   onPosted,
   onCancel,
 }: {
@@ -423,6 +440,8 @@ function NewPostForm({
   userId: string
   firstName: string | null
   userRole: string
+  avatarUrl: string | null
+  avatarColor: string
   onPosted: (post: Post) => void
   onCancel: () => void
 }) {
@@ -453,7 +472,7 @@ function NewPostForm({
     if (err || !inserted) { setError('Failed to post. Try again.'); return }
     const post: Post = {
       ...inserted,
-      author: { first_name: firstName, role: userRole },
+      author: { first_name: firstName, role: userRole, avatar_url: avatarUrl, avatar_color: avatarColor },
       reactions: [],
       comments: [],
     }
@@ -648,7 +667,7 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
     if (!inserted) return
     const comment: Comment = {
       ...inserted,
-      author: { first_name: firstName, role: userRole },
+      author: { first_name: firstName, role: userRole, avatar_url: avatarUrl, avatar_color: avatarColor },
     }
     setPostsByTab(prev => ({
       ...prev,
@@ -742,6 +761,8 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
             userId={userId}
             firstName={firstName}
             userRole={userRole}
+            avatarUrl={avatarUrl}
+            avatarColor={avatarColor}
             onPosted={handlePosted}
             onCancel={() => setComposing(false)}
           />

@@ -79,6 +79,8 @@ function computeStreak(dates: string[]): number {
 
 // ─── Workout log section ──────────────────────────────────────────────────────
 
+type ExerciseRow = { id: number; move: string; kg: string; reps: string; sets: string }
+
 function WorkoutLogSection({
   userId,
   workoutDates,
@@ -94,15 +96,31 @@ function WorkoutLogSection({
   const today = new Date().toISOString().split('T')[0]
   const todayLogged = workoutDates.includes(today)
   const [open, setOpen] = useState(false)
+  const [rows, setRows] = useState<ExerciseRow[]>([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
+  let nextId = rows.length + 1
+
+  function updateRow(id: number, field: keyof ExerciseRow, value: string) {
+    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
+  }
+
+  function addRow() {
+    setRows(prev => [...prev, { id: nextId++, move: '', kg: '', reps: '', sets: '' }])
+  }
+
+  function removeRow(id: number) {
+    setRows(prev => prev.length > 1 ? prev.filter(r => r.id !== id) : prev)
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setLoading(true)
+    const exercises = rows.filter(r => r.move.trim())
+    const payload = JSON.stringify({ v: 1, exercises, notes: notes.trim() || null })
     await supabase
       .from('workout_logs')
-      .upsert({ member_id: userId, logged_date: today, notes: notes.trim() || null }, { onConflict: 'member_id,logged_date' })
+      .upsert({ member_id: userId, logged_date: today, notes: payload }, { onConflict: 'member_id,logged_date' })
 
     const newDates = workoutDates.includes(today) ? workoutDates : [today, ...workoutDates]
     const streak = computeStreak(newDates)
@@ -121,6 +139,7 @@ function WorkoutLogSection({
     }
 
     onLogged(today, toAward)
+    setRows([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
     setNotes('')
     setOpen(false)
     setLoading(false)
@@ -153,14 +172,81 @@ function WorkoutLogSection({
             </svg>
           </button>
         </div>
+
+        {/* Exercise table header */}
+        <div className="grid grid-cols-[1fr_60px_52px_52px_24px] gap-1.5 px-1">
+          {['Move', 'kg', 'Reps', 'Sets', ''].map((h, i) => (
+            <p key={i} className="text-[9px] font-semibold text-[var(--c-text4)] uppercase tracking-wider text-center first:text-left">{h}</p>
+          ))}
+        </div>
+
+        {/* Exercise rows */}
+        <div className="space-y-2">
+          {rows.map(row => (
+            <div key={row.id} className="grid grid-cols-[1fr_60px_52px_52px_24px] gap-1.5 items-center">
+              <input
+                value={row.move}
+                onChange={e => updateRow(row.id, 'move', e.target.value)}
+                placeholder="Exercise name"
+                className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+              />
+              <input
+                value={row.kg}
+                onChange={e => updateRow(row.id, 'kg', e.target.value)}
+                placeholder="—"
+                type="number"
+                min="0"
+                className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+              />
+              <input
+                value={row.reps}
+                onChange={e => updateRow(row.id, 'reps', e.target.value)}
+                placeholder="—"
+                type="number"
+                min="0"
+                className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+              />
+              <input
+                value={row.sets}
+                onChange={e => updateRow(row.id, 'sets', e.target.value)}
+                placeholder="—"
+                type="number"
+                min="0"
+                className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+              />
+              <button
+                type="button"
+                onClick={() => removeRow(row.id)}
+                className="w-6 h-6 flex items-center justify-center text-[var(--c-text4)] hover:text-red-400 transition rounded-full"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={addRow}
+          className="flex items-center gap-1.5 text-xs font-medium text-[var(--c-accent-text)] hover:opacity-75 transition"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+          </svg>
+          Add exercise
+        </button>
+
         <textarea
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          maxLength={500}
-          rows={3}
-          placeholder="Optional notes - what did you do? How did it feel?"
+          maxLength={300}
+          rows={2}
+          placeholder="Any notes? (optional)"
           className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-2xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
         />
+
         <div className="flex gap-3">
           <button
             type="button"
@@ -174,7 +260,7 @@ function WorkoutLogSection({
             disabled={loading}
             className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
           >
-            {loading ? 'Saving…' : 'Done - Log It'}
+            {loading ? 'Saving…' : 'Log It'}
           </button>
         </div>
       </form>

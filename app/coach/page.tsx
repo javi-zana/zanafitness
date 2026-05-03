@@ -52,7 +52,7 @@ export default async function CoachPage() {
 
   const [{ data: members }, { data: allStats }, { data: threads }] = await Promise.all([
     memberIds.length
-      ? admin.from('profiles').select('id, first_name, email, role, weight_unit').in('id', memberIds)
+      ? admin.from('profiles').select('id, first_name, email, role, weight_unit, avatar_url, avatar_color').in('id', memberIds)
       : Promise.resolve({ data: [] }),
     memberIds.length
       ? admin
@@ -95,7 +95,7 @@ export default async function CoachPage() {
       firstName={profile?.first_name ?? null}
       avatarColor={profile?.avatar_color ?? '#b0e455'}
       avatarUrl={profile?.avatar_url ?? null}
-      members={(members ?? []) as { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null }[]}
+      members={(members ?? []) as { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null; avatar_url: string | null; avatar_color: string | null }[]}
       allStats={(allStats ?? []) as { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }[]}
       threads={(threads ?? []) as { id: string; member_id: string }[]}
       lastMessages={(lastMessages ?? []) as { thread_id: string; body: string; created_at: string; author_id: string }[]}

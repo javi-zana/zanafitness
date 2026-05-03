@@ -45,13 +45,13 @@
   --c-accent-text: #b0e455;  /* Full lime reads fine on dark backgrounds */
 
   --c-text:     #FFFFFF;
-  --c-text2:    rgba(255, 255, 255, 0.70);
-  --c-text3:    rgba(255, 255, 255, 0.45);
-  --c-text4:    rgba(255, 255, 255, 0.28);
-  --c-text5:    rgba(255, 255, 255, 0.15);
+  --c-text2:    rgba(255, 255, 255, 0.82);
+  --c-text3:    rgba(255, 255, 255, 0.60);
+  --c-text4:    rgba(255, 255, 255, 0.42);
+  --c-text5:    rgba(255, 255, 255, 0.25);
 
-  --c-border:   rgba(255, 255, 255, 0.08);
-  --c-border2:  rgba(255, 255, 255, 0.12);
+  --c-border:   rgba(255, 255, 255, 0.11);
+  --c-border2:  rgba(255, 255, 255, 0.18);
 
   --background: #111111;
   --foreground: #FFFFFF;

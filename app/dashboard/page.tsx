@@ -23,7 +23,7 @@ export default async function DashboardPage() {
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0]
 
-  const [{ data: stats }, { data: thread }, { data: latestAnn }, { data: workoutLogs }, { data: milestoneRows }, { data: referralRow }] = await Promise.all([
+  const [{ data: stats }, { data: thread }, { data: latestAnn }, { data: workoutLogs }, { data: milestoneRows }, { data: referralRow }, { data: statDates }] = await Promise.all([
     supabase
       .from('stat_updates')
       .select('id, weight_kg, confidence, milestone_text, created_at')
@@ -58,6 +58,12 @@ export default async function DashboardPage() {
       .select('code')
       .eq('referrer_id', user.id)
       .maybeSingle(),
+    supabase
+      .from('stat_updates')
+      .select('created_at')
+      .eq('member_id', user.id)
+      .gte('created_at', ninetyDaysAgo + 'T00:00:00')
+      .order('created_at', { ascending: false }),
   ])
 
   let referralCode = referralRow?.code ?? null
@@ -107,7 +113,10 @@ export default async function DashboardPage() {
       hasThread={!!thread}
       unreadCount={unreadCount}
       latestAnnouncement={latestAnn ?? null}
-      workoutDates={(workoutLogs ?? []).map(w => w.logged_date as string)}
+      workoutDates={Array.from(new Set([
+        ...(workoutLogs ?? []).map(w => w.logged_date as string),
+        ...(statDates ?? []).map(s => (s.created_at as string).split('T')[0]),
+      ]))}
       milestones={(milestoneRows ?? []).map(m => m.type as string)}
       referralCode={referralCode}
     />

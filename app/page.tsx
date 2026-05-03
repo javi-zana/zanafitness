@@ -191,13 +191,16 @@ function LoginForm() {
       </div>
 
       <div className="pt-4 border-t border-[var(--c-border)]">
-        <p className="text-xs text-[var(--c-text4)] text-center mb-3">Don't have an account?</p>
-        <a
-          href={APPLICATION_FORM_URL}
-          className="w-full block text-center border border-[var(--c-accent-text)]/40 text-[var(--c-accent-text)] font-semibold text-sm py-4 rounded-2xl hover:bg-[var(--c-accent-text)]/8 transition-colors"
-        >
-          Apply to Join
-        </a>
+        <div className="bg-[#b0e455]/10 border border-[#b0e455]/25 rounded-2xl p-4">
+          <p className="text-xs font-semibold text-[var(--c-text)] text-center mb-1">Not a member yet?</p>
+          <p className="text-[11px] text-[var(--c-text3)] text-center mb-3">Apply to get access — takes 3 minutes.</p>
+          <a
+            href={APPLICATION_FORM_URL}
+            className="w-full block text-center bg-[#b0e455] text-[#0f1a0c] font-bold text-sm py-4 rounded-xl hover:bg-[#c9f070] transition-colors"
+          >
+            Apply to Join →
+          </a>
+        </div>
       </div>
     </form>
   );

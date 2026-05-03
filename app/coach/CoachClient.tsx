@@ -9,7 +9,7 @@ const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ss
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Member = { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null }
+type Member = { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null; avatar_url: string | null; avatar_color: string | null }
 type Stat = { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }
 type Thread = { id: string; member_id: string }
 type MsgPreview = { thread_id: string; body: string; created_at: string; author_id: string }
@@ -537,8 +537,8 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
               if (!m) return null
               return (
                 <div key={s.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl px-4 py-3 flex items-center gap-3 border border-[var(--c-border)]">
-                  <div className="w-7 h-7 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[var(--c-accent-text)] shrink-0">
-                    {memberName(m).charAt(0).toUpperCase()}
+                  <div className="w-7 h-7 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[var(--c-accent-text)] shrink-0">
+                    {m.avatar_url ? <img src={m.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(m).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-[var(--c-text)] truncate">{memberName(m)}</p>
@@ -692,8 +692,8 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
                 className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-4 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 transition-colors text-left"
               >
                 <div className="relative shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)]">
-                    {memberName(member).charAt(0).toUpperCase()}
+                  <div className="w-9 h-9 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)]">
+                    {member.avatar_url ? <img src={member.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(member).charAt(0).toUpperCase()}
                   </div>
                   <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--c-card2)] ${STATUS_DOT[status]}`} />
                 </div>
@@ -856,8 +856,8 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
               onClick={() => selectMember(m.id)}
               className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-3 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 hover:bg-[var(--c-hover)] transition text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)] shrink-0">
-                {memberName(m).charAt(0).toUpperCase()}
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)] shrink-0">
+                {m.avatar_url ? <img src={m.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(m).charAt(0).toUpperCase()}
               </div>
               <div>
                 <p className="text-sm font-semibold text-[var(--c-text)]">{memberName(m)}</p>
@@ -1103,8 +1103,8 @@ function MessagesTab({
               className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-3 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 hover:bg-[var(--c-hover)] transition text-left"
             >
               <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)]">
-                  {m ? memberName(m).charAt(0).toUpperCase() : '?'}
+                <div className="w-9 h-9 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)]">
+                  {m?.avatar_url ? <img src={m.avatar_url} alt="" className="w-full h-full object-cover" /> : (m ? memberName(m).charAt(0).toUpperCase() : '?')}
                 </div>
                 {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#b0e455] rounded-full border-2 border-[var(--c-bg)]" />}
               </div>

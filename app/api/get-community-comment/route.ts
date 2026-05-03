@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const admin = adminClient()
   const { data: comment } = await admin
     .from('community_post_comments')
-    .select('id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role)')
+    .select('id, author_id, body, created_at, hidden, author:profiles!author_id(first_name, role, avatar_url, avatar_color)')
     .eq('id', commentId)
     .single()
 

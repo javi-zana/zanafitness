@@ -29,11 +29,11 @@ export default async function CommunityPage() {
     .from('community_posts')
     .select(`
       id, author_id, sub_tab, title, body_json, created_at, hidden,
-      author:profiles!author_id(first_name, role),
+      author:profiles!author_id(first_name, role, avatar_url, avatar_color),
       reactions:community_post_reactions(user_id),
       comments:community_post_comments(
         id, author_id, body, created_at, hidden,
-        author:profiles!author_id(first_name, role)
+        author:profiles!author_id(first_name, role, avatar_url, avatar_color)
       )
     `)
     .eq('sub_tab', 'announcements')
