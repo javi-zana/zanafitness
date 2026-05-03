@@ -24,28 +24,22 @@ export async function POST(req: NextRequest) {
     })
 
     const text = await res.text()
-    console.log('[apply] GAS status:', res.status, '| body:', text.slice(0, 300))
+    console.log('[apply] GAS status:', res.status, '| body:', text.slice(0, 500))
 
-    // GAS can return 200 but with an error payload
+    // Only succeed if GAS explicitly returns { success: true }
+    // Any other response (HTML login page, error, etc.) is treated as failure
     try {
       const json = JSON.parse(text)
-      if (json.error) {
-        console.error('[apply] GAS returned error:', json.error)
-        return NextResponse.json({ error: 'Sheet write failed' }, { status: 502 })
-      }
-      if (json.success) {
+      if (json.success === true) {
         return NextResponse.json({ success: true })
       }
+      console.error('[apply] GAS did not return success:', json)
+      return NextResponse.json({ error: 'Sheet write failed' }, { status: 502 })
     } catch {
-      // response wasn't JSON — fall through to status check
-    }
-
-    if (!res.ok) {
-      console.error('[apply] GAS non-ok response:', res.status, text.slice(0, 300))
+      // Response was not JSON — likely an HTML redirect/login page
+      console.error('[apply] GAS returned non-JSON (possible auth redirect):', text.slice(0, 300))
       return NextResponse.json({ error: 'Sheet write failed' }, { status: 502 })
     }
-
-    return NextResponse.json({ success: true })
 
   } catch (err) {
     console.error('[apply] fetch threw:', err)
