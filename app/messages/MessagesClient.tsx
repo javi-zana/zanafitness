@@ -93,12 +93,12 @@ function NoThread() {
   return (
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       <div className="px-5 pt-12 pb-4 lg:pt-8 lg:border-b lg:border-[var(--c-border)]">
-        <p className="text-xs text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
-        <h1 className="text-xl font-bold tracking-tight">Messages</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Messages</h1>
+        <p className="text-xs text-[var(--c-text4)] mt-0.5">Your direct line to your coach</p>
       </div>
       <div className="flex-1 overflow-y-auto px-5 pb-28 pt-4 space-y-4">
-        <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5 space-y-4">
-          <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">Direct line to your coach</p>
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-5 space-y-4">
+          <p className="text-xs font-semibold text-[var(--c-accent-text)] uppercase tracking-wider">Direct line to your coach</p>
           {[
             { label: 'Ask anything', desc: 'Questions about your program, nutrition, a specific workout - nothing is too small.' },
             { label: 'Log between calls', desc: 'Share a win, flag something that felt off, or just check in. Your coach reads it all.' },
@@ -114,7 +114,7 @@ function NoThread() {
           ))}
         </div>
         <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-4 text-center">
-          <p className="text-xs text-[#b0e455] font-medium mb-1">Thread not active yet</p>
+          <p className="text-xs text-[var(--c-accent-text)] font-medium mb-1">Thread not active yet</p>
           <p className="text-xs text-[var(--c-text3)]">Your coach will open your direct message thread once you're fully onboarded.</p>
         </div>
       </div>
@@ -276,8 +276,8 @@ export default function MessagesClient({
 
       {/* Header */}
       <div className="relative px-5 pt-12 pb-4 border-b border-[var(--c-border)] lg:px-10 lg:pt-10 lg:pb-5">
-        <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
-        <h1 className="text-xl font-bold tracking-tight lg:text-3xl">Messages</h1>
+        <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">Messages</h1>
+        <p className="text-xs text-[var(--c-text4)] mt-0.5">Direct line to your coach</p>
 
         {/* Admin: group thread button */}
         {isAdmin && (

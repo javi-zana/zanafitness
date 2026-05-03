@@ -115,8 +115,8 @@ export default function LandingPage() {
             <Link href="/system" className="inline-flex items-center gap-2 bg-[#b0e455] text-[#0f1a0c] px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#c9f070] transition-colors">
               Get Started <ArrowUpRight className="w-4 h-4" />
             </Link>
-            <Link href="/demo" className="inline-flex items-center gap-2 border border-white/20 text-white px-7 py-3.5 rounded-full text-sm hover:border-white/40 hover:bg-white/5 transition-colors">
-              Preview the App
+            <Link href="/about" className="inline-flex items-center gap-2 border border-white/20 text-white px-7 py-3.5 rounded-full text-sm hover:border-white/40 hover:bg-white/5 transition-colors">
+              About Javi
             </Link>
           </div>
         </div>
@@ -137,6 +137,24 @@ export default function LandingPage() {
           ))}
         </div>
       </div>
+
+      {/* ── METRICS ───────────────────────────────────────────────────────── */}
+      <section className="py-16 md:py-20 px-6 md:px-12 border-b border-[var(--c-border)]">
+        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6">
+          {[
+            { num: '3–5%', label: 'Body fat reduced', sub: 'In 4 months on average' },
+            { num: '16 wks', label: 'Start to results', sub: 'Visible transformation' },
+            { num: '1:1', label: 'Direct coaching', sub: 'No group chat ghosting' },
+            { num: 'Weekly', label: 'Check-ins with Javi', sub: 'Reviewed personally' },
+          ].map(m => (
+            <div key={m.num} className="flex flex-col gap-1.5">
+              <p className="font-display text-4xl md:text-5xl text-[#b0e455] leading-none">{m.num}</p>
+              <p className="text-sm font-semibold text-[var(--c-text)] mt-1">{m.label}</p>
+              <p className="text-xs text-[var(--c-text4)]">{m.sub}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* ── WHO IT'S FOR ──────────────────────────────────────────────────── */}
       <section className="py-24 md:py-36 px-6 md:px-12">
@@ -291,8 +309,8 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <Link href="/demo" className="inline-flex items-center gap-2 text-sm font-medium text-[#b0e455] hover:text-[#c9f070] transition-colors border border-[#b0e455]/25 px-6 py-3 rounded-full hover:border-[#b0e455]/50">
-                Preview the App <ArrowUpRight className="w-4 h-4" />
+              <Link href="/system" className="inline-flex items-center gap-2 text-sm font-medium text-[#b0e455] hover:text-[#c9f070] transition-colors border border-[#b0e455]/25 px-6 py-3 rounded-full hover:border-[#b0e455]/50">
+                View Plans <ArrowUpRight className="w-4 h-4" />
               </Link>
             </div>
           </div>

@@ -135,7 +135,7 @@ function WorkoutLogSection({
           </svg>
         </div>
         <div>
-          <p className="text-sm font-semibold text-[#b0e455]">Workout logged for today</p>
+          <p className="text-sm font-semibold text-[var(--c-accent-text)]">Workout logged for today</p>
           <p className="text-xs text-[var(--c-text3)] mt-0.5">Streak: {computeStreak(workoutDates)} day{computeStreak(workoutDates) !== 1 ? 's' : ''}</p>
         </div>
       </div>
@@ -144,7 +144,7 @@ function WorkoutLogSection({
 
   if (open) {
     return (
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[var(--c-card2)] rounded-2xl p-5 border border-[var(--c-border)]">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[var(--c-card)] shadow-sm rounded-2xl p-5 border border-[var(--c-border)]">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold text-[var(--c-text2)]">Log today's workout</p>
           <button type="button" onClick={() => setOpen(false)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
@@ -253,7 +253,7 @@ function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }
       </div>
       {doneCount === total && total > 0 && (
         <div className="bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4 text-center">
-          <p className="text-sm font-semibold text-[#b0e455]">All habits done today</p>
+          <p className="text-sm font-semibold text-[var(--c-accent-text)]">All habits done today</p>
           <p className="text-xs text-[var(--c-text4)] mt-0.5">Check back tomorrow to reset</p>
         </div>
       )}
@@ -271,13 +271,13 @@ function BmrDisplay({ data }: { data: BmrContent }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)]">
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
           <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Daily Calories</p>
-          <p className="text-2xl font-bold text-[#b0e455] mt-1">{data.calorie_target}</p>
+          <p className="text-2xl font-bold text-[var(--c-accent-text)] mt-1">{data.calorie_target}</p>
           <p className="text-[10px] text-[var(--c-text4)] mt-0.5">kcal target</p>
         </div>
         {data.protein_g > 0 && (
-          <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)]">
+          <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
             <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Protein</p>
             <p className="text-2xl font-bold text-[var(--c-text)] mt-1">{data.protein_g}<span className="text-sm text-[var(--c-text3)]">g</span></p>
             <p className="text-[10px] text-[var(--c-text4)] mt-0.5">daily target</p>
@@ -285,7 +285,7 @@ function BmrDisplay({ data }: { data: BmrContent }) {
         )}
       </div>
 
-      <div className="bg-[var(--c-card)] rounded-2xl p-4 border border-[var(--c-border)] space-y-2">
+      <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)] space-y-2">
         <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-2">Your Numbers</p>
         <div className="flex justify-between text-sm">
           <span className="text-[var(--c-text3)]">BMR (at rest)</span>
@@ -296,19 +296,19 @@ function BmrDisplay({ data }: { data: BmrContent }) {
           <span className="text-[var(--c-text)] font-mono">{data.tdee} kcal</span>
         </div>
         <div className="flex justify-between text-sm border-t border-[var(--c-border)] pt-2 mt-1">
-          <span className="text-[#b0e455]">Your target</span>
-          <span className="text-[#b0e455] font-mono font-semibold">{data.calorie_target} kcal</span>
+          <span className="text-[var(--c-accent-text)]">Your target</span>
+          <span className="text-[var(--c-accent-text)] font-mono font-semibold">{data.calorie_target} kcal</span>
         </div>
       </div>
 
       {data.notes ? (
-        <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)]">
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
           <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-2">Coach's Notes</p>
           <p className="text-sm text-[var(--c-text2)] leading-relaxed">{data.notes}</p>
         </div>
       ) : null}
 
-      <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)] space-y-3">
+      <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)] space-y-3">
         <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Track Today's Calories</p>
         <div className="flex gap-3 items-center">
           <input
@@ -408,7 +408,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
                   <button
                     onClick={savePrinciples}
                     disabled={saving}
-                    className="text-sm font-semibold text-[#b0e455] hover:text-[#c9f070] transition disabled:opacity-50"
+                    className="text-sm font-semibold text-[var(--c-accent-text)] hover:text-[#c9f070] transition disabled:opacity-50"
                   >
                     {saving ? 'Saving…' : 'Save'}
                   </button>
@@ -416,7 +416,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
               ) : (
                 <button
                   onClick={() => setEditingPrinciples(true)}
-                  className="text-sm text-[var(--c-text4)] hover:text-[#b0e455] transition"
+                  className="text-sm text-[var(--c-text4)] hover:text-[var(--c-accent-text)] transition"
                 >
                   Edit
                 </button>
@@ -477,7 +477,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
       const info = sectionInfo[activeTab] ?? { title: 'Coming soon', desc: 'Your coach is working on this section.' }
       return (
         <div className="space-y-3 pt-2">
-          <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5">
+          <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-5">
             <div className="w-10 h-10 rounded-xl bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center mb-4">
               <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-5 h-5">
                 <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
@@ -487,7 +487,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
             <p className="text-sm text-[var(--c-text3)] leading-relaxed">{info.desc}</p>
           </div>
           <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-4">
-            <p className="text-xs text-[#b0e455] font-medium">Your coach is preparing this section.</p>
+            <p className="text-xs text-[var(--c-accent-text)] font-medium">Your coach is preparing this section.</p>
             <p className="text-xs text-[var(--c-text3)] mt-1">You'll see it here as soon as it's ready.</p>
           </div>
         </div>
@@ -507,8 +507,8 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
   return (
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       <div className="px-5 pt-12 pb-2 lg:px-10 lg:pt-10 lg:pb-4">
-        <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
-        <h1 className="text-xl font-bold tracking-tight lg:text-3xl">My Program</h1>
+        <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">My Program</h1>
+        <p className="text-xs text-[var(--c-text4)] mt-0.5">Training & nutrition</p>
       </div>
 
       <div className="overflow-x-auto border-b border-[var(--c-border)] lg:px-5">
@@ -522,7 +522,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
               }}
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 -mb-px ${
                 activeTab === tab.id
-                  ? 'border-[#b0e455] text-[#b0e455]'
+                  ? 'border-[var(--c-accent-text)] text-[var(--c-accent-text)]'
                   : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
               }`}
             >

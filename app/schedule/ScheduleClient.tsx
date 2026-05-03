@@ -15,9 +15,8 @@ export default function ScheduleClient() {
   return (
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       <div className="px-5 pt-12 pb-4 lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[var(--c-border)]">
-        <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
-        <h1 className="text-xl font-bold tracking-tight lg:text-3xl">Schedule</h1>
-        <p className="text-sm lg:text-base text-[var(--c-text3)] mt-1">Book your bi-weekly coaching call below.</p>
+        <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">Schedule</h1>
+        <p className="text-xs text-[var(--c-text4)] mt-0.5">Book your bi-weekly coaching call below.</p>
       </div>
 
       <div className="flex-1 pb-20 lg:px-5 lg:max-w-3xl">
@@ -36,7 +35,7 @@ export default function ScheduleClient() {
         ) : (
           <div className="px-5 pb-8 space-y-4 pt-2">
             <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5 space-y-4">
-              <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">What happens on a coaching call</p>
+              <p className="text-xs font-semibold text-[var(--c-accent-text)] uppercase tracking-wider">What happens on a coaching call</p>
               {[
                 { label: 'Progress review', desc: 'We go through your stats, what changed, and what your numbers mean.' },
                 { label: 'Program adjustments', desc: 'Your training or nutrition plan gets updated based on how the last weeks went.' },
@@ -59,7 +58,7 @@ export default function ScheduleClient() {
               </p>
             </div>
             <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-4 text-center">
-              <p className="text-xs text-[#b0e455] font-medium mb-1">Booking coming soon</p>
+              <p className="text-xs text-[var(--c-accent-text)] font-medium mb-1">Booking coming soon</p>
               <p className="text-xs text-[var(--c-text3)]">Your coach will activate scheduling when you're fully onboarded.</p>
             </div>
           </div>

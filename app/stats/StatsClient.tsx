@@ -113,7 +113,7 @@ function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }
       </svg>
       <div className="flex justify-between text-xs text-[var(--c-text4)] mt-1">
         <span>{min} {unit}</span>
-        <span className="text-[#b0e455] font-semibold">{lastVal} {unit} now</span>
+        <span className="text-[var(--c-accent-text)] font-semibold">{lastVal} {unit} now</span>
         <span>{max} {unit}</span>
       </div>
     </div>
@@ -128,7 +128,7 @@ function StatCard({ stat, unit }: { stat: StatUpdate; unit: 'kg' | 'lb' }) {
   const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 
   return (
-    <div className="bg-[var(--c-card2)] rounded-2xl p-4 space-y-3 border border-[var(--c-border)]">
+    <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 space-y-3 border border-[var(--c-border)]">
       <p className="text-xs text-[var(--c-text4)]">
         {formatted} · {time}
       </p>
@@ -244,7 +244,7 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
   )
 
   return (
-    <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)] space-y-4">
+    <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)] space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="text-xs text-[var(--c-text4)] uppercase tracking-wide font-medium">Progress Photos</p>
@@ -252,7 +252,7 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
           <button
             onClick={() => weeklyInputRef.current?.click()}
             disabled={uploading !== null}
-            className="text-xs text-[#b0e455]/60 hover:text-[#b0e455] transition font-medium disabled:opacity-40"
+            className="text-xs text-[var(--c-accent-text)]/60 hover:text-[var(--c-accent-text)] transition font-medium disabled:opacity-40"
           >
             + Add weekly
           </button>
@@ -276,7 +276,7 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
               type="button"
               onClick={() => beforeInputRef.current?.click()}
               disabled={uploading !== null}
-              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[var(--c-border)] flex flex-col items-center justify-center gap-2 text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[var(--c-border)] flex flex-col items-center justify-center gap-2 text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[var(--c-accent-text)]/50 transition disabled:opacity-40"
             >
               {uploading === 'before' ? (
                 <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
@@ -307,7 +307,7 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
               type="button"
               onClick={() => weeklyInputRef.current?.click()}
               disabled={uploading !== null}
-              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[var(--c-border)] flex flex-col items-center justify-center gap-2 text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[var(--c-border)] flex flex-col items-center justify-center gap-2 text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[var(--c-accent-text)]/50 transition disabled:opacity-40"
             >
               {uploading === 'weekly' ? (
                 <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
@@ -356,7 +356,7 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
             <button
               onClick={() => weeklyInputRef.current?.click()}
               disabled={uploading !== null}
-              className="w-14 h-14 rounded-xl border border-dashed border-[var(--c-border)] flex items-center justify-center text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+              className="w-14 h-14 rounded-xl border border-dashed border-[var(--c-border)] flex items-center justify-center text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[var(--c-accent-text)]/50 transition disabled:opacity-40"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                 <path d="M12 5v14M5 12h14" strokeLinecap="round" />
@@ -533,7 +533,7 @@ function LogForm({
               onClick={() => setConfidence(p.value)}
               className={`flex-1 py-1.5 rounded-xl text-xs font-medium transition border ${
                 confidence === p.value
-                  ? 'border-[#b0e455] text-[#b0e455] bg-[#b0e455]/10'
+                  ? 'border-[var(--c-accent-text)] text-[var(--c-accent-text)] bg-[var(--c-accent-text)]/10'
                   : 'border-[var(--c-border)] text-[var(--c-text3)] hover:border-[var(--c-border2)]'
               }`}
             >
@@ -563,7 +563,7 @@ function LogForm({
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="w-full border border-dashed border-[var(--c-border)] rounded-2xl py-3 text-sm text-[var(--c-text3)] hover:border-[#b0e455] hover:text-[#b0e455] transition"
+          className="w-full border border-dashed border-[var(--c-border)] rounded-2xl py-3 text-sm text-[var(--c-text3)] hover:border-[var(--c-accent-text)] hover:text-[var(--c-accent-text)] transition"
         >
           + Add photos
         </button>
@@ -620,15 +620,15 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
 
         <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[var(--c-border)]">
           <div>
-            <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
-            <h1 className="text-xl font-bold tracking-tight lg:text-3xl">My Stats</h1>
+            <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">My Stats</h1>
+            <p className="text-xs text-[var(--c-text4)] mt-0.5">Track your progress over time</p>
           </div>
           {!formOpen && (
             <button
               onClick={() => setFormOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] active:scale-95 transition-all shadow-sm"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
                 <path d="M12 5v14M5 12h14" strokeLinecap="round" />
               </svg>
               Log
@@ -653,7 +653,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
                   </p>
                   <button
                     onClick={() => setFormOpen(true)}
-                    className="mt-4 inline-flex items-center gap-2 bg-[var(--c-bg)] text-[#b0e455] text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-[var(--c-card)] transition"
+                    className="mt-4 inline-flex items-center gap-2 bg-[var(--c-bg)] text-[var(--c-accent-text)] text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-[var(--c-card)] transition"
                   >
                     Log now
                   </button>
@@ -671,8 +671,8 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
           )}
 
           {formOpen && (
-            <div className="bg-[var(--c-card2)] rounded-2xl p-5 border border-[var(--c-border)]">
-              <h2 className="text-sm font-semibold text-[var(--c-text3)] mb-5">New Update</h2>
+            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-5 border border-[var(--c-border)]">
+              <h2 className="text-base font-bold text-[var(--c-text)] mb-5">New Update</h2>
               <LogForm
                 userId={userId}
                 weightUnit={weightUnit}
@@ -683,7 +683,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
           )}
 
           {chartStats.length > 0 && !formOpen && (
-            <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)]">
+            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
               <p className="text-xs text-[var(--c-text4)] uppercase tracking-wide mb-3">Weight trend</p>
               <WeightChart stats={chartStats} unit={weightUnit} />
             </div>
@@ -693,8 +693,8 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
 
           {stats.length === 0 && !formOpen ? (
             <div className="space-y-3 pt-2">
-              <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5 space-y-4">
-                <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">What you&apos;ll track</p>
+              <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-5 space-y-4">
+                <p className="text-xs font-semibold text-[var(--c-accent-text)] uppercase tracking-wider">What you&apos;ll track</p>
                 {[
                   { icon: <path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />, label: "Body weight", desc: "Logged in kg or lbs, charted over time so you can see the trend clearly." },
                   { icon: <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />, label: "Confidence score", desc: "How you're feeling about your progress on a 1-10 scale. Tells your coach a lot." },
@@ -711,14 +711,14 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
                   </div>
                 ))}
               </div>
-              <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5">
+              <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-5">
                 <p className="text-sm font-semibold mb-2">How often should I log?</p>
                 <p className="text-sm text-[var(--c-text3)] leading-relaxed">
                   At least once a week - ideally every 3-4 days. Consistency matters more than frequency. Even weekly data gives your coach a clear picture of what's actually happening.
                 </p>
               </div>
               <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-5">
-                <p className="text-sm font-semibold text-[#b0e455] mb-1">Ready to start?</p>
+                <p className="text-sm font-semibold text-[var(--c-accent-text)] mb-1">Ready to start?</p>
                 <p className="text-sm text-[var(--c-text3)] leading-relaxed">
                   Tap <strong className="text-[var(--c-text2)]">Log</strong> above to drop your first check-in. It takes less than a minute.
                 </p>

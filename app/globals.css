@@ -23,6 +23,10 @@
   --c-border:   rgba(0, 0, 0, 0.10);
   --c-border2:  rgba(0, 0, 0, 0.16);
 
+  --c-accent:      #b0e455;
+  --c-accent2:     #c9f070;
+  --c-accent-text: #4d8f1a;  /* Readable forest green for text/icons on light backgrounds */
+
   /* Legacy vars */
   --background: #F2F2F7;
   --foreground: #1C1C1E;
@@ -36,6 +40,9 @@
   --c-card2:    #2C2C2E;
   --c-hover:    #2C2C2E;
   --c-backdrop: rgba(17, 17, 17, 0.95);
+  --c-accent:      #b0e455;
+  --c-accent2:     #c9f070;
+  --c-accent-text: #b0e455;  /* Full lime reads fine on dark backgrounds */
 
   --c-text:     #FFFFFF;
   --c-text2:    rgba(255, 255, 255, 0.70);

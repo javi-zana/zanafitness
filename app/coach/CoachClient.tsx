@@ -152,7 +152,7 @@ function HabitsSection({ initial, onSave, saving, saved }: {
         <button
           onClick={addHabit}
           disabled={!newText.trim()}
-          className="px-4 py-2 rounded-lg bg-[var(--c-card2)] border border-[var(--c-border2)] text-[10px] text-[#b0e455] font-mono uppercase tracking-widest hover:bg-[var(--c-hover)] transition disabled:opacity-30 shrink-0"
+          className="px-4 py-2 rounded-lg bg-[var(--c-card2)] border border-[var(--c-border2)] text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest hover:bg-[var(--c-hover)] transition disabled:opacity-30 shrink-0"
         >
           Add
         </button>
@@ -256,7 +256,7 @@ function BmrSection({ initial, onSave, saving, saved }: {
           </div>
           <div className="bg-[var(--c-card2)] rounded-xl p-3 border border-[var(--c-border)]">
             <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">TDEE</p>
-            <p className="text-lg font-bold text-[#b0e455] mt-0.5">{tdee} <span className="text-xs text-[var(--c-text3)]">kcal</span></p>
+            <p className="text-lg font-bold text-[var(--c-accent-text)] mt-0.5">{tdee} <span className="text-xs text-[var(--c-text3)]">kcal</span></p>
           </div>
         </div>
       )}
@@ -403,7 +403,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
               {t.icon}
             </div>
             <span className={`text-[9px] uppercase font-medium ${
-              active === t.id ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'
+              active === t.id ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
             }`}>
               {t.label}
             </span>
@@ -426,7 +426,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
               {adminIcon}
             </div>
             <span className={`text-[9px] uppercase font-medium ${
-              active === 'admin' ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'
+              active === 'admin' ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
             }`}>Admin</span>
           </button>
         )}
@@ -478,26 +478,36 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
 
   return (
     <div className="space-y-5">
-      {/* Greeting */}
-      <div>
-        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono lg:hidden">Zana · Coach Portal</p>
-        <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-3xl">{greet}, {name}.</h1>
-        <p className="text-xs text-[var(--c-text4)] mt-1">
-          {isHeadCoach ? 'Full access · Head coach' : 'Coach view'}
-        </p>
+      {/* Greeting hero */}
+      <div
+        className="rounded-3xl p-5 lg:p-6 relative overflow-hidden"
+        style={{ background: 'linear-gradient(145deg, #cbf14e 0%, #b0e455 45%, #87be2a 100%)' }}
+      >
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(ellipse at 10% 90%, rgba(255,255,255,0.2) 0%, transparent 55%)' }} />
+        <div className="relative z-10">
+          <p className="text-xs text-[#1a3300]/50 font-medium" suppressHydrationWarning>{greet},</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-[#1a3300] tracking-tight leading-tight mt-0.5">{name}.</h1>
+          <p className="text-xs text-[#1a3300]/50 mt-1.5">
+            {isHeadCoach ? 'Full access · Head coach' : 'Coach view'}
+          </p>
+        </div>
       </div>
 
       {/* Summary row */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-[var(--c-card2)] rounded-xl p-3 text-center border border-[var(--c-border)]">
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
           <p className="text-2xl font-bold text-[var(--c-text)]">{members.length}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Members</p>
         </div>
-        <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[var(--c-card2)] border-[var(--c-border)]'}`}>
+        <div
+          className={`rounded-2xl p-3 text-center border ${needAttention > 0 ? 'border-[#f87171]/20' : 'bg-[var(--c-card)] shadow-sm border-[var(--c-border)]'}`}
+          style={needAttention > 0 ? { background: 'linear-gradient(135deg, #1a0505 0%, #2a1010 100%)' } : undefined}
+        >
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Attention</p>
         </div>
-        <div className="bg-[var(--c-card2)] rounded-xl p-3 text-center border border-[var(--c-border)]">
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
           <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
         </div>
@@ -526,8 +536,8 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
               const m = memberMap[s.member_id]
               if (!m) return null
               return (
-                <div key={s.id} className="bg-[var(--c-card2)] rounded-xl px-4 py-3 flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[#b0e455] shrink-0">
+                <div key={s.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl px-4 py-3 flex items-center gap-3 border border-[var(--c-border)]">
+                  <div className="w-7 h-7 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[var(--c-accent-text)] shrink-0">
                     {memberName(m).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -652,15 +662,18 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
 
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-[var(--c-card2)] rounded-xl p-3 text-center border border-[var(--c-border)]">
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
           <p className="text-2xl font-bold text-[var(--c-text)]">{totalMembers}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Total</p>
         </div>
-        <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[var(--c-card2)] border-[var(--c-border)]'}`}>
+        <div
+          className={`rounded-2xl p-3 text-center border ${needAttention > 0 ? 'border-[#f87171]/20' : 'bg-[var(--c-card)] shadow-sm border-[var(--c-border)]'}`}
+          style={needAttention > 0 ? { background: 'linear-gradient(135deg, #1a0505 0%, #2a1010 100%)' } : undefined}
+        >
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Attention</p>
         </div>
-        <div className="bg-[var(--c-card2)] rounded-xl p-3 text-center border border-[var(--c-border)]">
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
           <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
         </div>
@@ -676,10 +689,10 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
               <button
                 key={member.id}
                 onClick={() => onOpenProgram(member.id)}
-                className="w-full bg-[var(--c-card2)] rounded-xl p-4 flex items-center gap-4 border border-transparent hover:border-[#b0e455]/10 transition-colors text-left"
+                className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-4 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 transition-colors text-left"
               >
                 <div className="relative shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
+                  <div className="w-9 h-9 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)]">
                     {memberName(member).charAt(0).toUpperCase()}
                   </div>
                   <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--c-card2)] ${STATUS_DOT[status]}`} />
@@ -841,9 +854,9 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
             <button
               key={m.id}
               onClick={() => selectMember(m.id)}
-              className="w-full bg-[var(--c-card2)] rounded-xl p-4 flex items-center gap-3 hover:bg-[var(--c-hover)] transition text-left"
+              className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-3 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 hover:bg-[var(--c-hover)] transition text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)] shrink-0">
                 {memberName(m).charAt(0).toUpperCase()}
               </div>
               <div>
@@ -873,7 +886,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
           <button
             onClick={saveSection}
             disabled={saving}
-            className="ml-auto text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:text-[#c9f070] transition disabled:opacity-50"
+            className="ml-auto text-[10px] tracking-widest uppercase font-mono text-[var(--c-accent-text)] hover:opacity-75 transition disabled:opacity-50"
           >
             {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save'}
           </button>
@@ -887,7 +900,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
             key={s}
             onClick={() => setActiveSection(s)}
             className={`flex-1 py-2.5 text-[11px] tracking-wide font-mono capitalize transition border-b-2 -mb-px ${
-              activeSection === s ? 'border-[#b0e455] text-[#b0e455]' : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
+              activeSection === s ? 'border-[var(--c-accent-text)] text-[var(--c-accent-text)]' : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
             }`}
           >
             {s}
@@ -1087,10 +1100,10 @@ function MessagesTab({
             <button
               key={thread.id}
               onClick={() => openThread(thread.id)}
-              className="w-full bg-[var(--c-card2)] rounded-xl p-4 flex items-center gap-3 hover:bg-[var(--c-hover)] transition text-left"
+              className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-3 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 hover:bg-[var(--c-hover)] transition text-left"
             >
               <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
+                <div className="w-9 h-9 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)]">
                   {m ? memberName(m).charAt(0).toUpperCase() : '?'}
                 </div>
                 {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#b0e455] rounded-full border-2 border-[var(--c-bg)]" />}
@@ -1421,7 +1434,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
                 <button
                   onClick={() => setupThread(m)}
                   disabled={hasThread || setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
-                  className="w-full py-2 rounded-lg border border-[var(--c-border2)] text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:bg-[#b0e455]/8 transition disabled:opacity-40"
+                  className="w-full py-2 rounded-lg border border-[var(--c-border2)] text-[10px] tracking-widest uppercase font-mono text-[var(--c-accent-text)] hover:bg-[var(--c-accent-text)]/8 transition disabled:opacity-40"
                 >
                   {hasThread || setupStatus[m.id] === 'done'
                     ? 'Messaging Active ✓'
@@ -1446,15 +1459,15 @@ function AdminTab({ userEmail }: { userEmail: string }) {
         ) : (
           <div className="space-y-2">
             {coaches.map(c => (
-              <div key={c.id} className="bg-[var(--c-card2)] rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#b0e455]/15 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[#b0e455] shrink-0">
+              <div key={c.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl px-4 py-3 flex items-center gap-3 border border-[var(--c-border)]">
+                <div className="w-8 h-8 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[var(--c-accent-text)] shrink-0">
                   {profileName(c).charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-[var(--c-text)]">{profileName(c)}</p>
                   <p className="text-[10px] text-[var(--c-text4)] font-mono truncate">{c.email}</p>
                 </div>
-                <span className="text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border text-[#b0e455] border-[var(--c-border2)] bg-[#b0e455]/8">
+                <span className="text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border text-[var(--c-accent-text)] border-[var(--c-accent-text)]/20 bg-[var(--c-accent-text)]/8">
                   {c.role === 'head_coach' ? 'Head Coach' : 'Coach'}
                 </span>
               </div>
@@ -1474,8 +1487,8 @@ function AdminTab({ userEmail }: { userEmail: string }) {
               const coach = coachName(assignMap[m.id])
               const hasThread = threadMemberIds.has(m.id)
               return (
-                <div key={m.id} className="bg-[var(--c-card2)] rounded-xl px-4 py-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center text-xs font-bold text-[var(--c-text3)] shrink-0">
+                <div key={m.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl px-4 py-3 flex items-center gap-3 border border-[var(--c-border)]">
+                  <div className="w-8 h-8 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[var(--c-accent-text)] shrink-0">
                     {profileName(m).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -1543,15 +1556,15 @@ function AdminTab({ userEmail }: { userEmail: string }) {
           <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Setup Messaging Thread</p>
           <div className="space-y-2">
             {membersWithoutThread.map(m => (
-              <div key={m.id} className="bg-[var(--c-card2)] rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center text-xs font-bold text-[var(--c-text3)] shrink-0">
+              <div key={m.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl px-4 py-3 flex items-center gap-3 border border-[var(--c-border)]">
+                <div className="w-8 h-8 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[var(--c-accent-text)] shrink-0">
                   {profileName(m).charAt(0).toUpperCase()}
                 </div>
                 <p className="text-sm text-[var(--c-text)] flex-1 truncate">{profileName(m)}</p>
                 <button
                   onClick={() => setupThread(m)}
                   disabled={setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
-                  className="text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:text-[#c9f070] transition disabled:opacity-40 shrink-0"
+                  className="text-[10px] tracking-widest uppercase font-mono text-[var(--c-accent-text)] hover:text-[var(--c-accent-text)]/70 transition disabled:opacity-40 shrink-0"
                 >
                   {setupStatus[m.id] === 'loading' ? 'Setting up…'
                     : setupStatus[m.id] === 'done' ? 'Done!'
@@ -1605,7 +1618,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
             <button
               type="submit"
               disabled={broadcastStatus === 'loading' || !broadcastBody.trim()}
-              className="w-full py-3 rounded-lg border border-[#b0e455]/30 text-[#b0e455] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#b0e455]/8 transition disabled:opacity-50"
+              className="w-full py-3 rounded-lg border border-[var(--c-accent-text)]/30 text-[var(--c-accent-text)] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[var(--c-accent-text)]/8 transition disabled:opacity-50"
             >
               {broadcastStatus === 'loading' ? 'Sending…' : broadcastStatus === 'done' ? 'Sent to All!' : 'Broadcast'}
             </button>

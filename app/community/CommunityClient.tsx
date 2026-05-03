@@ -139,7 +139,7 @@ function PostCard({
     return (
       <div className="bg-[var(--c-card2)] rounded-2xl overflow-hidden border border-[var(--c-border2)] p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold text-[#b0e455]/70 uppercase tracking-wide">Editing post</p>
+          <p className="text-xs font-semibold text-[var(--c-accent-text)]/70 uppercase tracking-wide">Editing post</p>
           <button onClick={() => setEditing(false)} className="text-xs text-[var(--c-text4)] hover:text-[var(--c-text)]/60 transition">Cancel</button>
         </div>
         <input
@@ -160,14 +160,14 @@ function PostCard({
   }
 
   return (
-    <div className="bg-[var(--c-card2)] rounded-2xl overflow-hidden border border-[var(--c-border)]">
+    <div className="bg-[var(--c-card)] shadow-sm rounded-2xl overflow-hidden border border-[var(--c-border)]">
       <button
         className="w-full text-left px-4 pt-4 pb-3"
         onClick={() => setExpanded(e => !e)}
       >
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#b0e455]/12 border border-[var(--c-border2)] flex items-center justify-center text-[9px] font-bold text-[#b0e455] shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#b0e455]/12 border border-[var(--c-border2)] flex items-center justify-center text-[9px] font-bold text-[var(--c-accent-text)] shrink-0">
               {displayName(post.author).charAt(0).toUpperCase()}
             </div>
             <span className="text-xs text-[var(--c-text3)]">{displayName(post.author)}</span>
@@ -214,7 +214,7 @@ function PostCard({
           {canEdit && (
             <button
               onClick={() => { setEditTitle(post.title); setEditBody(post.body_json); setEditing(true) }}
-              className="text-xs text-[var(--c-text4)] hover:text-[#b0e455]/70 transition"
+              className="text-xs text-[var(--c-text4)] hover:text-[var(--c-accent-text)]/70 transition"
             >
               Edit
             </button>
@@ -386,7 +386,7 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
                 {item.icon}
               </div>
               <span className={`text-[9px] uppercase font-medium ${
-                active ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'
+                active ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
               }`}>
                 {item.label}
               </span>
@@ -461,10 +461,10 @@ function NewPostForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-[var(--c-card2)] rounded-2xl p-5 space-y-4 border border-[var(--c-border)]">
+    <form onSubmit={handleSubmit} className="bg-[var(--c-card)] shadow-sm rounded-2xl p-5 space-y-4 border border-[var(--c-border)]">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-[var(--c-text3)]">New Post</h2>
-        <span className="text-xs font-medium text-[#b0e455]/60 capitalize">{subTab}</span>
+        <span className="text-xs font-medium text-[var(--c-accent-text)]/60 capitalize">{subTab}</span>
       </div>
 
       <input
@@ -701,8 +701,8 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
 
       <div className="px-5 pt-12 pb-2 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-4 lg:border-b lg:border-[var(--c-border)]">
         <div>
-          <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
-          <h1 className="text-xl font-bold tracking-tight lg:text-3xl">Community</h1>
+          <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">Community</h1>
+          <p className="text-xs text-[var(--c-text4)] mt-0.5">Announcements & posts</p>
         </div>
         {canPost && !composing && (
           <button
@@ -725,7 +725,7 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
               onClick={() => switchTab(tab.id)}
               className={`flex-1 py-3 text-xs font-medium text-center whitespace-nowrap transition border-b-2 -mb-px ${
                 activeTab === tab.id
-                  ? 'border-[#b0e455] text-[#b0e455]'
+                  ? 'border-[var(--c-accent-text)] text-[var(--c-accent-text)]'
                   : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
               }`}
             >
@@ -766,7 +766,7 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
             {canPost && (
               <button
                 onClick={() => setComposing(true)}
-                className="mt-3 text-sm text-[#b0e455]/60 hover:text-[#b0e455] transition font-medium"
+                className="mt-3 text-sm text-[var(--c-accent-text)]/60 hover:text-[var(--c-accent-text)] transition font-medium"
               >
                 Be the first to post
               </button>

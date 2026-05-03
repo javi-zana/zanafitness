@@ -61,12 +61,12 @@ function LoginForm() {
   if (showForgot) {
     return forgotSent ? (
       <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-8 text-center space-y-4">
-        <div className="w-12 h-12 rounded-full border-2 border-[#b0e455] flex items-center justify-center mx-auto bg-[#b0e455]/10">
-          <svg viewBox="0 0 16 16" className="w-5 h-5 text-[#b0e455]" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <div className="w-12 h-12 rounded-full border-2 border-[var(--c-accent-text)] flex items-center justify-center mx-auto bg-[var(--c-accent-text)]/8">
+          <svg viewBox="0 0 16 16" className="w-5 h-5 text-[var(--c-accent-text)]" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M2 8l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
-        <p className="text-sm font-semibold text-[#b0e455]">Check your inbox</p>
+        <p className="text-sm font-semibold text-[var(--c-accent-text)]">Check your inbox</p>
         <p className="text-sm text-[var(--c-text)]/55 leading-relaxed">
           A reset link was sent to<br />
           <span className="text-[var(--c-text)] font-medium">{forgotEmail}</span>
@@ -112,8 +112,8 @@ function LoginForm() {
   if (noAccess) {
     return (
       <div className="space-y-5 text-center">
-        <div className="w-14 h-14 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center mx-auto">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[#b0e455]">
+        <div className="w-14 h-14 rounded-full bg-[var(--c-accent-text)]/8 border border-[var(--c-border2)] flex items-center justify-center mx-auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[var(--c-accent-text)]">
             <path d="M12 15v2m0-10v4m-7.07 7.07A10 10 0 1019.07 4.93 10 10 0 004.93 19.07z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
@@ -186,7 +186,7 @@ function LoginForm() {
         >
           Forgot password?
         </button>
-        <Link href="/system" className="text-sm text-[#b0e455] hover:text-[#c9f070] transition-colors">
+        <Link href="/system" className="text-sm text-[var(--c-accent-text)] hover:opacity-75 transition-colors">
           View plans
         </Link>
       </div>
@@ -211,9 +211,9 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
 
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[var(--c-border2)] rounded-full px-4 py-1.5 mb-6">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
-              <p className="text-xs font-medium text-[#b0e455]">Member Access</p>
+            <span className="inline-flex items-center gap-2 bg-[var(--c-accent-text)]/8 border border-[var(--c-border2)] rounded-full px-4 py-1.5 mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--c-accent-text)]" />
+              <p className="text-xs font-medium text-[var(--c-accent-text)]">Member Access</p>
             </span>
             <h1 className="font-display leading-none mb-3" style={{ fontSize: "clamp(40px, 6vw, 60px)" }}>
               Welcome<br />back.

@@ -47,7 +47,7 @@ function getInitials(firstName: string, nickname: string, email: string): string
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] overflow-hidden">
+    <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] overflow-hidden">
       <div className="px-5 py-3 border-b border-[var(--c-border)]">
         <p className="text-xs font-semibold text-[var(--c-text3)] uppercase tracking-wider">{title}</p>
       </div>
@@ -234,7 +234,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[var(--c-bg)] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#b0e455]/30 border-t-[#b0e455] rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[var(--c-accent-text)]/30 border-t-[var(--c-accent-text)] rounded-full animate-spin" />
       </main>
     );
   }
@@ -369,7 +369,7 @@ export default function ProfilePage() {
           </Field>
           {emailNotice && (
             <div className="bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-xl px-4 py-3">
-              <p className="text-xs text-[#b0e455] leading-relaxed">{emailNotice}</p>
+              <p className="text-xs text-[var(--c-accent-text)] leading-relaxed">{emailNotice}</p>
             </div>
           )}
         </Section>
@@ -384,8 +384,8 @@ export default function ProfilePage() {
                 onClick={() => setFitnessGoal(fitnessGoal === g ? "" : g)}
                 className={`px-3 py-2.5 rounded-xl border text-left text-xs font-medium transition-all ${
                   fitnessGoal === g
-                    ? "bg-[#b0e455]/10 border-[#b0e455]/50 text-[#b0e455]"
-                    : "bg-[var(--c-bg)] border-[#b0e455]/10 text-[var(--c-text3)] hover:border-[var(--c-border2)] hover:text-[var(--c-text)]/70"
+                    ? "bg-[var(--c-accent-text)]/10 border-[var(--c-accent-text)]/50 text-[var(--c-accent-text)]"
+                    : "bg-[var(--c-bg)] border-[var(--c-accent-text)]/10 text-[var(--c-text3)] hover:border-[var(--c-border2)] hover:text-[var(--c-text)]/70"
                 }`}
               >
                 {g}
@@ -497,7 +497,7 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={passwordSaving || !newPassword}
-              className="w-full border border-[var(--c-border2)] text-[var(--c-text2)] text-sm font-medium py-3.5 rounded-2xl hover:border-[#b0e455]/40 hover:text-[#b0e455] transition-colors disabled:opacity-40"
+              className="w-full border border-[var(--c-border2)] text-[var(--c-text2)] text-sm font-medium py-3.5 rounded-2xl hover:border-[#b0e455]/40 hover:text-[var(--c-accent-text)] transition-colors disabled:opacity-40"
             >
               {passwordSaving ? "Updating..." : passwordSaved ? "Password Updated ✓" : "Update Password"}
             </button>
@@ -508,7 +508,7 @@ export default function ProfilePage() {
         <div className="pt-2 space-y-3 text-center">
           <a
             href="mailto:hello@zanafitness.com"
-            className="block text-xs text-[var(--c-text4)] hover:text-[#b0e455] transition-colors"
+            className="block text-xs text-[var(--c-text4)] hover:text-[var(--c-accent-text)] transition-colors"
           >
             Support - hello@zanafitness.com
           </a>

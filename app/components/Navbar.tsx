@@ -17,7 +17,6 @@ const ZanaLogo = ({ className = "h-5" }: { className?: string }) => (
 const LINKS = [
   { href: "/about",  label: "About",      key: "about"  },
   { href: "/system", label: "The System", key: "system" },
-  { href: "/demo",   label: "Preview",    key: "demo"   },
   { href: "/faq",    label: "FAQ",        key: "faq"    },
 ];
 

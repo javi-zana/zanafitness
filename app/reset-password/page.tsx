@@ -59,9 +59,9 @@ export default function ResetPasswordPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-16">
         <div className="w-full max-w-sm">
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-full px-4 py-1.5 mb-5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
-              <p className="text-xs font-medium text-[#b0e455]">Account Setup</p>
+            <span className="inline-flex items-center gap-2 bg-[var(--c-accent-text)]/8 border border-[var(--c-border2)] rounded-full px-4 py-1.5 mb-5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--c-accent-text)]" />
+              <p className="text-xs font-medium text-[var(--c-accent-text)]">Account Setup</p>
             </span>
             <h1 className="font-display leading-none mb-3" style={{ fontSize: "clamp(32px, 5vw, 48px)" }}>
               Set your<br />password.
@@ -71,7 +71,7 @@ export default function ResetPasswordPage() {
 
           {!ready ? (
             <div className="flex justify-center py-8">
-              <div className="w-6 h-6 border-2 border-[#b0e455]/30 border-t-[#b0e455] rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-[var(--c-border2)] border-t-[var(--c-accent-text)] rounded-full animate-spin" />
             </div>
           ) : (
             <form onSubmit={handleReset} className="space-y-3">
