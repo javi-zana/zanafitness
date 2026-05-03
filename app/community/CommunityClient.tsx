@@ -49,9 +49,9 @@ type Props = {
 
 function displayName(author: Author) {
   if (!author) return 'Member'
-  if (author.role === 'head_coach') return 'Javi'
-  if (author.role === 'coach') return 'Coach'
-  return author.first_name ?? 'Member'
+  if (author.first_name) return author.first_name
+  if (author.role === 'head_coach' || author.role === 'coach') return 'Coach'
+  return 'Member'
 }
 
 function relativeTime(dateStr: string) {
@@ -87,7 +87,7 @@ function PostCard({
   post: Post
   userId: string
   userRole: string
-  onReact: (postId: string, reacted: boolean) => void
+  onReact: (postId: string, reacted: boolean) => void | Promise<void>
   onComment: (postId: string, body: string) => void
   onHide: (postId: string) => void
   onEdit: (postId: string, title: string, bodyJson: object | null) => Promise<void>
@@ -360,21 +360,21 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl }: {
       </aside>
 
       {/* Mobile bottom bar — full coach tabs */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
         {coachLinks.map(item => {
           const active = item.label === 'Community'
           return (
             <Link
               key={item.label}
               href={item.href}
-              className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
+              className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
             >
-              <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
+              <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
                 active ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
               }`}>
                 {item.icon}
               </div>
-              <span className={`text-[9px] tracking-wide uppercase font-medium ${
+              <span className={`text-[9px] uppercase font-medium ${
                 active ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
               }`}>
                 {item.label}
@@ -586,7 +586,7 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
 
   // ─── Handlers ───────────────────────────────────────────────────────────────
 
-  function handleReact(postId: string, alreadyReacted: boolean) {
+  async function handleReact(postId: string, alreadyReacted: boolean) {
     setPostsByTab(prev => ({
       ...prev,
       [activeTab]: prev[activeTab].map(p => {
@@ -597,10 +597,23 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
         return { ...p, reactions }
       }),
     }))
-    if (alreadyReacted) {
-      supabase.from('community_post_reactions').delete().eq('post_id', postId).eq('user_id', userId)
-    } else {
-      supabase.from('community_post_reactions').insert({ post_id: postId, user_id: userId })
+    try {
+      const { error } = alreadyReacted
+        ? await supabase.from('community_post_reactions').delete().eq('post_id', postId).eq('user_id', userId)
+        : await supabase.from('community_post_reactions').insert({ post_id: postId, user_id: userId })
+      if (error) throw error
+    } catch (err) {
+      console.error('react error:', err)
+      setPostsByTab(prev => ({
+        ...prev,
+        [activeTab]: prev[activeTab].map(p => {
+          if (p.id !== postId) return p
+          const reactions = alreadyReacted
+            ? [...p.reactions, { user_id: userId }]
+            : p.reactions.filter(r => r.user_id !== userId)
+          return { ...p, reactions }
+        }),
+      }))
     }
   }
 

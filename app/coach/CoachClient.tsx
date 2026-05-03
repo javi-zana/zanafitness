@@ -376,14 +376,14 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
       </aside>
 
       {/* ── Mobile bottom bar ─────────────────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
         {tabs.map(t => (
           <button
             key={t.id}
             onClick={() => onChange(t.id)}
-            className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
+            className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
-            <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
+            <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
               active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
             }`}>
               {t.icon}
@@ -395,8 +395,8 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             </span>
           </button>
         ))}
-        <Link href="/community" className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors">
-          <div className="w-12 h-7 flex items-center justify-center rounded-full text-[#edf5e2]/25">
+        <Link href="/community" className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors">
+          <div className="w-10 h-7 flex items-center justify-center rounded-full text-[#edf5e2]/25">
             {communityIcon}
           </div>
           <span className="text-[9px] uppercase font-medium text-[#edf5e2]/25">Community</span>
@@ -462,7 +462,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
           <p className="text-2xl font-bold text-[#edf5e2]">{members.length}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Members</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Members</p>
         </div>
         <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[#1c2e16] border-[#b0e455]/8'}`}>
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[#edf5e2]/30'}`}>{needAttention}</p>
@@ -470,7 +470,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
         </div>
         <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
           <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Active</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Active</p>
         </div>
       </div>
 
@@ -625,15 +625,15 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
       <div className="grid grid-cols-3 gap-3">
         <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
           <p className="text-2xl font-bold text-[#edf5e2]">{totalMembers}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Total</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Total</p>
         </div>
         <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[#1c2e16] border-[#b0e455]/8'}`}>
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[#edf5e2]/30'}`}>{needAttention}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Attention</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Attention</p>
         </div>
         <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
           <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-widest mt-0.5">Active</p>
+          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Active</p>
         </div>
       </div>
 
@@ -849,12 +849,12 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
       </div>
 
       {/* Section tabs */}
-      <div className="flex gap-1 border-b border-[#b0e455]/8 mb-4 overflow-x-auto">
+      <div className="flex border-b border-[#b0e455]/8 mb-4">
         {SECTIONS.map(s => (
           <button
             key={s}
             onClick={() => setActiveSection(s)}
-            className={`px-4 py-2.5 text-[11px] tracking-wide font-mono capitalize whitespace-nowrap transition border-b-2 -mb-px ${
+            className={`flex-1 py-2.5 text-[11px] tracking-wide font-mono capitalize transition border-b-2 -mb-px ${
               activeSection === s ? 'border-[#b0e455] text-[#b0e455]' : 'border-transparent text-[#edf5e2]/30 hover:text-[#edf5e2]/60'
             }`}
           >

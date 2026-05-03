@@ -498,7 +498,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
       <div className="space-y-3">
         <RichTextViewer content={content} />
         {updatedAt && (
-          <p className="text-xs text-[#edf5e2]/20 pt-2">{relativeTime(updatedAt)}</p>
+          <p className="text-xs text-[#edf5e2]/20 pt-2" suppressHydrationWarning>{relativeTime(updatedAt)}</p>
         )}
       </div>
     )
