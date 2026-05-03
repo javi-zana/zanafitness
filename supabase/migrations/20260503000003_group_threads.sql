@@ -42,7 +42,7 @@ CREATE POLICY "participants_manage" ON thread_participants
 
 -- Allow members to read messages in group threads they're part of
 -- (add this to your existing messages RLS policy or create a new one)
-CREATE POLICY IF NOT EXISTS "messages_group_thread_select" ON messages
+CREATE POLICY "messages_group_thread_select" ON messages
   FOR SELECT USING (
     EXISTS (
       SELECT 1 FROM thread_participants tp
