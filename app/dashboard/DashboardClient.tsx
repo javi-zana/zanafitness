@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
+import { useTheme } from '@/app/providers'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -78,11 +79,11 @@ function confidenceLabel(v: number) {
   return 'Peak'
 }
 
-function confidenceColor(v: number): string {
-  if (v <= 3) return '#f87171'
-  if (v <= 5) return '#fbbf24'
-  if (v <= 8) return '#86efac'
-  return '#b0e455'
+function confidenceColor(v: number, dark = false): string {
+  if (v <= 3) return dark ? '#f87171' : '#dc2626'
+  if (v <= 5) return dark ? '#fbbf24' : '#b45309'
+  if (v <= 8) return dark ? '#86efac' : '#16a34a'
+  return dark ? '#b0e455' : '#4d8f1a'
 }
 
 // ─── Streak ───────────────────────────────────────────────────────────────────
@@ -163,10 +164,11 @@ function WeekStrip({ stats }: { stats: StatUpdate[] }) {
 // ─── ConfidenceRing ───────────────────────────────────────────────────────────
 
 function ConfidenceRing({ value }: { value: number }) {
+  const { theme } = useTheme()
   const r = 28
   const circ = 2 * Math.PI * r
   const progress = (value / 10) * circ
-  const color = confidenceColor(value)
+  const color = confidenceColor(value, theme === 'dark')
   return (
     <div className="relative w-[72px] h-[72px] flex items-center justify-center">
       <svg viewBox="0 0 72 72" className="absolute inset-0 w-full h-full" style={{ transform: 'rotate(-90deg)' }}>
@@ -185,6 +187,8 @@ function ConfidenceRing({ value }: { value: number }) {
 // ─── MiniSparkline ────────────────────────────────────────────────────────────
 
 function MiniSparkline({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }) {
+  const { theme } = useTheme()
+  const dark = theme === 'dark'
   const pts = [...stats].reverse().filter(s => s.weight_kg != null).map(s => toDisplay(s.weight_kg!, unit)).slice(-8)
   if (pts.length < 2) return null
   const W = 80, H = 32
@@ -193,7 +197,7 @@ function MiniSparkline({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb'
   const coords = pts.map((w, i) => ({ x: (i / (pts.length - 1)) * W, y: H - ((w - min) / range) * (H - 8) - 4 }))
   const polyline = coords.map(c => `${c.x},${c.y}`).join(' ')
   const delta = pts[pts.length - 1] - pts[0]
-  const color = delta <= 0 ? '#b0e455' : '#f87171'
+  const color = delta <= 0 ? (dark ? '#b0e455' : '#16a34a') : '#f87171'
   return (
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: 80, height: 32 }} className="opacity-80">
       <polyline points={polyline} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -204,20 +208,22 @@ function MiniSparkline({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb'
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
 
-const MILESTONE_DEF: Record<string, { label: string; iconPath: string; color: string }> = {
-  first_workout: { label: 'First Workout', iconPath: 'M6.5 6.5h11M6.5 17.5h11M8 12h8', color: '#b0e455' },
-  first_checkin: { label: 'First Check-in', iconPath: 'M18 20V10M12 20V4M6 20v-6', color: '#86efac' },
-  streak_3: { label: '3-Day Streak', iconPath: 'M13 10V3L4 14h7v7l9-11h-7z', color: '#fbbf24' },
-  streak_7: { label: '7-Day Streak', iconPath: 'M13 10V3L4 14h7v7l9-11h-7z', color: '#f97316' },
-  streak_14: { label: '2-Week Streak', iconPath: 'M13 10V3L4 14h7v7l9-11h-7z', color: '#ef4444' },
+const MILESTONE_DEF: Record<string, { label: string; iconPath: string; lightColor: string; darkColor: string }> = {
+  first_workout: { label: 'First Workout', iconPath: 'M6.5 6.5h11M6.5 17.5h11M8 12h8', lightColor: '#4d8f1a', darkColor: '#b0e455' },
+  first_checkin: { label: 'First Check-in', iconPath: 'M18 20V10M12 20V4M6 20v-6', lightColor: '#16a34a', darkColor: '#86efac' },
+  streak_3: { label: '3-Day Streak', iconPath: 'M13 10V3L4 14h7v7l9-11h-7z', lightColor: '#b45309', darkColor: '#fbbf24' },
+  streak_7: { label: '7-Day Streak', iconPath: 'M13 10V3L4 14h7v7l9-11h-7z', lightColor: '#ea580c', darkColor: '#f97316' },
+  streak_14: { label: '2-Week Streak', iconPath: 'M13 10V3L4 14h7v7l9-11h-7z', lightColor: '#dc2626', darkColor: '#ef4444' },
   streak_30: {
     label: '30-Day Streak',
     iconPath: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z',
-    color: '#b0e455',
+    lightColor: '#4d8f1a', darkColor: '#b0e455',
   },
 }
 
 function BadgesSection({ milestones }: { milestones: string[] }) {
+  const { theme } = useTheme()
+  const dark = theme === 'dark'
   const earned = milestones.filter(m => MILESTONE_DEF[m])
   if (!earned.length) return null
   return (
@@ -226,11 +232,12 @@ function BadgesSection({ milestones }: { milestones: string[] }) {
       <div className="flex gap-2 overflow-x-auto pb-1">
         {earned.map(type => {
           const def = MILESTONE_DEF[type]
+          const color = dark ? def.darkColor : def.lightColor
           return (
             <div key={type} className="shrink-0 flex flex-col items-center gap-1.5 bg-[var(--c-card)] shadow-sm border border-[var(--c-border)] rounded-2xl px-4 py-3">
               <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: def.color + '18', border: `1px solid ${def.color}30` }}>
-                <svg viewBox="0 0 24 24" fill="none" stroke={def.color} strokeWidth="1.8" className="w-4 h-4">
+                style={{ backgroundColor: color + '18', border: `1px solid ${color}30` }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" className="w-4 h-4">
                   <path d={def.iconPath} strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
@@ -295,6 +302,8 @@ export default function DashboardClient({
   milestones,
   referralCode,
 }: Props) {
+  const { theme } = useTheme()
+  const dark = theme === 'dark'
   const name = firstName ?? 'there'
   const streak = computeStreak(workoutDates)
   const latest = recentStats[0] ?? null
@@ -505,7 +514,7 @@ export default function DashboardClient({
                         <span className="text-sm text-[var(--c-text3)]">{weightUnit}</span>
                       </div>
                       {weightDelta !== null && (
-                        <p className="text-xs mt-1 font-medium" style={{ color: weightDelta <= 0 ? '#86efac' : '#f87171' }}>
+                        <p className="text-xs mt-1 font-medium" style={{ color: weightDelta <= 0 ? (dark ? '#86efac' : '#16a34a') : '#f87171' }}>
                           {weightDelta > 0 ? '+' : ''}{weightDelta.toFixed(1)} {weightUnit}
                         </p>
                       )}
@@ -515,7 +524,7 @@ export default function DashboardClient({
                     <div className="ml-2">
                       <p className="text-[10px] text-[var(--c-text4)] uppercase tracking-wider mb-2">Confidence</p>
                       <ConfidenceRing value={latest.confidence} />
-                      <p className="text-xs mt-1.5 font-medium text-center" style={{ color: confidenceColor(latest.confidence) }}>
+                      <p className="text-xs mt-1.5 font-medium text-center" style={{ color: confidenceColor(latest.confidence, dark) }}>
                         {confidenceLabel(latest.confidence)}
                       </p>
                     </div>
@@ -583,7 +592,7 @@ export default function DashboardClient({
                           <p className="text-sm font-semibold">{toDisplay(s.weight_kg, weightUnit)} {weightUnit}</p>
                         )}
                         {s.confidence !== null && (
-                          <p className="text-sm font-semibold ml-auto" style={{ color: confidenceColor(s.confidence) }}>
+                          <p className="text-sm font-semibold ml-auto" style={{ color: confidenceColor(s.confidence, dark) }}>
                             {s.confidence}/10
                           </p>
                         )}
