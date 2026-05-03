@@ -39,9 +39,7 @@ const GOALS = [
 
 function getInitials(firstName: string, nickname: string, email: string): string {
   const source = firstName.trim() || nickname.trim() || email.split("@")[0];
-  const parts = source.split(/[\s._-]+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return source.slice(0, 2).toUpperCase();
+  return source.slice(0, 1).toUpperCase();
 }
 
 // ─── Section wrapper ──────────────────────────────────────────────────────────

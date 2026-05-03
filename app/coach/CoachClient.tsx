@@ -765,6 +765,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
   const [activeSection, setActiveSection] = useState<Section>('split')
   const [sections, setSections] = useState<Partial<Record<Section, object | null>>>({})
   const [sectionLoadKey, setSectionLoadKey] = useState(0)
+  const [loadingSections, setLoadingSections] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
@@ -781,6 +782,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
     setSelectedId(id)
     setActiveSection('split')
     setSections({})
+    setLoadingSections(true)
     const { data } = await supabase
       .from('program_sections')
       .select('section, content_json')
@@ -788,6 +790,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
     const map: Partial<Record<Section, object | null>> = {}
     for (const row of data ?? []) map[row.section as Section] = row.content_json
     setSections(map)
+    setLoadingSections(false)
     setSectionLoadKey(k => k + 1)
   }
 
@@ -892,7 +895,11 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
         ))}
       </div>
 
-      {activeSection === 'food' ? (
+      {loadingSections ? (
+        <div className="flex justify-center py-16">
+          <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+        </div>
+      ) : activeSection === 'food' ? (
         <BmrSection
           key={`${selectedId}-${sectionLoadKey}`}
           initial={(sections.food as BmrData | null | undefined) ?? null}
@@ -942,6 +949,7 @@ function MessagesTab({
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [loadingMessages, setLoadingMessages] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -973,7 +981,9 @@ function MessagesTab({
 
   async function openThread(threadId: string) {
     setSelectedThreadId(threadId)
+    setChatMessages([])
     setLoadError(null)
+    setLoadingMessages(true)
     try {
       const res = await fetch(`/api/get-thread-messages?thread_id=${threadId}`)
       const json = await res.json()
@@ -995,6 +1005,7 @@ function MessagesTab({
       setLoadError('Network error loading messages.')
       console.error('get-thread-messages fetch error:', err)
     }
+    setLoadingMessages(false)
     await supabase.from('message_reads').upsert({
       thread_id: threadId, user_id: userId, last_read_at: new Date().toISOString(),
     })
@@ -1121,7 +1132,12 @@ function MessagesTab({
         {loadError && (
           <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-3 text-xs text-[#f87171]">{loadError}</div>
         )}
-        {!loadError && chatMessages.length === 0 && (
+        {loadingMessages && (
+          <div className="flex justify-center py-16">
+            <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+          </div>
+        )}
+        {!loadError && !loadingMessages && chatMessages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-sm text-[#edf5e2]/20">No messages yet.</p>
             <p className="text-xs text-[#edf5e2]/12 mt-1">Send the first message below.</p>

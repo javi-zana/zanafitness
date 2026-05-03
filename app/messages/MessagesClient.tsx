@@ -239,7 +239,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
       </div>
 
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 pb-4 space-y-1 lg:px-10 lg:max-w-3xl" style={{ paddingBottom: '140px' }}>
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 lg:px-10 lg:max-w-3xl pb-36 lg:pb-24">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-sm text-[#edf5e2]/20">No messages yet.</p>
@@ -289,8 +289,8 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
         <div ref={bottomRef} />
       </div>
 
-      {/* Composer - fixed above bottom nav */}
-      <div className="fixed bottom-16 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 px-4 py-3 z-40">
+      {/* Composer - fixed above bottom nav on mobile, flush to bottom on desktop */}
+      <div className="fixed bottom-16 left-0 right-0 lg:bottom-0 lg:left-52 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 px-4 py-3 z-40">
         {sendError && (
           <div className="mb-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20">
             <p className="text-xs text-red-400">{sendError}</p>

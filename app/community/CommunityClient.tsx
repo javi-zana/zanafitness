@@ -707,23 +707,23 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
         {canPost && !composing && (
           <button
             onClick={() => setComposing(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition"
+            className="w-8 h-8 rounded-full bg-[#b0e455] flex items-center justify-center text-[#0f1a0c] hover:bg-[#c9f070] transition shrink-0 lg:w-auto lg:h-auto lg:rounded-xl lg:px-3 lg:py-2 lg:gap-1.5"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3 h-3">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5 lg:w-3 lg:h-3">
               <path d="M12 5v14M5 12h14" strokeLinecap="round" />
             </svg>
-            Post
+            <span className="hidden lg:inline text-xs font-semibold">Post</span>
           </button>
         )}
       </div>
 
-      <div className="overflow-x-auto border-b border-[#b0e455]/8">
-        <div className="flex min-w-max px-5 lg:px-10">
+      <div className="border-b border-[#b0e455]/8">
+        <div className="flex px-5 lg:px-10">
           {SUB_TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => switchTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 -mb-px ${
+              className={`flex-1 py-3 text-xs font-medium text-center whitespace-nowrap transition border-b-2 -mb-px ${
                 activeTab === tab.id
                   ? 'border-[#b0e455] text-[#b0e455]'
                   : 'border-transparent text-[#edf5e2]/30 hover:text-[#edf5e2]/60'
