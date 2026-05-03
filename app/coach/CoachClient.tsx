@@ -515,15 +515,15 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
 
       {/* Quick links */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-[#1a2630] border border-[#60a5fa]/10 rounded-xl p-4">
-          <p className="text-[10px] text-[#60a5fa] uppercase tracking-wider font-mono mb-1">Programs</p>
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
+          <p className="text-[10px] text-[#3b82f6] uppercase tracking-wider font-mono mb-1">Programs</p>
           <p className="text-sm font-semibold text-[var(--c-text)]">{members.length} member{members.length !== 1 ? 's' : ''}</p>
-          <p className="text-[10px] text-[var(--c-text4)] mt-0.5">Click Programs to edit</p>
+          <p className="text-[10px] text-[var(--c-text3)] mt-0.5">Click Programs to edit</p>
         </div>
-        <div className="bg-[#261a2a] border border-[#c084fc]/10 rounded-xl p-4">
-          <p className="text-[10px] text-[#c084fc] uppercase tracking-wider font-mono mb-1">Messages</p>
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
+          <p className="text-[10px] text-[#9333ea] uppercase tracking-wider font-mono mb-1">Messages</p>
           <p className="text-sm font-semibold text-[var(--c-text)]">{threads.length} thread{threads.length !== 1 ? 's' : ''}</p>
-          <p className="text-[10px] text-[var(--c-text4)] mt-0.5">Click Messages to chat</p>
+          <p className="text-[10px] text-[var(--c-text3)] mt-0.5">Click Messages to chat</p>
         </div>
       </div>
 
