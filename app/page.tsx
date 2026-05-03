@@ -15,8 +15,7 @@ const ZanaLogo = ({ className = "h-5" }: { className?: string }) => (
   </svg>
 );
 
-// ── Replace this href with the actual application form URL ───────────────────
-const APPLICATION_FORM_URL = '#apply';
+const APPLICATION_FORM_URL = '/apply';
 
 function LoginForm() {
   const searchParams = useSearchParams();
