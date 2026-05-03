@@ -67,10 +67,10 @@ function relTime(dateStr: string) {
 }
 
 function confidenceColor(v: number) {
-  if (v <= 3) return '#f87171'
-  if (v <= 5) return '#fbbf24'
-  if (v <= 8) return '#86efac'
-  return '#b0e455'
+  if (v <= 3) return '#dc2626'
+  if (v <= 5) return '#b45309'
+  if (v <= 8) return '#16a34a'
+  return '#15803d'
 }
 
 function toDisplay(kg: number, unit: string | null) {
@@ -508,7 +508,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Attention</p>
         </div>
         <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
-          <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
+          <p className="text-2xl font-bold text-[#16a34a]">{activeThisWeek}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
         </div>
       </div>
@@ -674,7 +674,7 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Attention</p>
         </div>
         <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
-          <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
+          <p className="text-2xl font-bold text-[#16a34a]">{activeThisWeek}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
         </div>
       </div>
@@ -715,10 +715,10 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded-full ${
-                    status === 'fresh' ? 'text-[#86efac] bg-[#86efac]/10'
-                    : status === 'ok' ? 'text-[#fbbf24] bg-[#fbbf24]/10'
-                    : status === 'overdue' ? 'text-[#f87171] bg-[#f87171]/10'
+                  <span className={`text-[10px] font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-full ${
+                    status === 'fresh' ? 'text-[#15803d] bg-[#15803d]/10'
+                    : status === 'ok' ? 'text-[#b45309] bg-[#b45309]/10'
+                    : status === 'overdue' ? 'text-[#dc2626] bg-[#dc2626]/10'
                     : 'text-[var(--c-text4)] bg-[var(--c-card)]'
                   }`}>
                     {STATUS_LABEL[status]}
@@ -741,7 +741,7 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
               const m = memberMap[s.member_id]
               if (!m) return null
               return (
-                <div key={s.id} className="bg-[var(--c-card2)] rounded-xl p-4">
+                <div key={s.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
                   <div className="flex items-center justify-between mb-2">
                     <p className="text-xs font-semibold text-[var(--c-text)]">{memberName(m)}</p>
                     <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>{relTime(s.created_at)} ago</p>
@@ -1428,7 +1428,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
                   </div>
                 )}
                 {alreadyAssigned && (
-                  <p className="text-[10px] text-[#86efac] font-mono">Coach assigned ✓</p>
+                  <p className="text-[10px] text-[#15803d] font-medium">Coach assigned ✓</p>
                 )}
 
                 <button
@@ -1500,9 +1500,9 @@ function AdminTab({ userEmail }: { userEmail: string }) {
                       {hasThread ? 'Messaging active' : 'No thread'}
                     </p>
                   </div>
-                  <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border ${
+                  <span className={`text-[10px] font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-lg border ${
                     hasThread
-                      ? 'text-[#86efac] border-[#86efac]/20 bg-[#86efac]/8'
+                      ? 'text-[#15803d] border-[#15803d]/25 bg-[#15803d]/8'
                       : 'text-[var(--c-text4)] border-[var(--c-border)]'
                   }`}>
                     {hasThread ? 'active' : 'pending'}
@@ -1596,7 +1596,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
             {inviteStatus === 'loading' ? 'Sending…' : 'Send Invite'}
           </button>
           {inviteMsg && (
-            <p className={`text-xs font-mono ${inviteStatus === 'ok' ? 'text-[#86efac]' : 'text-[#f87171]'}`}>{inviteMsg}</p>
+            <p className={`text-xs font-medium ${inviteStatus === 'ok' ? 'text-[#15803d]' : 'text-[#dc2626]'}`}>{inviteMsg}</p>
           )}
         </form>
       </div>
