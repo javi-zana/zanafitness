@@ -12,9 +12,29 @@
  *    - Who has access: Anyone
  * 6. Click Deploy, copy the Web App URL
  * 7. Add to Vercel: GOOGLE_SHEET_APPLY_WEBHOOK = <that URL>
+ *
+ * NOTE: If you change questions, update the HEADERS array and the
+ * sheet.appendRow([...]) array below to match, then redeploy.
  */
 
-const SHEET_NAME = 'Applications'; // rename your sheet tab to this, or change this string
+const SHEET_NAME = 'Applications';
+
+const HEADERS = [
+  'Timestamp',
+  'First Name',        // Q1
+  'Email',             // Q2
+  'Phone / WhatsApp',  // Q3
+  'Instagram',         // Q4
+  'Age',               // Q5
+  'Location',          // Q6
+  'Work',              // Q7
+  'Mirror Goal',       // Q8
+  'What Stopped Them', // Q9
+  'Training History',  // Q10
+  'Commitment (1–10)', // Q11
+  'Investment Fit',    // Q12
+  'Why Now',           // Q13 (optional)
+];
 
 function doPost(e) {
   try {
@@ -22,50 +42,33 @@ function doPost(e) {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName(SHEET_NAME);
 
-    // Create sheet if it doesn't exist
-    if (!sheet) {
-      sheet = ss.insertSheet(SHEET_NAME);
-    }
+    if (!sheet) sheet = ss.insertSheet(SHEET_NAME);
 
-    // Add header row once
     if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        'Timestamp',
-        'First Name',
-        'Email',
-        'Phone / WhatsApp',
-        'Instagram',
-        'Age Range',
-        'Location',
-        'Training Frequency',
-        'Fitness Goal',
-        'What Stopped Them',
-        'Previous Coaching',
-        'Commitment (1–10)',
-      ]);
-
-      // Basic formatting
-      const header = sheet.getRange(1, 1, 1, 12);
+      sheet.appendRow(HEADERS);
+      const header = sheet.getRange(1, 1, 1, HEADERS.length);
       header.setFontWeight('bold');
       header.setBackground('#0f1a0c');
       header.setFontColor('#b0e455');
       sheet.setFrozenRows(1);
-      sheet.setColumnWidths(1, 12, 200);
+      sheet.setColumnWidths(1, HEADERS.length, 220);
     }
 
     sheet.appendRow([
       new Date().toLocaleString('en-SG', { timeZone: 'Asia/Singapore' }),
-      data.firstName   || '',
-      data.email       || '',
-      data.phone       || '',
-      data.instagram   || '',
-      data.ageRange    || '',
-      data.location    || '',
-      data.trainingFrequency  || '',
-      data.fitnessGoal        || '',
-      data.stoppedProgress    || '',
-      data.previousCoaching   || '',
-      data.commitment  || '',
+      data.firstName        || '',
+      data.email            || '',
+      data.phone            || '',
+      data.instagram        || '',
+      data.age              || '',
+      data.location         || '',
+      data.work             || '',
+      data.mirrorGoal       || '',
+      data.whatStopped      || '',
+      data.trainingHistory  || '',
+      data.commitment       || '',
+      data.investmentFit    || '',
+      data.whyNow           || '',
     ]);
 
     return ContentService
@@ -79,26 +82,25 @@ function doPost(e) {
   }
 }
 
-// Test this manually from the Apps Script editor:
-// Run > Run function > testPost
 function testPost() {
   const mock = {
     postData: {
       contents: JSON.stringify({
-        firstName: 'Test',
-        email: 'test@example.com',
-        phone: '+65 9999 0000',
-        instagram: '@test',
-        ageRange: '26–30',
+        firstName: 'Marco',
+        email: 'marco@example.com',
+        phone: '+65 9123 4567',
+        instagram: 'marco_sg',
+        age: '30–34',
         location: 'Singapore',
-        trainingFrequency: '3–4x / week',
-        fitnessGoal: 'Lose body fat and get more defined',
-        stoppedProgress: 'Consistency and not knowing what to eat',
-        previousCoaching: 'No',
+        work: 'Investment banker',
+        mirrorGoal: 'Look good with my shirt off at Bali in October',
+        whatStopped: 'Inconsistency and not knowing what to eat when travelling',
+        trainingHistory: "I train 3–4×/week but don't see the results I want",
         commitment: 9,
+        investmentFit: "Yes — ready to commit if we're a match",
+        whyNow: 'Getting married in December — want to look my best',
       }),
     },
   };
-  const result = doPost(mock);
-  Logger.log(result.getContent());
+  Logger.log(doPost(mock).getContent());
 }
