@@ -180,7 +180,7 @@ function LoginForm() {
         {loading ? 'Signing in...' : 'Sign In'}
       </button>
 
-      <div className="flex items-center justify-between pt-1">
+      <div className="flex justify-center pt-1">
         <button
           type="button"
           onClick={() => setShowForgot(true)}
@@ -188,11 +188,15 @@ function LoginForm() {
         >
           Forgot password?
         </button>
+      </div>
+
+      <div className="pt-4 border-t border-[var(--c-border)]">
+        <p className="text-xs text-[var(--c-text4)] text-center mb-3">Don't have an account?</p>
         <a
           href={APPLICATION_FORM_URL}
-          className="text-sm text-[var(--c-accent-text)] hover:opacity-75 transition-colors"
+          className="w-full block text-center border border-[var(--c-accent-text)]/40 text-[var(--c-accent-text)] font-semibold text-sm py-4 rounded-2xl hover:bg-[var(--c-accent-text)]/8 transition-colors"
         >
-          Apply to join
+          Apply to Join
         </a>
       </div>
     </form>
