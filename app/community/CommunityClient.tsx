@@ -296,12 +296,14 @@ function PostCard({
 
 // ─── Coach nav for community page ─────────────────────────────────────────────
 
-function CoachCommunityNav({ firstName, avatarColor, avatarUrl }: {
+function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
   firstName: string | null
   avatarColor: string
   avatarUrl: string | null
+  userRole: string
 }) {
   const initials = (firstName ?? 'C').slice(0, 1).toUpperCase()
+  const adminIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
 
   const coachLinks = [
     { href: '/coach', label: 'Home', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" /></svg> },
@@ -344,6 +346,15 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl }: {
               </Link>
             )
           })}
+          {userRole === 'head_coach' && (
+            <Link
+              href="/coach"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]"
+            >
+              {adminIcon}
+              <span className="text-sm font-semibold">Admin</span>
+            </Link>
+          )}
         </nav>
         <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-0.5">
           <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
@@ -382,6 +393,17 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl }: {
             </Link>
           )
         })}
+        {userRole === 'head_coach' && (
+          <Link
+            href="/coach"
+            className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
+          >
+            <div className="w-10 h-7 flex items-center justify-center rounded-full text-[#edf5e2]/25">
+              {adminIcon}
+            </div>
+            <span className="text-[9px] uppercase font-medium text-[#edf5e2]/25">Admin</span>
+          </Link>
+        )}
       </nav>
     </>
   )
@@ -771,7 +793,7 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
       </div>
 
       {userRole === 'coach' || userRole === 'head_coach'
-        ? <CoachCommunityNav firstName={firstName} avatarColor={avatarColor} avatarUrl={avatarUrl} />
+        ? <CoachCommunityNav firstName={firstName} avatarColor={avatarColor} avatarUrl={avatarUrl} userRole={userRole} />
         : <BottomNav />
       }
     </div>
