@@ -58,13 +58,13 @@ function AttachmentImage({ path }: { path: string }) {
 
 function NoThread() {
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
-      <div className="px-5 pt-12 pb-4 lg:pt-8 lg:border-b lg:border-[#b0e455]/8">
-        <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
+      <div className="px-5 pt-12 pb-4 lg:pt-8 lg:border-b lg:border-[var(--c-border)]">
+        <p className="text-xs text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight">Messages</h1>
       </div>
       <div className="flex-1 overflow-y-auto px-5 pb-28 pt-4 space-y-4">
-        <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
+        <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5 space-y-4">
           <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">Direct line to your coach</p>
           {[
             { label: 'Ask anything', desc: 'Questions about your program, nutrition, a specific workout - nothing is too small.' },
@@ -75,14 +75,14 @@ function NoThread() {
               <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455] mt-2 shrink-0" />
               <div>
                 <p className="text-sm font-semibold">{item.label}</p>
-                <p className="text-xs text-[#edf5e2]/40 mt-0.5 leading-relaxed">{item.desc}</p>
+                <p className="text-xs text-[var(--c-text3)] mt-0.5 leading-relaxed">{item.desc}</p>
               </div>
             </div>
           ))}
         </div>
-        <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-4 text-center">
+        <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-4 text-center">
           <p className="text-xs text-[#b0e455] font-medium mb-1">Thread not active yet</p>
-          <p className="text-xs text-[#edf5e2]/40">Your coach will open your direct message thread once you're fully onboarded.</p>
+          <p className="text-xs text-[var(--c-text3)]">Your coach will open your direct message thread once you're fully onboarded.</p>
         </div>
       </div>
       <BottomNav />
@@ -231,10 +231,10 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
     : false
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 border-b border-[#b0e455]/8 lg:px-10 lg:pt-10 lg:pb-5">
-        <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+      <div className="px-5 pt-12 pb-4 border-b border-[var(--c-border)] lg:px-10 lg:pt-10 lg:pb-5">
+        <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight lg:text-3xl">Messages</h1>
       </div>
 
@@ -242,8 +242,8 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 lg:px-10 lg:max-w-3xl pb-36 lg:pb-24">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm text-[#edf5e2]/20">No messages yet.</p>
-            <p className="text-xs text-[#edf5e2]/15 mt-1">Send the first one below.</p>
+            <p className="text-sm text-[var(--c-text4)]">No messages yet.</p>
+            <p className="text-xs text-[var(--c-text5)] mt-1">Send the first one below.</p>
           </div>
         )}
 
@@ -256,7 +256,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
           return (
             <div key={msg.id}>
               {showTs && (
-                <p className="text-center text-xs text-[#edf5e2]/25 py-3">
+                <p className="text-center text-xs text-[var(--c-text4)] py-3">
                   {formatTime(msg.created_at)}
                 </p>
               )}
@@ -267,7 +267,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
                       className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                         isMine
                           ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm font-medium'
-                          : 'bg-[#1c2e16] text-[#edf5e2]/85 rounded-bl-sm border border-[#b0e455]/8'
+                          : 'bg-[var(--c-card2)] text-[var(--c-text2)] rounded-bl-sm border border-[var(--c-border)]'
                       }`}
                     >
                       {msg.body}
@@ -279,7 +279,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
                       : null
                   ))}
                   {isLastMine && coachHasSeen && (
-                    <p className="text-xs text-[#edf5e2]/30 mt-1 mr-1">Seen</p>
+                    <p className="text-xs text-[var(--c-text4)] mt-1 mr-1">Seen</p>
                   )}
                 </div>
               </div>
@@ -290,7 +290,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
       </div>
 
       {/* Composer - fixed above bottom nav on mobile, flush to bottom on desktop */}
-      <div className="fixed bottom-16 left-0 right-0 lg:bottom-0 lg:left-52 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 px-4 py-3 z-40">
+      <div className="fixed bottom-16 left-0 right-0 lg:bottom-0 lg:left-52 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] px-4 py-3 z-40">
         {sendError && (
           <div className="mb-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20">
             <p className="text-xs text-red-400">{sendError}</p>
@@ -306,7 +306,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
                     setAttachmentFiles(f => f.filter((_, j) => j !== i))
                     setPreviews(p => p.filter((_, j) => j !== i))
                   }}
-                  className="absolute -top-1 -right-1 w-4 h-4 bg-[#0f1a0c] border border-[#edf5e2]/15 rounded-full text-[#edf5e2]/60 flex items-center justify-center text-[10px]"
+                  className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--c-bg)] border border-[var(--c-border)] rounded-full text-[var(--c-text3)] flex items-center justify-center text-[10px]"
                 >
                   ×
                 </button>
@@ -317,7 +317,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
         <div className="flex items-end gap-2">
           <button
             onClick={() => fileRef.current?.click()}
-            className="shrink-0 w-9 h-9 rounded-full border border-[#edf5e2]/10 flex items-center justify-center text-[#edf5e2]/30 hover:text-[#edf5e2]/60 hover:border-[#edf5e2]/25 transition mb-0.5"
+            className="shrink-0 w-9 h-9 rounded-full border border-[var(--c-border)] flex items-center justify-center text-[var(--c-text4)] hover:text-[var(--c-text)]/60 hover:border-[var(--c-border2)] transition mb-0.5"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
               <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" strokeLinecap="round" strokeLinejoin="round" />
@@ -332,7 +332,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
             onKeyDown={handleKeyDown}
             placeholder="Message…"
             rows={1}
-            className="flex-1 bg-[#1c2e16] border border-[#b0e455]/12 rounded-2xl px-4 py-2.5 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 resize-none focus:outline-none focus:border-[#b0e455]/35 transition max-h-32 overflow-y-auto leading-relaxed"
+            className="flex-1 bg-[var(--c-card2)] border border-[var(--c-border)] rounded-2xl px-4 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] resize-none focus:outline-none focus:border-[#b0e455]/35 transition max-h-32 overflow-y-auto leading-relaxed"
           />
 
           <button

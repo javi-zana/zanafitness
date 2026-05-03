@@ -65,7 +65,7 @@ function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }
 
   if (pts.length < 2) {
     return (
-      <p className="text-sm text-[#edf5e2]/30 text-center py-4">
+      <p className="text-sm text-[var(--c-text4)] text-center py-4">
         Log at least 2 weights to see your trend
       </p>
     )
@@ -111,7 +111,7 @@ function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }
         <polyline points={polyline} fill="none" stroke="#b0e455" strokeWidth="1.5" />
         <circle cx={last.x} cy={last.y} r="3" fill="#b0e455" />
       </svg>
-      <div className="flex justify-between text-xs text-[#edf5e2]/35 mt-1">
+      <div className="flex justify-between text-xs text-[var(--c-text4)] mt-1">
         <span>{min} {unit}</span>
         <span className="text-[#b0e455] font-semibold">{lastVal} {unit} now</span>
         <span>{max} {unit}</span>
@@ -128,24 +128,24 @@ function StatCard({ stat, unit }: { stat: StatUpdate; unit: 'kg' | 'lb' }) {
   const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
 
   return (
-    <div className="bg-[#1c2e16] rounded-2xl p-4 space-y-3 border border-[#b0e455]/8">
-      <p className="text-xs text-[#edf5e2]/35">
+    <div className="bg-[var(--c-card2)] rounded-2xl p-4 space-y-3 border border-[var(--c-border)]">
+      <p className="text-xs text-[var(--c-text4)]">
         {formatted} · {time}
       </p>
 
       <div className="flex gap-4">
         {stat.weight_kg != null && (
           <div>
-            <p className="text-xs text-[#edf5e2]/40 mb-0.5">Weight</p>
-            <p className="text-xl font-bold text-[#edf5e2]">
+            <p className="text-xs text-[var(--c-text3)] mb-0.5">Weight</p>
+            <p className="text-xl font-bold text-[var(--c-text)]">
               {toDisplay(stat.weight_kg, unit)}
-              <span className="text-sm text-[#edf5e2]/40 ml-1">{unit}</span>
+              <span className="text-sm text-[var(--c-text3)] ml-1">{unit}</span>
             </p>
           </div>
         )}
         {stat.confidence != null && (
           <div>
-            <p className="text-xs text-[#edf5e2]/40 mb-0.5">Confidence</p>
+            <p className="text-xs text-[var(--c-text3)] mb-0.5">Confidence</p>
             <p className="text-xl font-bold" style={{ color: confidenceColor(stat.confidence) }}>
               {stat.confidence}
               <span className="text-sm opacity-60 ml-1">/ 10</span>
@@ -155,7 +155,7 @@ function StatCard({ stat, unit }: { stat: StatUpdate; unit: 'kg' | 'lb' }) {
       </div>
 
       {stat.milestone_text && (
-        <p className="text-sm text-[#edf5e2]/70 leading-relaxed">{stat.milestone_text}</p>
+        <p className="text-sm text-[var(--c-text2)] leading-relaxed">{stat.milestone_text}</p>
       )}
 
       {stat.stat_update_photos.length > 0 && (
@@ -176,7 +176,7 @@ function PhotoThumb({ path }: { path: string }) {
     <img
       src={data.publicUrl}
       alt=""
-      className="w-20 h-20 rounded-xl object-cover shrink-0 bg-[#edf5e2]/5"
+      className="w-20 h-20 rounded-xl object-cover shrink-0 bg-[var(--c-card)]"
     />
   )
 }
@@ -244,10 +244,10 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
   )
 
   return (
-    <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8 space-y-4">
+    <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)] space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#edf5e2]/35 uppercase tracking-wide font-medium">Progress Photos</p>
+        <p className="text-xs text-[var(--c-text4)] uppercase tracking-wide font-medium">Progress Photos</p>
         {photos.length > 0 && (
           <button
             onClick={() => weeklyInputRef.current?.click()}
@@ -263,10 +263,10 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
       <div className="grid grid-cols-2 gap-3">
         {/* Before slot */}
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 uppercase tracking-wide mb-1.5">Before</p>
+          <p className="text-[10px] text-[var(--c-text4)] uppercase tracking-wide mb-1.5">Before</p>
           {beforePhoto ? (
             <div
-              className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#0f1a0c] cursor-pointer"
+              className="aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--c-bg)] cursor-pointer"
               onClick={() => setLightbox(beforePhoto.photo_url)}
             >
               <img src={beforePhoto.photo_url} alt="Before" className="w-full h-full object-cover" />
@@ -276,10 +276,10 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
               type="button"
               onClick={() => beforeInputRef.current?.click()}
               disabled={uploading !== null}
-              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[#edf5e2]/10 flex flex-col items-center justify-center gap-2 text-[#edf5e2]/25 hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[var(--c-border)] flex flex-col items-center justify-center gap-2 text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
             >
               {uploading === 'before' ? (
-                <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
               ) : (
                 <>
                   {cameraIcon}
@@ -292,12 +292,12 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
 
         {/* Latest weekly slot */}
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 uppercase tracking-wide mb-1.5">
+          <p className="text-[10px] text-[var(--c-text4)] uppercase tracking-wide mb-1.5">
             {latestWeekly ? `Week ${weeklyPhotos.length}` : 'Latest'}
           </p>
           {latestWeekly ? (
             <div
-              className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#0f1a0c] cursor-pointer"
+              className="aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--c-bg)] cursor-pointer"
               onClick={() => setLightbox(latestWeekly.photo_url)}
             >
               <img src={latestWeekly.photo_url} alt="Latest" className="w-full h-full object-cover" />
@@ -307,10 +307,10 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
               type="button"
               onClick={() => weeklyInputRef.current?.click()}
               disabled={uploading !== null}
-              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[#edf5e2]/10 flex flex-col items-center justify-center gap-2 text-[#edf5e2]/25 hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+              className="w-full aspect-[3/4] rounded-2xl border border-dashed border-[var(--c-border)] flex flex-col items-center justify-center gap-2 text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
             >
               {uploading === 'weekly' ? (
-                <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
               ) : (
                 <>
                   {cameraIcon}
@@ -324,7 +324,7 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
 
       {/* No photos CTA */}
       {photos.length === 0 && !uploading && (
-        <p className="text-xs text-[#edf5e2]/25 text-center leading-relaxed">
+        <p className="text-xs text-[var(--c-text4)] text-center leading-relaxed">
           Upload a &quot;Before&quot; photo to start tracking your visual progress over time.
         </p>
       )}
@@ -335,20 +335,20 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
           {photos.map(photo => (
             <div key={photo.id} className="shrink-0 flex flex-col items-center gap-1">
               <div
-                className="relative w-14 h-14 rounded-xl overflow-hidden bg-[#162212] cursor-pointer"
+                className="relative w-14 h-14 rounded-xl overflow-hidden bg-[var(--c-card)] cursor-pointer"
                 onClick={() => setLightbox(photo.photo_url)}
               >
                 <img src={photo.photo_url} alt="" className="w-full h-full object-cover" />
                 <button
                   onClick={e => { e.stopPropagation(); deletePhoto(photo.id) }}
-                  className="absolute top-0.5 right-0.5 w-4 h-4 bg-[#0f1a0c]/80 rounded-full flex items-center justify-center"
+                  className="absolute top-0.5 right-0.5 w-4 h-4 bg-[var(--c-bg)]/80 rounded-full flex items-center justify-center"
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2 h-2 text-[#edf5e2]/60">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="w-2 h-2 text-[var(--c-text3)]">
                     <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
                   </svg>
                 </button>
               </div>
-              <p className="text-[9px] text-[#edf5e2]/25 uppercase tracking-wide">{photoLabel(photo)}</p>
+              <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wide">{photoLabel(photo)}</p>
             </div>
           ))}
           {/* Add weekly button */}
@@ -356,13 +356,13 @@ function ProgressPhotos({ initialPhotos }: { initialPhotos: ProgressPhoto[] }) {
             <button
               onClick={() => weeklyInputRef.current?.click()}
               disabled={uploading !== null}
-              className="w-14 h-14 rounded-xl border border-dashed border-[#edf5e2]/10 flex items-center justify-center text-[#edf5e2]/20 hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
+              className="w-14 h-14 rounded-xl border border-dashed border-[var(--c-border)] flex items-center justify-center text-[var(--c-text4)] hover:border-[#b0e455]/30 hover:text-[#b0e455]/50 transition disabled:opacity-40"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                 <path d="M12 5v14M5 12h14" strokeLinecap="round" />
               </svg>
             </button>
-            <p className="text-[9px] text-[#edf5e2]/20 uppercase tracking-wide">Add</p>
+            <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wide">Add</p>
           </div>
         </div>
       )}
@@ -496,7 +496,7 @@ function LogForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="text-xs text-[#edf5e2]/45 block mb-2">
+        <label className="text-xs text-[var(--c-text3)] block mb-2">
           Weight ({weightUnit})
         </label>
         <input
@@ -506,13 +506,13 @@ function LogForm({
           placeholder={`e.g. ${weightUnit === 'kg' ? '72.5' : '159.8'}`}
           value={weight}
           onChange={e => setWeight(e.target.value)}
-          className="w-full bg-[#0f1a0c] border border-[#b0e455]/15 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition"
+          className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-2xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
         />
       </div>
 
       <div>
         <div className="flex justify-between items-baseline mb-2">
-          <label className="text-xs text-[#edf5e2]/45">Confidence</label>
+          <label className="text-xs text-[var(--c-text3)]">Confidence</label>
           <span className="text-sm font-semibold" style={{ color: confidenceColor(confidence) }}>
             {confidence} / 10 · {confidenceLabel(confidence)}
           </span>
@@ -534,7 +534,7 @@ function LogForm({
               className={`flex-1 py-1.5 rounded-xl text-xs font-medium transition border ${
                 confidence === p.value
                   ? 'border-[#b0e455] text-[#b0e455] bg-[#b0e455]/10'
-                  : 'border-[#edf5e2]/10 text-[#edf5e2]/40 hover:border-[#edf5e2]/25'
+                  : 'border-[var(--c-border)] text-[var(--c-text3)] hover:border-[var(--c-border2)]'
               }`}
             >
               {p.label}
@@ -545,8 +545,8 @@ function LogForm({
 
       <div>
         <div className="flex justify-between items-baseline mb-2">
-          <label className="text-xs text-[#edf5e2]/45">Milestone</label>
-          <span className="text-xs text-[#edf5e2]/30">{milestone.length} / 280</span>
+          <label className="text-xs text-[var(--c-text3)]">Milestone</label>
+          <span className="text-xs text-[var(--c-text4)]">{milestone.length} / 280</span>
         </div>
         <textarea
           maxLength={280}
@@ -554,16 +554,16 @@ function LogForm({
           placeholder="What did you hit this week? Any wins, realizations, momentum?"
           value={milestone}
           onChange={e => setMilestone(e.target.value)}
-          className="w-full bg-[#0f1a0c] border border-[#b0e455]/15 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
+          className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-2xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
         />
       </div>
 
       <div>
-        <label className="text-xs text-[#edf5e2]/45 block mb-2">Photos (optional)</label>
+        <label className="text-xs text-[var(--c-text3)] block mb-2">Photos (optional)</label>
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="w-full border border-dashed border-[#edf5e2]/12 rounded-2xl py-3 text-sm text-[#edf5e2]/40 hover:border-[#b0e455]/35 hover:text-[#b0e455]/60 transition"
+          className="w-full border border-dashed border-[var(--c-border)] rounded-2xl py-3 text-sm text-[var(--c-text3)] hover:border-[#b0e455] hover:text-[#b0e455] transition"
         >
           + Add photos
         </button>
@@ -571,7 +571,7 @@ function LogForm({
         {previews.length > 0 && (
           <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
             {previews.map((src, i) => (
-              <img key={i} src={src} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[#edf5e2]/5" />
+              <img key={i} src={src} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[var(--c-card)]" />
             ))}
           </div>
         )}
@@ -583,7 +583,7 @@ function LogForm({
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3 rounded-2xl border border-[#edf5e2]/10 text-sm text-[#edf5e2]/50 hover:text-[#edf5e2] hover:border-[#edf5e2]/25 transition"
+          className="flex-1 py-3 rounded-2xl border border-[var(--c-border)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] hover:border-[var(--c-border2)] transition"
         >
           Cancel
         </button>
@@ -615,12 +615,12 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
   const chartStats = [...stats].filter(s => s.weight_kg != null)
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       <div className="flex-1 flex flex-col lg:max-w-4xl lg:mx-auto lg:w-full">
 
-        <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
+        <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[var(--c-border)]">
           <div>
-            <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+            <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
             <h1 className="text-xl font-bold tracking-tight lg:text-3xl">My Stats</h1>
           </div>
           {!formOpen && (
@@ -653,7 +653,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
                   </p>
                   <button
                     onClick={() => setFormOpen(true)}
-                    className="mt-4 inline-flex items-center gap-2 bg-[#0f1a0c] text-[#b0e455] text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-[#162212] transition"
+                    className="mt-4 inline-flex items-center gap-2 bg-[var(--c-bg)] text-[#b0e455] text-xs font-bold uppercase tracking-widest px-5 py-2.5 rounded-xl hover:bg-[var(--c-card)] transition"
                   >
                     Log now
                   </button>
@@ -671,8 +671,8 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
           )}
 
           {formOpen && (
-            <div className="bg-[#1c2e16] rounded-2xl p-5 border border-[#b0e455]/8">
-              <h2 className="text-sm font-semibold text-[#edf5e2]/60 mb-5">New Update</h2>
+            <div className="bg-[var(--c-card2)] rounded-2xl p-5 border border-[var(--c-border)]">
+              <h2 className="text-sm font-semibold text-[var(--c-text3)] mb-5">New Update</h2>
               <LogForm
                 userId={userId}
                 weightUnit={weightUnit}
@@ -683,8 +683,8 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
           )}
 
           {chartStats.length > 0 && !formOpen && (
-            <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8">
-              <p className="text-xs text-[#edf5e2]/35 uppercase tracking-wide mb-3">Weight trend</p>
+            <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)]">
+              <p className="text-xs text-[var(--c-text4)] uppercase tracking-wide mb-3">Weight trend</p>
               <WeightChart stats={chartStats} unit={weightUnit} />
             </div>
           )}
@@ -693,7 +693,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
 
           {stats.length === 0 && !formOpen ? (
             <div className="space-y-3 pt-2">
-              <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
+              <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5 space-y-4">
                 <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">What you&apos;ll track</p>
                 {[
                   { icon: <path d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />, label: "Body weight", desc: "Logged in kg or lbs, charted over time so you can see the trend clearly." },
@@ -706,28 +706,28 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
                     </div>
                     <div>
                       <p className="text-sm font-semibold">{item.label}</p>
-                      <p className="text-xs text-[#edf5e2]/40 mt-0.5 leading-relaxed">{item.desc}</p>
+                      <p className="text-xs text-[var(--c-text3)] mt-0.5 leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
+              <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5">
                 <p className="text-sm font-semibold mb-2">How often should I log?</p>
-                <p className="text-sm text-[#edf5e2]/45 leading-relaxed">
+                <p className="text-sm text-[var(--c-text3)] leading-relaxed">
                   At least once a week - ideally every 3-4 days. Consistency matters more than frequency. Even weekly data gives your coach a clear picture of what's actually happening.
                 </p>
               </div>
-              <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-5">
+              <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-5">
                 <p className="text-sm font-semibold text-[#b0e455] mb-1">Ready to start?</p>
-                <p className="text-sm text-[#edf5e2]/50 leading-relaxed">
-                  Tap <strong className="text-[#edf5e2]/70">Log</strong> above to drop your first check-in. It takes less than a minute.
+                <p className="text-sm text-[var(--c-text3)] leading-relaxed">
+                  Tap <strong className="text-[var(--c-text2)]">Log</strong> above to drop your first check-in. It takes less than a minute.
                 </p>
               </div>
             </div>
           ) : (
             <div className="space-y-3">
               {stats.length > 0 && (
-                <p className="text-xs text-[#edf5e2]/30 uppercase tracking-wide">History</p>
+                <p className="text-xs text-[var(--c-text4)] uppercase tracking-wide">History</p>
               )}
               {stats.map(stat => (
                 <StatCard key={stat.id} stat={stat} unit={weightUnit} />

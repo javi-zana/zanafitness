@@ -128,7 +128,7 @@ function WorkoutLogSection({
 
   if (todayLogged) {
     return (
-      <div className="flex items-center gap-3 bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-2xl p-4 mt-6">
+      <div className="flex items-center gap-3 bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4 mt-6">
         <div className="w-8 h-8 rounded-full bg-[#b0e455] flex items-center justify-center shrink-0">
           <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="2.5" className="w-4 h-4">
             <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
@@ -136,7 +136,7 @@ function WorkoutLogSection({
         </div>
         <div>
           <p className="text-sm font-semibold text-[#b0e455]">Workout logged for today</p>
-          <p className="text-xs text-[#edf5e2]/40 mt-0.5">Streak: {computeStreak(workoutDates)} day{computeStreak(workoutDates) !== 1 ? 's' : ''}</p>
+          <p className="text-xs text-[var(--c-text3)] mt-0.5">Streak: {computeStreak(workoutDates)} day{computeStreak(workoutDates) !== 1 ? 's' : ''}</p>
         </div>
       </div>
     )
@@ -144,10 +144,10 @@ function WorkoutLogSection({
 
   if (open) {
     return (
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[#1c2e16] rounded-2xl p-5 border border-[#b0e455]/8">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[var(--c-card2)] rounded-2xl p-5 border border-[var(--c-border)]">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-[#edf5e2]/70">Log today's workout</p>
-          <button type="button" onClick={() => setOpen(false)} className="text-[#edf5e2]/30 hover:text-[#edf5e2] transition">
+          <p className="text-sm font-semibold text-[var(--c-text2)]">Log today's workout</p>
+          <button type="button" onClick={() => setOpen(false)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
               <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
             </svg>
@@ -159,13 +159,13 @@ function WorkoutLogSection({
           maxLength={500}
           rows={3}
           placeholder="Optional notes - what did you do? How did it feel?"
-          className="w-full bg-[#0f1a0c] border border-[#b0e455]/15 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
+          className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-2xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
         />
         <div className="flex gap-3">
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="flex-1 py-3 rounded-2xl border border-[#edf5e2]/10 text-sm text-[#edf5e2]/50 hover:text-[#edf5e2] transition"
+            className="flex-1 py-3 rounded-2xl border border-[var(--c-border)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition"
           >
             Cancel
           </button>
@@ -182,7 +182,7 @@ function WorkoutLogSection({
   }
 
   return (
-    <div className="mt-6 pt-6 border-t border-[#b0e455]/8">
+    <div className="mt-6 pt-6 border-t border-[var(--c-border)]">
       <button
         onClick={() => setOpen(true)}
         className="w-full flex items-center justify-center gap-2 bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl text-sm font-semibold hover:bg-[#c9f070] transition active:scale-[0.98]"
@@ -222,8 +222,8 @@ function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Today's Habits</p>
-        <p className="text-[10px] text-[#edf5e2]/30 font-mono">{doneCount}/{total} done</p>
+        <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Today's Habits</p>
+        <p className="text-[10px] text-[var(--c-text4)] font-mono">{doneCount}/{total} done</p>
       </div>
       <div className="space-y-2">
         {data.habits.map(habit => (
@@ -232,12 +232,12 @@ function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }
             onClick={() => toggle(habit.id)}
             className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all text-left ${
               checked[habit.id]
-                ? 'bg-[#b0e455]/8 border-[#b0e455]/20'
-                : 'bg-[#1c2e16] border-transparent hover:border-[#b0e455]/10'
+                ? 'bg-[#b0e455]/8 border-[var(--c-border2)]'
+                : 'bg-[var(--c-card2)] border-transparent hover:border-[#b0e455]/10'
             }`}
           >
             <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-              checked[habit.id] ? 'bg-[#b0e455] border-[#b0e455]' : 'border-[#edf5e2]/20'
+              checked[habit.id] ? 'bg-[#b0e455] border-[#b0e455]' : 'border-[var(--c-border2)]'
             }`}>
               {checked[habit.id] && (
                 <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="3" className="w-3 h-3">
@@ -245,16 +245,16 @@ function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }
                 </svg>
               )}
             </div>
-            <span className={`text-sm transition-all ${checked[habit.id] ? 'text-[#edf5e2]/40 line-through' : 'text-[#edf5e2]'}`}>
+            <span className={`text-sm transition-all ${checked[habit.id] ? 'text-[var(--c-text3)] line-through' : 'text-[var(--c-text)]'}`}>
               {habit.text}
             </span>
           </button>
         ))}
       </div>
       {doneCount === total && total > 0 && (
-        <div className="bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-2xl p-4 text-center">
+        <div className="bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4 text-center">
           <p className="text-sm font-semibold text-[#b0e455]">All habits done today</p>
-          <p className="text-xs text-[#edf5e2]/30 mt-0.5">Check back tomorrow to reset</p>
+          <p className="text-xs text-[var(--c-text4)] mt-0.5">Check back tomorrow to reset</p>
         </div>
       )}
     </div>
@@ -271,60 +271,60 @@ function BmrDisplay({ data }: { data: BmrContent }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/12">
-          <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Daily Calories</p>
+        <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)]">
+          <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Daily Calories</p>
           <p className="text-2xl font-bold text-[#b0e455] mt-1">{data.calorie_target}</p>
-          <p className="text-[10px] text-[#edf5e2]/25 mt-0.5">kcal target</p>
+          <p className="text-[10px] text-[var(--c-text4)] mt-0.5">kcal target</p>
         </div>
         {data.protein_g > 0 && (
-          <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/12">
-            <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Protein</p>
-            <p className="text-2xl font-bold text-[#edf5e2] mt-1">{data.protein_g}<span className="text-sm text-[#edf5e2]/40">g</span></p>
-            <p className="text-[10px] text-[#edf5e2]/25 mt-0.5">daily target</p>
+          <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)]">
+            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Protein</p>
+            <p className="text-2xl font-bold text-[var(--c-text)] mt-1">{data.protein_g}<span className="text-sm text-[var(--c-text3)]">g</span></p>
+            <p className="text-[10px] text-[var(--c-text4)] mt-0.5">daily target</p>
           </div>
         )}
       </div>
 
-      <div className="bg-[#162212] rounded-2xl p-4 border border-[#b0e455]/8 space-y-2">
-        <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-2">Your Numbers</p>
+      <div className="bg-[var(--c-card)] rounded-2xl p-4 border border-[var(--c-border)] space-y-2">
+        <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-2">Your Numbers</p>
         <div className="flex justify-between text-sm">
-          <span className="text-[#edf5e2]/50">BMR (at rest)</span>
-          <span className="text-[#edf5e2] font-mono">{data.bmr} kcal</span>
+          <span className="text-[var(--c-text3)]">BMR (at rest)</span>
+          <span className="text-[var(--c-text)] font-mono">{data.bmr} kcal</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="text-[#edf5e2]/50">TDEE (with activity)</span>
-          <span className="text-[#edf5e2] font-mono">{data.tdee} kcal</span>
+          <span className="text-[var(--c-text3)]">TDEE (with activity)</span>
+          <span className="text-[var(--c-text)] font-mono">{data.tdee} kcal</span>
         </div>
-        <div className="flex justify-between text-sm border-t border-[#b0e455]/8 pt-2 mt-1">
+        <div className="flex justify-between text-sm border-t border-[var(--c-border)] pt-2 mt-1">
           <span className="text-[#b0e455]">Your target</span>
           <span className="text-[#b0e455] font-mono font-semibold">{data.calorie_target} kcal</span>
         </div>
       </div>
 
       {data.notes ? (
-        <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8">
-          <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-2">Coach's Notes</p>
-          <p className="text-sm text-[#edf5e2]/70 leading-relaxed">{data.notes}</p>
+        <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)]">
+          <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-2">Coach's Notes</p>
+          <p className="text-sm text-[var(--c-text2)] leading-relaxed">{data.notes}</p>
         </div>
       ) : null}
 
-      <div className="bg-[#1c2e16] rounded-2xl p-4 border border-[#b0e455]/8 space-y-3">
-        <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Track Today's Calories</p>
+      <div className="bg-[var(--c-card2)] rounded-2xl p-4 border border-[var(--c-border)] space-y-3">
+        <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Track Today's Calories</p>
         <div className="flex gap-3 items-center">
           <input
             type="number"
             value={calories}
             onChange={e => setCalories(e.target.value)}
             placeholder="Enter calories eaten"
-            className="flex-1 bg-[#0f1a0c] border border-[#b0e455]/15 rounded-xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition"
+            className="flex-1 bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
           />
-          <span className="text-sm text-[#edf5e2]/30 shrink-0">kcal</span>
+          <span className="text-sm text-[var(--c-text4)] shrink-0">kcal</span>
         </div>
         {remaining !== null && (
           <div className={`rounded-xl px-4 py-3 flex items-center justify-between ${
             remaining >= 0 ? 'bg-[#86efac]/8 border border-[#86efac]/15' : 'bg-[#f87171]/8 border border-[#f87171]/15'
           }`}>
-            <span className="text-sm text-[#edf5e2]/60">{remaining >= 0 ? 'Remaining' : 'Over by'}</span>
+            <span className="text-sm text-[var(--c-text3)]">{remaining >= 0 ? 'Remaining' : 'Over by'}</span>
             <span className={`text-lg font-bold font-mono ${remaining >= 0 ? 'text-[#86efac]' : 'text-[#f87171]'}`}>
               {Math.abs(remaining)} kcal
             </span>
@@ -340,12 +340,12 @@ function BmrDisplay({ data }: { data: BmrContent }) {
 function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-10 h-10 rounded-full bg-[#b0e455]/8 border border-[#b0e455]/15 flex items-center justify-center mb-4">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-[#edf5e2]/25">
+      <div className="w-10 h-10 rounded-full bg-[#b0e455]/8 border border-[var(--c-border2)] flex items-center justify-center mb-4">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-[var(--c-text4)]">
           <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <p className="text-sm text-[#edf5e2]/25">{message}</p>
+      <p className="text-sm text-[var(--c-text4)]">{message}</p>
     </div>
   )
 }
@@ -401,7 +401,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
                 <>
                   <button
                     onClick={() => setEditingPrinciples(false)}
-                    className="text-sm text-[#edf5e2]/30 hover:text-[#edf5e2] transition"
+                    className="text-sm text-[var(--c-text4)] hover:text-[var(--c-text)] transition"
                   >
                     Cancel
                   </button>
@@ -416,7 +416,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
               ) : (
                 <button
                   onClick={() => setEditingPrinciples(true)}
-                  className="text-sm text-[#edf5e2]/30 hover:text-[#b0e455] transition"
+                  className="text-sm text-[var(--c-text4)] hover:text-[#b0e455] transition"
                 >
                   Edit
                 </button>
@@ -430,7 +430,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
             <>
               <RichTextViewer content={content} />
               {updatedAt && (
-                <p className="text-xs text-[#edf5e2]/20 pt-2" suppressHydrationWarning>{relativeTime(updatedAt)}</p>
+                <p className="text-xs text-[var(--c-text4)] pt-2" suppressHydrationWarning>{relativeTime(updatedAt)}</p>
               )}
             </>
           ) : (
@@ -477,18 +477,18 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
       const info = sectionInfo[activeTab] ?? { title: 'Coming soon', desc: 'Your coach is working on this section.' }
       return (
         <div className="space-y-3 pt-2">
-          <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
-            <div className="w-10 h-10 rounded-xl bg-[#b0e455]/10 border border-[#b0e455]/15 flex items-center justify-center mb-4">
+          <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5">
+            <div className="w-10 h-10 rounded-xl bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center mb-4">
               <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-5 h-5">
                 <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-[#edf5e2]/80 mb-2">{info.title}</p>
-            <p className="text-sm text-[#edf5e2]/45 leading-relaxed">{info.desc}</p>
+            <p className="text-sm font-semibold text-[var(--c-text)]/80 mb-2">{info.title}</p>
+            <p className="text-sm text-[var(--c-text3)] leading-relaxed">{info.desc}</p>
           </div>
-          <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-4">
+          <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-4">
             <p className="text-xs text-[#b0e455] font-medium">Your coach is preparing this section.</p>
-            <p className="text-xs text-[#edf5e2]/40 mt-1">You'll see it here as soon as it's ready.</p>
+            <p className="text-xs text-[var(--c-text3)] mt-1">You'll see it here as soon as it's ready.</p>
           </div>
         </div>
       )
@@ -498,20 +498,20 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
       <div className="space-y-3">
         <RichTextViewer content={content} />
         {updatedAt && (
-          <p className="text-xs text-[#edf5e2]/20 pt-2" suppressHydrationWarning>{relativeTime(updatedAt)}</p>
+          <p className="text-xs text-[var(--c-text4)] pt-2" suppressHydrationWarning>{relativeTime(updatedAt)}</p>
         )}
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       <div className="px-5 pt-12 pb-2 lg:px-10 lg:pt-10 lg:pb-4">
-        <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+        <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight lg:text-3xl">My Program</h1>
       </div>
 
-      <div className="overflow-x-auto border-b border-[#b0e455]/8 lg:px-5">
+      <div className="overflow-x-auto border-b border-[var(--c-border)] lg:px-5">
         <div className="flex min-w-max px-5">
           {TABS.map(tab => (
             <button
@@ -523,7 +523,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 -mb-px ${
                 activeTab === tab.id
                   ? 'border-[#b0e455] text-[#b0e455]'
-                  : 'border-transparent text-[#edf5e2]/30 hover:text-[#edf5e2]/60'
+                  : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
               }`}
             >
               {tab.label}

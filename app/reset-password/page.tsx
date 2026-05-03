@@ -50,10 +50,10 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
+    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col">
 
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#b0e455]/8">
-        <Link href="/" className="text-[#edf5e2]"><ZanaLogo className="h-5 text-[#edf5e2]" /></Link>
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-[var(--c-border)]">
+        <Link href="/" className="text-[var(--c-text)]"><ZanaLogo className="h-5" /></Link>
       </nav>
 
       <div className="flex-1 flex items-center justify-center px-6 py-16">
@@ -66,7 +66,7 @@ export default function ResetPasswordPage() {
             <h1 className="font-display leading-none mb-3" style={{ fontSize: "clamp(32px, 5vw, 48px)" }}>
               Set your<br />password.
             </h1>
-            <p className="text-sm text-[#edf5e2]/45">Choose a password for your account</p>
+            <p className="text-sm text-[var(--c-text3)]">Choose a password for your account</p>
           </div>
 
           {!ready ? (
@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
                 required
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+                className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
               />
               <input
                 type="password"
@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
                 required
                 value={confirm}
                 onChange={e => setConfirm(e.target.value)}
-                className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+                className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
               />
               {error && (
                 <div className="bg-red-500/8 border border-red-500/20 rounded-xl px-4 py-3">

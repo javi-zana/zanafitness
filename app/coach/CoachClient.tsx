@@ -123,14 +123,14 @@ function HabitsSection({ initial, onSave, saving, saved }: {
         <div className="space-y-2">
           {habits.map((habit, idx) => (
             <div key={habit.id} className="flex items-center gap-2">
-              <span className="text-[10px] text-[#edf5e2]/20 font-mono w-4 shrink-0 text-right">{idx + 1}</span>
+              <span className="text-[10px] text-[var(--c-text4)] font-mono w-4 shrink-0 text-right">{idx + 1}</span>
               <input
                 type="text"
                 value={habit.text}
                 onChange={e => updateHabit(habit.id, e.target.value)}
-                className="flex-1 bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] focus:outline-none focus:border-[#b0e455]/40 transition"
+                className="flex-1 bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] focus:outline-none focus:border-[#b0e455]/40 transition"
               />
-              <button onClick={() => removeHabit(habit.id)} className="text-[#edf5e2]/20 hover:text-[#f87171] transition shrink-0">
+              <button onClick={() => removeHabit(habit.id)} className="text-[var(--c-text4)] hover:text-[#f87171] transition shrink-0">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                   <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -147,12 +147,12 @@ function HabitsSection({ initial, onSave, saving, saved }: {
           onChange={e => setNewText(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addHabit() } }}
           placeholder="Add a habit…"
-          className="flex-1 bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition"
+          className="flex-1 bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
         />
         <button
           onClick={addHabit}
           disabled={!newText.trim()}
-          className="px-4 py-2 rounded-lg bg-[#1c2e16] border border-[#b0e455]/20 text-[10px] text-[#b0e455] font-mono uppercase tracking-widest hover:bg-[#233019] transition disabled:opacity-30 shrink-0"
+          className="px-4 py-2 rounded-lg bg-[var(--c-card2)] border border-[var(--c-border2)] text-[10px] text-[#b0e455] font-mono uppercase tracking-widest hover:bg-[var(--c-hover)] transition disabled:opacity-30 shrink-0"
         >
           Add
         </button>
@@ -206,14 +206,14 @@ function BmrSection({ initial, onSave, saving, saved }: {
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Gender</p>
+          <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Gender</p>
           <div className="flex gap-2">
             {(['female', 'male'] as const).map(g => (
               <button
                 key={g}
                 onClick={() => setGender(g)}
                 className={`flex-1 py-2 rounded-lg text-xs font-mono capitalize transition ${
-                  gender === g ? 'bg-[#b0e455] text-[#0f1a0c]' : 'bg-[#162212] border border-[#b0e455]/12 text-[#edf5e2]/50 hover:text-[#edf5e2]'
+                  gender === g ? 'bg-[#b0e455] text-[#0f1a0c]' : 'bg-[var(--c-card)] border border-[var(--c-border)] text-[var(--c-text3)] hover:text-[var(--c-text)]'
                 }`}
               >
                 {g}
@@ -222,26 +222,26 @@ function BmrSection({ initial, onSave, saving, saved }: {
           </div>
         </div>
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Age</p>
+          <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Age</p>
           <input type="number" value={age} onChange={e => setAge(e.target.value)} placeholder="e.g. 28"
-            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+            className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition" />
         </div>
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Height (cm)</p>
+          <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Height (cm)</p>
           <input type="number" value={height} onChange={e => setHeight(e.target.value)} placeholder="e.g. 165"
-            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+            className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition" />
         </div>
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Weight (kg)</p>
+          <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Weight (kg)</p>
           <input type="number" value={weight} onChange={e => setWeight(e.target.value)} placeholder="e.g. 65"
-            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+            className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition" />
         </div>
       </div>
 
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Activity Level</p>
+        <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Activity Level</p>
         <select value={activity} onChange={e => setActivity(e.target.value)}
-          className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] focus:outline-none focus:border-[#b0e455]/40 transition">
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] focus:outline-none focus:border-[#b0e455]/40 transition">
           {ACTIVITY_LEVELS.map(a => (
             <option key={a.value} value={a.value}>{a.label}</option>
           ))}
@@ -250,35 +250,35 @@ function BmrSection({ initial, onSave, saving, saved }: {
 
       {valid && bmr && tdee && (
         <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#1c2e16] rounded-xl p-3 border border-[#b0e455]/8">
-            <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">BMR</p>
-            <p className="text-lg font-bold text-[#edf5e2] mt-0.5">{bmr} <span className="text-xs text-[#edf5e2]/40">kcal</span></p>
+          <div className="bg-[var(--c-card2)] rounded-xl p-3 border border-[var(--c-border)]">
+            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">BMR</p>
+            <p className="text-lg font-bold text-[var(--c-text)] mt-0.5">{bmr} <span className="text-xs text-[var(--c-text3)]">kcal</span></p>
           </div>
-          <div className="bg-[#1c2e16] rounded-xl p-3 border border-[#b0e455]/8">
-            <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">TDEE</p>
-            <p className="text-lg font-bold text-[#b0e455] mt-0.5">{tdee} <span className="text-xs text-[#edf5e2]/40">kcal</span></p>
+          <div className="bg-[var(--c-card2)] rounded-xl p-3 border border-[var(--c-border)]">
+            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">TDEE</p>
+            <p className="text-lg font-bold text-[#b0e455] mt-0.5">{tdee} <span className="text-xs text-[var(--c-text3)]">kcal</span></p>
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Daily Calorie Target</p>
+          <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Daily Calorie Target</p>
           <input type="number" value={calorieTarget} onChange={e => setCalorieTarget(e.target.value)} placeholder={tdee ? String(tdee) : 'kcal'}
-            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+            className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition" />
         </div>
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Protein Target (g)</p>
+          <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Protein Target (g)</p>
           <input type="number" value={protein} onChange={e => setProtein(e.target.value)} placeholder="e.g. 130"
-            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition" />
+            className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition" />
         </div>
       </div>
 
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 font-mono uppercase tracking-widest mb-1.5">Notes (optional)</p>
+        <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Notes (optional)</p>
         <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
           placeholder="Timing notes, meal quality guidance, exceptions…"
-          className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-3 py-2 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition resize-none" />
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition resize-none" />
       </div>
 
       <button
@@ -319,9 +319,9 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   return (
     <>
       {/* ── Desktop sidebar ────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-52 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-52 flex-col bg-[var(--c-sidebar)] border-r border-[var(--c-border)] z-50">
         {/* Logo */}
-        <div className="px-5 pt-6 pb-5 border-b border-[#b0e455]/8">
+        <div className="px-5 pt-6 pb-5 border-b border-[var(--c-border)]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#b0e455] flex items-center justify-center shrink-0">
               <svg viewBox="0 0 32 32" className="h-4 w-4" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
@@ -330,8 +330,8 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
               </svg>
             </div>
             <div>
-              <p className="text-[#edf5e2] font-bold text-base tracking-tight leading-none">Zana</p>
-              <p className="text-[9px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1">Coach Portal</p>
+              <p className="text-[var(--c-text)] font-bold text-base tracking-tight leading-none">Zana</p>
+              <p className="text-[9px] text-[var(--c-text4)] tracking-widest uppercase leading-none mt-1">Coach Portal</p>
             </div>
           </div>
         </div>
@@ -345,7 +345,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
                 active === t.id
                   ? 'bg-[#b0e455] text-[#0b1509]'
-                  : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
+                  : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
               }`}
             >
               {t.icon}
@@ -354,7 +354,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
           ))}
           <Link
             href="/community"
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]"
           >
             {communityIcon}
             <span className="text-sm font-semibold">Community</span>
@@ -365,7 +365,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
                 active === 'admin'
                   ? 'bg-[#b0e455] text-[#0b1509]'
-                  : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
+                  : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
               }`}
             >
               {adminIcon}
@@ -375,8 +375,8 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
         </nav>
 
         {/* Profile */}
-        <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-0.5">
-          <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
+        <div className="px-3 py-4 border-t border-[var(--c-border)] space-y-0.5">
+          <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)] transition-all">
             <div
               className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
               style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
@@ -385,12 +385,12 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             </div>
             <span className="text-sm font-semibold">Profile</span>
           </Link>
-          <p className="text-[9px] text-[#edf5e2]/15 uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
+          <p className="text-[9px] text-[var(--c-text5)] uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
         </div>
       </aside>
 
       {/* ── Mobile bottom bar ─────────────────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
         {tabs.map(t => (
           <button
             key={t.id}
@@ -398,22 +398,22 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
             <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
-              active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
+              active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
             }`}>
               {t.icon}
             </div>
             <span className={`text-[9px] uppercase font-medium ${
-              active === t.id ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
+              active === t.id ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'
             }`}>
               {t.label}
             </span>
           </button>
         ))}
         <Link href="/community" className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors">
-          <div className="w-10 h-7 flex items-center justify-center rounded-full text-[#edf5e2]/25">
+          <div className="w-10 h-7 flex items-center justify-center rounded-full text-[var(--c-text4)]">
             {communityIcon}
           </div>
-          <span className="text-[9px] uppercase font-medium text-[#edf5e2]/25">Community</span>
+          <span className="text-[9px] uppercase font-medium text-[var(--c-text4)]">Community</span>
         </Link>
         {showAdmin && (
           <button
@@ -421,12 +421,12 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
             <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
-              active === 'admin' ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
+              active === 'admin' ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
             }`}>
               {adminIcon}
             </div>
             <span className={`text-[9px] uppercase font-medium ${
-              active === 'admin' ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
+              active === 'admin' ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'
             }`}>Admin</span>
           </button>
         )}
@@ -480,26 +480,26 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
     <div className="space-y-5">
       {/* Greeting */}
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono lg:hidden">Zana · Coach Portal</p>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono lg:hidden">Zana · Coach Portal</p>
         <h1 className="text-xl font-bold tracking-tight mt-0.5 lg:text-3xl">{greet}, {name}.</h1>
-        <p className="text-xs text-[#edf5e2]/35 mt-1">
+        <p className="text-xs text-[var(--c-text4)] mt-1">
           {isHeadCoach ? 'Full access · Head coach' : 'Coach view'}
         </p>
       </div>
 
       {/* Summary row */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
-          <p className="text-2xl font-bold text-[#edf5e2]">{members.length}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Members</p>
+        <div className="bg-[var(--c-card2)] rounded-xl p-3 text-center border border-[var(--c-border)]">
+          <p className="text-2xl font-bold text-[var(--c-text)]">{members.length}</p>
+          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Members</p>
         </div>
-        <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[#1c2e16] border-[#b0e455]/8'}`}>
-          <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[#edf5e2]/30'}`}>{needAttention}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Attention</p>
+        <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[var(--c-card2)] border-[var(--c-border)]'}`}>
+          <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
+          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Attention</p>
         </div>
-        <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
+        <div className="bg-[var(--c-card2)] rounded-xl p-3 text-center border border-[var(--c-border)]">
           <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Active</p>
+          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
         </div>
       </div>
 
@@ -507,32 +507,32 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-[#1a2630] border border-[#60a5fa]/10 rounded-xl p-4">
           <p className="text-[10px] text-[#60a5fa] uppercase tracking-wider font-mono mb-1">Programs</p>
-          <p className="text-sm font-semibold text-[#edf5e2]">{members.length} member{members.length !== 1 ? 's' : ''}</p>
-          <p className="text-[10px] text-[#edf5e2]/30 mt-0.5">Click Programs to edit</p>
+          <p className="text-sm font-semibold text-[var(--c-text)]">{members.length} member{members.length !== 1 ? 's' : ''}</p>
+          <p className="text-[10px] text-[var(--c-text4)] mt-0.5">Click Programs to edit</p>
         </div>
         <div className="bg-[#261a2a] border border-[#c084fc]/10 rounded-xl p-4">
           <p className="text-[10px] text-[#c084fc] uppercase tracking-wider font-mono mb-1">Messages</p>
-          <p className="text-sm font-semibold text-[#edf5e2]">{threads.length} thread{threads.length !== 1 ? 's' : ''}</p>
-          <p className="text-[10px] text-[#edf5e2]/30 mt-0.5">Click Messages to chat</p>
+          <p className="text-sm font-semibold text-[var(--c-text)]">{threads.length} thread{threads.length !== 1 ? 's' : ''}</p>
+          <p className="text-[10px] text-[var(--c-text4)] mt-0.5">Click Messages to chat</p>
         </div>
       </div>
 
       {/* Recent check-ins */}
       {recentActivity.length > 0 && (
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Recent Check-ins</p>
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Recent Check-ins</p>
           <div className="space-y-2">
             {recentActivity.map(s => {
               const m = memberMap[s.member_id]
               if (!m) return null
               return (
-                <div key={s.id} className="bg-[#1c2e16] rounded-xl px-4 py-3 flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-[10px] font-bold text-[#b0e455] shrink-0">
+                <div key={s.id} className="bg-[var(--c-card2)] rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[#b0e455] shrink-0">
                     {memberName(m).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[#edf5e2] truncate">{memberName(m)}</p>
-                    <p className="text-[10px] text-[#edf5e2]/30 font-mono" suppressHydrationWarning>
+                    <p className="text-xs font-semibold text-[var(--c-text)] truncate">{memberName(m)}</p>
+                    <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>
                       {relTime(s.created_at)} ago
                       {s.weight_kg != null ? ` · ${toDisplay(s.weight_kg, m.weight_unit)}` : ''}
                       {s.confidence != null ? ` · ${s.confidence}/10` : ''}
@@ -547,8 +547,8 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
 
       {members.length === 0 && (
         <div className="text-center py-10">
-          <p className="text-sm text-[#edf5e2]/20">No members assigned yet.</p>
-          {isHeadCoach && <p className="text-xs text-[#edf5e2]/15 mt-1">Use Admin to invite and set up members.</p>}
+          <p className="text-sm text-[var(--c-text4)]">No members assigned yet.</p>
+          {isHeadCoach && <p className="text-xs text-[var(--c-text5)] mt-1">Use Admin to invite and set up members.</p>}
         </div>
       )}
     </div>
@@ -569,7 +569,7 @@ const STATUS_DOT: Record<string, string> = {
   fresh: 'bg-[#86efac]',
   ok: 'bg-[#fbbf24]',
   overdue: 'bg-[#f87171]',
-  none: 'bg-[#edf5e2]/15',
+  none: 'bg-[var(--c-hover)]',
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -641,8 +641,8 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
   if (members.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="text-sm text-[#edf5e2]/20">No members assigned yet.</p>
-        <p className="text-xs text-[#edf5e2]/15 mt-1">Use Admin to invite members.</p>
+        <p className="text-sm text-[var(--c-text4)]">No members assigned yet.</p>
+        <p className="text-xs text-[var(--c-text5)] mt-1">Use Admin to invite members.</p>
       </div>
     )
   }
@@ -652,23 +652,23 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
 
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
-          <p className="text-2xl font-bold text-[#edf5e2]">{totalMembers}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Total</p>
+        <div className="bg-[var(--c-card2)] rounded-xl p-3 text-center border border-[var(--c-border)]">
+          <p className="text-2xl font-bold text-[var(--c-text)]">{totalMembers}</p>
+          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Total</p>
         </div>
-        <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[#1c2e16] border-[#b0e455]/8'}`}>
-          <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[#edf5e2]/30'}`}>{needAttention}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Attention</p>
+        <div className={`rounded-xl p-3 text-center border ${needAttention > 0 ? 'bg-[#2a1a1a] border-[#f87171]/20' : 'bg-[var(--c-card2)] border-[var(--c-border)]'}`}>
+          <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
+          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Attention</p>
         </div>
-        <div className="bg-[#1c2e16] rounded-xl p-3 text-center border border-[#b0e455]/8">
+        <div className="bg-[var(--c-card2)] rounded-xl p-3 text-center border border-[var(--c-border)]">
           <p className="text-2xl font-bold text-[#86efac]">{activeThisWeek}</p>
-          <p className="text-[9px] text-[#edf5e2]/30 uppercase tracking-wider mt-0.5">Active</p>
+          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
         </div>
       </div>
 
       {/* Roster */}
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Roster</p>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Roster</p>
         <div className="space-y-2">
           {sortedMembers.map(({ member, stat, lastMsg }) => {
             const status = checkinStatus(stat)
@@ -676,28 +676,28 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
               <button
                 key={member.id}
                 onClick={() => onOpenProgram(member.id)}
-                className="w-full bg-[#1c2e16] rounded-xl p-4 flex items-center gap-4 border border-transparent hover:border-[#b0e455]/10 transition-colors text-left"
+                className="w-full bg-[var(--c-card2)] rounded-xl p-4 flex items-center gap-4 border border-transparent hover:border-[#b0e455]/10 transition-colors text-left"
               >
                 <div className="relative shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
+                  <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
                     {memberName(member).charAt(0).toUpperCase()}
                   </div>
-                  <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[#1c2e16] ${STATUS_DOT[status]}`} />
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--c-card2)] ${STATUS_DOT[status]}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#edf5e2] truncate">{memberName(member)}</p>
+                  <p className="text-sm font-semibold text-[var(--c-text)] truncate">{memberName(member)}</p>
                   <div className="flex items-center gap-3 mt-0.5 flex-wrap">
                     {stat ? (
-                      <p className="text-[10px] text-[#edf5e2]/30 font-mono" suppressHydrationWarning>
+                      <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>
                         Check-in {relTime(stat.created_at)} ago
                         {stat.weight_kg != null ? ` · ${toDisplay(stat.weight_kg, member.weight_unit)}` : ''}
                         {stat.confidence != null ? <span style={{ color: confidenceColor(stat.confidence) }}> · {stat.confidence}/10</span> : null}
                       </p>
                     ) : (
-                      <p className="text-[10px] text-[#edf5e2]/20 font-mono">No check-ins</p>
+                      <p className="text-[10px] text-[var(--c-text4)] font-mono">No check-ins</p>
                     )}
                     {lastMsg && (
-                      <p className="text-[10px] text-[#edf5e2]/20 font-mono" suppressHydrationWarning>Msg {relTime(lastMsg.created_at)} ago</p>
+                      <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>Msg {relTime(lastMsg.created_at)} ago</p>
                     )}
                   </div>
                 </div>
@@ -706,11 +706,11 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
                     status === 'fresh' ? 'text-[#86efac] bg-[#86efac]/10'
                     : status === 'ok' ? 'text-[#fbbf24] bg-[#fbbf24]/10'
                     : status === 'overdue' ? 'text-[#f87171] bg-[#f87171]/10'
-                    : 'text-[#edf5e2]/20 bg-[#edf5e2]/5'
+                    : 'text-[var(--c-text4)] bg-[var(--c-card)]'
                   }`}>
                     {STATUS_LABEL[status]}
                   </span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[#edf5e2]/20">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[var(--c-text4)]">
                     <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
@@ -722,27 +722,27 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
 
       {recentStream.length > 0 && (
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Recent updates</p>
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Recent updates</p>
           <div className="space-y-2">
             {recentStream.map(s => {
               const m = memberMap[s.member_id]
               if (!m) return null
               return (
-                <div key={s.id} className="bg-[#1c2e16] rounded-xl p-4">
+                <div key={s.id} className="bg-[var(--c-card2)] rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-[#edf5e2]">{memberName(m)}</p>
-                    <p className="text-[10px] text-[#edf5e2]/25 font-mono" suppressHydrationWarning>{relTime(s.created_at)} ago</p>
+                    <p className="text-xs font-semibold text-[var(--c-text)]">{memberName(m)}</p>
+                    <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>{relTime(s.created_at)} ago</p>
                   </div>
                   <div className="flex gap-4">
                     {s.weight_kg != null && (
                       <div>
-                        <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Weight</p>
-                        <p className="text-sm font-semibold text-[#edf5e2]">{toDisplay(s.weight_kg, m.weight_unit)}</p>
+                        <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Weight</p>
+                        <p className="text-sm font-semibold text-[var(--c-text)]">{toDisplay(s.weight_kg, m.weight_unit)}</p>
                       </div>
                     )}
                     {s.confidence != null && (
                       <div>
-                        <p className="text-[9px] text-[#edf5e2]/30 font-mono uppercase tracking-widest">Confidence</p>
+                        <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Confidence</p>
                         <p className="text-sm font-semibold" style={{ color: confidenceColor(s.confidence) }}>{s.confidence}/10</p>
                       </div>
                     )}
@@ -835,22 +835,22 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
   if (!selectedId) {
     return (
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Select a member to edit their program</p>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Select a member to edit their program</p>
         <div className="space-y-2">
           {members.map(m => (
             <button
               key={m.id}
               onClick={() => selectMember(m.id)}
-              className="w-full bg-[#1c2e16] rounded-xl p-4 flex items-center gap-3 hover:bg-[#233019] transition text-left"
+              className="w-full bg-[var(--c-card2)] rounded-xl p-4 flex items-center gap-3 hover:bg-[var(--c-hover)] transition text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[#b0e455] shrink-0">
                 {memberName(m).charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-sm font-semibold text-[#edf5e2]">{memberName(m)}</p>
-                <p className="text-[10px] text-[#edf5e2]/30 font-mono">Split · Food · Habits</p>
+                <p className="text-sm font-semibold text-[var(--c-text)]">{memberName(m)}</p>
+                <p className="text-[10px] text-[var(--c-text4)] font-mono">Split · Food · Habits</p>
               </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-[#edf5e2]/20 ml-auto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-[var(--c-text4)] ml-auto">
                 <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
@@ -863,12 +863,12 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
   return (
     <div>
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => setSelectedId(null)} className="text-[#edf5e2]/30 hover:text-[#edf5e2] transition">
+        <button onClick={() => setSelectedId(null)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <p className="text-sm font-semibold text-[#edf5e2]">{memberName(selected!)}</p>
+        <p className="text-sm font-semibold text-[var(--c-text)]">{memberName(selected!)}</p>
         {activeSection === 'split' && (
           <button
             onClick={saveSection}
@@ -881,13 +881,13 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
       </div>
 
       {/* Section tabs */}
-      <div className="flex border-b border-[#b0e455]/8 mb-4">
+      <div className="flex border-b border-[var(--c-border)] mb-4">
         {SECTIONS.map(s => (
           <button
             key={s}
             onClick={() => setActiveSection(s)}
             className={`flex-1 py-2.5 text-[11px] tracking-wide font-mono capitalize transition border-b-2 -mb-px ${
-              activeSection === s ? 'border-[#b0e455] text-[#b0e455]' : 'border-transparent text-[#edf5e2]/30 hover:text-[#edf5e2]/60'
+              activeSection === s ? 'border-[#b0e455] text-[#b0e455]' : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
             }`}
           >
             {s}
@@ -897,7 +897,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
 
       {loadingSections ? (
         <div className="flex justify-center py-16">
-          <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+          <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
         </div>
       ) : activeSection === 'food' ? (
         <BmrSection
@@ -1071,14 +1071,14 @@ function MessagesTab({
     if (sortedThreads.length === 0) {
       return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-sm text-[#edf5e2]/20">No threads yet.</p>
-          <p className="text-xs text-[#edf5e2]/15 mt-1">Use Admin to set up member threads.</p>
+          <p className="text-sm text-[var(--c-text4)]">No threads yet.</p>
+          <p className="text-xs text-[var(--c-text5)] mt-1">Use Admin to set up member threads.</p>
         </div>
       )
     }
     return (
       <div className="space-y-2">
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Inbox</p>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Inbox</p>
         {sortedThreads.map(thread => {
           const m = memberMap[thread.member_id]
           const last = lastMsgByThread[thread.id]
@@ -1087,24 +1087,24 @@ function MessagesTab({
             <button
               key={thread.id}
               onClick={() => openThread(thread.id)}
-              className="w-full bg-[#1c2e16] rounded-xl p-4 flex items-center gap-3 hover:bg-[#233019] transition text-left"
+              className="w-full bg-[var(--c-card2)] rounded-xl p-4 flex items-center gap-3 hover:bg-[var(--c-hover)] transition text-left"
             >
               <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
+                <div className="w-9 h-9 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[#b0e455]">
                   {m ? memberName(m).charAt(0).toUpperCase() : '?'}
                 </div>
-                {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#b0e455] rounded-full border-2 border-[#0f1a0c]" />}
+                {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#b0e455] rounded-full border-2 border-[var(--c-bg)]" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm truncate ${unread ? 'font-semibold text-[#edf5e2]' : 'text-[#edf5e2]/70'}`}>
+                <p className={`text-sm truncate ${unread ? 'font-semibold text-[var(--c-text)]' : 'text-[var(--c-text2)]'}`}>
                   {m ? memberName(m) : 'Unknown'}
                 </p>
                 {last && (
-                  <p className="text-[11px] text-[#edf5e2]/30 truncate mt-0.5">{last.body || '📎 Attachment'}</p>
+                  <p className="text-[11px] text-[var(--c-text4)] truncate mt-0.5">{last.body || '📎 Attachment'}</p>
                 )}
               </div>
               {last && (
-                <p className="text-[10px] text-[#edf5e2]/25 font-mono shrink-0" suppressHydrationWarning>{relTime(last.created_at)}</p>
+                <p className="text-[10px] text-[var(--c-text4)] font-mono shrink-0" suppressHydrationWarning>{relTime(last.created_at)}</p>
               )}
             </button>
           )
@@ -1120,12 +1120,12 @@ function MessagesTab({
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => setSelectedThreadId(null)} className="text-[#edf5e2]/30 hover:text-[#edf5e2] transition shrink-0">
+        <button onClick={() => setSelectedThreadId(null)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition shrink-0">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <p className="text-sm font-semibold text-[#edf5e2]">{chatMember ? memberName(chatMember) : 'Chat'}</p>
+        <p className="text-sm font-semibold text-[var(--c-text)]">{chatMember ? memberName(chatMember) : 'Chat'}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-1 pb-4" style={{ maxHeight: 'calc(100vh - 340px)' }}>
@@ -1134,13 +1134,13 @@ function MessagesTab({
         )}
         {loadingMessages && (
           <div className="flex justify-center py-16">
-            <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
           </div>
         )}
         {!loadError && !loadingMessages && chatMessages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm text-[#edf5e2]/20">No messages yet.</p>
-            <p className="text-xs text-[#edf5e2]/12 mt-1">Send the first message below.</p>
+            <p className="text-sm text-[var(--c-text4)]">No messages yet.</p>
+            <p className="text-xs text-[var(--c-text5)] mt-1">Send the first message below.</p>
           </div>
         )}
         {chatMessages.map(msg => {
@@ -1148,7 +1148,7 @@ function MessagesTab({
           return (
             <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[#1c2e16] text-[#edf5e2]/85 rounded-bl-sm'
+                isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[var(--c-card2)] text-[var(--c-text2)] rounded-bl-sm'
               }`}>
                 {msg.body}
               </div>
@@ -1164,7 +1164,7 @@ function MessagesTab({
         </div>
       )}
 
-      <div className="flex items-end gap-2 pt-3 border-t border-[#b0e455]/8">
+      <div className="flex items-end gap-2 pt-3 border-t border-[var(--c-border)]">
         <textarea
           ref={textareaRef}
           value={body}
@@ -1172,7 +1172,7 @@ function MessagesTab({
           onKeyDown={handleKeyDown}
           placeholder="Message…"
           rows={1}
-          className="flex-1 bg-[#162212] border border-[#b0e455]/12 rounded-2xl px-4 py-2.5 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 resize-none focus:outline-none focus:border-[#b0e455]/40 transition max-h-28 overflow-y-auto leading-relaxed"
+          className="flex-1 bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl px-4 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] resize-none focus:outline-none focus:border-[#b0e455]/40 transition max-h-28 overflow-y-auto leading-relaxed"
         />
         <button
           onClick={send}
@@ -1354,7 +1354,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
   }
 
   if (loading) {
-    return <div className="py-12 text-center text-xs text-[#edf5e2]/20 font-mono">Loading…</div>
+    return <div className="py-12 text-center text-xs text-[var(--c-text4)] font-mono">Loading…</div>
   }
 
   return (
@@ -1379,13 +1379,13 @@ function AdminTab({ userEmail }: { userEmail: string }) {
                     {profileName(m).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#edf5e2]">{profileName(m)}</p>
-                    <p className="text-[10px] text-[#edf5e2]/40 font-mono truncate">{m.email}</p>
+                    <p className="text-sm font-semibold text-[var(--c-text)]">{profileName(m)}</p>
+                    <p className="text-[10px] text-[var(--c-text3)] font-mono truncate">{m.email}</p>
                     <p className="text-[10px] text-[#fbbf24]/70 font-mono mt-0.5">Just joined — assign a coach &amp; set up messaging</p>
                   </div>
                   <button
                     onClick={() => setNewMembers(prev => prev.filter(x => x.id !== m.id))}
-                    className="text-[#edf5e2]/20 hover:text-[#edf5e2]/60 transition shrink-0 mt-0.5"
+                    className="text-[var(--c-text4)] hover:text-[var(--c-text)]/60 transition shrink-0 mt-0.5"
                   >
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                       <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
@@ -1398,7 +1398,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
                     <select
                       value={newMemberCoach[m.id] ?? ''}
                       onChange={e => setNewMemberCoach(prev => ({ ...prev, [m.id]: e.target.value }))}
-                      className="flex-1 bg-[#162212] border border-[#fbbf24]/15 rounded-lg px-3 py-2 text-xs text-[#edf5e2] focus:outline-none focus:border-[#fbbf24]/40 transition"
+                      className="flex-1 bg-[var(--c-card)] border border-[#fbbf24]/15 rounded-lg px-3 py-2 text-xs text-[var(--c-text)] focus:outline-none focus:border-[#fbbf24]/40 transition"
                     >
                       <option value="">Assign coach…</option>
                       {coaches.map(c => (
@@ -1421,7 +1421,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
                 <button
                   onClick={() => setupThread(m)}
                   disabled={hasThread || setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
-                  className="w-full py-2 rounded-lg border border-[#b0e455]/20 text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:bg-[#b0e455]/8 transition disabled:opacity-40"
+                  className="w-full py-2 rounded-lg border border-[var(--c-border2)] text-[10px] tracking-widest uppercase font-mono text-[#b0e455] hover:bg-[#b0e455]/8 transition disabled:opacity-40"
                 >
                   {hasThread || setupStatus[m.id] === 'done'
                     ? 'Messaging Active ✓'
@@ -1438,23 +1438,23 @@ function AdminTab({ userEmail }: { userEmail: string }) {
       {/* ── Coaches ── */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">Coaches ({coaches.length})</p>
-          <button onClick={() => loadData()} className="text-[10px] text-[#edf5e2]/20 hover:text-[#edf5e2]/50 font-mono transition">Refresh</button>
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Coaches ({coaches.length})</p>
+          <button onClick={() => loadData()} className="text-[10px] text-[var(--c-text4)] hover:text-[var(--c-text)]/50 font-mono transition">Refresh</button>
         </div>
         {coaches.length === 0 ? (
-          <p className="text-xs text-[#edf5e2]/20 font-mono">No coaches found. Set role to coach or head_coach in Supabase.</p>
+          <p className="text-xs text-[var(--c-text4)] font-mono">No coaches found. Set role to coach or head_coach in Supabase.</p>
         ) : (
           <div className="space-y-2">
             {coaches.map(c => (
-              <div key={c.id} className="bg-[#1c2e16] rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#b0e455]/15 border border-[#b0e455]/25 flex items-center justify-center text-xs font-bold text-[#b0e455] shrink-0">
+              <div key={c.id} className="bg-[var(--c-card2)] rounded-xl px-4 py-3 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#b0e455]/15 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[#b0e455] shrink-0">
                   {profileName(c).charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#edf5e2]">{profileName(c)}</p>
-                  <p className="text-[10px] text-[#edf5e2]/30 font-mono truncate">{c.email}</p>
+                  <p className="text-sm font-semibold text-[var(--c-text)]">{profileName(c)}</p>
+                  <p className="text-[10px] text-[var(--c-text4)] font-mono truncate">{c.email}</p>
                 </div>
-                <span className="text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border text-[#b0e455] border-[#b0e455]/25 bg-[#b0e455]/8">
+                <span className="text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border text-[#b0e455] border-[var(--c-border2)] bg-[#b0e455]/8">
                   {c.role === 'head_coach' ? 'Head Coach' : 'Coach'}
                 </span>
               </div>
@@ -1465,23 +1465,23 @@ function AdminTab({ userEmail }: { userEmail: string }) {
 
       {/* ── Members ── */}
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Members ({members.length})</p>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Members ({members.length})</p>
         {members.length === 0 ? (
-          <p className="text-xs text-[#edf5e2]/20 font-mono">No members yet. Invite one below.</p>
+          <p className="text-xs text-[var(--c-text4)] font-mono">No members yet. Invite one below.</p>
         ) : (
           <div className="space-y-2">
             {members.map(m => {
               const coach = coachName(assignMap[m.id])
               const hasThread = threadMemberIds.has(m.id)
               return (
-                <div key={m.id} className="bg-[#1c2e16] rounded-xl px-4 py-3 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-[#edf5e2]/5 border border-[#edf5e2]/10 flex items-center justify-center text-xs font-bold text-[#edf5e2]/50 shrink-0">
+                <div key={m.id} className="bg-[var(--c-card2)] rounded-xl px-4 py-3 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center text-xs font-bold text-[var(--c-text3)] shrink-0">
                     {profileName(m).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#edf5e2]">{profileName(m)}</p>
-                    <p className="text-[10px] text-[#edf5e2]/30 font-mono truncate">{m.email}</p>
-                    <p className="text-[10px] text-[#edf5e2]/20 font-mono mt-0.5">
+                    <p className="text-sm font-semibold text-[var(--c-text)]">{profileName(m)}</p>
+                    <p className="text-[10px] text-[var(--c-text4)] font-mono truncate">{m.email}</p>
+                    <p className="text-[10px] text-[var(--c-text4)] font-mono mt-0.5">
                       {coach ? `Coach: ${profileName(coach)}` : 'No coach assigned'}
                       {' · '}
                       {hasThread ? 'Messaging active' : 'No thread'}
@@ -1490,7 +1490,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
                   <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border ${
                     hasThread
                       ? 'text-[#86efac] border-[#86efac]/20 bg-[#86efac]/8'
-                      : 'text-[#edf5e2]/20 border-[#edf5e2]/8'
+                      : 'text-[var(--c-text4)] border-[var(--c-border)]'
                   }`}>
                     {hasThread ? 'active' : 'pending'}
                   </span>
@@ -1504,12 +1504,12 @@ function AdminTab({ userEmail }: { userEmail: string }) {
       {/* ── Assign member to coach ── */}
       {coaches.length > 0 && members.length > 0 && (
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Assign Member to Coach</p>
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Assign Member to Coach</p>
           <form onSubmit={handleAssign} className="space-y-2">
             <select
               value={assignMemberId}
               onChange={e => setAssignMemberId(e.target.value)}
-              className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-sm text-[#edf5e2] focus:outline-none focus:border-[#b0e455]/50 transition"
+              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-sm text-[var(--c-text)] focus:outline-none focus:border-[#b0e455]/50 transition"
             >
               <option value="">Select member…</option>
               {members.map(m => (
@@ -1519,7 +1519,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
             <select
               value={assignCoachId}
               onChange={e => setAssignCoachId(e.target.value)}
-              className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-sm text-[#edf5e2] focus:outline-none focus:border-[#b0e455]/50 transition"
+              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-sm text-[var(--c-text)] focus:outline-none focus:border-[#b0e455]/50 transition"
             >
               <option value="">Select coach…</option>
               {coaches.map(c => (
@@ -1540,14 +1540,14 @@ function AdminTab({ userEmail }: { userEmail: string }) {
       {/* ── Setup messaging threads ── */}
       {membersWithoutThread.length > 0 && (
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Setup Messaging Thread</p>
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Setup Messaging Thread</p>
           <div className="space-y-2">
             {membersWithoutThread.map(m => (
-              <div key={m.id} className="bg-[#1c2e16] rounded-xl px-4 py-3 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#edf5e2]/5 border border-[#edf5e2]/10 flex items-center justify-center text-xs font-bold text-[#edf5e2]/50 shrink-0">
+              <div key={m.id} className="bg-[var(--c-card2)] rounded-xl px-4 py-3 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center text-xs font-bold text-[var(--c-text3)] shrink-0">
                   {profileName(m).charAt(0).toUpperCase()}
                 </div>
-                <p className="text-sm text-[#edf5e2] flex-1 truncate">{profileName(m)}</p>
+                <p className="text-sm text-[var(--c-text)] flex-1 truncate">{profileName(m)}</p>
                 <button
                   onClick={() => setupThread(m)}
                   disabled={setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
@@ -1566,14 +1566,14 @@ function AdminTab({ userEmail }: { userEmail: string }) {
 
       {/* ── Invite member ── */}
       <div>
-        <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">Invite New Member</p>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Invite New Member</p>
         <form onSubmit={handleInvite} className="space-y-3">
           <input
             type="email"
             value={inviteEmail}
             onChange={e => setInviteEmail(e.target.value)}
             placeholder="member@email.com"
-            className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-[#edf5e2] text-sm placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/60 transition"
+            className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-[var(--c-text)] text-sm placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition"
           />
           <button
             type="submit"
@@ -1591,7 +1591,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
       {/* ── Broadcast ── */}
       {threads.length > 0 && (
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono mb-3">
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">
             Broadcast to All Members ({threads.length})
           </p>
           <form onSubmit={handleBroadcast} className="space-y-3">
@@ -1600,7 +1600,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
               onChange={e => setBroadcastBody(e.target.value)}
               rows={3}
               placeholder="Send one message to every member's inbox…"
-              className="w-full bg-[#162212] border border-[#b0e455]/12 rounded-lg px-4 py-3 text-[#edf5e2] text-sm placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/60 transition resize-none"
+              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-[var(--c-text)] text-sm placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition resize-none"
             />
             <button
               type="submit"
@@ -1640,11 +1640,11 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[#b0e455]/8">
+      <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[var(--c-border)]">
         <div>
-          <p className="text-[10px] text-[#edf5e2]/30 tracking-widest uppercase font-mono">
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">
             Zana · Coach Portal
           </p>
           <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-2xl">{TAB_TITLES[activeTab]}</h1>

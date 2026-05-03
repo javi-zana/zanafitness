@@ -8,7 +8,7 @@ export default function OnboardingPage() {
   const [goal, setGoal] = useState('');
 
   return (
-    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col items-center justify-center p-6">
+    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-lg">
 
         {step === 1 && (
@@ -20,7 +20,7 @@ export default function OnboardingPage() {
             <h1 className="font-display leading-none" style={{ fontSize: "clamp(40px, 6vw, 64px)" }}>
               This is not<br />a program.
             </h1>
-            <p className="text-base text-[#edf5e2]/50">It's a system.</p>
+            <p className="text-base text-[var(--c-text3)]">It's a system.</p>
             <button
               onClick={() => setStep(2)}
               className="mt-8 bg-[#b0e455] text-[#0f1a0c] font-semibold px-10 py-4 rounded-2xl hover:bg-[#c9f070] transition-colors"
@@ -45,7 +45,7 @@ export default function OnboardingPage() {
                   className={`w-full text-left px-6 py-5 rounded-2xl border transition-all ${
                     goal === opt
                       ? 'border-[#b0e455] bg-[#b0e455]/8 text-[#b0e455]'
-                      : 'border-[#b0e455]/12 bg-[#162212] text-[#edf5e2]/70 hover:border-[#b0e455]/30'
+                      : 'border-[var(--c-border2)] bg-[var(--c-card)] text-[var(--c-text2)] hover:border-[#b0e455]/30'
                   }`}
                 >
                   <span className="text-sm font-semibold">{opt}</span>
@@ -57,7 +57,7 @@ export default function OnboardingPage() {
 
         {step === 3 && (
           <div className="space-y-8 text-center">
-            <div className="py-12 border border-[#b0e455]/15 bg-[#162212] rounded-3xl">
+            <div className="py-12 border border-[#b0e455]/15 bg-[var(--c-card)] rounded-3xl">
               <h2 className="font-display leading-none mb-3" style={{ fontSize: "clamp(28px, 4vw, 44px)" }}>You're set.</h2>
               <p className="text-sm font-medium text-[#b0e455] mb-10">System calibrated.</p>
               <Link

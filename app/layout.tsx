@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "./providers";
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
 
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "ZANA",
   },
   other: {
@@ -24,13 +25,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#0f1a0c" />
+        {/* FOUC prevention: apply dark class before React hydrates */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('zana-theme');if(t==='dark')document.documentElement.classList.add('dark');}catch(e){}})();` }} />
+        <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
         <link rel="apple-touch-icon" href="/logo.png" />
       </head>
-      <body className={`${inter.variable} font-sans bg-[#0f1a0c] text-[#edf5e2] min-h-screen antialiased`}>
-        {children}
+      <body className={`${inter.variable} font-sans min-h-screen antialiased bg-[var(--c-bg)] text-[var(--c-text)]`}>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -26,26 +26,28 @@ export default function Navbar({ active }: { active?: string }) {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 bg-[#0f1a0c]/90 backdrop-blur-md border-b border-[#b0e455]/8">
+      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 bg-[var(--c-backdrop)] backdrop-blur-md border-b border-[var(--c-border)]">
         <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
-          <ZanaLogo className="h-5 text-[#edf5e2]" />
+          <ZanaLogo className="h-5 text-[var(--c-text)]" />
         </Link>
 
-        {/* Desktop nav + CTAs (all right-aligned) */}
+        {/* Desktop nav + CTAs */}
         <div className="hidden md:flex items-center gap-8">
           {LINKS.map(l => (
             <Link
               key={l.key}
               href={l.href}
               className={`text-sm font-medium transition-colors ${
-                active === l.key ? "text-[#edf5e2]" : "text-[#edf5e2]/50 hover:text-[#edf5e2]"
+                active === l.key
+                  ? "text-[var(--c-text)]"
+                  : "text-[var(--c-text3)] hover:text-[var(--c-text)]"
               }`}
             >
               {l.label}
             </Link>
           ))}
-          <div className="flex items-center gap-3 pl-2 border-l border-[#b0e455]/15">
-            <Link href="/login" className="text-sm font-medium text-[#edf5e2]/50 hover:text-[#edf5e2] transition-colors px-4 py-2">
+          <div className="flex items-center gap-3 pl-2 border-l border-[var(--c-border2)]">
+            <Link href="/login" className="text-sm font-medium text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors px-4 py-2">
               Log In
             </Link>
             <Link href="/system" className="text-sm font-semibold bg-[#b0e455] text-[#0f1a0c] px-5 py-2.5 rounded-full hover:bg-[#c9f070] transition-colors">
@@ -55,14 +57,14 @@ export default function Navbar({ active }: { active?: string }) {
         </div>
 
         {/* Mobile hamburger */}
-        <button className="md:hidden text-[#edf5e2]" onClick={() => setOpen(!open)} aria-label="Toggle menu">
+        <button className="md:hidden text-[var(--c-text)]" onClick={() => setOpen(!open)} aria-label="Toggle menu">
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </nav>
 
       {/* Mobile overlay */}
       {open && (
-        <div className="fixed inset-0 z-40 bg-[#0f1a0c] flex flex-col pt-24 px-8 md:hidden">
+        <div className="fixed inset-0 z-40 bg-[var(--c-bg)] flex flex-col pt-24 px-8 md:hidden">
           <div className="flex flex-col gap-8">
             {LINKS.map(l => (
               <Link
@@ -70,17 +72,19 @@ export default function Navbar({ active }: { active?: string }) {
                 href={l.href}
                 onClick={() => setOpen(false)}
                 className={`text-lg font-medium transition-colors ${
-                  active === l.key ? "text-[#edf5e2]" : "text-[#edf5e2]/60 hover:text-[#edf5e2]"
+                  active === l.key
+                    ? "text-[var(--c-text)]"
+                    : "text-[var(--c-text3)] hover:text-[var(--c-text)]"
                 }`}
               >
                 {l.label}
               </Link>
             ))}
-            <div className="pt-6 flex flex-col gap-3 border-t border-[#b0e455]/10">
-              <Link href="/login" onClick={() => setOpen(false)} className="text-sm font-medium text-center py-3 border border-[#edf5e2]/15 text-[#edf5e2]/70 rounded-2xl">
+            <div className="pt-6 flex flex-col gap-3 border-t border-[var(--c-border)]">
+              <Link href="/login" onClick={() => setOpen(false)} className="text-sm font-medium text-center py-3 border border-[var(--c-border2)] text-[var(--c-text2)] rounded-2xl">
                 Log In
               </Link>
-              <Link href="/system" onClick={() => setOpen(false)} className="text-sm font-semibold bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl font-bold text-center">
+              <Link href="/system" onClick={() => setOpen(false)} className="text-sm font-bold bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl text-center">
                 Get Started
               </Link>
             </div>

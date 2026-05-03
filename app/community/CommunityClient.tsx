@@ -137,15 +137,15 @@ function PostCard({
   // Edit mode
   if (editing) {
     return (
-      <div className="bg-[#1c2e16] rounded-2xl overflow-hidden border border-[#b0e455]/20 p-4 space-y-3">
+      <div className="bg-[var(--c-card2)] rounded-2xl overflow-hidden border border-[var(--c-border2)] p-4 space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-xs font-semibold text-[#b0e455]/70 uppercase tracking-wide">Editing post</p>
-          <button onClick={() => setEditing(false)} className="text-xs text-[#edf5e2]/30 hover:text-[#edf5e2]/60 transition">Cancel</button>
+          <button onClick={() => setEditing(false)} className="text-xs text-[var(--c-text4)] hover:text-[var(--c-text)]/60 transition">Cancel</button>
         </div>
         <input
           value={editTitle}
           onChange={e => setEditTitle(e.target.value)}
-          className="w-full bg-[#0f1a0c] border border-[#b0e455]/12 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/35 transition"
+          className="w-full bg-[var(--c-bg)] border border-[var(--c-border)] rounded-2xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/35 transition"
         />
         <RichTextEditor content={editBody} onChange={setEditBody} />
         <button
@@ -160,21 +160,21 @@ function PostCard({
   }
 
   return (
-    <div className="bg-[#1c2e16] rounded-2xl overflow-hidden border border-[#b0e455]/8">
+    <div className="bg-[var(--c-card2)] rounded-2xl overflow-hidden border border-[var(--c-border)]">
       <button
         className="w-full text-left px-4 pt-4 pb-3"
         onClick={() => setExpanded(e => !e)}
       >
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-[#b0e455]/12 border border-[#b0e455]/20 flex items-center justify-center text-[9px] font-bold text-[#b0e455] shrink-0">
+            <div className="w-6 h-6 rounded-full bg-[#b0e455]/12 border border-[var(--c-border2)] flex items-center justify-center text-[9px] font-bold text-[#b0e455] shrink-0">
               {displayName(post.author).charAt(0).toUpperCase()}
             </div>
-            <span className="text-xs text-[#edf5e2]/50">{displayName(post.author)}</span>
+            <span className="text-xs text-[var(--c-text3)]">{displayName(post.author)}</span>
           </div>
-          <span className="text-xs text-[#edf5e2]/25 shrink-0" suppressHydrationWarning>{relativeTime(post.created_at)}</span>
+          <span className="text-xs text-[var(--c-text4)] shrink-0" suppressHydrationWarning>{relativeTime(post.created_at)}</span>
         </div>
-        <h3 className="text-sm font-semibold text-[#edf5e2] leading-snug text-left">{post.title}</h3>
+        <h3 className="text-sm font-semibold text-[var(--c-text)] leading-snug text-left">{post.title}</h3>
       </button>
 
       {expanded && hasContent(post.body_json) && (
@@ -190,19 +190,19 @@ function PostCard({
         >
           <svg
             viewBox="0 0 24 24"
-            className={`w-4 h-4 transition ${hasReacted ? 'fill-red-400 stroke-red-400' : 'fill-none stroke-[#edf5e2]/25 group-hover:stroke-red-400'}`}
+            className={`w-4 h-4 transition ${hasReacted ? 'fill-red-400 stroke-red-400' : 'fill-none stroke-[var(--c-text4)] group-hover:stroke-red-400'}`}
             strokeWidth="1.5"
           >
             <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          <span className={`text-xs ${hasReacted ? 'text-red-400' : 'text-[#edf5e2]/25'}`}>
+          <span className={`text-xs ${hasReacted ? 'text-red-400' : 'text-[var(--c-text4)]'}`}>
             {reactionCount > 0 ? reactionCount : ''}
           </span>
         </button>
 
         <button
           onClick={() => setExpanded(e => !e)}
-          className="flex items-center gap-1.5 text-[#edf5e2]/25 hover:text-[#edf5e2]/60 transition"
+          className="flex items-center gap-1.5 text-[var(--c-text4)] hover:text-[var(--c-text)]/60 transition"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
             <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" />
@@ -214,7 +214,7 @@ function PostCard({
           {canEdit && (
             <button
               onClick={() => { setEditTitle(post.title); setEditBody(post.body_json); setEditing(true) }}
-              className="text-xs text-[#edf5e2]/20 hover:text-[#b0e455]/70 transition"
+              className="text-xs text-[var(--c-text4)] hover:text-[#b0e455]/70 transition"
             >
               Edit
             </button>
@@ -222,14 +222,14 @@ function PostCard({
           {(userRole === 'head_coach' || isAuthor) && !confirmDelete && (
             <button
               onClick={() => setConfirmDelete(true)}
-              className="text-xs text-[#edf5e2]/20 hover:text-red-400/70 transition"
+              className="text-xs text-[var(--c-text4)] hover:text-red-400/70 transition"
             >
               Delete
             </button>
           )}
           {confirmDelete && (
             <div className="flex items-center gap-2">
-              <button onClick={() => setConfirmDelete(false)} className="text-xs text-[#edf5e2]/30 hover:text-[#edf5e2]/60 transition">No</button>
+              <button onClick={() => setConfirmDelete(false)} className="text-xs text-[var(--c-text4)] hover:text-[var(--c-text)]/60 transition">No</button>
               <button
                 onClick={doDelete}
                 disabled={deleting}
@@ -242,7 +242,7 @@ function PostCard({
           {userRole === 'head_coach' && !post.hidden && !canEdit && (
             <button
               onClick={() => onHide(post.id)}
-              className="text-xs text-[#edf5e2]/20 hover:text-red-400/60 transition"
+              className="text-xs text-[var(--c-text4)] hover:text-red-400/60 transition"
             >
               Hide
             </button>
@@ -256,15 +256,15 @@ function PostCard({
             <div className="space-y-2.5">
               {visibleComments.map(c => (
                 <div key={c.id} className="flex gap-2">
-                  <div className="w-5 h-5 rounded-full bg-[#edf5e2]/5 border border-[#edf5e2]/10 flex items-center justify-center text-[8px] font-medium text-[#edf5e2]/40 shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center text-[8px] font-medium text-[var(--c-text3)] shrink-0 mt-0.5">
                     {displayName(c.author).charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-xs text-[#edf5e2]/40">{displayName(c.author)}</span>
-                      <span className="text-[10px] text-[#edf5e2]/20" suppressHydrationWarning>{relativeTime(c.created_at)}</span>
+                      <span className="text-xs text-[var(--c-text3)]">{displayName(c.author)}</span>
+                      <span className="text-[10px] text-[var(--c-text4)]" suppressHydrationWarning>{relativeTime(c.created_at)}</span>
                     </div>
-                    <p className="text-sm text-[#edf5e2]/70 leading-relaxed mt-0.5">{c.body}</p>
+                    <p className="text-sm text-[var(--c-text2)] leading-relaxed mt-0.5">{c.body}</p>
                   </div>
                 </div>
               ))}
@@ -276,7 +276,7 @@ function PostCard({
               value={comment}
               onChange={e => setComment(e.target.value)}
               placeholder="Add a comment…"
-              className="flex-1 bg-[#0f1a0c] border border-[#b0e455]/12 rounded-full px-3 py-1.5 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/35 transition"
+              className="flex-1 bg-[var(--c-bg)] border border-[var(--c-border)] rounded-full px-3 py-1.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/35 transition"
             />
             <button
               type="submit"
@@ -316,8 +316,8 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
   return (
     <>
       {/* Desktop sidebar — identical layout to coach portal */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-52 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
-        <div className="px-5 pt-6 pb-5 border-b border-[#b0e455]/8">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-52 flex-col bg-[var(--c-sidebar)] border-r border-[var(--c-border)] z-50">
+        <div className="px-5 pt-6 pb-5 border-b border-[var(--c-border)]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#b0e455] flex items-center justify-center shrink-0">
               <svg viewBox="0 0 32 32" className="h-4 w-4" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
@@ -325,8 +325,8 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
               </svg>
             </div>
             <div>
-              <p className="text-[#edf5e2] font-bold text-base tracking-tight leading-none">Zana</p>
-              <p className="text-[9px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1">Coach Portal</p>
+              <p className="text-[var(--c-text)] font-bold text-base tracking-tight leading-none">Zana</p>
+              <p className="text-[9px] text-[var(--c-text4)] tracking-widest uppercase leading-none mt-1">Coach Portal</p>
             </div>
           </div>
         </div>
@@ -338,7 +338,7 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
                 key={item.label}
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
-                  active ? 'bg-[#b0e455] text-[#0b1509]' : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
+                  active ? 'bg-[#b0e455] text-[#0b1509]' : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
                 }`}
               >
                 {item.icon}
@@ -349,15 +349,15 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
           {userRole === 'head_coach' && (
             <Link
               href="/coach"
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]"
             >
               {adminIcon}
               <span className="text-sm font-semibold">Admin</span>
             </Link>
           )}
         </nav>
-        <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-0.5">
-          <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212] transition-all">
+        <div className="px-3 py-4 border-t border-[var(--c-border)] space-y-0.5">
+          <Link href="/profile" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)] transition-all">
             <div
               className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden shrink-0"
               style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
@@ -366,12 +366,12 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
             </div>
             <span className="text-sm font-semibold">Profile</span>
           </Link>
-          <p className="text-[9px] text-[#edf5e2]/15 uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
+          <p className="text-[9px] text-[var(--c-text5)] uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
         </div>
       </aside>
 
       {/* Mobile bottom bar — full coach tabs */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
         {coachLinks.map(item => {
           const active = item.label === 'Community'
           return (
@@ -381,12 +381,12 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
               className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
             >
               <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
-                active ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
+                active ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
               }`}>
                 {item.icon}
               </div>
               <span className={`text-[9px] uppercase font-medium ${
-                active ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
+                active ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'
               }`}>
                 {item.label}
               </span>
@@ -398,10 +398,10 @@ function CoachCommunityNav({ firstName, avatarColor, avatarUrl, userRole }: {
             href="/coach"
             className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
-            <div className="w-10 h-7 flex items-center justify-center rounded-full text-[#edf5e2]/25">
+            <div className="w-10 h-7 flex items-center justify-center rounded-full text-[var(--c-text4)]">
               {adminIcon}
             </div>
-            <span className="text-[9px] uppercase font-medium text-[#edf5e2]/25">Admin</span>
+            <span className="text-[9px] uppercase font-medium text-[var(--c-text4)]">Admin</span>
           </Link>
         )}
       </nav>
@@ -461,9 +461,9 @@ function NewPostForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-[#1c2e16] rounded-2xl p-5 space-y-4 border border-[#b0e455]/8">
+    <form onSubmit={handleSubmit} className="bg-[var(--c-card2)] rounded-2xl p-5 space-y-4 border border-[var(--c-border)]">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-[#edf5e2]/50">New Post</h2>
+        <h2 className="text-sm font-semibold text-[var(--c-text3)]">New Post</h2>
         <span className="text-xs font-medium text-[#b0e455]/60 capitalize">{subTab}</span>
       </div>
 
@@ -471,7 +471,7 @@ function NewPostForm({
         value={title}
         onChange={e => setTitle(e.target.value)}
         placeholder="Title"
-        className="w-full bg-[#0f1a0c] border border-[#b0e455]/12 rounded-2xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/35 transition"
+        className="w-full bg-[var(--c-bg)] border border-[var(--c-border)] rounded-2xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/35 transition"
       />
 
       <RichTextEditor content={null} onChange={setBodyJson} />
@@ -482,7 +482,7 @@ function NewPostForm({
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 py-3 rounded-2xl border border-[#edf5e2]/10 text-sm text-[#edf5e2]/40 hover:text-[#edf5e2] hover:border-[#edf5e2]/25 transition"
+          className="flex-1 py-3 rounded-2xl border border-[var(--c-border)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] hover:border-[var(--c-border2)] transition"
         >
           Cancel
         </button>
@@ -696,12 +696,12 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
   // ─── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       <div className="flex-1 flex flex-col lg:max-w-4xl lg:mx-auto lg:w-full">
 
-      <div className="px-5 pt-12 pb-2 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-4 lg:border-b lg:border-[#b0e455]/8">
+      <div className="px-5 pt-12 pb-2 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-4 lg:border-b lg:border-[var(--c-border)]">
         <div>
-          <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+          <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
           <h1 className="text-xl font-bold tracking-tight lg:text-3xl">Community</h1>
         </div>
         {canPost && !composing && (
@@ -717,7 +717,7 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
         )}
       </div>
 
-      <div className="border-b border-[#b0e455]/8">
+      <div className="border-b border-[var(--c-border)]">
         <div className="flex px-5 lg:px-10">
           {SUB_TABS.map(tab => (
             <button
@@ -726,7 +726,7 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
               className={`flex-1 py-3 text-xs font-medium text-center whitespace-nowrap transition border-b-2 -mb-px ${
                 activeTab === tab.id
                   ? 'border-[#b0e455] text-[#b0e455]'
-                  : 'border-transparent text-[#edf5e2]/30 hover:text-[#edf5e2]/60'
+                  : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
               }`}
             >
               {tab.label}
@@ -749,20 +749,20 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
 
         {loadingTab && (
           <div className="flex justify-center py-12">
-            <div className="w-5 h-5 border-2 border-[#b0e455]/20 border-t-[#b0e455]/60 rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
           </div>
         )}
 
         {!loadingTab && posts.filter(p => !p.hidden || userRole === 'head_coach').length === 0 && !composing && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-12 h-12 rounded-full bg-[#b0e455]/8 border border-[#b0e455]/12 flex items-center justify-center mb-4">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-[#edf5e2]/25">
+            <div className="w-12 h-12 rounded-full bg-[#b0e455]/8 border border-[var(--c-border)] flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-[var(--c-text4)]">
                 <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <p className="text-sm text-[#edf5e2]/25">Nothing here yet.</p>
+            <p className="text-sm text-[var(--c-text4)]">Nothing here yet.</p>
             {canPost && (
               <button
                 onClick={() => setComposing(true)}

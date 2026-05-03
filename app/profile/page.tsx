@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, FormEvent, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/client";
+import { useTheme } from "@/app/providers";
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 
 const ZMark = ({ className = "h-5" }: { className?: string }) => (
@@ -46,9 +47,9 @@ function getInitials(firstName: string, nickname: string, email: string): string
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 overflow-hidden">
-      <div className="px-5 py-3 border-b border-[#b0e455]/8">
-        <p className="text-xs font-semibold text-[#edf5e2]/40 uppercase tracking-wider">{title}</p>
+    <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] overflow-hidden">
+      <div className="px-5 py-3 border-b border-[var(--c-border)]">
+        <p className="text-xs font-semibold text-[var(--c-text3)] uppercase tracking-wider">{title}</p>
       </div>
       <div className="px-5 py-4 space-y-3">{children}</div>
     </div>
@@ -60,13 +61,13 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-xs text-[#edf5e2]/40 mb-1.5">{label}</label>
+      <label className="block text-xs text-[var(--c-text3)] mb-1.5">{label}</label>
       {children}
     </div>
   );
 }
 
-const inputCls = "w-full bg-[#0f1a0c] border border-[#b0e455]/12 rounded-xl px-4 py-3 text-sm text-[#edf5e2] placeholder-[#edf5e2]/20 focus:outline-none focus:border-[#b0e455]/40 transition-colors";
+const inputCls = "w-full bg-[var(--c-bg)] border border-[var(--c-border)] rounded-xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition-colors";
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -74,6 +75,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const supabase = createClient();
   const photoRef = useRef<HTMLInputElement>(null);
+  const { theme, toggleTheme } = useTheme();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -231,27 +233,45 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#0f1a0c] flex items-center justify-center">
+      <main className="min-h-screen bg-[var(--c-bg)] flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-[#b0e455]/30 border-t-[#b0e455] rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2]">
+    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)]">
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-5 py-4 border-b border-[#b0e455]/8 sticky top-0 z-10 bg-[#0f1a0c]/95 backdrop-blur">
-        <Link href="/dashboard" className="text-[#edf5e2]">
+      <nav className="flex items-center justify-between px-5 py-4 border-b border-[var(--c-border)] sticky top-0 z-10 bg-[var(--c-backdrop)] backdrop-blur">
+        <Link href="/dashboard" className="text-[var(--c-text)]">
           <ZMark className="h-5" />
         </Link>
-        <p className="text-xs font-semibold text-[#edf5e2]/40 uppercase tracking-widest">Profile</p>
-        <button
-          onClick={handleSignOut}
-          className="text-xs text-[#edf5e2]/35 hover:text-[#f87171] transition-colors"
-        >
-          Sign out
-        </button>
+        <p className="text-xs font-semibold text-[var(--c-text3)] uppercase tracking-widest">Profile</p>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--c-text4)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)] transition-all"
+            aria-label="Toggle theme"
+          >
+            {theme === 'dark' ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
+                <circle cx="12" cy="12" r="5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="text-xs text-[var(--c-text4)] hover:text-[#f87171] transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
       </nav>
 
       <div className="max-w-lg mx-auto px-5 py-8 space-y-5 pb-20">
@@ -297,7 +317,7 @@ export default function ProfilePage() {
           <input ref={photoRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
           <div className="text-center">
             <p className="text-base font-semibold">{displayName}</p>
-            <p className="text-xs text-[#edf5e2]/35 mt-0.5">{currentEmail}</p>
+            <p className="text-xs text-[var(--c-text4)] mt-0.5">{currentEmail}</p>
           </div>
         </div>
 
@@ -333,7 +353,7 @@ export default function ProfilePage() {
               maxLength={200}
               className={`${inputCls} resize-none leading-relaxed`}
             />
-            <p className="text-[10px] text-[#edf5e2]/25 text-right mt-1">{bio.length}/200</p>
+            <p className="text-[10px] text-[var(--c-text4)] text-right mt-1">{bio.length}/200</p>
           </Field>
         </Section>
 
@@ -348,7 +368,7 @@ export default function ProfilePage() {
             />
           </Field>
           {emailNotice && (
-            <div className="bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-xl px-4 py-3">
+            <div className="bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-xl px-4 py-3">
               <p className="text-xs text-[#b0e455] leading-relaxed">{emailNotice}</p>
             </div>
           )}
@@ -365,7 +385,7 @@ export default function ProfilePage() {
                 className={`px-3 py-2.5 rounded-xl border text-left text-xs font-medium transition-all ${
                   fitnessGoal === g
                     ? "bg-[#b0e455]/10 border-[#b0e455]/50 text-[#b0e455]"
-                    : "bg-[#0f1a0c] border-[#b0e455]/10 text-[#edf5e2]/45 hover:border-[#b0e455]/25 hover:text-[#edf5e2]/70"
+                    : "bg-[var(--c-bg)] border-[#b0e455]/10 text-[var(--c-text3)] hover:border-[var(--c-border2)] hover:text-[var(--c-text)]/70"
                 }`}
               >
                 {g}
@@ -378,7 +398,7 @@ export default function ProfilePage() {
         <Section title="Socials">
           <Field label="Instagram">
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-[#edf5e2]/25">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-[var(--c-text4)]">@</span>
               <input
                 type="text"
                 value={instagram}
@@ -393,7 +413,7 @@ export default function ProfilePage() {
           </Field>
           <Field label="TikTok">
             <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-[#edf5e2]/25">@</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs text-[var(--c-text4)]">@</span>
               <input
                 type="text"
                 value={tiktok}
@@ -401,7 +421,7 @@ export default function ProfilePage() {
                 placeholder="username"
                 className={`${inputCls} pl-8`}
               />
-              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[#edf5e2]/25 absolute right-4 top-1/2 -translate-y-1/2">
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 text-[var(--c-text4)] absolute right-4 top-1/2 -translate-y-1/2">
                 <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z" />
               </svg>
             </div>
@@ -410,7 +430,7 @@ export default function ProfilePage() {
 
         {/* Profile color */}
         <Section title="Profile Color">
-          <p className="text-xs text-[#edf5e2]/35 -mt-1">Used for your avatar when no photo is set.</p>
+          <p className="text-xs text-[var(--c-text4)] -mt-1">Used for your avatar when no photo is set.</p>
           <div className="grid grid-cols-8 gap-2 pt-1">
             {COLORS.map(c => (
               <button
@@ -477,7 +497,7 @@ export default function ProfilePage() {
             <button
               type="submit"
               disabled={passwordSaving || !newPassword}
-              className="w-full border border-[#b0e455]/20 text-[#edf5e2]/70 text-sm font-medium py-3.5 rounded-2xl hover:border-[#b0e455]/40 hover:text-[#b0e455] transition-colors disabled:opacity-40"
+              className="w-full border border-[var(--c-border2)] text-[var(--c-text2)] text-sm font-medium py-3.5 rounded-2xl hover:border-[#b0e455]/40 hover:text-[#b0e455] transition-colors disabled:opacity-40"
             >
               {passwordSaving ? "Updating..." : passwordSaved ? "Password Updated ✓" : "Update Password"}
             </button>
@@ -488,11 +508,11 @@ export default function ProfilePage() {
         <div className="pt-2 space-y-3 text-center">
           <a
             href="mailto:hello@zanafitness.com"
-            className="block text-xs text-[#edf5e2]/25 hover:text-[#b0e455] transition-colors"
+            className="block text-xs text-[var(--c-text4)] hover:text-[#b0e455] transition-colors"
           >
             Support - hello@zanafitness.com
           </a>
-          <p className="text-[10px] text-[#edf5e2]/15 uppercase tracking-widest">
+          <p className="text-[10px] text-[var(--c-text5)] uppercase tracking-widest">
             © 2026 ZANA Fitness
           </p>
         </div>

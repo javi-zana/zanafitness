@@ -23,16 +23,18 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
 function WaitlistModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
-      <div className="relative bg-[#162212] border border-[#b0e455]/15 rounded-3xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-[0_0_120px_-20px_rgba(176,228,85,0.2)]" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-5 right-5 text-[#edf5e2]/30 hover:text-[#edf5e2] transition-colors"><X className="w-4 h-4" /></button>
-        <ZanaLogo className="h-5 text-[#edf5e2] mb-10 opacity-40" />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+      <div className="relative bg-[var(--c-card2)] border border-[var(--c-border2)] rounded-3xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-2xl" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-5 right-5 text-[var(--c-text4)] hover:text-[var(--c-text)] transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+        <ZanaLogo className="h-5 text-[var(--c-text4)] mb-10" />
         <div className="w-8 h-px bg-[#b0e455]/30 mb-8" />
         <p className="text-xs font-medium text-[#b0e455] mb-3 tracking-wider uppercase">You're on the list</p>
-        <h2 className="text-2xl font-bold text-[#edf5e2] mb-4">We'll be in touch soon.</h2>
-        <p className="text-sm text-[#edf5e2]/50 leading-relaxed">We'll reach out when slots open. Get ready.</p>
-        <div className="w-8 h-px bg-[#b0e455]/10 mt-8 mb-8" />
-        <p className="text-xs text-[#edf5e2]/30">Built for results. Not motivation.</p>
+        <h2 className="text-2xl font-bold text-[var(--c-text)] mb-4">We'll be in touch soon.</h2>
+        <p className="text-sm text-[var(--c-text3)] leading-relaxed">We'll reach out when slots open. Get ready.</p>
+        <div className="w-8 h-px bg-[var(--c-border)] mt-8 mb-8" />
+        <p className="text-xs text-[var(--c-text4)]">Built for results. Not motivation.</p>
       </div>
     </div>
   );
@@ -41,13 +43,15 @@ function WaitlistModal({ onClose }: { onClose: () => void }) {
 function DuplicateModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-6" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
-      <div className="relative bg-[#162212] border border-[#b0e455]/15 rounded-3xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-5 right-5 text-[#edf5e2]/30 hover:text-[#edf5e2] transition-colors"><X className="w-4 h-4" /></button>
-        <ZanaLogo className="h-5 text-[#edf5e2] mb-10 opacity-40" />
-        <p className="text-xs text-[#edf5e2]/40 mb-3">Already Registered</p>
-        <h2 className="text-2xl font-bold text-[#edf5e2] mb-4">Love the commitment.</h2>
-        <p className="text-sm text-[#edf5e2]/50 leading-relaxed">You're already on the list.<br />We'll reach out when it's time.</p>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+      <div className="relative bg-[var(--c-card2)] border border-[var(--c-border2)] rounded-3xl p-10 md:p-14 max-w-md w-full flex flex-col items-center text-center shadow-2xl" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-5 right-5 text-[var(--c-text4)] hover:text-[var(--c-text)] transition-colors">
+          <X className="w-4 h-4" />
+        </button>
+        <ZanaLogo className="h-5 text-[var(--c-text4)] mb-10" />
+        <p className="text-xs text-[var(--c-text4)] mb-3">Already Registered</p>
+        <h2 className="text-2xl font-bold text-[var(--c-text)] mb-4">Love the commitment.</h2>
+        <p className="text-sm text-[var(--c-text3)] leading-relaxed">You're already on the list.<br />We'll reach out when it's time.</p>
       </div>
     </div>
   );
@@ -73,24 +77,24 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="bg-[#0f1a0c] text-[#edf5e2] selection:bg-[#b0e455] selection:text-[#0f1a0c]">
+    <main className="bg-[var(--c-bg)] text-[var(--c-text)] selection:bg-[#b0e455] selection:text-[#0f1a0c]">
 
       {status === 'success'   && <WaitlistModal   onClose={() => setStatus('idle')} />}
       {status === 'duplicate' && <DuplicateModal  onClose={() => setStatus('idle')} />}
 
       <Navbar />
 
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
+      {/* ── HERO ─────────────────────────────────────────────────────────────
+          Always dark — full-bleed photo with gradient overlay. Text must stay
+          white regardless of the page theme. */}
       <section className="relative min-h-screen flex flex-col justify-end pb-20 md:pb-28 overflow-hidden">
 
-        {/* Background image */}
         <div className="absolute inset-0">
           <div className="w-full h-full bg-[url('/671A2489-147A-4CFB-9BE4-8E41C0B1B66A.PNG')] bg-cover bg-[60%_20%]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1a0c] via-[#0f1a0c]/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0f1a0c] via-[#0f1a0c]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/55 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0a] via-black/35 to-transparent" />
         </div>
 
-        {/* Top label */}
         <div className="absolute top-32 left-6 md:left-12 z-10">
           <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-full px-4 py-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
@@ -98,30 +102,28 @@ export default function LandingPage() {
           </span>
         </div>
 
-        {/* Main content */}
         <div className="relative z-10 px-6 md:px-12 max-w-5xl">
-          <h1 className="font-display leading-[0.95] mb-6" style={{ fontSize: "clamp(52px, 7vw, 88px)" }}>
+          <h1 className="font-display leading-[0.95] mb-6 text-white" style={{ fontSize: "clamp(52px, 7vw, 88px)" }}>
             Lose 3-5%<br />
             <span className="text-[#b0e455]">Body Fat.</span><br />
             In 4 Months.
           </h1>
-          <p className="text-base text-[#edf5e2]/60 mb-10 max-w-xs leading-relaxed">
+          <p className="text-base text-white/60 mb-10 max-w-xs leading-relaxed">
             Without overhauling your life. A system built around how you actually live.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link href="/system" className="inline-flex items-center gap-2 bg-[#b0e455] text-[#0f1a0c] px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#c9f070] transition-colors">
               Get Started <ArrowUpRight className="w-4 h-4" />
             </Link>
-            <Link href="/demo" className="inline-flex items-center gap-2 border border-[#edf5e2]/20 text-[#edf5e2] px-7 py-3.5 rounded-full text-sm hover:border-[#edf5e2]/40 hover:bg-[#edf5e2]/5 transition-colors">
+            <Link href="/demo" className="inline-flex items-center gap-2 border border-white/20 text-white px-7 py-3.5 rounded-full text-sm hover:border-white/40 hover:bg-white/5 transition-colors">
               Preview the App
             </Link>
           </div>
         </div>
 
-        {/* Bottom right credit */}
         <div className="absolute bottom-20 right-6 md:right-12 z-10 text-right">
-          <p className="text-xs text-[#edf5e2]/35">Javier Lorenzana</p>
-          <p className="text-xs text-[#edf5e2]/25 mt-0.5">Online Coach</p>
+          <p className="text-xs text-white/35">Javier Lorenzana</p>
+          <p className="text-xs text-white/25 mt-0.5">Online Coach</p>
         </div>
       </section>
 
@@ -144,15 +146,15 @@ export default function LandingPage() {
               <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-5">The Reality</p>
               <h2 className="font-display leading-none" style={{ fontSize: "clamp(40px, 5.5vw, 72px)" }}>
                 You've built<br />a great life.<br />
-                <span className="text-[#edf5e2]/40">Your body<br />hasn't kept up.</span>
+                <span className="text-[var(--c-text4)]">Your body<br />hasn't kept up.</span>
               </h2>
             </div>
             <div className="md:w-80 space-y-5">
-              <p className="text-base text-[#edf5e2]/60 leading-relaxed">
-                Skinny-fat. Soft in clothes. Not where you want to be - despite having the income, the wardrobe, the career.
+              <p className="text-base text-[var(--c-text3)] leading-relaxed">
+                Skinny-fat. Soft in clothes. Not where you want to be — despite having the income, the wardrobe, the career.
               </p>
-              <div className="w-8 h-px bg-[#b0e455]/20" />
-              <p className="text-base text-[#edf5e2]/45 leading-relaxed">
+              <div className="w-8 h-px bg-[#b0e455]/30" />
+              <p className="text-base text-[var(--c-text4)] leading-relaxed">
                 You know what to do. You just never had a system that fit your actual life.
               </p>
               <p className="text-base font-semibold text-[#b0e455]">Now you do.</p>
@@ -165,9 +167,9 @@ export default function LandingPage() {
       <section className="grid grid-cols-1 md:grid-cols-2 min-h-[70vh]">
         <div className="relative h-[50vh] md:h-auto">
           <div className="absolute inset-0 bg-[url('/A502086F-E304-43B4-87C1-93658EDB79F0.PNG')] bg-cover bg-center" />
-          <div className="absolute inset-0 bg-[#0f1a0c]/25" />
+          <div className="absolute inset-0 bg-black/25" />
         </div>
-        <div className="bg-[#162212] flex flex-col justify-center px-10 md:px-16 py-16 border-l border-[#b0e455]/8">
+        <div className="bg-[var(--c-card)] flex flex-col justify-center px-10 md:px-16 py-16 border-l border-[var(--c-border)]">
           <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-8">How It Works</p>
           <h2 className="font-display leading-none mb-10" style={{ fontSize: "clamp(36px, 4.5vw, 60px)" }}>
             A system<br />built on<br />structure.
@@ -176,13 +178,13 @@ export default function LandingPage() {
             {[
               { n: "01", title: "Training", desc: "Progressive split built for your schedule. 45-60 min sessions, no fluff, structured for the lean aesthetic look." },
               { n: "02", title: "Nutrition", desc: "Real food, clear macros. No extreme cuts. Fits your life in Singapore, Manila, Jakarta, or wherever you are." },
-              { n: "03", title: "Guidance", desc: "Weekly check-ins. Constant adjustments. A coach who understands your world - the travel, the client dinners." },
+              { n: "03", title: "Guidance", desc: "Weekly check-ins. Constant adjustments. A coach who understands your world — the travel, the client dinners." },
             ].map(p => (
               <div key={p.n} className="flex gap-5 items-start">
                 <span className="text-sm text-[#b0e455] mt-0.5 shrink-0 font-semibold">{p.n}</span>
                 <div>
-                  <p className="text-sm font-semibold text-[#edf5e2] mb-1">{p.title}</p>
-                  <p className="text-sm text-[#edf5e2]/50 leading-relaxed">{p.desc}</p>
+                  <p className="text-sm font-semibold text-[var(--c-text)] mb-1">{p.title}</p>
+                  <p className="text-sm text-[var(--c-text3)] leading-relaxed">{p.desc}</p>
                 </div>
               </div>
             ))}
@@ -190,15 +192,16 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FULL-WIDTH QUOTE ──────────────────────────────────────────────── */}
+      {/* ── FULL-WIDTH QUOTE ─────────────────────────────────────────────────
+          Always dark — photo section with heavy overlay. Text stays white. */}
       <section className="relative py-28 md:py-44 px-6 md:px-12 overflow-hidden">
         <div className="absolute inset-0">
           <div className="w-full h-full bg-[url('/F52D6DDD-5F62-414C-9B2D-5E12C333F2D3.PNG')] bg-cover bg-[50%_30%]" />
-          <div className="absolute inset-0 bg-[#0f1a0c]/88" />
+          <div className="absolute inset-0 bg-black/85" />
         </div>
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-8">The Outcome</p>
-          <h2 className="font-display leading-none mb-6" style={{ fontSize: "clamp(36px, 5vw, 68px)" }}>
+          <h2 className="font-display leading-none mb-6 text-white" style={{ fontSize: "clamp(36px, 5vw, 68px)" }}>
             Not a workout plan.<br />
             A system that fits<br />your life and gets<br />
             <span className="text-[#b0e455]">you lean.</span>
@@ -211,53 +214,51 @@ export default function LandingPage() {
       </section>
 
       {/* ── APP PREVIEW ───────────────────────────────────────────────────── */}
-      <section className="py-24 px-6 md:px-12 bg-[#162212] border-y border-[#b0e455]/8">
+      <section className="py-24 px-6 md:px-12 bg-[var(--c-card)] border-y border-[var(--c-border)]">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-center gap-12 md:gap-20">
 
-            {/* Mock phone */}
+            {/* Mock phone — intentionally dark as a device preview */}
             <div className="w-full max-w-[240px] mx-auto md:mx-0 shrink-0">
-              <div className="bg-[#0f1a0c] border border-[#b0e455]/12 rounded-3xl overflow-hidden shadow-[0_0_80px_-20px_rgba(176,228,85,0.18)]">
-                <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#b0e455]/8">
-                  <ZanaLogo className="h-3.5 text-[#edf5e2]" />
+              <div className="bg-[#111] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+                <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/8">
+                  <ZanaLogo className="h-3.5 text-white/80" />
                   <span className="text-[9px] font-semibold px-2 py-0.5 bg-[#86efac]/10 border border-[#86efac]/25 text-[#86efac] rounded-full">Member</span>
                 </div>
                 <div className="p-4 space-y-3">
                   <div>
-                    <p className="text-[10px] text-[#edf5e2]/35 uppercase tracking-wider mb-0.5">Welcome back</p>
-                    <p className="text-sm font-semibold text-[#edf5e2]">Priya.</p>
+                    <p className="text-[10px] text-white/35 uppercase tracking-wider mb-0.5">Welcome back</p>
+                    <p className="text-sm font-semibold text-white">Priya.</p>
                   </div>
                   <div className="flex gap-2">
-                    <div className="flex-1 bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl p-2.5 text-center">
-                      <p className="text-[9px] text-[#edf5e2]/35 uppercase mb-1">Streak</p>
-                      <p className="text-base font-bold text-[#b0e455]">67<span className="text-[9px] text-[#edf5e2]/30 ml-0.5">d</span></p>
-                    </div>
-                    <div className="flex-1 bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl p-2.5 text-center">
-                      <p className="text-[9px] text-[#edf5e2]/35 uppercase mb-1">Phase</p>
-                      <p className="text-base font-bold text-[#edf5e2]">03</p>
-                    </div>
-                    <div className="flex-1 bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl p-2.5 text-center">
-                      <p className="text-[9px] text-[#edf5e2]/35 uppercase mb-1">Check-ins</p>
-                      <p className="text-base font-bold text-[#86efac]">12</p>
-                    </div>
+                    {[
+                      { label: "Streak", value: "67", unit: "d", color: "text-[#b0e455]" },
+                      { label: "Phase",  value: "03", unit: "",  color: "text-white"     },
+                      { label: "Check-ins", value: "12", unit: "", color: "text-[#86efac]" },
+                    ].map(stat => (
+                      <div key={stat.label} className="flex-1 bg-white/5 border border-white/8 rounded-xl p-2.5 text-center">
+                        <p className="text-[9px] text-white/35 uppercase mb-1">{stat.label}</p>
+                        <p className={`text-base font-bold ${stat.color}`}>{stat.value}<span className="text-[9px] text-white/30 ml-0.5">{stat.unit}</span></p>
+                      </div>
+                    ))}
                   </div>
-                  <div className="bg-[#1c2e16] border border-[#b0e455]/20 rounded-xl p-3">
+                  <div className="bg-white/5 border border-[#b0e455]/20 rounded-xl p-3">
                     <p className="text-[9px] text-[#b0e455] uppercase tracking-wide mb-1.5">Today</p>
-                    <p className="text-xs font-semibold text-[#edf5e2]">Upper Body A</p>
-                    <p className="text-[9px] text-[#edf5e2]/40 mt-0.5">6 exercises · 55 min</p>
-                    <div className="mt-2.5 w-full bg-[#0f1a0c] rounded-full h-1">
+                    <p className="text-xs font-semibold text-white">Upper Body A</p>
+                    <p className="text-[9px] text-white/40 mt-0.5">6 exercises · 55 min</p>
+                    <div className="mt-2.5 w-full bg-white/8 rounded-full h-1">
                       <div className="bg-[#b0e455] h-1 rounded-full w-[45%]" />
                     </div>
                   </div>
-                  <div className="bg-[#1c2e16] border border-[#b0e455]/8 rounded-xl p-3">
-                    <p className="text-[9px] text-[#edf5e2]/35 uppercase mb-1.5">Coach's Note</p>
-                    <p className="text-[10px] text-[#edf5e2]/60 leading-relaxed">Control the eccentric. Drop the ego.</p>
+                  <div className="bg-white/5 border border-white/8 rounded-xl p-3">
+                    <p className="text-[9px] text-white/35 uppercase mb-1.5">Coach's Note</p>
+                    <p className="text-[10px] text-white/60 leading-relaxed">Control the eccentric. Drop the ego.</p>
                   </div>
                 </div>
-                <div className="border-t border-[#b0e455]/8 flex">
+                <div className="border-t border-white/8 flex">
                   {["Home","Programs","Community","Messages","Schedule"].map((t, i) => (
-                    <div key={t} className={`flex-1 py-2.5 flex flex-col items-center gap-0.5 ${i === 0 ? "text-[#b0e455]" : "text-[#edf5e2]/20"}`}>
-                      <div className={`w-2.5 h-2.5 rounded-sm ${i === 0 ? "bg-[#b0e455]/30" : "bg-[#1c2e16]"}`} />
+                    <div key={t} className={`flex-1 py-2.5 flex flex-col items-center gap-0.5 ${i === 0 ? "text-[#b0e455]" : "text-white/20"}`}>
+                      <div className={`w-2.5 h-2.5 rounded-sm ${i === 0 ? "bg-[#b0e455]/30" : "bg-white/5"}`} />
                       <span className="text-[5px] uppercase tracking-wide">{t}</span>
                     </div>
                   ))}
@@ -270,13 +271,13 @@ export default function LandingPage() {
               <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-5">Inside the Platform</p>
               <h2 className="font-display leading-none mb-8" style={{ fontSize: "clamp(36px, 4.5vw, 60px)" }}>
                 Everything<br />you need.<br />
-                <span className="text-[#edf5e2]/35">Nothing<br />you don't.</span>
+                <span className="text-[var(--c-text4)]">Nothing<br />you don't.</span>
               </h2>
               <div className="space-y-4 mb-10">
                 {[
                   "Your training plan, updated as you progress",
                   "Weekly check-ins reviewed by Javi",
-                  "Direct messaging - coach + community",
+                  "Direct messaging — coach + community",
                   "Community feed to stay accountable",
                   "Weekly calendar & upcoming events",
                 ].map(f => (
@@ -286,7 +287,7 @@ export default function LandingPage() {
                         <path d="M2 6l3 3 5-5" stroke="#b0e455" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
-                    <p className="text-sm text-[#edf5e2]/65">{f}</p>
+                    <p className="text-sm text-[var(--c-text3)]">{f}</p>
                   </div>
                 ))}
               </div>
@@ -299,12 +300,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── SPOTIFY ───────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 md:px-12 bg-[#0f1a0c]">
+      <section className="py-20 px-6 md:px-12">
         <div className="max-w-2xl mx-auto">
           <p className="text-xs font-semibold tracking-wider uppercase text-[#b0e455] mb-3 text-center">Train to This</p>
           <h2 className="font-display text-center mb-2" style={{ fontSize: "clamp(28px, 3.5vw, 44px)" }}>My Personal Playlist</h2>
-          <p className="text-sm text-[#edf5e2]/40 text-center mb-10">What I train to. What you'll train to.</p>
-          <div className="rounded-3xl overflow-hidden border border-[#b0e455]/10">
+          <p className="text-sm text-[var(--c-text4)] text-center mb-10">What I train to. What you'll train to.</p>
+          <div className="rounded-3xl overflow-hidden border border-[var(--c-border)]">
             <iframe
               src="https://open.spotify.com/embed/playlist/6hJ4JJSCPrUbb0ZD17ntQJ?utm_source=generator&theme=0"
               width="100%" height="352"
@@ -316,8 +317,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── WAITLIST ──────────────────────────────────────────────────────── */}
-      <section className="relative py-28 md:py-40 px-6 md:px-12 overflow-hidden bg-[#162212] border-t border-[#b0e455]/8">
-        <div className="absolute inset-0 bg-[url('/asian_athlete_running_1777345213125.png')] bg-cover bg-center opacity-8" />
+      <section className="relative py-28 md:py-40 px-6 md:px-12 overflow-hidden bg-[var(--c-card)] border-t border-[var(--c-border)]">
+        <div className="absolute inset-0 bg-[url('/asian_athlete_running_1777345213125.png')] bg-cover bg-center opacity-[0.04]" />
         <div className="relative z-10 max-w-xl mx-auto flex flex-col items-center text-center">
           <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-full px-4 py-1.5 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
@@ -326,14 +327,14 @@ export default function LandingPage() {
           <h2 className="font-display leading-none mb-5" style={{ fontSize: "clamp(40px, 6vw, 76px)" }}>
             Ready to<br />get <span className="text-[#b0e455]">lean?</span>
           </h2>
-          <p className="text-base text-[#edf5e2]/50 mb-10 leading-relaxed">
+          <p className="text-base text-[var(--c-text3)] mb-10 leading-relaxed">
             Join the waitlist. First access when doors open.
           </p>
           <form onSubmit={handleWaitlist} className="w-full flex flex-col gap-3">
             <input
               type="email" value={email} onChange={e => setEmail(e.target.value)} required
               placeholder="Your email address"
-              className="w-full bg-[#0f1a0c] border border-[#b0e455]/15 rounded-2xl px-6 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/25 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+              className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-2xl px-6 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
             />
             <button type="submit" disabled={status === 'loading'}
               className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold px-8 py-4 rounded-2xl text-sm hover:bg-[#c9f070] transition-colors disabled:opacity-50">
@@ -341,7 +342,7 @@ export default function LandingPage() {
             </button>
             {status === 'error' && <p className="text-xs text-red-400 text-center">Something went wrong. Try again.</p>}
           </form>
-          <div className="flex items-center gap-2 mt-5 text-[#edf5e2]/30 text-xs">
+          <div className="flex items-center gap-2 mt-5 text-[var(--c-text4)] text-xs">
             <Lock className="w-3 h-3" />
             <p>Limited first access.</p>
           </div>

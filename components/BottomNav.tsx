@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTheme } from '@/app/providers'
 
 const NAV = [
   {
@@ -55,6 +56,7 @@ const NAV = [
 
 export default function BottomNav() {
   const pathname = usePathname()
+  const { theme, toggleTheme } = useTheme()
 
   function isActive(href: string) {
     return href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href)
@@ -63,10 +65,10 @@ export default function BottomNav() {
   return (
     <>
       {/* ── Desktop sidebar ─────────────────────────────────────────────────── */}
-      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-52 flex-col bg-[#0b1509] border-r border-[#b0e455]/12 z-50">
+      <aside className="hidden lg:flex fixed left-0 top-0 h-screen w-52 flex-col bg-[var(--c-sidebar)] border-r border-[var(--c-border)] z-50">
 
         {/* Logo */}
-        <div className="px-5 pt-6 pb-5 border-b border-[#b0e455]/8">
+        <div className="px-5 pt-6 pb-5 border-b border-[var(--c-border)]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#b0e455] flex items-center justify-center shrink-0">
               <svg viewBox="0 0 32 32" className="h-4 w-4" fill="none" stroke="#0b1509" strokeWidth="5.5" strokeMiterlimit="10">
@@ -75,8 +77,8 @@ export default function BottomNav() {
               </svg>
             </div>
             <div>
-              <p className="text-[#edf5e2] font-bold text-base tracking-tight leading-none">Zana</p>
-              <p className="text-[9px] text-[#edf5e2]/30 tracking-widest uppercase leading-none mt-1">Platform</p>
+              <p className="text-[var(--c-text)] font-bold text-base tracking-tight leading-none">Zana</p>
+              <p className="text-[9px] text-[var(--c-text4)] tracking-widest uppercase leading-none mt-1">Platform</p>
             </div>
           </div>
         </div>
@@ -92,7 +94,7 @@ export default function BottomNav() {
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                   active
                     ? 'bg-[#b0e455] text-[#0b1509]'
-                    : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
+                    : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
                 }`}
               >
                 <span className={active ? 'text-[#0b1509]' : ''}>{item.icon}</span>
@@ -103,13 +105,13 @@ export default function BottomNav() {
         </nav>
 
         {/* Profile + footer */}
-        <div className="px-3 py-4 border-t border-[#b0e455]/8 space-y-0.5">
+        <div className="px-3 py-4 border-t border-[var(--c-border)] space-y-0.5">
           <Link
             href="/profile"
             className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
               pathname === '/profile'
                 ? 'bg-[#b0e455] text-[#0b1509]'
-                : 'text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]'
+                : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
             }`}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 shrink-0">
@@ -119,19 +121,35 @@ export default function BottomNav() {
           </Link>
           <Link
             href="/"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-[#edf5e2]/40 hover:text-[#edf5e2] hover:bg-[#162212]"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 shrink-0">
               <path d="M10 19l-7-7m0 0l7-7m-7 7h18" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span className="text-sm font-semibold">Website</span>
           </Link>
-          <p className="text-[9px] text-[#edf5e2]/15 uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all w-full text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]"
+          >
+            {theme === 'dark' ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 shrink-0">
+                <circle cx="12" cy="12" r="5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 shrink-0">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+            <span className="text-sm font-semibold">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+          </button>
+          <p className="text-[9px] text-[var(--c-text5)] uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
         </div>
       </aside>
 
       {/* ── Mobile bottom bar ────────────────────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0f1a0c]/95 backdrop-blur-md border-t border-[#b0e455]/8 flex z-50">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex z-50">
         {NAV.map(item => {
           const active = isActive(item.href)
           return (
@@ -141,12 +159,12 @@ export default function BottomNav() {
               className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
             >
               <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
-                active ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[#edf5e2]/25'
+                active ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
               }`}>
                 {item.icon}
               </div>
               <span className={`text-[9px] tracking-wide uppercase font-medium ${
-                active ? 'text-[#b0e455]' : 'text-[#edf5e2]/25'
+                active ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'
               }`}>
                 {item.label}
               </span>

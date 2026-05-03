@@ -60,27 +60,27 @@ function LoginForm() {
 
   if (showForgot) {
     return forgotSent ? (
-      <div className="bg-[#162212] border border-[#b0e455]/12 rounded-2xl p-8 text-center space-y-4">
+      <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-8 text-center space-y-4">
         <div className="w-12 h-12 rounded-full border-2 border-[#b0e455] flex items-center justify-center mx-auto bg-[#b0e455]/10">
           <svg viewBox="0 0 16 16" className="w-5 h-5 text-[#b0e455]" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M2 8l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <p className="text-sm font-semibold text-[#b0e455]">Check your inbox</p>
-        <p className="text-sm text-[#edf5e2]/55 leading-relaxed">
+        <p className="text-sm text-[var(--c-text)]/55 leading-relaxed">
           A reset link was sent to<br />
-          <span className="text-[#edf5e2] font-medium">{forgotEmail}</span>
+          <span className="text-[var(--c-text)] font-medium">{forgotEmail}</span>
         </p>
         <button
           onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(''); }}
-          className="text-sm text-[#edf5e2]/40 hover:text-[#edf5e2] transition-colors"
+          className="text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
         >
           ← Back to login
         </button>
       </div>
     ) : (
       <form onSubmit={handleForgotPassword} className="space-y-4">
-        <p className="text-sm text-[#edf5e2]/50 text-center leading-relaxed">
+        <p className="text-sm text-[var(--c-text3)] text-center leading-relaxed">
           Enter your email and we'll send a reset link.
         </p>
         <input
@@ -89,7 +89,7 @@ function LoginForm() {
           required
           value={forgotEmail}
           onChange={e => setForgotEmail(e.target.value)}
-          className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
         />
         <button
           type="submit"
@@ -101,7 +101,7 @@ function LoginForm() {
         <button
           type="button"
           onClick={() => setShowForgot(false)}
-          className="w-full text-sm text-[#edf5e2]/40 hover:text-[#edf5e2] transition-colors"
+          className="w-full text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
         >
           ← Back to login
         </button>
@@ -112,14 +112,14 @@ function LoginForm() {
   if (noAccess) {
     return (
       <div className="space-y-5 text-center">
-        <div className="w-14 h-14 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center mx-auto">
+        <div className="w-14 h-14 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center mx-auto">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-6 h-6 text-[#b0e455]">
             <path d="M12 15v2m0-10v4m-7.07 7.07A10 10 0 1019.07 4.93 10 10 0 004.93 19.07z" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
         <div>
-          <p className="text-base font-semibold text-[#edf5e2]">Membership required</p>
-          <p className="text-sm text-[#edf5e2]/45 mt-1.5 leading-relaxed">
+          <p className="text-base font-semibold text-[var(--c-text)]">Membership required</p>
+          <p className="text-sm text-[var(--c-text3)] mt-1.5 leading-relaxed">
             Your account doesn't have an active membership.<br />
             Join The System to get access.
           </p>
@@ -137,7 +137,7 @@ function LoginForm() {
             await supabase.auth.signOut();
             window.location.href = '/login';
           }}
-          className="text-sm text-[#edf5e2]/30 hover:text-[#edf5e2] transition-colors"
+          className="text-sm text-[var(--c-text4)] hover:text-[var(--c-text)] transition-colors"
         >
           Sign in with a different account
         </button>
@@ -153,7 +153,7 @@ function LoginForm() {
         required
         value={email}
         onChange={e => setEmail(e.target.value)}
-        className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+        className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
       />
       <input
         type="password"
@@ -161,7 +161,7 @@ function LoginForm() {
         required
         value={password}
         onChange={e => setPassword(e.target.value)}
-        className="w-full bg-[#162212] border border-[#b0e455]/15 rounded-2xl px-4 py-4 text-sm text-[#edf5e2] placeholder-[#edf5e2]/30 focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+        className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
       />
 
       {error && (
@@ -182,7 +182,7 @@ function LoginForm() {
         <button
           type="button"
           onClick={() => setShowForgot(true)}
-          className="text-sm text-[#edf5e2]/40 hover:text-[#edf5e2] transition-colors"
+          className="text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
         >
           Forgot password?
         </button>
@@ -196,13 +196,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <main className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col">
+    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col">
 
-      <nav className="flex items-center justify-between px-8 py-5 border-b border-[#b0e455]/8">
-        <Link href="/" className="text-[#edf5e2]">
-          <ZanaLogo className="h-5 text-[#edf5e2]" />
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-[var(--c-border)]">
+        <Link href="/" className="text-[var(--c-text)]">
+          <ZanaLogo className="h-5 text-[var(--c-text)]" />
         </Link>
-        <Link href="/" className="text-sm text-[#edf5e2]/45 hover:text-[#edf5e2] transition-colors">
+        <Link href="/" className="text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors">
           ← Back
         </Link>
       </nav>
@@ -211,14 +211,14 @@ export default function LoginPage() {
         <div className="w-full max-w-sm">
 
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-full px-4 py-1.5 mb-6">
+            <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[var(--c-border2)] rounded-full px-4 py-1.5 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
               <p className="text-xs font-medium text-[#b0e455]">Member Access</p>
             </span>
             <h1 className="font-display leading-none mb-3" style={{ fontSize: "clamp(40px, 6vw, 60px)" }}>
               Welcome<br />back.
             </h1>
-            <p className="text-sm text-[#edf5e2]/45">
+            <p className="text-sm text-[var(--c-text3)]">
               Sign in to your account
             </p>
           </div>

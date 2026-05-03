@@ -2,16 +2,22 @@
 
 import Script from 'next/script'
 import BottomNav from '@/components/BottomNav'
+import { useTheme } from '@/app/providers'
 
 const CALENDLY_URL = process.env.NEXT_PUBLIC_CALENDLY_URL ?? ''
 
 export default function ScheduleClient() {
+  const { theme } = useTheme()
+  const calendlyParams = theme === 'dark'
+    ? 'background_color=111111&text_color=ffffff&primary_color=b0e455'
+    : 'background_color=ffffff&text_color=1c1c1e&primary_color=b0e455'
+
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
-      <div className="px-5 pt-12 pb-4 lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[#b0e455]/8">
-        <p className="text-xs lg:text-sm text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
+      <div className="px-5 pt-12 pb-4 lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[var(--c-border)]">
+        <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight lg:text-3xl">Schedule</h1>
-        <p className="text-sm lg:text-base text-[#edf5e2]/40 mt-1">Book your bi-weekly coaching call below.</p>
+        <p className="text-sm lg:text-base text-[var(--c-text3)] mt-1">Book your bi-weekly coaching call below.</p>
       </div>
 
       <div className="flex-1 pb-20 lg:px-5 lg:max-w-3xl">
@@ -23,13 +29,13 @@ export default function ScheduleClient() {
             />
             <div
               className="calendly-inline-widget w-full"
-              data-url={`${CALENDLY_URL}?background_color=0f1a0c&text_color=edf5e2&primary_color=b0e455`}
+              data-url={`${CALENDLY_URL}?${calendlyParams}`}
               style={{ minWidth: '320px', height: '680px' }}
             />
           </>
         ) : (
           <div className="px-5 pb-8 space-y-4 pt-2">
-            <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5 space-y-4">
+            <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5 space-y-4">
               <p className="text-xs font-semibold text-[#b0e455] uppercase tracking-wider">What happens on a coaching call</p>
               {[
                 { label: 'Progress review', desc: 'We go through your stats, what changed, and what your numbers mean.' },
@@ -41,20 +47,20 @@ export default function ScheduleClient() {
                   <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455] mt-2 shrink-0" />
                   <div>
                     <p className="text-sm font-semibold">{item.label}</p>
-                    <p className="text-xs text-[#edf5e2]/40 mt-0.5 leading-relaxed">{item.desc}</p>
+                    <p className="text-xs text-[var(--c-text3)] mt-0.5 leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="bg-[#162212] rounded-2xl border border-[#b0e455]/8 p-5">
+            <div className="bg-[var(--c-card)] rounded-2xl border border-[var(--c-border)] p-5">
               <p className="text-sm font-semibold mb-2">How often are calls?</p>
-              <p className="text-sm text-[#edf5e2]/45 leading-relaxed">
+              <p className="text-sm text-[var(--c-text3)] leading-relaxed">
                 Bi-weekly - every two weeks. Calls are 30-45 minutes and happen over video. They're the engine of the whole system.
               </p>
             </div>
-            <div className="bg-[#b0e455]/6 border border-[#b0e455]/15 rounded-2xl p-4 text-center">
+            <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-4 text-center">
               <p className="text-xs text-[#b0e455] font-medium mb-1">Booking coming soon</p>
-              <p className="text-xs text-[#edf5e2]/40">Your coach will activate scheduling when you're fully onboarded.</p>
+              <p className="text-xs text-[var(--c-text3)]">Your coach will activate scheduling when you're fully onboarded.</p>
             </div>
           </div>
         )}

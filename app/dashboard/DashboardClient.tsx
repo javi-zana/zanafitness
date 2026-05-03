@@ -112,8 +112,8 @@ function WeekStrip({ stats }: { stats: StatUpdate[] }) {
   const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
   return (
-    <div className="bg-[#162212] rounded-2xl p-4 border border-[#b0e455]/8">
-      <p className="text-[10px] text-[#edf5e2]/30 tracking-wider uppercase mb-3">This Week</p>
+    <div className="bg-[var(--c-card)] rounded-2xl p-4 border border-[var(--c-border)]">
+      <p className="text-[10px] text-[var(--c-text4)] tracking-wider uppercase mb-3">This Week</p>
       <div className="flex justify-between">
         {weekDays.map((day, i) => {
           const isToday = day.toDateString() === todayStr
@@ -123,7 +123,7 @@ function WeekStrip({ stats }: { stats: StatUpdate[] }) {
           return (
             <div key={i} className="flex flex-col items-center gap-1.5">
               <span className={`text-[10px] font-medium uppercase ${
-                isToday ? 'text-[#b0e455]' : isPast ? 'text-[#edf5e2]/30' : 'text-[#edf5e2]/15'
+                isToday ? 'text-[#b0e455]' : isPast ? 'text-[var(--c-text4)]' : 'text-[var(--c-text5)]'
               }`}>
                 {DAY_LABELS[i]}
               </span>
@@ -131,8 +131,8 @@ function WeekStrip({ stats }: { stats: StatUpdate[] }) {
                 isToday
                   ? 'bg-[#b0e455] text-[#0f1a0c]'
                   : isPast
-                  ? 'text-[#edf5e2]/45'
-                  : 'text-[#edf5e2]/15'
+                  ? 'text-[var(--c-text3)]'
+                  : 'text-[var(--c-text5)]'
               }`}>
                 {day.getDate()}
               </div>
@@ -165,7 +165,7 @@ function ConfidenceRing({ value }: { value: number }) {
       </svg>
       <div className="flex flex-col items-center relative z-10">
         <span className="text-xl font-bold leading-none" style={{ color }}>{value}</span>
-        <span className="text-[9px] text-[#edf5e2]/30 font-medium leading-none mt-0.5">/10</span>
+        <span className="text-[9px] text-[var(--c-text4)] font-medium leading-none mt-0.5">/10</span>
       </div>
     </div>
   )
@@ -194,20 +194,20 @@ function computeStreak(dates: string[]): number {
 
 function StreakCard({ streak }: { streak: number }) {
   return (
-    <div className="bg-[#162212] rounded-2xl p-4 border border-[#b0e455]/10 flex items-center gap-4">
+    <div className="bg-[var(--c-card)] rounded-2xl p-4 border border-[#b0e455]/10 flex items-center gap-4">
       <div className="w-11 h-11 rounded-xl bg-[#b0e455]/15 flex items-center justify-center shrink-0">
         <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-5 h-5">
           <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
       <div>
-        <p className="text-[10px] lg:text-xs text-[#edf5e2]/30 tracking-wider uppercase">Workout Streak</p>
-        <p className="text-2xl font-bold text-[#edf5e2] leading-none mt-0.5">
-          {streak} <span className="text-sm font-normal text-[#edf5e2]/40">{streak === 1 ? 'day' : 'days'}</span>
+        <p className="text-[10px] lg:text-xs text-[var(--c-text4)] tracking-wider uppercase">Workout Streak</p>
+        <p className="text-2xl font-bold text-[var(--c-text)] leading-none mt-0.5">
+          {streak} <span className="text-sm font-normal text-[var(--c-text3)]">{streak === 1 ? 'day' : 'days'}</span>
         </p>
       </div>
       {streak >= 7 && (
-        <span className="ml-auto text-[10px] font-semibold bg-[#b0e455]/15 text-[#b0e455] px-2.5 py-1 rounded-full border border-[#b0e455]/20">
+        <span className="ml-auto text-[10px] font-semibold bg-[#b0e455]/15 text-[#b0e455] px-2.5 py-1 rounded-full border border-[var(--c-border2)]">
           On fire
         </span>
       )}
@@ -255,14 +255,14 @@ function BadgesSection({ milestones }: { milestones: string[] }) {
   if (!earned.length) return null
   return (
     <div>
-      <p className="text-[10px] lg:text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-3">Achievements</p>
+      <p className="text-[10px] lg:text-xs text-[var(--c-text4)] tracking-wider uppercase mb-3">Achievements</p>
       <div className="flex gap-2 overflow-x-auto pb-1">
         {earned.map(type => {
           const def = MILESTONE_DEF[type]
           return (
             <div
               key={type}
-              className="shrink-0 flex flex-col items-center gap-1.5 bg-[#1c2e16] border border-[#b0e455]/8 rounded-2xl px-4 py-3"
+              className="shrink-0 flex flex-col items-center gap-1.5 bg-[var(--c-card2)] border border-[var(--c-border)] rounded-2xl px-4 py-3"
             >
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center"
@@ -272,7 +272,7 @@ function BadgesSection({ milestones }: { milestones: string[] }) {
                   <path d={def.iconPath} strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
-              <p className="text-[9px] text-[#edf5e2]/50 whitespace-nowrap font-medium">{def.label}</p>
+              <p className="text-[9px] text-[var(--c-text3)] whitespace-nowrap font-medium">{def.label}</p>
             </div>
           )
         })}
@@ -295,7 +295,7 @@ function ReferralCard({ code }: { code: string }) {
   }
 
   return (
-    <div className="bg-[#162212] border border-[#b0e455]/8 rounded-2xl p-4">
+    <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-4">
       <div className="flex items-center gap-3 mb-3">
         <div className="w-8 h-8 rounded-xl bg-[#b0e455]/10 flex items-center justify-center shrink-0">
           <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
@@ -304,11 +304,11 @@ function ReferralCard({ code }: { code: string }) {
         </div>
         <div>
           <p className="text-sm font-semibold">Refer a friend</p>
-          <p className="text-xs text-[#edf5e2]/35">Share your link. They get access, you get credit.</p>
+          <p className="text-xs text-[var(--c-text4)]">Share your link. They get access, you get credit.</p>
         </div>
       </div>
-      <div className="flex items-center gap-2 bg-[#0f1a0c] border border-[#b0e455]/10 rounded-xl px-3 py-2">
-        <p className="text-xs text-[#edf5e2]/40 flex-1 truncate font-mono">{link}</p>
+      <div className="flex items-center gap-2 bg-[var(--c-bg)] border border-[#b0e455]/10 rounded-xl px-3 py-2">
+        <p className="text-xs text-[var(--c-text3)] flex-1 truncate font-mono">{link}</p>
         <button
           onClick={copy}
           className="shrink-0 text-[10px] font-semibold text-[#b0e455] hover:text-[#c9f070] transition"
@@ -384,22 +384,22 @@ export default function DashboardClient({
   const subtext = greetingSubtext(streak, daysSinceLast, fitnessGoal)
 
   return (
-    <div className="min-h-screen bg-[#0f1a0c] text-[#edf5e2] flex flex-col lg:pl-52">
+    <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       <div className="flex-1 flex flex-col lg:max-w-3xl lg:mx-auto lg:w-full">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[#b0e455]/8">
+      <div className="flex items-center justify-between px-5 pt-14 pb-3 lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[var(--c-border)]">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase">Zana</p>
-            <Link href="/" className="lg:hidden text-[9px] text-[#edf5e2]/20 hover:text-[#edf5e2]/50 transition tracking-widest uppercase font-medium">
+            <p className="text-xs text-[var(--c-text4)] tracking-wider uppercase">Zana</p>
+            <Link href="/" className="lg:hidden text-[9px] text-[var(--c-text4)] hover:text-[var(--c-text)]/50 transition tracking-widest uppercase font-medium">
               ← Website
             </Link>
           </div>
           <h1 className="text-2xl font-bold tracking-tight lg:text-3xl">
             {greeting()}, {name}.
           </h1>
-          <p className="text-xs text-[#edf5e2]/35 mt-1 max-w-xs">{subtext}</p>
+          <p className="text-xs text-[var(--c-text4)] mt-1 max-w-xs">{subtext}</p>
         </div>
         <Link href="/profile">
           {avatarUrl ? (
@@ -424,7 +424,7 @@ export default function DashboardClient({
 
         {/* Latest announcement */}
         {latestAnnouncement && (
-          <Link href="/community" className="block bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-2xl p-4 hover:border-[#b0e455]/35 active:scale-[0.99] transition-all">
+          <Link href="/community" className="block bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4 hover:border-[#b0e455]/35 active:scale-[0.99] transition-all">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-full bg-[#b0e455]/15 flex items-center justify-center shrink-0 mt-0.5">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-4 h-4">
@@ -433,12 +433,12 @@ export default function DashboardClient({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] text-[#b0e455] font-semibold uppercase tracking-wider mb-1">Announcement</p>
-                <p className="text-sm font-semibold text-[#edf5e2]/90 leading-snug line-clamp-2">
+                <p className="text-sm font-semibold text-[var(--c-text)]/90 leading-snug line-clamp-2">
                   {latestAnnouncement.title}
                 </p>
-                <p className="text-xs text-[#edf5e2]/30 mt-1">{annRelTime(latestAnnouncement.created_at)}</p>
+                <p className="text-xs text-[var(--c-text4)] mt-1">{annRelTime(latestAnnouncement.created_at)}</p>
               </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[#edf5e2]/20 shrink-0 mt-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[var(--c-text4)] shrink-0 mt-1">
                 <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
@@ -453,14 +453,14 @@ export default function DashboardClient({
 
         {/* Progress card */}
         {latest ? (
-          <div className="bg-[#162212] rounded-2xl p-5 border border-[#b0e455]/10">
+          <div className="bg-[var(--c-card)] rounded-2xl p-5 border border-[#b0e455]/10">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-xs font-medium text-[#edf5e2]/40">Latest check-in</p>
-                <p className="text-xs text-[#edf5e2]/25 mt-0.5" suppressHydrationWarning>{relTime(latest.created_at)}</p>
+                <p className="text-xs font-medium text-[var(--c-text3)]">Latest check-in</p>
+                <p className="text-xs text-[var(--c-text4)] mt-0.5" suppressHydrationWarning>{relTime(latest.created_at)}</p>
               </div>
               {fitnessGoal && (
-                <span className="text-[10px] bg-[#b0e455]/10 border border-[#b0e455]/20 text-[#b0e455] px-2.5 py-1 rounded-full font-medium">
+                <span className="text-[10px] bg-[#b0e455]/10 border border-[var(--c-border2)] text-[#b0e455] px-2.5 py-1 rounded-full font-medium">
                   {fitnessGoal}
                 </span>
               )}
@@ -469,10 +469,10 @@ export default function DashboardClient({
             <div className="flex items-center gap-5 lg:gap-8">
               {latestWeight !== null && (
                 <div>
-                  <p className="text-[10px] text-[#edf5e2]/35 uppercase tracking-wider mb-1">Weight</p>
+                  <p className="text-[10px] text-[var(--c-text4)] uppercase tracking-wider mb-1">Weight</p>
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-3xl lg:text-4xl font-bold tracking-tight">{latestWeight}</span>
-                    <span className="text-sm text-[#edf5e2]/40">{weightUnit}</span>
+                    <span className="text-sm text-[var(--c-text3)]">{weightUnit}</span>
                   </div>
                   {weightDelta !== null && (
                     <p className="text-xs mt-1 font-medium" style={{ color: weightDelta <= 0 ? '#86efac' : '#f87171' }}>
@@ -484,7 +484,7 @@ export default function DashboardClient({
 
               {latest.confidence !== null && (
                 <div className="ml-2">
-                  <p className="text-[10px] text-[#edf5e2]/35 uppercase tracking-wider mb-2">Confidence</p>
+                  <p className="text-[10px] text-[var(--c-text4)] uppercase tracking-wider mb-2">Confidence</p>
                   <ConfidenceRing value={latest.confidence} />
                   <p className="text-xs mt-1.5 font-medium text-center" style={{ color: confidenceColor(latest.confidence) }}>
                     {confidenceLabel(latest.confidence)}
@@ -498,22 +498,22 @@ export default function DashboardClient({
             </div>
 
             {latest.milestone_text && (
-              <div className="mt-4 pt-4 border-t border-[#b0e455]/8">
-                <p className="text-xs text-[#edf5e2]/45 italic leading-relaxed">
+              <div className="mt-4 pt-4 border-t border-[var(--c-border)]">
+                <p className="text-xs text-[var(--c-text3)] italic leading-relaxed">
                   "{latest.milestone_text}"
                 </p>
               </div>
             )}
           </div>
         ) : (
-          <div className="bg-[#162212] rounded-2xl p-6 border border-[#b0e455]/15 text-center">
-            <div className="w-12 h-12 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center mx-auto mb-4">
+          <div className="bg-[var(--c-card)] rounded-2xl p-6 border border-[var(--c-border2)] text-center">
+            <div className="w-12 h-12 rounded-full bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center mx-auto mb-4">
               <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-6 h-6">
                 <path d="M18 20V10M12 20V4M6 20v-6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <p className="text-sm font-semibold text-[#edf5e2]/80 mb-1">No check-ins yet</p>
-            <p className="text-xs text-[#edf5e2]/35 mb-5">Log your first update to start tracking progress.</p>
+            <p className="text-sm font-semibold text-[var(--c-text)]/80 mb-1">No check-ins yet</p>
+            <p className="text-xs text-[var(--c-text4)] mb-5">Log your first update to start tracking progress.</p>
             <Link
               href="/stats"
               className="inline-block bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold px-6 py-2.5 rounded-xl hover:bg-[#c9f070] transition-colors"
@@ -525,7 +525,7 @@ export default function DashboardClient({
 
         {/* Check-in nudge */}
         {needsUpdate && latest && (
-          <Link href="/stats" className="block bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-2xl p-4">
+          <Link href="/stats" className="block bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#b0e455]/15 flex items-center justify-center shrink-0">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-4 h-4">
@@ -534,11 +534,11 @@ export default function DashboardClient({
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-[#b0e455]">Time to check in</p>
-                <p className="text-xs text-[#edf5e2]/40">
+                <p className="text-xs text-[var(--c-text3)]">
                   <span suppressHydrationWarning>{daysSinceLast === 1 ? '1 day' : `${daysSinceLast} days`} since your last update</span>
                 </p>
               </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[#edf5e2]/25 shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[var(--c-text4)] shrink-0">
                 <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
@@ -547,10 +547,10 @@ export default function DashboardClient({
 
         {/* Quick actions */}
         <div>
-          <p className="text-[10px] lg:text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-3">Quick Actions</p>
+          <p className="text-[10px] lg:text-xs text-[var(--c-text4)] tracking-wider uppercase mb-3">Quick Actions</p>
           <div className="grid grid-cols-2 gap-3 lg:gap-4">
 
-            <Link href="/stats" className="group bg-[#1c2e16] border border-[#b0e455]/10 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#b0e455]/30 hover:bg-[#223318] active:scale-[0.98] transition-all">
+            <Link href="/stats" className="group bg-[var(--c-card2)] border border-[#b0e455]/10 rounded-2xl p-4 flex flex-col gap-3 hover:border-[#b0e455]/30 hover:bg-[#223318] active:scale-[0.98] transition-all">
               <div className="w-9 h-9 rounded-xl bg-[#b0e455]/15 flex items-center justify-center group-hover:bg-[#b0e455]/25 transition-colors">
                 <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-5 h-5">
                   <path d="M18 20V10M12 20V4M6 20v-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -558,7 +558,7 @@ export default function DashboardClient({
               </div>
               <div>
                 <p className="text-sm font-semibold">Log Update</p>
-                <p className="text-xs text-[#edf5e2]/35 mt-0.5">Weight & confidence</p>
+                <p className="text-xs text-[var(--c-text4)] mt-0.5">Weight & confidence</p>
               </div>
             </Link>
 
@@ -570,7 +570,7 @@ export default function DashboardClient({
               </div>
               <div>
                 <p className="text-sm font-semibold">My Program</p>
-                <p className="text-xs text-[#edf5e2]/35 mt-0.5">Training & nutrition</p>
+                <p className="text-xs text-[var(--c-text4)] mt-0.5">Training & nutrition</p>
               </div>
             </Link>
 
@@ -590,7 +590,7 @@ export default function DashboardClient({
               </div>
               <div>
                 <p className="text-sm font-semibold">Messages</p>
-                <p className="text-xs text-[#edf5e2]/35 mt-0.5">
+                <p className="text-xs text-[var(--c-text4)] mt-0.5">
                   {!hasThread ? 'Not activated yet' : unreadCount > 0 ? `${unreadCount} new` : 'Chat with coach'}
                 </p>
               </div>
@@ -605,7 +605,7 @@ export default function DashboardClient({
               </div>
               <div>
                 <p className="text-sm font-semibold">Schedule</p>
-                <p className="text-xs text-[#edf5e2]/35 mt-0.5">Book coaching call</p>
+                <p className="text-xs text-[var(--c-text4)] mt-0.5">Book coaching call</p>
               </div>
             </Link>
 
@@ -616,7 +616,7 @@ export default function DashboardClient({
         {recentStats.length > 1 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] text-[#edf5e2]/30 tracking-wider uppercase">Recent</p>
+              <p className="text-[10px] text-[var(--c-text4)] tracking-wider uppercase">Recent</p>
               <Link href="/stats" className="text-xs text-[#b0e455] font-medium">See all</Link>
             </div>
             <div className="space-y-2">
@@ -624,8 +624,8 @@ export default function DashboardClient({
                 const d = new Date(s.created_at)
                 const formatted = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                 return (
-                  <div key={s.id} className="flex items-center gap-4 bg-[#162212] rounded-xl px-4 py-3 border border-[#b0e455]/6">
-                    <p className="text-xs text-[#edf5e2]/30 w-14 shrink-0 font-medium">{formatted}</p>
+                  <div key={s.id} className="flex items-center gap-4 bg-[var(--c-card)] rounded-xl px-4 py-3 border border-[#b0e455]/6">
+                    <p className="text-xs text-[var(--c-text4)] w-14 shrink-0 font-medium">{formatted}</p>
                     {s.weight_kg !== null && (
                       <p className="text-sm font-semibold">{toDisplay(s.weight_kg, weightUnit)} {weightUnit}</p>
                     )}
@@ -645,7 +645,7 @@ export default function DashboardClient({
         <BadgesSection milestones={milestones} />
 
         {/* Community */}
-        <Link href="/community" className="block bg-[#162212] border border-[#b0e455]/8 rounded-2xl p-4 hover:border-[#b0e455]/20 active:scale-[0.99] transition-all">
+        <Link href="/community" className="block bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-4 hover:border-[var(--c-border2)] active:scale-[0.99] transition-all">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center shrink-0">
               <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-5 h-5">
@@ -656,9 +656,9 @@ export default function DashboardClient({
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold">Community</p>
-              <p className="text-xs text-[#edf5e2]/35 mt-0.5">Announcements & posts</p>
+              <p className="text-xs text-[var(--c-text4)] mt-0.5">Announcements & posts</p>
             </div>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[#edf5e2]/20 shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[var(--c-text4)] shrink-0">
               <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
