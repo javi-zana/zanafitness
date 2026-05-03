@@ -1252,16 +1252,23 @@ function AdminTab({ userEmail }: { userEmail: string }) {
     e.preventDefault()
     if (!assignMemberId || !assignCoachId) return
     setAssignStatus('loading')
-    await fetch('/api/admin-action', {
+    const res = await fetch('/api/admin-action', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'assign', memberId: assignMemberId, coachId: assignCoachId }),
     })
-    setAssignStatus('done')
-    setAssignMemberId('')
-    setAssignCoachId('')
-    await loadData()
-    setTimeout(() => setAssignStatus('idle'), 2000)
+    if (res.ok) {
+      setAssignStatus('done')
+      setAssignMemberId('')
+      setAssignCoachId('')
+      await loadData()
+      setTimeout(() => setAssignStatus('idle'), 2000)
+    } else {
+      const json = await res.json().catch(() => ({}))
+      console.error('assign error:', json.error)
+      setAssignStatus('error')
+      setTimeout(() => setAssignStatus('idle'), 3000)
+    }
   }
 
   async function setupThread(member: AdminProfile) {
@@ -1479,7 +1486,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
               disabled={assignStatus === 'loading' || !assignMemberId || !assignCoachId}
               className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
             >
-              {assignStatus === 'loading' ? 'Assigning…' : assignStatus === 'done' ? 'Assigned!' : 'Assign'}
+              {assignStatus === 'loading' ? 'Assigning…' : assignStatus === 'done' ? 'Assigned ✓' : assignStatus === 'error' ? 'Failed — retry' : 'Assign'}
             </button>
           </form>
         </div>
