@@ -5,26 +5,26 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Light mode (default) ─────────────────────────────────────────────────── */
+/* ─── Light mode (default) — iOS grouped-table aesthetic ───────────────────── */
 :root {
-  --c-bg:       #FFFFFF;
-  --c-sidebar:  #FAFAFA;
-  --c-card:     #F2F2F7;
-  --c-card2:    #FFFFFF;
-  --c-hover:    #F0F0F5;
-  --c-backdrop: rgba(255, 255, 255, 0.92);
+  --c-bg:       #F2F2F7;   /* iOS systemGroupedBackground — page canvas */
+  --c-sidebar:  #FFFFFF;   /* White sidebar */
+  --c-card:     #FFFFFF;   /* White cards float on gray bg */
+  --c-card2:    #F2F2F7;   /* Inset / nested cells */
+  --c-hover:    #E5E5EA;   /* Hover / pressed state */
+  --c-backdrop: rgba(242, 242, 247, 0.92);
 
   --c-text:     #1C1C1E;
   --c-text2:    #3C3C43;
-  --c-text3:    #6E6E73;
-  --c-text4:    #AEAEB2;
-  --c-text5:    #C7C7CC;
+  --c-text3:    #48484A;   /* Darker than before — readable on white cards */
+  --c-text4:    #8E8E93;   /* Section labels, captions */
+  --c-text5:    #AEAEB2;   /* Hints, placeholders */
 
-  --c-border:   rgba(0, 0, 0, 0.08);
-  --c-border2:  rgba(0, 0, 0, 0.12);
+  --c-border:   rgba(0, 0, 0, 0.10);
+  --c-border2:  rgba(0, 0, 0, 0.16);
 
-  /* Legacy vars (used in a few spots still) */
-  --background: #FFFFFF;
+  /* Legacy vars */
+  --background: #F2F2F7;
   --foreground: #1C1C1E;
 }
 

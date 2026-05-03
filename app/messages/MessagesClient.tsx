@@ -16,11 +16,20 @@ type Message = {
 }
 type ReadReceipt = { user_id: string; last_read_at: string }
 
+type AuthorProfile = {
+  firstName: string | null
+  avatarUrl: string | null
+  avatarColor: string
+}
+
 type Props = {
   userId: string
   threadId: string | null
   initialMessages: Message[]
   otherReads: ReadReceipt[]
+  authorProfiles: Record<string, AuthorProfile>
+  userProfile: AuthorProfile
+  isAdmin: boolean
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -51,6 +60,30 @@ function AttachmentImage({ path }: { path: string }) {
       alt=""
       className="max-w-[200px] rounded-xl object-cover bg-white/5 mt-1"
     />
+  )
+}
+
+// ─── Author avatar ────────────────────────────────────────────────────────────
+
+function AuthorAvatar({ profile }: { profile: AuthorProfile }) {
+  const initial = profile.firstName ? profile.firstName.charAt(0).toUpperCase() : '?'
+  if (profile.avatarUrl) {
+    return (
+      <img
+        src={profile.avatarUrl}
+        alt={profile.firstName ?? ''}
+        className="w-7 h-7 rounded-full object-cover shrink-0"
+        style={{ borderColor: profile.avatarColor, borderWidth: 1.5, borderStyle: 'solid' }}
+      />
+    )
+  }
+  return (
+    <div
+      className="w-7 h-7 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center shrink-0 text-[10px] font-semibold text-[var(--c-text3)]"
+      style={{ borderColor: profile.avatarColor }}
+    >
+      {initial}
+    </div>
   )
 }
 
@@ -92,7 +125,14 @@ function NoThread() {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function MessagesClient({ userId, threadId, initialMessages, otherReads }: Props) {
+export default function MessagesClient({
+  userId,
+  threadId,
+  initialMessages,
+  otherReads,
+  authorProfiles,
+  isAdmin,
+}: Props) {
   const supabase = createClient()
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [body, setBody] = useState('')
@@ -103,6 +143,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
     otherReads[0]?.last_read_at ?? null
   )
   const [sendError, setSendError] = useState<string | null>(null)
+  const [groupPanelOpen, setGroupPanelOpen] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -117,7 +158,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { scrollToBottom() }, [])
 
-  // Realtime: new messages
+  // Realtime: new messages + read receipts
   useEffect(() => {
     const channel = supabase
       .channel(`thread-${threadId}`)
@@ -223,7 +264,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
     setSending(false)
   }
 
-  // "Seen" - show under last message sent by current user if coach has read it
+  // "Seen" — show under last message sent by current user if coach has read it
   const myMessages = messages.filter(m => m.author_id === userId)
   const lastMine = myMessages[myMessages.length - 1]
   const coachHasSeen = coachReadAt && lastMine
@@ -232,14 +273,50 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
 
   return (
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
+
       {/* Header */}
-      <div className="px-5 pt-12 pb-4 border-b border-[var(--c-border)] lg:px-10 lg:pt-10 lg:pb-5">
+      <div className="relative px-5 pt-12 pb-4 border-b border-[var(--c-border)] lg:px-10 lg:pt-10 lg:pb-5">
         <p className="text-xs lg:text-sm text-[var(--c-text4)] tracking-wider uppercase mb-0.5">Zana</p>
         <h1 className="text-xl font-bold tracking-tight lg:text-3xl">Messages</h1>
+
+        {/* Admin: group thread button */}
+        {isAdmin && (
+          <button
+            onClick={() => setGroupPanelOpen(v => !v)}
+            className="absolute right-5 top-12 lg:right-10 lg:top-10 w-8 h-8 rounded-full border border-[var(--c-border)] bg-[var(--c-card)] flex items-center justify-center text-[var(--c-text4)] hover:text-[var(--c-text)] hover:border-[var(--c-border2)] transition"
+            title="Group thread"
+          >
+            {/* Two-people icon */}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4">
+              <path d="M17 20c0-2.21-2.239-4-5-4s-5 1.79-5 4" strokeLinecap="round" />
+              <circle cx="12" cy="8" r="3" />
+              <path d="M21 20c0-1.657-1.567-3-3.5-3" strokeLinecap="round" />
+              <path d="M18.5 6a2.5 2.5 0 010 5" strokeLinecap="round" />
+            </svg>
+          </button>
+        )}
+
+        {/* Admin: group panel dropdown */}
+        {isAdmin && groupPanelOpen && (
+          <div className="fixed right-4 top-20 z-50 w-64 bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl shadow-xl p-4 lg:right-10 lg:top-24">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-xs font-semibold text-[var(--c-text)] uppercase tracking-wider">Group Thread</p>
+              <button
+                onClick={() => setGroupPanelOpen(false)}
+                className="w-5 h-5 flex items-center justify-center text-[var(--c-text4)] hover:text-[var(--c-text)] transition text-sm"
+              >
+                ×
+              </button>
+            </div>
+            <p className="text-xs text-amber-400 leading-relaxed">
+              Run the group thread migration first.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 lg:px-10 lg:max-w-3xl pb-36 lg:pb-24">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 lg:px-10 lg:max-w-3xl lg:mx-auto w-full pb-36 lg:pb-24">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-sm text-[var(--c-text4)]">No messages yet.</p>
@@ -250,8 +327,18 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
         {messages.map((msg, i) => {
           const isMine = msg.author_id === userId
           const prev = messages[i - 1]
+          const next = messages[i + 1]
           const showTs = shouldShowTimestamp(prev, msg)
+
+          // Determine whether to show sender name + avatar for non-own messages
+          const prevIsSameSender = prev && prev.author_id === msg.author_id && !shouldShowTimestamp(prev, msg)
+          const nextIsSameSender = next && next.author_id === msg.author_id && !shouldShowTimestamp(msg, next)
+          const showName = !isMine && !prevIsSameSender
+          // Show avatar on the last message of a consecutive run (bottom of group)
+          const showAvatar = !isMine && !nextIsSameSender
+
           const isLastMine = msg.id === lastMine?.id
+          const profile = authorProfiles[msg.author_id]
 
           return (
             <div key={msg.id}>
@@ -260,24 +347,43 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
                   {formatTime(msg.created_at)}
                 </p>
               )}
-              <div className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
+
+              <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} items-end gap-2`}>
+
+                {/* Left avatar slot for non-own messages */}
+                {!isMine && (
+                  showAvatar && profile
+                    ? <AuthorAvatar profile={profile} />
+                    : <div className="w-7 shrink-0" />
+                )}
+
+                {/* Bubble column */}
                 <div className={`max-w-[78%] ${isMine ? 'items-end' : 'items-start'} flex flex-col`}>
+                  {/* Sender name (only on first message of a run) */}
+                  {showName && profile?.firstName && (
+                    <p className="text-xs text-[var(--c-text4)] mb-1 font-medium px-1">
+                      {profile.firstName}
+                    </p>
+                  )}
+
                   {msg.body && (
                     <div
                       className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                         isMine
                           ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm font-medium'
-                          : 'bg-[var(--c-card2)] text-[var(--c-text2)] rounded-bl-sm border border-[var(--c-border)]'
+                          : 'bg-[var(--c-card)] text-[var(--c-text)] rounded-bl-sm border border-[var(--c-border)]'
                       }`}
                     >
                       {msg.body}
                     </div>
                   )}
+
                   {msg.message_attachments.map(att => (
                     att.kind === 'image'
                       ? <AttachmentImage key={att.id} path={att.storage_path} />
                       : null
                   ))}
+
                   {isLastMine && coachHasSeen && (
                     <p className="text-xs text-[var(--c-text4)] mt-1 mr-1">Seen</p>
                   )}
@@ -289,7 +395,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
         <div ref={bottomRef} />
       </div>
 
-      {/* Composer - fixed above bottom nav on mobile, flush to bottom on desktop */}
+      {/* Composer — fixed above bottom nav on mobile, flush to bottom on desktop */}
       <div className="fixed bottom-16 left-0 right-0 lg:bottom-0 lg:left-52 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] px-4 py-3 z-40">
         {sendError && (
           <div className="mb-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20">
@@ -332,7 +438,7 @@ export default function MessagesClient({ userId, threadId, initialMessages, othe
             onKeyDown={handleKeyDown}
             placeholder="Message…"
             rows={1}
-            className="flex-1 bg-[var(--c-card2)] border border-[var(--c-border)] rounded-2xl px-4 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] resize-none focus:outline-none focus:border-[#b0e455]/35 transition max-h-32 overflow-y-auto leading-relaxed"
+            className="flex-1 bg-[var(--c-card2)] border border-[var(--c-border)] rounded-2xl px-4 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] resize-none focus:outline-none focus:border-[#b0e455]/35 transition max-h-32 overflow-y-auto leading-relaxed"
           />
 
           <button
