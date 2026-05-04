@@ -50,12 +50,17 @@ function LoginForm() {
   const handleForgotPassword = async (e: FormEvent) => {
     e.preventDefault();
     setForgotLoading(true);
+    setError('');
     const supabase = createClient();
-    await supabase.auth.resetPasswordForEmail(forgotEmail, {
+    const { error: resetErr } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
       redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
     });
     setForgotLoading(false);
-    setForgotSent(true);
+    if (resetErr) {
+      setError(resetErr.message);
+    } else {
+      setForgotSent(true);
+    }
   };
 
   if (showForgot) {
