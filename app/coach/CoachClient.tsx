@@ -421,7 +421,8 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
       </aside>
 
       {/* ── Mobile bottom bar ─────────────────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden relative" style={{ scrollbarWidth: 'none' }}>
+        {showAdmin && <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[var(--c-backdrop)] to-transparent z-10" />}
         {tabs.map(t => (
           <button
             key={t.id}
@@ -526,10 +527,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
     stat && Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) <= 7
   ).length
 
-  const needAttention = latestPerMember.filter(({ stat }) => {
-    if (!stat) return true
-    return Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) > 7
-  }).length
+  const needAttention = latestPerMember.filter(({ stat }) => needsAttention(stat)).length
 
   const recentActivity = [...allStats]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -636,6 +634,13 @@ function checkinStatus(stat: Stat | null): 'fresh' | 'ok' | 'overdue' | 'none' {
   return 'overdue'
 }
 
+function needsAttention(stat: Stat | null): boolean {
+  if (!stat) return true
+  const days = Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000)
+  if (days > 7) return true
+  return stat.confidence !== null && stat.confidence <= 3
+}
+
 const STATUS_DOT: Record<string, string> = {
   fresh: 'bg-[#86efac]',
   ok: 'bg-[#fbbf24]',
@@ -701,7 +706,7 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
     if (!stat) return false
     return Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) <= 7
   }).length
-  const needAttention = latestPerMember.filter(({ stat }) => checkinStatus(stat) === 'overdue' || checkinStatus(stat) === 'none').length
+  const needAttention = latestPerMember.filter(({ stat }) => needsAttention(stat)).length
 
   // Sort: overdue first, then ok, then fresh
   const sortedMembers = [...latestPerMember].sort((a, b) => {
@@ -1227,7 +1232,7 @@ function MessagesTab({
           return (
             <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[var(--c-card2)] text-[var(--c-text2)] rounded-bl-sm'
+                isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[var(--c-card)] text-[var(--c-text)] border border-[var(--c-border)] rounded-bl-sm'
               }`}>
                 {msg.body}
               </div>

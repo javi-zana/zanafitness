@@ -24,6 +24,8 @@ export default async function MessagesPage() {
     .eq('id', user.id)
     .single()
 
+  if (profile?.role === 'head_coach' || profile?.role === 'coach') redirect('/coach')
+
   const isAdmin = profile?.role === 'head_coach' && user.email === 'me@javilorenzana.com'
 
   const { data: thread } = await admin

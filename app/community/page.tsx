@@ -43,6 +43,7 @@ export default async function CommunityPage() {
   return (
     <CommunityClient
       userId={user.id}
+      userEmail={user.email ?? ''}
       userRole={resolvedRole}
       firstName={profile?.first_name ?? null}
       avatarColor={profile?.avatar_color ?? '#b0e455'}
