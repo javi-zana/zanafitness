@@ -560,8 +560,8 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Members</p>
         </div>
         <div
-          className={`rounded-2xl p-3 text-center border ${needAttention > 0 ? 'border-[#f87171]/20' : 'bg-[var(--c-card)] shadow-sm border-[var(--c-border)]'}`}
-          style={needAttention > 0 ? { background: 'linear-gradient(135deg, #1a0505 0%, #2a1010 100%)' } : undefined}
+          className={`rounded-2xl p-3 text-center border shadow-sm ${needAttention > 0 ? 'bg-[#f87171]/8 border-[#f87171]/30' : 'bg-[var(--c-card)] border-[var(--c-border)]'}`}
+          style={undefined}
         >
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase mt-0.5">Attn</p>
@@ -733,8 +733,8 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Total</p>
         </div>
         <div
-          className={`rounded-2xl p-3 text-center border ${needAttention > 0 ? 'border-[#f87171]/20' : 'bg-[var(--c-card)] shadow-sm border-[var(--c-border)]'}`}
-          style={needAttention > 0 ? { background: 'linear-gradient(135deg, #1a0505 0%, #2a1010 100%)' } : undefined}
+          className={`rounded-2xl p-3 text-center border shadow-sm ${needAttention > 0 ? 'bg-[#f87171]/8 border-[#f87171]/30' : 'bg-[var(--c-card)] border-[var(--c-border)]'}`}
+          style={undefined}
         >
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase mt-0.5">Attn</p>
@@ -1018,12 +1018,18 @@ function MessagesTab({
   threads,
   lastMessages,
   myReads,
+  coachName,
+  coachAvatarUrl,
+  coachAvatarColor,
 }: {
   userId: string
   members: Member[]
   threads: Thread[]
   lastMessages: MsgPreview[]
   myReads: ReadReceipt[]
+  coachName: string | null
+  coachAvatarUrl: string | null
+  coachAvatarColor: string
 }) {
   const supabase = createClient()
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
@@ -1227,15 +1233,37 @@ function MessagesTab({
             <p className="text-xs text-[var(--c-text5)] mt-1">Send the first message below.</p>
           </div>
         )}
-        {chatMessages.map(msg => {
+        {chatMessages.map((msg, i) => {
           const isMine = msg.author_id === userId
+          const prev = chatMessages[i - 1]
+          const next = chatMessages[i + 1]
+          const isFirst = !prev || prev.author_id !== msg.author_id
+          const isLast = !next || next.author_id !== msg.author_id
+
+          const memberAvatar = chatMember?.avatar_url
+            ? <img src={chatMember.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" style={{ border: `1.5px solid ${chatMember.avatar_color ?? '#b0e455'}` }} />
+            : <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ background: (chatMember?.avatar_color ?? '#b0e455') + '22', border: `1.5px solid ${chatMember?.avatar_color ?? '#b0e455'}`, color: chatMember?.avatar_color ?? '#b0e455' }}>{(chatMember ? memberName(chatMember) : '?').charAt(0).toUpperCase()}</div>
+
+          const coachAvatar = coachAvatarUrl
+            ? <img src={coachAvatarUrl} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" style={{ border: `1.5px solid ${coachAvatarColor}` }} />
+            : <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ background: coachAvatarColor + '22', border: `1.5px solid ${coachAvatarColor}`, color: coachAvatarColor }}>{(coachName ?? 'J').charAt(0).toUpperCase()}</div>
+
+          const displayName = isMine ? (coachName ?? 'Coach') : (chatMember ? memberName(chatMember) : 'Member')
+
           return (
-            <div key={msg.id} className={`flex ${isMine ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[78%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[var(--c-card)] text-[var(--c-text)] border border-[var(--c-border)] rounded-bl-sm'
-              }`}>
-                {msg.body}
+            <div key={msg.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
+              {!isMine && (isLast ? memberAvatar : <div className="w-7 shrink-0" />)}
+              <div className={`max-w-[75%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+                {isFirst && (
+                  <p className="text-[11px] text-[var(--c-text4)] font-medium mb-1 px-1">{displayName}</p>
+                )}
+                <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                  isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[var(--c-card)] text-[var(--c-text)] border border-[var(--c-border)] rounded-bl-sm'
+                }`}>
+                  {msg.body}
+                </div>
               </div>
+              {isMine && (isLast ? coachAvatar : <div className="w-7 shrink-0" />)}
             </div>
           )
         })}
@@ -2301,6 +2329,9 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
             threads={threads}
             lastMessages={lastMessages}
             myReads={myReads}
+            coachName={firstName}
+            coachAvatarUrl={avatarUrl}
+            coachAvatarColor={avatarColor}
           />
         )}
         {activeTab === 'inbox' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
