@@ -4,7 +4,7 @@ import Script from 'next/script'
 import BottomNav from '@/components/BottomNav'
 import { useTheme } from '@/app/providers'
 
-const CALENDLY_URL = process.env.NEXT_PUBLIC_CALENDLY_URL ?? ''
+const CALENDLY_URL = process.env.NEXT_PUBLIC_CALENDLY_URL ?? 'https://calendly.com/me-javilorenzana/30-minute-check-in'
 
 export default function ScheduleClient() {
   const { theme } = useTheme()

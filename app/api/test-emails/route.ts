@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server'
 
 const ADMIN_EMAIL = 'me@javilorenzana.com'
 const FROM_EMAIL = 'Javier Lorenzana <javi@zanafitness.com>'
-const CALENDLY_URL = 'https://calendly.com/javilorenzana/30min'
+const CALENDLY_URL = 'https://calendly.com/me-javilorenzana/30min?month=2026-05'
 
 function logoHtml() {
   return `<table cellpadding="0" cellspacing="0">

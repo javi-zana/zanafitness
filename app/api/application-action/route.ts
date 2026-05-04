@@ -5,7 +5,7 @@ import { Resend } from 'resend'
 
 const ADMIN_EMAIL = 'me@javilorenzana.com'
 const FROM_EMAIL = 'Javier Lorenzana <javi@zanafitness.com>'
-const CALENDLY_URL = 'https://calendly.com/javilorenzana/30min'
+const CALENDLY_URL = 'https://calendly.com/me-javilorenzana/30min?month=2026-05'
 
 function admin() {
   return createServiceClient(
