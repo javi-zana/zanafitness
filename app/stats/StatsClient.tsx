@@ -92,6 +92,7 @@ function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }
   ].join(' ')
 
   const last = coords[coords.length - 1]
+  const firstVal = pts[0]
   const lastVal = pts[pts.length - 1]
 
   return (
@@ -113,9 +114,8 @@ function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }
         <circle cx={last.x} cy={last.y} r="3" fill="#b0e455" />
       </svg>
       <div className="flex justify-between text-xs text-[var(--c-text4)] mt-1">
-        <span>{min} {unit}</span>
-        <span className="text-[var(--c-accent-text)] font-semibold">{lastVal} {unit} now</span>
-        <span>{max} {unit}</span>
+        <span>{firstVal} {unit}</span>
+        <span className="text-[var(--c-accent-text)] font-semibold">{lastVal} {unit} — now</span>
       </div>
     </div>
   )
