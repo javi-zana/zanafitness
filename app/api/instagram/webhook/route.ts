@@ -46,7 +46,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  if (body.object !== 'instagram') return NextResponse.json({ ok: true })
+  console.log('[ig/webhook] POST object:', body.object, 'raw:', rawBody.slice(0, 500))
+
+  if (body.object !== 'instagram' && body.object !== 'page') return NextResponse.json({ ok: true })
 
   const db = adminDb()
 
