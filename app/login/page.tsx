@@ -52,7 +52,7 @@ function LoginForm() {
     setForgotLoading(true);
     const supabase = createClient();
     await supabase.auth.resetPasswordForEmail(forgotEmail, {
-      redirectTo: `${window.location.origin}/auth/callback?type=recovery`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
     });
     setForgotLoading(false);
     setForgotSent(true);
