@@ -737,18 +737,21 @@ export default function CommunityClient({ userId, userRole, firstName, avatarCol
       </div>
 
       <div className="border-b border-[var(--c-border)]">
-        <div className="flex px-5 lg:px-10">
+        <div className="flex gap-1 px-4 lg:px-10">
           {SUB_TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => switchTab(tab.id)}
-              className={`flex-1 py-3 text-xs font-medium text-center whitespace-nowrap transition border-b-2 -mb-px ${
+              className={`relative flex-1 py-3 text-xs font-semibold text-center transition ${
                 activeTab === tab.id
-                  ? 'border-[var(--c-accent-text)] text-[var(--c-accent-text)]'
-                  : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
+                  ? 'text-[var(--c-accent-text)]'
+                  : 'text-[var(--c-text3)] hover:text-[var(--c-text)]'
               }`}
             >
               {tab.label}
+              {activeTab === tab.id && (
+                <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[var(--c-accent-text)] rounded-full translate-y-px" />
+              )}
             </button>
           ))}
         </div>

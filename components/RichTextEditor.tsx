@@ -34,8 +34,8 @@ function ToolBtn({
       }}
       className={`px-2.5 py-1 rounded text-xs font-mono transition ${
         active
-          ? 'bg-babyblue-500 text-navy-900 font-semibold'
-          : 'text-white/50 hover:text-white hover:bg-white/10'
+          ? 'bg-[#b0e455]/20 text-[#b0e455] font-semibold'
+          : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-hover)]'
       }`}
     >
       {children}
@@ -46,21 +46,21 @@ function ToolBtn({
 function Toolbar({ editor }: { editor: Editor | null }) {
   if (!editor) return null
   return (
-    <div className="flex gap-1 p-2 border-b border-white/10 flex-wrap bg-white/[0.02]">
+    <div className="flex gap-1 p-2 border-b border-[var(--c-border)] flex-wrap bg-[var(--c-card2)]">
       <ToolBtn active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>
         B
       </ToolBtn>
       <ToolBtn active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}>
         I
       </ToolBtn>
-      <div className="w-px bg-white/10 mx-1" />
+      <div className="w-px bg-[var(--c-border)] mx-1" />
       <ToolBtn active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}>
         H2
       </ToolBtn>
       <ToolBtn active={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}>
         H3
       </ToolBtn>
-      <div className="w-px bg-white/10 mx-1" />
+      <div className="w-px bg-[var(--c-border)] mx-1" />
       <ToolBtn active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}>
         •
       </ToolBtn>
@@ -70,9 +70,9 @@ function Toolbar({ editor }: { editor: Editor | null }) {
       <ToolBtn active={editor.isActive('taskList')} onClick={() => editor.chain().focus().toggleTaskList().run()}>
         ☐
       </ToolBtn>
-      <div className="w-px bg-white/10 mx-1" />
+      <div className="w-px bg-[var(--c-border)] mx-1" />
       <ToolBtn active={false} onClick={() => editor.chain().focus().setHorizontalRule().run()}>
-        -
+        —
       </ToolBtn>
     </div>
   )
@@ -101,7 +101,7 @@ export default function RichTextEditor({
   })
 
   return (
-    <div className="border border-white/10 rounded-xl overflow-hidden">
+    <div className="border border-[var(--c-border)] rounded-xl overflow-hidden">
       <Toolbar editor={editor} />
       <div className="prose-dark prose-editor p-4 min-h-[180px]">
         <EditorContent editor={editor} />

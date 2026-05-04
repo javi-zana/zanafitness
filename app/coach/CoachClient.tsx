@@ -5,7 +5,10 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 
-const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false })
+const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
+  ssr: false,
+  loading: () => <div className="border border-[var(--c-border)] rounded-xl min-h-[220px] bg-[var(--c-bg)] animate-pulse" />,
+})
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -409,7 +412,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
           <button
             key={t.id}
             onClick={() => onChange(t.id)}
-            className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
+            className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
             <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
               active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
@@ -423,7 +426,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             </span>
           </button>
         ))}
-        <Link href="/community" className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors">
+        <Link href="/community" className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors">
           <div className="w-10 h-7 flex items-center justify-center rounded-full text-[var(--c-text4)]">
             {communityIcon}
           </div>
@@ -432,7 +435,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
         {showAdmin && (
           <button
             onClick={() => onChange('applications')}
-            className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
+            className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
             <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
               active === 'applications' ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
@@ -447,7 +450,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
         {showAdmin && (
           <button
             onClick={() => onChange('admin')}
-            className="flex-1 min-w-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
+            className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
             <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
               active === 'admin' ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
@@ -534,7 +537,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
           style={needAttention > 0 ? { background: 'linear-gradient(135deg, #1a0505 0%, #2a1010 100%)' } : undefined}
         >
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
-          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Attention</p>
+          <p className="text-[9px] text-[var(--c-text4)] uppercase mt-0.5">Attn</p>
         </div>
         <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
           <p className="text-2xl font-bold text-[#16a34a]">{activeThisWeek}</p>
@@ -700,7 +703,7 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
           style={needAttention > 0 ? { background: 'linear-gradient(135deg, #1a0505 0%, #2a1010 100%)' } : undefined}
         >
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
-          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Attention</p>
+          <p className="text-[9px] text-[var(--c-text4)] uppercase mt-0.5">Attn</p>
         </div>
         <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
           <p className="text-2xl font-bold text-[#16a34a]">{activeThisWeek}</p>
@@ -923,18 +926,23 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
       </div>
 
       {/* Section tabs */}
-      <div className="flex border-b border-[var(--c-border)] mb-4">
-        {SECTIONS.map(s => (
-          <button
-            key={s}
-            onClick={() => setActiveSection(s)}
-            className={`flex-1 py-2.5 text-[11px] tracking-wide font-mono capitalize transition border-b-2 -mb-px ${
-              activeSection === s ? 'border-[var(--c-accent-text)] text-[var(--c-accent-text)]' : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
-            }`}
-          >
-            {s}
-          </button>
-        ))}
+      <div className="border-b border-[var(--c-border)] mb-4">
+        <div className="flex gap-1">
+          {SECTIONS.map(s => (
+            <button
+              key={s}
+              onClick={() => setActiveSection(s)}
+              className={`relative flex-1 py-2.5 text-[11px] font-mono capitalize transition text-center ${
+                activeSection === s ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text3)] hover:text-[var(--c-text)]'
+              }`}
+            >
+              {s}
+              {activeSection === s && (
+                <span className="absolute bottom-0 left-1 right-1 h-0.5 bg-[var(--c-accent-text)] rounded-full translate-y-px" />
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loadingSections ? (
