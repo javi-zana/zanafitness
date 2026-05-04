@@ -24,7 +24,7 @@ type Form = {
   age: string; location: string; work: string;
   mirrorGoal: string; whatStopped: string;
   trainingHistory: string; commitment: number;
-  investmentFit: string; whyNow: string;
+  investmentFit: string; investmentWhy: string; whyNow: string;
 }
 
 const empty: Form = {
@@ -32,7 +32,7 @@ const empty: Form = {
   age: '', location: '', work: '',
   mirrorGoal: '', whatStopped: '',
   trainingHistory: '', commitment: 0,
-  investmentFit: '', whyNow: '',
+  investmentFit: '', investmentWhy: '', whyNow: '',
 };
 
 function ChoiceButton({ label, selected, onClick }: { label: string; selected: boolean; onClick: () => void }) {
@@ -373,16 +373,23 @@ export default function ApplyPage() {
                   Most clients go 12-month for the bigger transformation.
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 mb-6">
                 {[
-                  "Yes — ready to commit if we're a match",
-                  "Probably — need to confirm with my partner first",
-                  "Not right now — but want to stay in touch",
-                  "No — not where I'm at financially",
+                  "Yes",
+                  "Probably",
+                  "Not right now",
+                  "No",
                 ].map(opt => (
                   <ChoiceButton key={opt} label={opt} selected={form.investmentFit === opt}
                     onClick={() => set('investmentFit', opt)} />
                 ))}
+              </div>
+              <div>
+                <label className={labelCls}>Why? <span className="text-white/20 normal-case tracking-normal font-normal">(optional)</span></label>
+                <textarea value={form.investmentWhy} rows={3}
+                  onChange={e => set('investmentWhy', e.target.value)}
+                  placeholder="Tell us a bit more about your situation…"
+                  className={textareaCls} />
               </div>
             </>
           )}

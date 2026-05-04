@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
       training_history: body.trainingHistory ?? null,
       commitment: typeof body.commitment === 'number' ? body.commitment : null,
       investment_fit: body.investmentFit ?? null,
+      investment_why: body.investmentWhy ?? null,
       why_now: body.whyNow ?? null,
     })
     .then(({ error }) => {

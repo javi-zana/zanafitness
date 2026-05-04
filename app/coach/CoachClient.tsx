@@ -1220,6 +1220,7 @@ type Application = {
   training_history: string | null
   commitment: number | null
   investment_fit: string | null
+  investment_why: string | null
   why_now: string | null
 }
 
@@ -1419,6 +1420,9 @@ function ApplicationsSection() {
                 <div className="flex-1 bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
                   <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Investment fit</p>
                   <p className="text-xs text-[var(--c-text2)] mt-1 leading-relaxed">{app.investment_fit}</p>
+                  {app.investment_why && (
+                    <p className="text-xs text-[var(--c-text3)] mt-1 leading-relaxed italic">{app.investment_why}</p>
+                  )}
                 </div>
               )}
             </div>

@@ -252,8 +252,7 @@ export async function POST(req: NextRequest) {
 
   if (emailErr) {
     console.error('[application-action] Resend error:', emailErr)
-    return NextResponse.json({ error: 'Email failed to send', detail: emailErr }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, action })
+  return NextResponse.json({ success: true, action, emailSent: !emailErr })
 }
