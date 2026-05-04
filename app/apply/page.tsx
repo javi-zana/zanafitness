@@ -383,33 +383,30 @@ export default function ApplyPage() {
             </>
           )}
 
-          {/* ── Screen 7: Investment fit (Q12) — the big one ── */}
+          {/* ── Screen 7: Investment fit (Q12) ── */}
           {step === 6 && (
             <>
               <div className="mb-6">
                 <h2 className="text-2xl font-semibold text-white leading-snug mb-2">
                   Are you in a position to invest in your health right now?
                 </h2>
-                <p className="text-sm text-white/35">
-                  What's your monthly budget for coaching?
-                </p>
               </div>
               <div className="space-y-2 mb-6">
                 {[
-                  "Under $200 / month",
-                  "$200 – $500 / month",
-                  "$500 – $1,000 / month",
-                  "$1,000+ / month",
+                  "Yes — I'm ready to invest",
+                  "Yes — but I'd need a payment plan",
+                  "It depends on what's included",
+                  "Not right now, but soon",
                 ].map(opt => (
                   <ChoiceButton key={opt} label={opt} selected={form.investmentFit === opt}
                     onClick={() => set('investmentFit', opt)} />
                 ))}
               </div>
               <div>
-                <label className={labelCls}>Anything to add? <span className="text-white/20 normal-case tracking-normal font-normal">(optional)</span></label>
+                <label className={labelCls}>Why or why not? <span className="text-white/20 normal-case tracking-normal font-normal">(optional)</span></label>
                 <textarea value={form.investmentWhy} rows={3}
                   onChange={e => set('investmentWhy', e.target.value)}
-                  placeholder="e.g. flexible depending on what's included, need a payment plan, etc."
+                  placeholder="e.g. I've been meaning to do this for a while, just need the right fit. Open on budget depending on what's included."
                   className={textareaCls} />
               </div>
             </>
