@@ -1201,6 +1201,284 @@ function MessagesTab({
   )
 }
 
+// ─── Applications section (inside Admin tab) ──────────────────────────────────
+
+type Application = {
+  id: string
+  created_at: string
+  status: 'pending' | 'accepted' | 'declined'
+  responded_at: string | null
+  first_name: string | null
+  email: string | null
+  phone: string | null
+  instagram: string | null
+  age: string | null
+  location: string | null
+  work: string | null
+  mirror_goal: string | null
+  what_stopped: string | null
+  training_history: string | null
+  commitment: number | null
+  investment_fit: string | null
+  why_now: string | null
+}
+
+function appRelTime(dateStr: string) {
+  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000)
+  if (days === 0) return 'Today'
+  if (days === 1) return 'Yesterday'
+  return `${days}d ago`
+}
+
+const STATUS_BADGE: Record<string, string> = {
+  pending:  'text-[#fbbf24] bg-[#fbbf24]/10 border-[#fbbf24]/20',
+  accepted: 'text-[#16a34a] bg-[#16a34a]/10 border-[#16a34a]/20',
+  declined: 'text-[var(--c-text4)] bg-[var(--c-card)] border-[var(--c-border)]',
+}
+
+function ApplicationsSection() {
+  const [apps, setApps] = useState<Application[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [actionStatus, setActionStatus] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
+
+  useEffect(() => {
+    fetch('/api/admin-applications')
+      .then(r => r.json())
+      .then(json => setApps(json.applications ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleAction(appId: string, action: 'accept' | 'decline') {
+    setActionStatus(s => ({ ...s, [appId]: 'loading' }))
+    try {
+      const res = await fetch('/api/application-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId: appId, action }),
+      })
+      if (res.ok) {
+        setApps(prev => prev.map(a => a.id === appId
+          ? { ...a, status: action === 'accept' ? 'accepted' : 'declined', responded_at: new Date().toISOString() }
+          : a
+        ))
+        setActionStatus(s => ({ ...s, [appId]: 'done' }))
+        setTimeout(() => setExpandedId(null), 800)
+      } else {
+        const json = await res.json().catch(() => ({}))
+        console.error('application-action error:', json.error)
+        setActionStatus(s => ({ ...s, [appId]: 'error' }))
+        setTimeout(() => setActionStatus(s => ({ ...s, [appId]: 'idle' })), 3000)
+      }
+    } catch {
+      setActionStatus(s => ({ ...s, [appId]: 'error' }))
+      setTimeout(() => setActionStatus(s => ({ ...s, [appId]: 'idle' })), 3000)
+    }
+  }
+
+  const pending = apps.filter(a => a.status === 'pending')
+  const responded = apps.filter(a => a.status !== 'pending')
+
+  if (loading) {
+    return <div className="py-4 text-center text-xs text-[var(--c-text4)] font-mono">Loading applications…</div>
+  }
+
+  if (apps.length === 0) {
+    return (
+      <div className="py-6 text-center">
+        <p className="text-xs text-[var(--c-text4)] font-mono">No applications yet.</p>
+        <p className="text-[10px] text-[var(--c-text5)] mt-1">Submissions from the apply form will appear here.</p>
+      </div>
+    )
+  }
+
+  function AppCard({ app }: { app: Application }) {
+    const isExpanded = expandedId === app.id
+    const status = actionStatus[app.id] ?? 'idle'
+    const isPending = app.status === 'pending'
+
+    return (
+      <div className={`rounded-2xl border overflow-hidden transition-all ${
+        app.status === 'pending'
+          ? 'bg-[var(--c-card)] border-[var(--c-border)] shadow-sm'
+          : 'bg-[var(--c-card2)] border-[var(--c-border)]'
+      }`}>
+        {/* Row header */}
+        <button
+          onClick={() => setExpandedId(isExpanded ? null : app.id)}
+          className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--c-hover)] transition-colors"
+        >
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+            app.status === 'pending'
+              ? 'bg-[#fbbf24]/12 text-[#fbbf24] border border-[#fbbf24]/20'
+              : 'bg-[var(--c-accent-text)]/10 text-[var(--c-accent-text)] border border-[var(--c-border2)]'
+          }`}>
+            {(app.first_name ?? app.email ?? '?').charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-[var(--c-text)] truncate">
+              {app.first_name ?? 'Unknown'}{app.email ? ` — ${app.email}` : ''}
+            </p>
+            <p className="text-[10px] text-[var(--c-text4)] font-mono mt-0.5">
+              {appRelTime(app.created_at)}
+              {app.age ? ` · ${app.age}` : ''}
+              {app.location ? ` · ${app.location}` : ''}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border ${STATUS_BADGE[app.status]}`}>
+              {app.status}
+            </span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+              className={`w-3.5 h-3.5 text-[var(--c-text4)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+              <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </button>
+
+        {/* Expanded detail */}
+        {isExpanded && (
+          <div className="border-t border-[var(--c-border)] px-4 py-5 space-y-5">
+
+            {/* Contact row */}
+            <div className="grid grid-cols-2 gap-3">
+              {app.email && (
+                <div>
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Email</p>
+                  <p className="text-xs text-[var(--c-text2)] break-all">{app.email}</p>
+                </div>
+              )}
+              {app.phone && (
+                <div>
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Phone / WhatsApp</p>
+                  <p className="text-xs text-[var(--c-text2)]">{app.phone}</p>
+                </div>
+              )}
+              {app.instagram && (
+                <div>
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Instagram</p>
+                  <p className="text-xs text-[var(--c-text2)]">@{app.instagram}</p>
+                </div>
+              )}
+              {app.work && (
+                <div>
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Work</p>
+                  <p className="text-xs text-[var(--c-text2)]">{app.work}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Training history */}
+            {app.training_history && (
+              <div>
+                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Where they're at</p>
+                <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
+                  {app.training_history}
+                </p>
+              </div>
+            )}
+
+            {/* Big answers */}
+            {app.mirror_goal && (
+              <div>
+                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Mirror goal</p>
+                <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">
+                  "{app.mirror_goal}"
+                </p>
+              </div>
+            )}
+
+            {app.what_stopped && (
+              <div>
+                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">What stopped them</p>
+                <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">
+                  "{app.what_stopped}"
+                </p>
+              </div>
+            )}
+
+            {app.why_now && (
+              <div>
+                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Why now</p>
+                <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">
+                  "{app.why_now}"
+                </p>
+              </div>
+            )}
+
+            {/* Scores row */}
+            <div className="flex gap-4">
+              {app.commitment !== null && (
+                <div className="bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Commitment</p>
+                  <p className="text-xl font-bold text-[var(--c-accent-text)] mt-0.5">{app.commitment}<span className="text-xs text-[var(--c-text3)]">/10</span></p>
+                </div>
+              )}
+              {app.investment_fit && (
+                <div className="flex-1 bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Investment fit</p>
+                  <p className="text-xs text-[var(--c-text2)] mt-1 leading-relaxed">{app.investment_fit}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Accept / Decline — only for pending */}
+            {isPending && (
+              <div className="pt-2 border-t border-[var(--c-border)] flex gap-3">
+                <button
+                  onClick={() => handleAction(app.id, 'decline')}
+                  disabled={status === 'loading'}
+                  className="flex-1 py-3 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[#f87171] hover:border-[#f87171]/30 transition disabled:opacity-40"
+                >
+                  {status === 'loading' ? '…' : status === 'error' ? 'Error — retry' : 'Decline'}
+                </button>
+                <button
+                  onClick={() => handleAction(app.id, 'accept')}
+                  disabled={status === 'loading'}
+                  className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+                >
+                  {status === 'loading' ? 'Sending…'
+                    : status === 'done' ? 'Sent ✓'
+                    : 'Accept — Send Invite'}
+                </button>
+              </div>
+            )}
+
+            {/* Already responded */}
+            {!isPending && app.responded_at && (
+              <div className="pt-2 border-t border-[var(--c-border)]">
+                <p className="text-[10px] text-[var(--c-text4)] font-mono">
+                  {app.status === 'accepted' ? 'Accepted' : 'Declined'} · {appRelTime(app.responded_at)} · Email sent
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Pending */}
+      {pending.length > 0 && (
+        <div className="space-y-2">
+          {pending.map(app => <AppCard key={app.id} app={app} />)}
+        </div>
+      )}
+
+      {/* Responded */}
+      {responded.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-[10px] text-[var(--c-text5)] font-mono tracking-widest uppercase mt-2">Responded</p>
+          {responded.map(app => <AppCard key={app.id} app={app} />)}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Admin tab ────────────────────────────────────────────────────────────────
 
 type AdminProfile = { id: string; email: string; first_name: string | null; role: string }
@@ -1372,6 +1650,14 @@ function AdminTab({ userEmail }: { userEmail: string }) {
 
   return (
     <div className="space-y-8">
+
+      {/* ── Applications ── */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Applications</p>
+        </div>
+        <ApplicationsSection />
+      </div>
 
       {/* ── New member notifications ── */}
       {newMembers.length > 0 && (

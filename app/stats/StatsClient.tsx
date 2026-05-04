@@ -3,6 +3,7 @@
 import { useState, useRef, FormEvent } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import BottomNav from '@/components/BottomNav'
+import { useTheme } from '@/app/providers'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,11 +49,11 @@ function confidenceLabel(v: number) {
   if (v <= 8) return 'High'
   return 'Max'
 }
-function confidenceColor(v: number) {
-  if (v <= 3) return '#f87171'
-  if (v <= 5) return '#fbbf24'
-  if (v <= 8) return '#86efac'
-  return '#b0e455'
+function confidenceColor(v: number, dark = false): string {
+  if (v <= 3) return dark ? '#f87171' : '#dc2626'
+  if (v <= 5) return dark ? '#fbbf24' : '#b45309'
+  if (v <= 8) return dark ? '#86efac' : '#16a34a'
+  return dark ? '#b0e455' : '#4d8f1a'
 }
 
 // ─── Weight chart ─────────────────────────────────────────────────────────────
@@ -123,6 +124,8 @@ function WeightChart({ stats, unit }: { stats: StatUpdate[]; unit: 'kg' | 'lb' }
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
 function StatCard({ stat, unit }: { stat: StatUpdate; unit: 'kg' | 'lb' }) {
+  const { theme } = useTheme()
+  const dark = theme === 'dark'
   const date = new Date(stat.created_at)
   const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
   const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
@@ -146,7 +149,7 @@ function StatCard({ stat, unit }: { stat: StatUpdate; unit: 'kg' | 'lb' }) {
         {stat.confidence != null && (
           <div>
             <p className="text-xs text-[var(--c-text3)] mb-0.5">Confidence</p>
-            <p className="text-xl font-bold" style={{ color: confidenceColor(stat.confidence) }}>
+            <p className="text-xl font-bold" style={{ color: confidenceColor(stat.confidence, dark) }}>
               {stat.confidence}
               <span className="text-sm opacity-60 ml-1">/ 10</span>
             </p>
@@ -425,6 +428,8 @@ function LogForm({
   onCancel: () => void
 }) {
   const supabase = createClient()
+  const { theme } = useTheme()
+  const dark = theme === 'dark'
   const [weight, setWeight] = useState('')
   const [confidence, setConfidence] = useState(7)
   const [milestone, setMilestone] = useState('')
@@ -513,7 +518,7 @@ function LogForm({
       <div>
         <div className="flex justify-between items-baseline mb-2">
           <label className="text-xs text-[var(--c-text3)]">Confidence</label>
-          <span className="text-sm font-semibold" style={{ color: confidenceColor(confidence) }}>
+          <span className="text-sm font-semibold" style={{ color: confidenceColor(confidence, dark) }}>
             {confidence} / 10 · {confidenceLabel(confidence)}
           </span>
         </div>

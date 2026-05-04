@@ -60,6 +60,7 @@ function relTime(dateStr: string) {
   const mins = Math.floor(diff / 60_000)
   const hours = Math.floor(diff / 3_600_000)
   const days = Math.floor(diff / 86_400_000)
+  if (mins < 1) return 'just now'
   if (mins < 60) return `${mins}m ago`
   if (hours < 24) return `${hours}h ago`
   return `${days}d ago`
@@ -109,7 +110,7 @@ function computeStreak(dates: string[]): number {
 
 // ─── WeekStrip ────────────────────────────────────────────────────────────────
 
-function WeekStrip({ stats }: { stats: StatUpdate[] }) {
+function WeekStrip({ workoutDates }: { workoutDates: string[] }) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const todayStr = today.toDateString()
@@ -124,8 +125,8 @@ function WeekStrip({ stats }: { stats: StatUpdate[] }) {
     return d
   })
 
-  const loggedSet = new Set(stats.map(s => {
-    const d = new Date(s.created_at)
+  const loggedSet = new Set(workoutDates.map(iso => {
+    const d = new Date(iso)
     d.setHours(0, 0, 0, 0)
     return d.toDateString()
   }))
@@ -460,7 +461,7 @@ export default function DashboardClient({
             )}
 
             {/* Week strip */}
-            <WeekStrip stats={recentStats} />
+            <WeekStrip workoutDates={workoutDates} />
 
             {/* Check-in nudge — dark card to match announcement treatment */}
             {needsUpdate && (

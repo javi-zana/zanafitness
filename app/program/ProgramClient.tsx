@@ -411,7 +411,7 @@ function BmrDisplay({ data }: { data: BmrContent }) {
             remaining >= 0 ? 'bg-[#86efac]/8 border border-[#86efac]/15' : 'bg-[#f87171]/8 border border-[#f87171]/15'
           }`}>
             <span className="text-sm text-[var(--c-text3)]">{remaining >= 0 ? 'Remaining' : 'Over by'}</span>
-            <span className={`text-lg font-bold font-mono ${remaining >= 0 ? 'text-[#86efac]' : 'text-[#f87171]'}`}>
+            <span className={`text-lg font-bold font-mono ${remaining >= 0 ? 'text-[var(--c-accent-text)]' : 'text-[#f87171]'}`}>
               {Math.abs(remaining)} kcal
             </span>
           </div>
