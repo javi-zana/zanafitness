@@ -18,7 +18,7 @@ type Thread = { id: string; member_id: string }
 type MsgPreview = { thread_id: string; body: string; created_at: string; author_id: string }
 type ReadReceipt = { thread_id: string; last_read_at: string }
 type ChatMessage = { id: string; author_id: string; body: string; created_at: string; message_attachments: { id: string; storage_path: string; kind: string }[] }
-type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'applications' | 'admin'
+type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'inbox' | 'applications' | 'admin'
 type Section = 'split' | 'food' | 'habits'
 
 type BmrData = {
@@ -314,6 +314,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   ]
 
   const communityIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  const inboxIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><line x1="22" y1="2" x2="11" y2="13" strokeLinecap="round" strokeLinejoin="round" /><polygon points="22 2 15 22 11 13 2 9 22 2" strokeLinecap="round" strokeLinejoin="round" /></svg>
   const applicationsIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M9 12h6M9 16h3M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg>
   const adminIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
   const showAdmin = isHeadCoach && userEmail === 'me@javilorenzana.com'
@@ -363,6 +364,19 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             {communityIcon}
             <span className="text-sm font-semibold">Community</span>
           </Link>
+          {showAdmin && (
+            <button
+              onClick={() => onChange('inbox')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
+                active === 'inbox'
+                  ? 'bg-[#b0e455] text-[#0b1509]'
+                  : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
+              }`}
+            >
+              {inboxIcon}
+              <span className="text-sm font-semibold">DM Inbox</span>
+            </button>
+          )}
           {showAdmin && (
             <button
               onClick={() => onChange('applications')}
@@ -432,6 +446,21 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
           </div>
           <span className="text-[9px] uppercase font-medium text-[var(--c-text4)]">Community</span>
         </Link>
+        {showAdmin && (
+          <button
+            onClick={() => onChange('inbox')}
+            className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
+          >
+            <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
+              active === 'inbox' ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
+            }`}>
+              {inboxIcon}
+            </div>
+            <span className={`text-[9px] uppercase font-medium ${
+              active === 'inbox' ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
+            }`}>DMs</span>
+          </button>
+        )}
         {showAdmin && (
           <button
             onClick={() => onChange('applications')}
@@ -1971,6 +2000,237 @@ function AdminTab({ userEmail }: { userEmail: string }) {
   )
 }
 
+// ─── Instagram DM Inbox ───────────────────────────────────────────────────────
+
+type IgConversation = {
+  id: string
+  username: string | null
+  name: string | null
+  profile_pic_url: string | null
+  last_message_body: string | null
+  last_message_at: string | null
+  status: string
+}
+
+type IgMessage = {
+  id: string
+  conversation_id: string
+  direction: 'inbound' | 'outbound'
+  body: string
+  sent_at: string
+  ai_suggested: boolean
+}
+
+const DROP_LINK_TEXT = `honestly ur the exact guy this works for\n\napply here https://zanafitness.com/apply, takes 3 mins, Javi reviews every app personally`
+
+function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string }) {
+  const supabase = createClient()
+  const [convos, setConvos] = useState<IgConversation[]>([])
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [messages, setMessages] = useState<IgMessage[]>([])
+  const [reply, setReply] = useState('')
+  const [sending, setSending] = useState(false)
+  const [suggesting, setSuggesting] = useState(false)
+  const [loadingMsgs, setLoadingMsgs] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    supabase
+      .from('ig_conversations')
+      .select('*')
+      .order('last_message_at', { ascending: false })
+      .then(({ data }) => { if (data) setConvos(data as IgConversation[]) })
+
+    const ch = supabase
+      .channel('ig_convos_rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ig_conversations' }, () => {
+        supabase
+          .from('ig_conversations')
+          .select('*')
+          .order('last_message_at', { ascending: false })
+          .then(({ data }) => { if (data) setConvos(data as IgConversation[]) })
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(ch) }
+  }, [])
+
+  useEffect(() => {
+    if (!selectedId) return
+    setLoadingMsgs(true)
+    setMessages([])
+    supabase
+      .from('ig_messages')
+      .select('*')
+      .eq('conversation_id', selectedId)
+      .order('sent_at', { ascending: true })
+      .then(({ data }) => {
+        if (data) setMessages(data as IgMessage[])
+        setLoadingMsgs(false)
+      })
+
+    const ch = supabase
+      .channel(`ig_msgs_${selectedId}`)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'ig_messages',
+        filter: `conversation_id=eq.${selectedId}`,
+      }, payload => {
+        setMessages(prev => [...prev, payload.new as IgMessage])
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(ch) }
+  }, [selectedId])
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  async function handleSend() {
+    if (!selectedId || !reply.trim() || sending) return
+    setSending(true)
+    const text = reply.trim()
+    setReply('')
+    await fetch('/api/instagram/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversationId: selectedId, message: text }),
+    })
+    setSending(false)
+  }
+
+  async function handleSuggest() {
+    if (!selectedId || suggesting || messages.length === 0) return
+    setSuggesting(true)
+    const formatted = messages.map(m => ({
+      role: m.direction === 'inbound' ? 'user' : 'assistant',
+      content: m.body,
+    }))
+    const res = await fetch('/api/instagram/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages: formatted }),
+    })
+    const json = await res.json()
+    if (json.suggestion) setReply(json.suggestion)
+    setSuggesting(false)
+  }
+
+  const selected = convos.find(c => c.id === selectedId)
+
+  return (
+    <div className="flex h-[calc(100vh-120px)] lg:h-[calc(100vh-100px)] -mx-5 lg:-mx-10">
+      {/* Conversation list */}
+      <div className={`w-full lg:w-72 shrink-0 border-r border-[var(--c-border)] overflow-y-auto ${selectedId ? 'hidden lg:block' : ''}`}>
+        {convos.length === 0 ? (
+          <div className="p-6 text-center text-[var(--c-text4)] text-sm">No DMs yet — waiting for the first webhook.</div>
+        ) : convos.map(c => (
+          <button
+            key={c.id}
+            onClick={() => setSelectedId(c.id)}
+            className={`w-full text-left px-4 py-3.5 border-b border-[var(--c-border)] transition-colors ${
+              selectedId === c.id ? 'bg-[var(--c-card)]' : 'hover:bg-[var(--c-card2)]'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] flex items-center justify-center text-sm font-bold shrink-0 text-[var(--c-text3)]">
+                {(c.name ?? c.username ?? '?').slice(0, 1).toUpperCase()}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold truncate">{c.name ?? c.username ?? c.id}</p>
+                <p className="text-xs text-[var(--c-text4)] truncate mt-0.5">{c.last_message_body ?? ''}</p>
+              </div>
+              {c.last_message_at && (
+                <span className="text-[10px] text-[var(--c-text5)] shrink-0">{relTime(c.last_message_at)}</span>
+              )}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      {/* Thread */}
+      <div className={`flex-1 flex flex-col min-w-0 ${!selectedId ? 'hidden lg:flex' : ''}`}>
+        {!selectedId ? (
+          <div className="flex-1 flex items-center justify-center text-[var(--c-text4)] text-sm">Select a conversation</div>
+        ) : (
+          <>
+            <div className="px-4 py-3 border-b border-[var(--c-border)] flex items-center gap-3 shrink-0">
+              <button onClick={() => setSelectedId(null)} className="lg:hidden text-[var(--c-text4)] p-1 -ml-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                  <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+              <div className="w-8 h-8 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] flex items-center justify-center text-sm font-bold text-[var(--c-text3)] shrink-0">
+                {(selected?.name ?? selected?.username ?? '?').slice(0, 1).toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate">{selected?.name ?? selected?.username ?? selectedId}</p>
+                {selected?.username && <p className="text-xs text-[var(--c-text4)]">@{selected.username}</p>}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+              {loadingMsgs ? (
+                <div className="text-center text-[var(--c-text4)] text-sm py-8">Loading…</div>
+              ) : messages.map(msg => (
+                <div key={msg.id} className={`flex ${msg.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl text-sm leading-snug ${
+                    msg.direction === 'outbound'
+                      ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm'
+                      : 'bg-[var(--c-card)] text-[var(--c-text)] rounded-bl-sm'
+                  }`}>
+                    <p className="whitespace-pre-wrap break-words">{msg.body}</p>
+                    <p className={`text-[10px] mt-1 ${msg.direction === 'outbound' ? 'text-[#0f1a0c]/50' : 'text-[var(--c-text5)]'}`}>
+                      {relTime(msg.sent_at)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+
+            <div className="px-4 py-3 border-t border-[var(--c-border)] space-y-2 shrink-0">
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSuggest}
+                  disabled={suggesting || messages.length === 0}
+                  className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--c-border)] text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)] transition disabled:opacity-40"
+                >
+                  {suggesting ? '…' : '✦ AI Suggest'}
+                </button>
+                <button
+                  onClick={() => setReply(DROP_LINK_TEXT)}
+                  className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#b0e455]/40 text-[#b0e455] hover:bg-[#b0e455]/10 transition"
+                >
+                  Drop Link
+                </button>
+              </div>
+              <div className="flex gap-2 items-end">
+                <textarea
+                  value={reply}
+                  onChange={e => setReply(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) handleSend() }}
+                  rows={3}
+                  placeholder="Reply…"
+                  className="flex-1 bg-[var(--c-card)] border border-[var(--c-border)] rounded-xl px-3.5 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition resize-none"
+                />
+                <button
+                  onClick={handleSend}
+                  disabled={sending || !reply.trim()}
+                  className="shrink-0 px-4 py-2.5 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+                >
+                  {sending ? '…' : 'Send'}
+                </button>
+              </div>
+              <p className="text-[10px] text-[var(--c-text5)]">⌘↵ to send</p>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads }: Props) {
@@ -1988,6 +2248,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
     members: 'Members',
     programs: 'Programs',
     messages: 'Messages',
+    inbox: 'DM Inbox',
     applications: 'Applications',
     admin: 'Admin',
   }
@@ -2036,6 +2297,9 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
             lastMessages={lastMessages}
             myReads={myReads}
           />
+        )}
+        {activeTab === 'inbox' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
+          <InboxTab userId={userId} userEmail={userEmail} />
         )}
         {activeTab === 'applications' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
           <ApplicationsSection />
