@@ -1247,6 +1247,8 @@ type Application = {
   mirror_goal: string | null
   what_stopped: string | null
   training_history: string | null
+  training_looks: string | null
+  coach_history: string | null
   commitment: number | null
   investment_fit: string | null
   investment_why: string | null
@@ -1399,13 +1401,33 @@ function ApplicationsSection() {
               )}
             </div>
 
-            {/* Training history */}
-            {app.training_history && (
-              <div>
-                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Where they're at</p>
-                <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
-                  {app.training_history}
-                </p>
+            {/* Training background */}
+            {(app.training_history || app.training_looks || app.coach_history) && (
+              <div className="space-y-2">
+                {app.training_history && (
+                  <div>
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Where they're at</p>
+                    <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
+                      {app.training_history}
+                    </p>
+                  </div>
+                )}
+                {app.training_looks && (
+                  <div>
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Training overview</p>
+                    <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
+                      {app.training_looks}
+                    </p>
+                  </div>
+                )}
+                {app.coach_history && (
+                  <div>
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Coaching history</p>
+                    <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
+                      {app.coach_history}
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

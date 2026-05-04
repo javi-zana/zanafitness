@@ -23,7 +23,8 @@ type Form = {
   firstName: string; email: string; phone: string; instagram: string;
   age: string; location: string; work: string;
   mirrorGoal: string; whatStopped: string;
-  trainingHistory: string; commitment: number;
+  trainingHistory: string; trainingLooks: string; coachHistory: string;
+  commitment: number;
   investmentFit: string; investmentWhy: string; whyNow: string;
 }
 
@@ -31,7 +32,8 @@ const empty: Form = {
   firstName: '', email: '', phone: '', instagram: '',
   age: '', location: '', work: '',
   mirrorGoal: '', whatStopped: '',
-  trainingHistory: '', commitment: 0,
+  trainingHistory: '', trainingLooks: '', coachHistory: '',
+  commitment: 0,
   investmentFit: '', investmentWhy: '', whyNow: '',
 };
 
@@ -72,7 +74,7 @@ export default function ApplyPage() {
     if (step === 1) return !!(form.age && form.location.trim() && form.work.trim());
     if (step === 2) return !!form.mirrorGoal.trim();
     if (step === 3) return !!form.whatStopped.trim();
-    if (step === 4) return !!form.trainingHistory;
+    if (step === 4) return !!(form.trainingHistory && form.trainingLooks.trim() && form.coachHistory);
     if (step === 5) return form.commitment > 0;
     if (step === 6) return !!form.investmentFit;
     if (step === 7) return true; // optional
@@ -306,7 +308,7 @@ export default function ApplyPage() {
             </>
           )}
 
-          {/* ── Screen 5: Training history (Q10) ── */}
+          {/* ── Screen 5: Training background (3 questions) ── */}
           {step === 4 && (
             <>
               <div className="mb-6">
@@ -316,13 +318,35 @@ export default function ApplyPage() {
                 {[
                   "I've never been consistent with the gym",
                   "I lift but inconsistently — fall on and off",
-                  "I train 3–4×/week but don't see the results I want",
-                  "I've worked with a coach before — didn't stick",
-                  "I've worked with a coach before — got results but want more",
+                  "I train consistently but don't see the results I want",
+                  "I train hard and see results, but want to take it further",
                 ].map(opt => (
                   <ChoiceButton key={opt} label={opt} selected={form.trainingHistory === opt}
                     onClick={() => set('trainingHistory', opt)} />
                 ))}
+              </div>
+
+              <div className="mt-6">
+                <label className={labelCls}>What does your training usually look like? Give me a rough overview. *</label>
+                <textarea value={form.trainingLooks} rows={4}
+                  onChange={e => set('trainingLooks', e.target.value)}
+                  placeholder="e.g. I go to the gym 3x a week, mostly chest and arms, skip legs, no real structure…"
+                  className={textareaCls} />
+              </div>
+
+              <div className="mt-6">
+                <label className={labelCls}>Have you ever worked with a coach before? *</label>
+                <div className="space-y-2">
+                  {[
+                    "Yes — one-on-one coaching",
+                    "Yes — group classes or bootcamps",
+                    "Yes — online program (self-guided)",
+                    "No, never",
+                  ].map(opt => (
+                    <ChoiceButton key={opt} label={opt} selected={form.coachHistory === opt}
+                      onClick={() => set('coachHistory', opt)} />
+                  ))}
+                </div>
               </div>
             </>
           )}
@@ -391,20 +415,22 @@ export default function ApplyPage() {
             </>
           )}
 
-          {/* ── Screen 8: Why now (Q13) — optional, last ── */}
+          {/* ── Screen 8: Why + anything else — optional, last ── */}
           {step === 7 && (
             <>
               <div className="mb-6">
                 <h2 className="text-2xl font-semibold text-white leading-snug mb-2">
-                  Anything else I should know before we hop on?
+                  What's your WHY?
                 </h2>
-                <p className="text-sm text-white/30">
-                  What's making you reach out now vs. 6 months ago? <span className="text-white/20">(Optional)</span>
+                <p className="text-sm text-white/30 leading-relaxed">
+                  Why do you want to get in shape? What's the real motivation — not the surface answer, the actual one. And anything else I should know before we hop on.
                 </p>
               </div>
-              <textarea ref={textareaRef} value={form.whyNow} rows={5}
+              <textarea ref={textareaRef} value={form.whyNow} rows={6}
                 onChange={e => set('whyNow', e.target.value)}
-                placeholder="Totally optional — but I always read these." className={textareaCls} />
+                placeholder="e.g. I've been putting this off for years. Have a wedding in September. Also — I've had a bad knee so anything high impact is out…"
+                className={textareaCls} />
+              <p className="text-[11px] text-white/20 mt-2 pl-1">Optional — but I always read these.</p>
             </>
           )}
 

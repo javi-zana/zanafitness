@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
       mirror_goal: body.mirrorGoal ?? null,
       what_stopped: body.whatStopped ?? null,
       training_history: body.trainingHistory ?? null,
+      training_looks: body.trainingLooks ?? null,
+      coach_history: body.coachHistory ?? null,
       commitment: typeof body.commitment === 'number' ? body.commitment : null,
       investment_fit: body.investmentFit ?? null,
       investment_why: body.investmentWhy ?? null,
