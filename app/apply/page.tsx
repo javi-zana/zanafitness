@@ -363,32 +363,29 @@ export default function ApplyPage() {
           {step === 6 && (
             <>
               <div className="mb-6">
-                <h2 className="text-2xl font-semibold text-white leading-snug mb-4">
-                  Are you in a position to invest if it's the right fit?
+                <h2 className="text-2xl font-semibold text-white leading-snug mb-2">
+                  Are you in a position to invest in your health right now?
                 </h2>
-                <div className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-sm text-white/50 leading-relaxed">
-                  Coaching with me is{' '}
-                  <span className="text-white/85 font-semibold">$500/month for 4 months</span> (Starter) or{' '}
-                  <span className="text-white/85 font-semibold">$350/month for 12 months</span> (All In).{' '}
-                  Most clients go 12-month for the bigger transformation.
-                </div>
+                <p className="text-sm text-white/35">
+                  What's your monthly budget for coaching?
+                </p>
               </div>
               <div className="space-y-2 mb-6">
                 {[
-                  "Yes",
-                  "Probably",
-                  "Not right now",
-                  "No",
+                  "Under $200 / month",
+                  "$200 – $500 / month",
+                  "$500 – $1,000 / month",
+                  "$1,000+ / month",
                 ].map(opt => (
                   <ChoiceButton key={opt} label={opt} selected={form.investmentFit === opt}
                     onClick={() => set('investmentFit', opt)} />
                 ))}
               </div>
               <div>
-                <label className={labelCls}>Why? <span className="text-white/20 normal-case tracking-normal font-normal">(optional)</span></label>
+                <label className={labelCls}>Anything to add? <span className="text-white/20 normal-case tracking-normal font-normal">(optional)</span></label>
                 <textarea value={form.investmentWhy} rows={3}
                   onChange={e => set('investmentWhy', e.target.value)}
-                  placeholder="Tell us a bit more about your situation…"
+                  placeholder="e.g. flexible depending on what's included, need a payment plan, etc."
                   className={textareaCls} />
               </div>
             </>
