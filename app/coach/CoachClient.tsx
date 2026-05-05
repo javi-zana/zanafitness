@@ -2191,11 +2191,10 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ conversationId: selectedId, message: text }),
     }).then(async res => {
-      if (!res.ok) {
-        const text = await res.text().catch(() => String(res.status))
-        alert('Send failed: ' + text)
-      }
-    }).catch(err => alert('Send error: ' + err.message))
+      const json = await res.json().catch(() => ({}))
+      console.log('[send] result:', json)
+      if (!res.ok) alert('Send failed: ' + JSON.stringify(json))
+    }).catch(err => console.error('[send] error:', err.message))
   }
 
   async function markRead(id: string) {

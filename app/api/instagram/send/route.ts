@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { waitUntil } from '@vercel/functions'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 
@@ -30,8 +29,8 @@ export async function POST(req: NextRequest) {
   const db = adminDb()
   const now = new Date().toISOString()
 
-  // Write to DB immediately — source of truth for the UI
-  const [msgResult, convResult] = await Promise.all([
+  // Write to DB first
+  await Promise.all([
     db.from('ig_messages').insert({
       conversation_id: conversationId,
       direction: 'outbound',
@@ -47,17 +46,15 @@ export async function POST(req: NextRequest) {
       .eq('id', conversationId).eq('bucket', 'new'),
   ])
 
-  if (msgResult.error || convResult.error) {
-    const err = msgResult.error ?? convResult.error
-    console.error('[ig/send] DB error:', err)
-    return NextResponse.json({ error: err!.message }, { status: 500 })
-  }
-
-  // waitUntil keeps the Lambda alive after the response is sent
-  // so the ManyChat call actually completes
-  waitUntil(
-    fetch('https://api.manychat.com/fb/sending/sendContent', {
+  // Call ManyChat with 8s timeout — await so we can return the result for debugging
+  let mcStatus = 0
+  let mcBody = ''
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 8000)
+    const mcRes = await fetch('https://api.manychat.com/fb/sending/sendContent', {
       method: 'POST',
+      signal: controller.signal,
       headers: {
         'Authorization': `Bearer ${process.env.MANYCHAT_API_KEY}`,
         'Content-Type': 'application/json',
@@ -73,13 +70,16 @@ export async function POST(req: NextRequest) {
           },
         },
       }),
-    }).then(async res => {
-      const text = await res.text()
-      console.log('[ig/send] ManyChat:', res.status, text)
-    }).catch(err => {
-      console.error('[ig/send] ManyChat error:', err.message)
     })
-  )
+    clearTimeout(timer)
+    mcStatus = mcRes.status
+    mcBody = await mcRes.text()
+  } catch (err) {
+    mcBody = err instanceof Error ? err.message : String(err)
+  }
 
-  return NextResponse.json({ ok: true })
+  console.log('[ig/send] ManyChat result:', mcStatus, mcBody)
+
+  // Always return ok (message already saved to DB), but include mc result for debugging
+  return NextResponse.json({ ok: true, mcStatus, mcBody })
 }
