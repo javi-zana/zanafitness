@@ -2037,8 +2037,8 @@ function AdminTab({ userEmail }: { userEmail: string }) {
 
 type IgConversation = {
   id: string
-  username: string | null
-  name: string | null
+  ig_username: string | null
+  display_name: string | null
   profile_pic_url: string | null
   last_message_body: string | null
   last_message_at: string | null
@@ -2167,10 +2167,10 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
           >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] flex items-center justify-center text-sm font-bold shrink-0 text-[var(--c-text3)]">
-                {(c.name ?? c.username ?? '?').slice(0, 1).toUpperCase()}
+                {(c.display_name ?? c.ig_username ?? '?').slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold truncate">{c.name ?? c.username ?? c.id}</p>
+                <p className="text-sm font-semibold truncate">{c.display_name ?? c.ig_username ?? c.id}</p>
                 <p className="text-xs text-[var(--c-text4)] truncate mt-0.5">{c.last_message_body ?? ''}</p>
               </div>
               {c.last_message_at && (
@@ -2194,11 +2194,11 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
                 </svg>
               </button>
               <div className="w-8 h-8 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] flex items-center justify-center text-sm font-bold text-[var(--c-text3)] shrink-0">
-                {(selected?.name ?? selected?.username ?? '?').slice(0, 1).toUpperCase()}
+                {(selected?.display_name ?? selected?.ig_username ?? '?').slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">{selected?.name ?? selected?.username ?? selectedId}</p>
-                {selected?.username && <p className="text-xs text-[var(--c-text4)]">@{selected.username}</p>}
+                <p className="text-sm font-semibold truncate">{selected?.display_name ?? selected?.ig_username ?? selectedId}</p>
+                {selected?.ig_username && <p className="text-xs text-[var(--c-text4)]">@{selected.ig_username}</p>}
               </div>
             </div>
 
