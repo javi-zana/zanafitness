@@ -17,9 +17,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })
   }
 
-  console.log('[manychat/webhook] received:', JSON.stringify(body).slice(0, 500))
+  console.log('[manychat/webhook] full body:', JSON.stringify(body))
 
-  // Support both "Full Contact Data" format and individual field format
   const subscriberId = String(body.id ?? body.subscriber_id ?? '').trim()
   const displayName = (body.first_name as string | undefined) ?? null
   const profilePic = (body.profile_pic as string | undefined) ?? null
@@ -27,11 +26,16 @@ export async function POST(req: NextRequest) {
   const igUsername = (body.ig_username as string | undefined) ?? null
   const sentAt = new Date().toISOString()
 
-  if (!subscriberId) return NextResponse.json({ ok: true })
+  console.log('[manychat/webhook] parsed:', { subscriberId, displayName, message, igUsername })
+
+  if (!subscriberId) {
+    console.log('[manychat/webhook] no subscriberId, skipping')
+    return NextResponse.json({ ok: true })
+  }
 
   const db = adminDb()
 
-  await db.from('ig_conversations').upsert({
+  const { error: upsertError } = await db.from('ig_conversations').upsert({
     id: subscriberId,
     display_name: displayName,
     profile_pic_url: profilePic,
@@ -41,14 +45,23 @@ export async function POST(req: NextRequest) {
     status: 'open',
   }, { onConflict: 'id' })
 
+  if (upsertError) {
+    console.error('[manychat/webhook] upsert error:', JSON.stringify(upsertError))
+    return NextResponse.json({ error: upsertError.message }, { status: 500 })
+  }
+
   if (message) {
-    await db.from('ig_messages').insert({
+    const { error: insertError } = await db.from('ig_messages').insert({
       conversation_id: subscriberId,
       direction: 'inbound',
       body: message,
       sent_at: sentAt,
     })
+    if (insertError) {
+      console.error('[manychat/webhook] insert error:', JSON.stringify(insertError))
+    }
   }
 
+  console.log('[manychat/webhook] stored conversation:', subscriberId)
   return NextResponse.json({ ok: true })
 }
