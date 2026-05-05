@@ -63,35 +63,40 @@ export default function BottomNav() {
 
   useEffect(() => {
     const supabase = createClient()
-    let threadId: string | null = null
 
     async function checkUnread() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
       const { data: thread } = await supabase.from('threads').select('id').eq('member_id', user.id).maybeSingle()
-      if (!thread) return
-      threadId = thread.id
+      if (!thread) { setUnread(false); return }
 
-      const [{ data: lastMsg }, { data: readRow }] = await Promise.all([
-        supabase.from('messages').select('created_at, author_id').eq('thread_id', threadId).neq('author_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
-        supabase.from('message_reads').select('last_read_at').eq('thread_id', threadId).eq('user_id', user.id).maybeSingle(),
-      ])
+      const { data: readRow } = await supabase
+        .from('message_reads')
+        .select('last_read_at')
+        .eq('thread_id', thread.id)
+        .eq('user_id', user.id)
+        .maybeSingle()
 
-      if (!lastMsg) { setUnread(false); return }
+      const { data: messages } = await supabase
+        .from('messages')
+        .select('created_at')
+        .eq('thread_id', thread.id)
+        .neq('author_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+
+      if (!messages?.length) { setUnread(false); return }
+      const lastMsgAt = messages[0].created_at
       const lastRead = readRow?.last_read_at
-      setUnread(!lastRead || new Date(lastMsg.created_at) > new Date(lastRead))
+      setUnread(!lastRead || new Date(lastMsgAt) > new Date(lastRead))
     }
 
     checkUnread()
 
     const channel = supabase.channel('bottomnav-unread')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
-        if (threadId) checkUnread()
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reads' }, () => {
-        if (threadId) checkUnread()
-      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, checkUnread)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reads' }, checkUnread)
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }

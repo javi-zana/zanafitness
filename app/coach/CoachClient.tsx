@@ -2712,13 +2712,34 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
     supabase.from('attention_snoozes').delete().eq('coach_id', userId).eq('member_id', memberId)
   }
 
-  const readMap = Object.fromEntries(myReads.map(r => [r.thread_id, r.last_read_at]))
-  const unreadCount = threads.filter(t => {
-    const lastMsg = lastMessages.find(m => m.thread_id === t.id)
-    if (!lastMsg || lastMsg.author_id === userId) return false
-    const readAt = readMap[t.id]
-    return !readAt || new Date(lastMsg.created_at) > new Date(readAt)
-  }).length
+  const initialUnread = (() => {
+    const readMap = Object.fromEntries(myReads.map(r => [r.thread_id, r.last_read_at]))
+    return threads.filter(t => {
+      const lastMsg = lastMessages.find(m => m.thread_id === t.id)
+      if (!lastMsg || lastMsg.author_id === userId) return false
+      const readAt = readMap[t.id]
+      return !readAt || new Date(lastMsg.created_at) > new Date(readAt)
+    }).length
+  })()
+  const [unreadCount, setUnreadCount] = useState(initialUnread)
+
+  useEffect(() => {
+    const threadIds = threads.map(t => t.id)
+    if (!threadIds.length) return
+    const channel = supabase.channel('coach-unread-badge')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        const msg = payload.new as { author_id: string; thread_id: string }
+        if (threadIds.includes(msg.thread_id) && msg.author_id !== userId) {
+          setUnreadCount(c => c + 1)
+        }
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, []) // eslint-disable-line
+
+  useEffect(() => {
+    if (activeTab === 'messages') setUnreadCount(0)
+  }, [activeTab])
 
   const TAB_TITLES: Record<CoachTab, string> = {
     home: 'Home',
