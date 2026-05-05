@@ -24,7 +24,8 @@ export async function POST(req: NextRequest) {
   const profilePic = (body.profile_pic as string | undefined) ?? null
   const message = String(body.last_input_text ?? body.message ?? '').trim()
   const igUsername = (body.ig_username as string | undefined) ?? null
-  const direction = (body.direction as string | undefined) === 'outbound' ? 'outbound' : 'inbound'
+  const directionParam = req.nextUrl.searchParams.get('direction')
+  const direction = (directionParam ?? (body.direction as string | undefined) ?? 'inbound') === 'outbound' ? 'outbound' : 'inbound'
   const sentAt = new Date().toISOString()
 
   console.log('[manychat/webhook] parsed:', { subscriberId, displayName, message, igUsername, direction })
