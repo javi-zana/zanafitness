@@ -907,11 +907,13 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
 
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
-function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
+function MembersTab({ members, allStats, threads, lastMessages, myReads, userId, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
   threads: Thread[]
   lastMessages: MsgPreview[]
+  myReads: ReadReceipt[]
+  userId: string
   onOpenProgram: (memberId: string) => void
   snoozes: Record<string, string>
   onMarkAddressed: (memberId: string) => void
@@ -938,11 +940,22 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram, s
   }, [members]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const threadToMember = Object.fromEntries(threads.map(t => [t.id, t.member_id]))
+  const memberToThread = Object.fromEntries(threads.map(t => [t.member_id, t.id]))
   const lastMsgByMember: Record<string, MsgPreview> = {}
   for (const msg of lastMessages) {
     const mid = threadToMember[msg.thread_id]
     if (mid && !lastMsgByMember[mid]) lastMsgByMember[mid] = msg
   }
+  const readMap = Object.fromEntries(myReads.map(r => [r.thread_id, r.last_read_at]))
+  const unreadMembers = new Set(
+    members.filter(m => {
+      const tid = memberToThread[m.id]
+      const lastMsg = lastMsgByMember[m.id]
+      if (!tid || !lastMsg || lastMsg.author_id === userId) return false
+      const readAt = readMap[tid]
+      return !readAt || new Date(lastMsg.created_at) > new Date(readAt)
+    }).map(m => m.id)
+  )
 
   const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
 
@@ -1051,18 +1064,23 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram, s
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-[10px] font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-full ${
-                    status === 'fresh' ? 'text-[#15803d] bg-[#15803d]/10'
-                    : status === 'ok' ? 'text-[#b45309] bg-[#b45309]/10'
-                    : status === 'overdue' ? 'text-[#dc2626] bg-[#dc2626]/10'
-                    : 'text-[var(--c-text4)] bg-[var(--c-card)]'
-                  }`}>
-                    {STATUS_LABEL[status]}
-                  </span>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[var(--c-text4)]">
-                    <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-full ${
+                      status === 'fresh' ? 'text-[#15803d] bg-[#15803d]/10'
+                      : status === 'ok' ? 'text-[#b45309] bg-[#b45309]/10'
+                      : status === 'overdue' ? 'text-[#dc2626] bg-[#dc2626]/10'
+                      : 'text-[var(--c-text4)] bg-[var(--c-card)]'
+                    }`}>
+                      {STATUS_LABEL[status]}
+                    </span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[var(--c-text4)]">
+                      <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  {unreadMembers.has(member.id) && (
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest bg-[#b0e455] text-[#0f1a0c] px-2 py-0.5 rounded-full">New</span>
+                  )}
                 </div>
               </button>
             )
@@ -1461,12 +1479,17 @@ function MessagesTab({
                   {m ? memberName(m) : 'Unknown'}
                 </p>
                 {last && (
-                  <p className="text-[11px] text-[var(--c-text4)] truncate mt-0.5">{last.body || '📎 Attachment'}</p>
+                  <p className={`text-[11px] truncate mt-0.5 ${unread ? 'text-[var(--c-text3)]' : 'text-[var(--c-text4)]'}`}>{last.body || '📎 Attachment'}</p>
                 )}
               </div>
-              {last && (
-                <p className="text-[10px] text-[var(--c-text4)] font-mono shrink-0" suppressHydrationWarning>{relTime(last.created_at)}</p>
-              )}
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                {last && (
+                  <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>{relTime(last.created_at)}</p>
+                )}
+                {unread && (
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest bg-[#b0e455] text-[#0f1a0c] px-2 py-0.5 rounded-full">New</span>
+                )}
+              </div>
             </button>
           )
         })}
@@ -2782,7 +2805,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
           <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'members' && (
-          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
+          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'programs' && (
           <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} />
