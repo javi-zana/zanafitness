@@ -11,7 +11,7 @@ const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ss
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type WorkoutLogRecord = { id: string; logged_date: string; notes: string | null }
+type WorkoutLogRecord = { id: string; logged_date: string; notes: string | Record<string, unknown> | null }
 
 type BmrContent = {
   type: 'bmr'
@@ -85,11 +85,11 @@ function computeStreak(dates: string[]): number {
 type ExerciseRow = { id: number; move: string; kg: string; reps: string; sets: string; targetReps?: string }
 type ParsedExercise = { move: string; kg: string; reps: string; sets: string }
 
-function parseWorkoutNotes(raw: string | null): { exercises: ParsedExercise[]; notes: string | null } {
+function parseWorkoutNotes(raw: string | Record<string, unknown> | null): { exercises: ParsedExercise[]; notes: string | null } {
   if (!raw) return { exercises: [], notes: null }
   try {
-    const p = JSON.parse(raw)
-    return { exercises: p.exercises ?? [], notes: p.notes ?? null }
+    const p = typeof raw === 'string' ? JSON.parse(raw) : raw
+    return { exercises: (p.exercises as ParsedExercise[] | undefined) ?? [], notes: (p.notes as string | null | undefined) ?? null }
   } catch {
     return { exercises: [], notes: null }
   }
@@ -191,6 +191,7 @@ function WorkoutLogSection({
   const [rows, setRows] = useState<ExerciseRow[]>([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const sectionElRef = useRef<HTMLElement | null>(null)
   const sectionRef = (el: HTMLElement | null) => { sectionElRef.current = el }
   let nextId = rows.length + 1
@@ -248,13 +249,21 @@ function WorkoutLogSection({
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setLoading(true)
+    setSaveError(null)
     const exercises = rows.filter(r => r.move.trim()).map(({ targetReps: _t, ...r }) => r)
-    const payload = JSON.stringify({ v: 1, exercises, notes: notes.trim() || null })
-    const { data: upserted } = await supabase
+    const notesPayload = { v: 1, exercises, notes: notes.trim() || null }
+    const { data: upserted, error: upsertErr } = await supabase
       .from('workout_logs')
-      .upsert({ member_id: userId, logged_date: today, notes: payload }, { onConflict: 'member_id,logged_date' })
+      .upsert({ member_id: userId, logged_date: today, notes: notesPayload }, { onConflict: 'member_id,logged_date' })
       .select('id')
       .single()
+
+    if (upsertErr) {
+      console.error('[workout_logs] upsert error:', upsertErr)
+      setSaveError('Failed to save — please try again.')
+      setLoading(false)
+      return
+    }
 
     const newDates = workoutDates.includes(today) ? workoutDates : [today, ...workoutDates]
     const streak = computeStreak(newDates)
@@ -272,7 +281,7 @@ function WorkoutLogSection({
       )
     }
 
-    onLogged(today, toAward, { id: upserted?.id ?? today, logged_date: today, notes: payload })
+    onLogged(today, toAward, { id: upserted?.id ?? today, logged_date: today, notes: notesPayload })
     resetForm()
     setLoading(false)
   }
@@ -453,6 +462,9 @@ function WorkoutLogSection({
           className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-2xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
         />
 
+        {saveError && (
+          <p className="text-xs text-red-400 text-center">{saveError}</p>
+        )}
         <div className="flex gap-3">
           <button
             type="button"
