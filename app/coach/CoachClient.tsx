@@ -1784,62 +1784,66 @@ function AdminTab({ userEmail }: { userEmail: string }) {
             const hasThread = threadMemberIds.has(m.id)
             const alreadyAssigned = !!assignMap[m.id]
             return (
-              <div key={m.id} className="bg-[#221b0c] border border-[#fbbf24]/25 rounded-xl p-4 space-y-3">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-full bg-[#fbbf24]/12 border border-[#fbbf24]/25 flex items-center justify-center text-xs font-bold text-[#fbbf24] shrink-0">
-                    {profileName(m).charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--c-text)]">{profileName(m)}</p>
-                    <p className="text-[10px] text-[var(--c-text3)] font-mono truncate">{m.email}</p>
-                    <p className="text-[10px] text-[#fbbf24]/70 font-mono mt-0.5">Just joined — assign a coach &amp; set up messaging</p>
-                  </div>
-                  <button
-                    onClick={() => setNewMembers(prev => prev.filter(x => x.id !== m.id))}
-                    className="text-[var(--c-text4)] hover:text-[var(--c-text)]/60 transition shrink-0 mt-0.5"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                      <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                </div>
-
-                {coaches.length > 0 && !alreadyAssigned && (
-                  <div className="flex gap-2">
-                    <select
-                      value={newMemberCoach[m.id] ?? ''}
-                      onChange={e => setNewMemberCoach(prev => ({ ...prev, [m.id]: e.target.value }))}
-                      className="flex-1 bg-[var(--c-card)] border border-[#fbbf24]/15 rounded-lg px-3 py-2 text-xs text-[var(--c-text)] focus:outline-none focus:border-[#fbbf24]/40 transition"
-                    >
-                      <option value="">Assign coach…</option>
-                      {coaches.map(c => (
-                        <option key={c.id} value={c.id}>{profileName(c)}</option>
-                      ))}
-                    </select>
+              <div key={m.id} className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl overflow-hidden shadow-sm">
+                {/* amber top bar accent */}
+                <div className="h-0.5 bg-[#fbbf24]/50 w-full" />
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#fbbf24]/10 border border-[#fbbf24]/20 flex items-center justify-center text-sm font-bold text-[#fbbf24] shrink-0">
+                      {profileName(m).charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[var(--c-text)]">{profileName(m)}</p>
+                      <p className="text-xs text-[var(--c-text3)] truncate">{m.email}</p>
+                      <p className="text-[10px] text-[#fbbf24] mt-0.5">Just joined — assign a coach &amp; set up messaging</p>
+                    </div>
                     <button
-                      onClick={() => handleQuickAssign(m.id)}
-                      disabled={!newMemberCoach[m.id]}
-                      className="px-3 py-2 rounded-lg bg-[#fbbf24]/12 border border-[#fbbf24]/25 text-[10px] tracking-widest uppercase font-mono text-[#fbbf24] hover:bg-[#fbbf24]/22 transition disabled:opacity-40 shrink-0"
+                      onClick={() => setNewMembers(prev => prev.filter(x => x.id !== m.id))}
+                      className="text-[var(--c-text4)] hover:text-[var(--c-text3)] transition shrink-0 mt-0.5"
                     >
-                      Assign
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                        <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
                     </button>
                   </div>
-                )}
-                {alreadyAssigned && (
-                  <p className="text-[10px] text-[#15803d] font-medium">Coach assigned ✓</p>
-                )}
 
-                <button
-                  onClick={() => setupThread(m)}
-                  disabled={hasThread || setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
-                  className="w-full py-2 rounded-lg border border-[var(--c-border2)] text-[10px] tracking-widest uppercase font-mono text-[var(--c-accent-text)] hover:bg-[var(--c-accent-text)]/8 transition disabled:opacity-40"
-                >
-                  {hasThread || setupStatus[m.id] === 'done'
-                    ? 'Messaging Active ✓'
-                    : setupStatus[m.id] === 'loading' ? 'Setting up…'
-                    : setupStatus[m.id] === 'error' ? 'Error — retry'
-                    : 'Setup Messaging Thread'}
-                </button>
+                  {coaches.length > 0 && !alreadyAssigned && (
+                    <div className="flex gap-2">
+                      <select
+                        value={newMemberCoach[m.id] ?? ''}
+                        onChange={e => setNewMemberCoach(prev => ({ ...prev, [m.id]: e.target.value }))}
+                        className="flex-1 bg-[var(--c-bg)] border border-[var(--c-border)] rounded-xl px-3 py-2 text-xs text-[var(--c-text)] focus:outline-none focus:border-[var(--c-border2)] transition"
+                      >
+                        <option value="">Assign coach…</option>
+                        {coaches.map(c => (
+                          <option key={c.id} value={c.id}>{profileName(c)}</option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => handleQuickAssign(m.id)}
+                        disabled={!newMemberCoach[m.id]}
+                        className="px-4 py-2 rounded-xl bg-[var(--c-accent-text)]/10 border border-[var(--c-border)] text-xs font-semibold text-[var(--c-accent-text)] hover:bg-[var(--c-accent-text)]/20 transition disabled:opacity-40 shrink-0"
+                      >
+                        Assign
+                      </button>
+                    </div>
+                  )}
+                  {alreadyAssigned && (
+                    <p className="text-xs text-[#16a34a] font-medium">Coach assigned ✓</p>
+                  )}
+
+                  <button
+                    onClick={() => setupThread(m)}
+                    disabled={hasThread || setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
+                    className="w-full py-2.5 rounded-xl bg-[var(--c-bg)] border border-[var(--c-border)] text-xs font-semibold text-[var(--c-text2)] hover:border-[var(--c-border2)] hover:text-[var(--c-text)] transition disabled:opacity-40"
+                  >
+                    {hasThread || setupStatus[m.id] === 'done'
+                      ? 'Messaging Active ✓'
+                      : setupStatus[m.id] === 'loading' ? 'Setting up…'
+                      : setupStatus[m.id] === 'error' ? 'Error — retry'
+                      : 'Setup Messaging Thread'}
+                  </button>
+                </div>
               </div>
             )
           })}
