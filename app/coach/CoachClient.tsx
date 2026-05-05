@@ -1946,6 +1946,8 @@ function ApplicationsSection() {
   const [actionState, setActionState] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [declineFlow, setDeclineFlow] = useState<{ appId: string; note: string; step: 'compose' | 'preview' } | null>(null)
+  const [dragAppId, setDragAppId] = useState<string | null>(null)
+  const [dragOverCol, setDragOverCol] = useState<KanbanColKey | null>(null)
 
   useEffect(() => {
     fetch('/api/admin-applications')
@@ -2023,6 +2025,13 @@ function ApplicationsSection() {
     setDeletingId(null)
   }
 
+  function handleDrop(targetCol: KanbanColKey) {
+    if (!dragAppId || targetCol === 'new') return
+    const app = apps.find(a => a.id === dragAppId)
+    if (!app || columnKey(app.status) === targetCol) return
+    handleMove(dragAppId, targetCol)
+  }
+
   if (loading) {
     return <div className="py-8 text-center text-xs text-[var(--c-text4)] font-mono">Loading…</div>
   }
@@ -2055,11 +2064,17 @@ function ApplicationsSection() {
                 )}
               </div>
 
-              {/* Cards */}
-              <div className="space-y-2 min-h-[80px]">
+              {/* Cards — drop zone */}
+              <div
+                className="space-y-2 min-h-[80px] rounded-xl transition-colors p-1"
+                style={dragOverCol === col.key && dragAppId ? { backgroundColor: `${col.accent}18` } : {}}
+                onDragOver={e => { e.preventDefault(); setDragOverCol(col.key) }}
+                onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setDragOverCol(null) }}
+                onDrop={() => { handleDrop(col.key); setDragOverCol(null) }}
+              >
                 {items.length === 0 && (
                   <div className="rounded-2xl border border-dashed border-[var(--c-border)] px-3 py-6 flex items-center justify-center">
-                    <p className="text-[10px] text-[var(--c-text5)] font-mono">Empty</p>
+                    <p className="text-[10px] text-[var(--c-text5)] font-mono">Drop here</p>
                   </div>
                 )}
                 {items.map(app => {
@@ -2068,7 +2083,12 @@ function ApplicationsSection() {
                   return (
                     <div
                       key={app.id}
-                      className={`rounded-2xl border p-3 cursor-pointer transition-all ${
+                      draggable
+                      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; setDragAppId(app.id) }}
+                      onDragEnd={() => { setDragAppId(null); setDragOverCol(null) }}
+                      className={`rounded-2xl border p-3 transition-all select-none ${
+                        dragAppId === app.id ? 'opacity-40 cursor-grabbing' : 'cursor-grab'
+                      } ${
                         isSelected
                           ? 'bg-[var(--c-card)] border-[var(--c-accent-text)]/30 shadow-md'
                           : 'bg-[var(--c-card)] border-[var(--c-border)] hover:border-[var(--c-border2)] shadow-sm'
@@ -2184,15 +2204,17 @@ function ApplicationsSection() {
         })}
       </div>
 
-      {/* Detail drawer — shown below kanban when a card is selected */}
+      {/* Application detail modal */}
       {selectedApp && (() => {
         const app = selectedApp
         const state = actionState[app.id] ?? 'idle'
         const colKey = columnKey(app.status)
         const col = KANBAN_COLS.find(c => c.key === colKey)!
         return (
-          <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] overflow-hidden">
-            {/* Drawer header */}
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onClick={() => { setSelectedApp(null); setDeclineFlow(null) }}>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <div className="relative bg-[var(--c-card)] rounded-t-2xl sm:rounded-2xl border border-[var(--c-border)] shadow-2xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            {/* Modal header */}
             <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--c-border)]">
               <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0" style={{ backgroundColor: `${col.accent}20`, color: col.accent }}>
                 {(app.first_name ?? app.email ?? '?').charAt(0).toUpperCase()}
@@ -2404,6 +2426,7 @@ function ApplicationsSection() {
                   {deletingId === app.id ? 'Deleting…' : 'Delete'}
                 </button>
               </div>
+            </div>
             </div>
           </div>
         )
