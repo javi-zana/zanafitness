@@ -2136,19 +2136,27 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
     if (!selectedId || !reply.trim() || sending) return
     const text = reply.trim()
     const tempId = `temp-${Date.now()}`
+    setSending(true)
     setReply('')
     setSuggestions([])
-    // Optimistic: show message instantly
+    // Show message instantly
     setMessages(prev => [...prev, { id: tempId, conversation_id: selectedId, direction: 'outbound', body: text, sent_at: new Date().toISOString(), ai_suggested: false }])
-    // Auto-advance bucket locally
     setConvos(prev => prev.map(c => c.id === selectedId ? { ...c, bucket: c.bucket === 'new' ? 'interviewing' : c.bucket, last_message_body: text, last_message_at: new Date().toISOString(), unread: false } : c))
-    setSending(true)
-    await fetch('/api/instagram/send', {
+    setSending(false) // re-enable button immediately
+
+    // Send in background — remove optimistic msg if it fails
+    fetch('/api/instagram/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ conversationId: selectedId, message: text }),
+    }).then(async res => {
+      if (!res.ok) {
+        console.error('[send] failed, removing optimistic message')
+        setMessages(prev => prev.filter(m => m.id !== tempId))
+      }
+    }).catch(() => {
+      setMessages(prev => prev.filter(m => m.id !== tempId))
     })
-    setSending(false)
   }
 
   async function handleSuggest() {
@@ -2186,8 +2194,10 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
     })
   }
 
-  const filteredConvos = filterBucket === 'all' ? convos : convos.filter(c => (c.bucket ?? 'new') === filterBucket)
-  const unreadCount = convos.filter(c => c.unread).length
+  const filteredConvos = filterBucket === 'all'
+    ? convos.filter(c => (c.bucket ?? 'new') !== 'declined')
+    : convos.filter(c => (c.bucket ?? 'new') === filterBucket)
+  const unreadCount = convos.filter(c => c.unread && (c.bucket ?? 'new') !== 'declined').length
   const selected = convos.find(c => c.id === selectedId)
 
   return (
@@ -2195,7 +2205,7 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
       {/* Conversation list */}
       <div className={`w-full lg:w-72 shrink-0 border-r border-[var(--c-border)] flex flex-col overflow-hidden ${selectedId ? 'hidden lg:flex' : ''}`}>
         {/* Filter tabs */}
-        <div className="flex flex-wrap gap-1 p-2 border-b border-[var(--c-border)] bg-[var(--c-bg)] shrink-0">
+        <div className="flex gap-1.5 px-3 py-2.5 border-b border-[var(--c-border)] overflow-x-auto shrink-0 scrollbar-none">
           {(['all', 'new', 'interviewing', 'favorites', 'not_ready', 'declined'] as const).map(b => {
             const meta = b !== 'all' ? BUCKET_META[b] : null
             const isActive = filterBucket === b
@@ -2203,12 +2213,12 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
               <button
                 key={b}
                 onClick={() => setFilterBucket(b)}
-                className="px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all"
+                className="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all whitespace-nowrap"
                 style={isActive
-                  ? { backgroundColor: meta ? meta.color : '#b0e455', color: b === 'new' || b === 'all' ? '#0f1a0c' : '#0f1a0c' }
-                  : { color: 'var(--c-text4)' }}
+                  ? { backgroundColor: meta ? meta.color + '22' : '#b0e455' + '22', borderColor: meta ? meta.color : '#b0e455', color: meta ? meta.color : '#b0e455' }
+                  : { borderColor: 'transparent', color: 'var(--c-text4)' }}
               >
-                {b === 'all' ? `All${unreadCount > 0 ? ` · ${unreadCount}` : ''}` : meta!.label}
+                {b === 'all' ? (unreadCount > 0 ? `All · ${unreadCount}` : 'All') : meta!.label}
               </button>
             )
           })}
