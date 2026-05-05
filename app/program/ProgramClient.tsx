@@ -10,6 +10,8 @@ const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ss
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+type WorkoutLogRecord = { id: string; logged_date: string; notes: string | null }
+
 type BmrContent = {
   type: 'bmr'
   bmr: number
@@ -35,7 +37,7 @@ type Props = {
   food: SectionData
   habits: SectionData
   principles: PrinciplesData
-  workoutDates: string[]
+  workoutLogs: WorkoutLogRecord[]
   milestones: string[]
 }
 
@@ -80,21 +82,102 @@ function computeStreak(dates: string[]): number {
 // ─── Workout log section ──────────────────────────────────────────────────────
 
 type ExerciseRow = { id: number; move: string; kg: string; reps: string; sets: string }
+type ParsedExercise = { move: string; kg: string; reps: string; sets: string }
+
+function parseWorkoutNotes(raw: string | null): { exercises: ParsedExercise[]; notes: string | null } {
+  if (!raw) return { exercises: [], notes: null }
+  try {
+    const p = JSON.parse(raw)
+    return { exercises: p.exercises ?? [], notes: p.notes ?? null }
+  } catch {
+    return { exercises: [], notes: null }
+  }
+}
+
+function WorkoutHistory({ logs }: { logs: WorkoutLogRecord[] }) {
+  const [expandedDate, setExpandedDate] = useState<string | null>(logs[0]?.logged_date ?? null)
+  if (!logs.length) return null
+  return (
+    <div className="mt-6 space-y-2">
+      <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Recent workouts</p>
+      {logs.slice(0, 10).map(log => {
+        const { exercises, notes: logNotes } = parseWorkoutNotes(log.notes)
+        const isExpanded = expandedDate === log.logged_date
+        const d = new Date(log.logged_date + 'T12:00:00')
+        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+        return (
+          <div key={log.logged_date} className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] overflow-hidden">
+            <button
+              onClick={() => setExpandedDate(isExpanded ? null : log.logged_date)}
+              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--c-hover)] transition"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-[#b0e455]/15 flex items-center justify-center shrink-0">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2.5" className="w-3 h-3">
+                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <p className="text-sm font-medium text-[var(--c-text)]">{dayLabel}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {exercises.length > 0 && (
+                  <span className="text-[10px] text-[var(--c-text4)] font-mono">{exercises.length} exercise{exercises.length !== 1 ? 's' : ''}</span>
+                )}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-3.5 h-3.5 text-[var(--c-text4)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                  <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </button>
+            {isExpanded && (
+              <div className="border-t border-[var(--c-border)] px-4 py-3 space-y-3">
+                {exercises.length > 0 ? (
+                  <div className="space-y-1">
+                    <div className="grid grid-cols-[1fr_52px_44px_44px] gap-1 px-1 mb-1">
+                      {['Move', 'kg', 'Reps', 'Sets'].map(h => (
+                        <p key={h} className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-wider text-center first:text-left">{h}</p>
+                      ))}
+                    </div>
+                    {exercises.map((ex, i) => (
+                      <div key={i} className="grid grid-cols-[1fr_52px_44px_44px] gap-1 items-center py-1 border-b border-[var(--c-border)] last:border-0">
+                        <p className="text-sm text-[var(--c-text)]">{ex.move}</p>
+                        <p className="text-sm text-[var(--c-text3)] font-mono text-center">{ex.kg || '—'}</p>
+                        <p className="text-sm text-[var(--c-text3)] font-mono text-center">{ex.reps || '—'}</p>
+                        <p className="text-sm text-[var(--c-text3)] font-mono text-center">{ex.sets || '—'}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-[var(--c-text4)]">No exercises recorded</p>
+                )}
+                {logNotes && (
+                  <p className="text-xs text-[var(--c-text3)] italic border-t border-[var(--c-border)] pt-2">{logNotes}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
 
 function WorkoutLogSection({
   userId,
-  workoutDates,
+  workoutLogs,
   milestones,
   onLogged,
 }: {
   userId: string
-  workoutDates: string[]
+  workoutLogs: WorkoutLogRecord[]
   milestones: string[]
-  onLogged: (date: string, newMilestones: string[]) => void
+  onLogged: (date: string, newMilestones: string[], newLog: WorkoutLogRecord) => void
 }) {
   const supabase = createClient()
   const today = new Date().toISOString().split('T')[0]
-  const todayLogged = workoutDates.includes(today)
+  const workoutDates = workoutLogs.map(w => w.logged_date)
+  const todayLog = workoutLogs.find(w => w.logged_date === today)
+  const todayLogged = !!todayLog
+  const historyLogs = workoutLogs.filter(w => w.logged_date !== today)
   const [open, setOpen] = useState(false)
   const [rows, setRows] = useState<ExerciseRow[]>([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
   const [notes, setNotes] = useState('')
@@ -118,9 +201,11 @@ function WorkoutLogSection({
     setLoading(true)
     const exercises = rows.filter(r => r.move.trim())
     const payload = JSON.stringify({ v: 1, exercises, notes: notes.trim() || null })
-    await supabase
+    const { data: upserted } = await supabase
       .from('workout_logs')
       .upsert({ member_id: userId, logged_date: today, notes: payload }, { onConflict: 'member_id,logged_date' })
+      .select('id')
+      .single()
 
     const newDates = workoutDates.includes(today) ? workoutDates : [today, ...workoutDates]
     const streak = computeStreak(newDates)
@@ -138,7 +223,7 @@ function WorkoutLogSection({
       )
     }
 
-    onLogged(today, toAward)
+    onLogged(today, toAward, { id: upserted?.id ?? today, logged_date: today, notes: payload })
     setRows([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
     setNotes('')
     setOpen(false)
@@ -146,17 +231,24 @@ function WorkoutLogSection({
   }
 
   if (todayLogged) {
+    const { exercises } = parseWorkoutNotes(todayLog.notes)
     return (
-      <div className="flex items-center gap-3 bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4 mt-6">
-        <div className="w-8 h-8 rounded-full bg-[#b0e455] flex items-center justify-center shrink-0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="2.5" className="w-4 h-4">
-            <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+      <div className="mt-6 space-y-1 pt-6 border-t border-[var(--c-border)]">
+        <div className="flex items-center gap-3 bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4">
+          <div className="w-8 h-8 rounded-full bg-[#b0e455] flex items-center justify-center shrink-0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="2.5" className="w-4 h-4">
+              <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[var(--c-accent-text)]">Workout logged for today</p>
+            <p className="text-xs text-[var(--c-text3)] mt-0.5">
+              Streak: {computeStreak(workoutDates)} day{computeStreak(workoutDates) !== 1 ? 's' : ''}
+              {exercises.length > 0 ? ` · ${exercises.length} exercise${exercises.length !== 1 ? 's' : ''}` : ''}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm font-semibold text-[var(--c-accent-text)]">Workout logged for today</p>
-          <p className="text-xs text-[var(--c-text3)] mt-0.5">Streak: {computeStreak(workoutDates)} day{computeStreak(workoutDates) !== 1 ? 's' : ''}</p>
-        </div>
+        <WorkoutHistory logs={historyLogs} />
       </div>
     )
   }
@@ -278,6 +370,7 @@ function WorkoutLogSection({
         </svg>
         Log Today's Workout
       </button>
+      <WorkoutHistory logs={historyLogs} />
     </div>
   )
 }
@@ -349,10 +442,43 @@ function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }
 
 // ─── BMR display (member-facing food tab) ─────────────────────────────────────
 
-function BmrDisplay({ data }: { data: BmrContent }) {
+function BmrDisplay({ data, userId }: { data: BmrContent; userId: string }) {
+  const supabase = createClient()
+  const today = new Date().toISOString().split('T')[0]
   const [calories, setCalories] = useState('')
+  const [savedCalories, setSavedCalories] = useState<number | null>(null)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    supabase
+      .from('calorie_logs')
+      .select('calories_eaten')
+      .eq('member_id', userId)
+      .eq('logged_date', today)
+      .maybeSingle()
+      .then(({ data: row }) => {
+        if (row) {
+          setSavedCalories(row.calories_eaten)
+          setCalories(String(row.calories_eaten))
+        }
+      })
+  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function saveCalories() {
+    const val = Math.round(parseFloat(calories))
+    if (isNaN(val) || val < 0) return
+    setSaving(true)
+    await supabase
+      .from('calorie_logs')
+      .upsert({ member_id: userId, logged_date: today, calories_eaten: val }, { onConflict: 'member_id,logged_date' })
+    setSavedCalories(val)
+    setSaving(false)
+  }
+
   const calN = parseFloat(calories)
   const remaining = !isNaN(calN) ? data.calorie_target - calN : null
+  const progressPct = savedCalories !== null ? Math.min(100, Math.round((savedCalories / data.calorie_target) * 100)) : 0
+  const isOver = savedCalories !== null && savedCalories > data.calorie_target
 
   return (
     <div className="space-y-4">
@@ -395,8 +521,29 @@ function BmrDisplay({ data }: { data: BmrContent }) {
       ) : null}
 
       <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)] space-y-3">
-        <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Track Today's Calories</p>
-        <div className="flex gap-3 items-center">
+        <div className="flex items-center justify-between">
+          <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Track Today's Calories</p>
+          {savedCalories !== null && (
+            <span className="text-[9px] text-[var(--c-accent-text)] font-mono">Saved {savedCalories} kcal</span>
+          )}
+        </div>
+
+        {savedCalories !== null && (
+          <div className="space-y-1">
+            <div className="h-2 bg-[var(--c-bg)] rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${isOver ? 'bg-[#f87171]' : 'bg-[#b0e455]'}`}
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[9px] text-[var(--c-text4)] font-mono">
+              <span>{savedCalories} eaten</span>
+              <span>{progressPct}% of target</span>
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-2 items-center">
           <input
             type="number"
             value={calories}
@@ -405,7 +552,15 @@ function BmrDisplay({ data }: { data: BmrContent }) {
             className="flex-1 bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
           />
           <span className="text-sm text-[var(--c-text4)] shrink-0">kcal</span>
+          <button
+            onClick={saveCalories}
+            disabled={saving || !calories.trim()}
+            className="shrink-0 px-4 py-3 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+          >
+            {saving ? '…' : 'Save'}
+          </button>
         </div>
+
         {remaining !== null && (
           <div className={`rounded-xl px-4 py-3 flex items-center justify-between ${
             remaining >= 0 ? 'bg-[#86efac]/8 border border-[#86efac]/15' : 'bg-[#f87171]/8 border border-[#f87171]/15'
@@ -438,7 +593,7 @@ function EmptyState({ message }: { message: string }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ userId, firstName, role, split, food, habits, principles, workoutDates: initialWorkoutDates, milestones: initialMilestones }: Props) {
+export default function ProgramClient({ userId, firstName, role, split, food, habits, principles, workoutLogs: initialWorkoutLogs, milestones: initialMilestones }: Props) {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<Tab>('split')
   const [editingPrinciples, setEditingPrinciples] = useState(false)
@@ -446,11 +601,14 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     principles?.content_json ?? null
   )
   const [saving, setSaving] = useState(false)
-  const [workoutDates, setWorkoutDates] = useState<string[]>(initialWorkoutDates)
+  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLogRecord[]>(initialWorkoutLogs)
   const [milestones, setMilestones] = useState<string[]>(initialMilestones)
 
-  function handleWorkoutLogged(date: string, newMilestones: string[]) {
-    if (!workoutDates.includes(date)) setWorkoutDates(prev => [date, ...prev])
+  function handleWorkoutLogged(date: string, newMilestones: string[], newLog: WorkoutLogRecord) {
+    setWorkoutLogs(prev => {
+      const without = prev.filter(w => w.logged_date !== date)
+      return [newLog, ...without]
+    })
     if (newMilestones.length) setMilestones(prev => [...prev, ...newMilestones])
   }
 
@@ -538,7 +696,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     const updatedAt = section?.updated_at
 
     if (activeTab === 'food' && content && (content as { type?: string }).type === 'bmr') {
-      return <BmrDisplay data={content as BmrContent} />
+      return <BmrDisplay data={content as BmrContent} userId={userId} />
     }
 
     if (activeTab === 'habits' && content && (content as { type?: string }).type === 'habits') {
@@ -623,7 +781,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
         {activeTab === 'split' && !isHeadCoach && (
           <WorkoutLogSection
             userId={userId}
-            workoutDates={workoutDates}
+            workoutLogs={workoutLogs}
             milestones={milestones}
             onLogged={handleWorkoutLogged}
           />

@@ -626,6 +626,191 @@ const STATUS_LABEL: Record<string, string> = {
   none: 'No data',
 }
 
+// ─── Member detail panel ──────────────────────────────────────────────────────
+
+type WorkoutLog = { logged_date: string; notes: string | null }
+type CalorieLog = { logged_date: string; calories_eaten: number }
+
+function parseExercises(raw: string | null): { move: string; kg: string; reps: string; sets: string }[] {
+  if (!raw) return []
+  try { return JSON.parse(raw).exercises ?? [] } catch { return [] }
+}
+
+function MemberDetailPanel({ member, onOpenProgram, onClose }: {
+  member: Member
+  onOpenProgram: (id: string) => void
+  onClose: () => void
+}) {
+  const supabase = createClient()
+  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([])
+  const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([])
+  const [calorieTarget, setCalorieTarget] = useState<number | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 86_400_000).toISOString().split('T')[0]
+    Promise.all([
+      supabase.from('workout_logs').select('logged_date, notes').eq('member_id', member.id).gte('logged_date', thirtyDaysAgo).order('logged_date', { ascending: false }),
+      supabase.from('calorie_logs').select('logged_date, calories_eaten').eq('member_id', member.id).gte('logged_date', thirtyDaysAgo).order('logged_date', { ascending: false }),
+      supabase.from('program_sections').select('content_json').eq('member_id', member.id).eq('section', 'food').maybeSingle(),
+    ]).then(([wl, cl, food]) => {
+      setWorkoutLogs((wl.data ?? []) as WorkoutLog[])
+      setCalorieLogs((cl.data ?? []) as CalorieLog[])
+      const fc = food.data?.content_json as { type?: string; calorie_target?: number } | null
+      if (fc?.type === 'bmr' && fc.calorie_target) setCalorieTarget(fc.calorie_target)
+      setLoading(false)
+    })
+  }, [member.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const workoutDateSet = new Set(workoutLogs.map(w => w.logged_date))
+  const calorieMap = Object.fromEntries(calorieLogs.map(c => [c.logged_date, c.calories_eaten]))
+  const mostRecentWorkout = workoutLogs[0] ?? null
+
+  // Build last-7-days array (today first)
+  const last7: { date: string; label: string; hasWorkout: boolean; calories: number | null }[] = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0)
+    const key = d.toISOString().split('T')[0]
+    last7.push({
+      date: key,
+      label: i === 0 ? 'T' : d.toLocaleDateString('en-US', { weekday: 'narrow' }),
+      hasWorkout: workoutDateSet.has(key),
+      calories: calorieMap[key] ?? null,
+    })
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <button onClick={onClose} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+            <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[var(--c-accent-text)] shrink-0">
+            {member.avatar_url ? <img src={member.avatar_url} alt="" className="w-full h-full object-cover" /> : (member.first_name ?? member.email).charAt(0).toUpperCase()}
+          </div>
+          <p className="text-sm font-semibold text-[var(--c-text)] truncate">{member.first_name ?? member.email.split('@')[0]}</p>
+        </div>
+        <button
+          onClick={() => onOpenProgram(member.id)}
+          className="shrink-0 text-[10px] font-mono tracking-widest uppercase text-[var(--c-accent-text)] hover:opacity-75 transition"
+        >
+          Edit Program →
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-12">
+          <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
+        </div>
+      ) : (
+        <>
+          {/* 7-day workout calendar */}
+          <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
+            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Last 7 Days</p>
+            <div className="flex justify-between gap-1">
+              {[...last7].reverse().map(day => (
+                <div key={day.date} className="flex-1 flex flex-col items-center gap-1.5">
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono">{day.label}</p>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                    day.hasWorkout ? 'bg-[#b0e455] border border-[#b0e455]/40' : 'bg-[var(--c-bg)] border border-[var(--c-border2)]'
+                  }`}>
+                    {day.hasWorkout && (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="3" className="w-3 h-3">
+                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+                  {calorieTarget !== null && (
+                    <div className={`w-1.5 h-1.5 rounded-full ${
+                      day.calories === null ? 'bg-[var(--c-border2)]'
+                      : day.calories >= calorieTarget ? 'bg-[#86efac]'
+                      : day.calories >= calorieTarget * 0.8 ? 'bg-[#fbbf24]'
+                      : 'bg-[#f87171]'
+                    }`} title={day.calories !== null ? `${day.calories} kcal` : 'No log'} />
+                  )}
+                </div>
+              ))}
+            </div>
+            {calorieTarget !== null && (
+              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-[var(--c-border)]">
+                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#86efac]" /><span className="text-[9px] text-[var(--c-text4)]">On target</span></div>
+                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#fbbf24]" /><span className="text-[9px] text-[var(--c-text4)]">&gt;80%</span></div>
+                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#f87171]" /><span className="text-[9px] text-[var(--c-text4)]">Low</span></div>
+                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[var(--c-border2)]" /><span className="text-[9px] text-[var(--c-text4)]">No log</span></div>
+              </div>
+            )}
+          </div>
+
+          {/* Most recent workout */}
+          {mostRecentWorkout && (
+            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
+              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-2">
+                Last Workout — {new Date(mostRecentWorkout.logged_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              </p>
+              {(() => {
+                const exercises = parseExercises(mostRecentWorkout.notes)
+                if (!exercises.length) return <p className="text-xs text-[var(--c-text4)]">No exercises recorded</p>
+                return (
+                  <div className="space-y-1">
+                    <div className="grid grid-cols-[1fr_44px_40px_40px] gap-1 px-1 mb-1">
+                      {['Move', 'kg', 'Reps', 'Sets'].map(h => (
+                        <p key={h} className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-wider text-center first:text-left">{h}</p>
+                      ))}
+                    </div>
+                    {exercises.map((ex, i) => (
+                      <div key={i} className="grid grid-cols-[1fr_44px_40px_40px] gap-1 items-center py-1 border-b border-[var(--c-border)] last:border-0">
+                        <p className="text-xs text-[var(--c-text)]">{ex.move}</p>
+                        <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.kg || '—'}</p>
+                        <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.reps || '—'}</p>
+                        <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.sets || '—'}</p>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+            </div>
+          )}
+
+          {/* Calorie adherence — last 7 days with target */}
+          {calorieTarget !== null && calorieLogs.length > 0 && (
+            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Calorie Adherence</p>
+                <p className="text-[9px] text-[var(--c-text4)] font-mono">Target: {calorieTarget} kcal</p>
+              </div>
+              <div className="space-y-2">
+                {last7.filter(d => d.calories !== null).map(day => {
+                  const pct = Math.min(100, Math.round(((day.calories ?? 0) / calorieTarget) * 100))
+                  const isOver = (day.calories ?? 0) > calorieTarget
+                  return (
+                    <div key={day.date} className="flex items-center gap-3">
+                      <p className="text-[9px] text-[var(--c-text4)] font-mono w-8 shrink-0">{new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })}</p>
+                      <div className="flex-1 h-2 bg-[var(--c-bg)] rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full ${isOver ? 'bg-[#f87171]' : 'bg-[#b0e455]'}`} style={{ width: `${pct}%` }} />
+                      </div>
+                      <p className="text-[9px] text-[var(--c-text3)] font-mono w-12 text-right shrink-0">{day.calories} kcal</p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {workoutLogs.length === 0 && calorieLogs.length === 0 && (
+            <p className="text-sm text-[var(--c-text4)] text-center py-6">No workout or calorie data yet.</p>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+// ─── Members tab ──────────────────────────────────────────────────────────────
+
 function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }: {
   members: Member[]
   allStats: Stat[]
@@ -635,6 +820,7 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
 }) {
   const supabase = createClient()
   const [stats, setStats] = useState<Stat[]>(allStats)
+  const [selectedMember, setSelectedMember] = useState<Member | null>(null)
 
   useEffect(() => {
     const memberIds = members.map(m => m.id)
@@ -694,6 +880,16 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
     )
   }
 
+  if (selectedMember) {
+    return (
+      <MemberDetailPanel
+        member={selectedMember}
+        onOpenProgram={(id) => { setSelectedMember(null); onOpenProgram(id) }}
+        onClose={() => setSelectedMember(null)}
+      />
+    )
+  }
+
   return (
     <div className="space-y-6">
 
@@ -725,7 +921,7 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
             return (
               <button
                 key={member.id}
-                onClick={() => onOpenProgram(member.id)}
+                onClick={() => setSelectedMember(member)}
                 className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-4 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 transition-colors text-left"
               >
                 <div className="relative shrink-0">

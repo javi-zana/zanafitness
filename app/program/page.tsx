@@ -26,7 +26,7 @@ export default async function ProgramPage() {
       .single(),
     supabase
       .from('workout_logs')
-      .select('logged_date')
+      .select('id, logged_date, notes')
       .eq('member_id', user.id)
       .gte('logged_date', ninetyDaysAgo)
       .order('logged_date', { ascending: false }),
@@ -49,7 +49,7 @@ export default async function ProgramPage() {
       food={sectionMap['food'] ?? null}
       habits={sectionMap['habits'] ?? null}
       principles={principles ?? null}
-      workoutDates={(workoutLogs ?? []).map(w => w.logged_date as string)}
+      workoutLogs={(workoutLogs ?? []).map(w => ({ id: w.id as string, logged_date: w.logged_date as string, notes: w.notes as string | null }))}
       milestones={(milestoneRows ?? []).map(m => m.type as string)}
     />
   )
