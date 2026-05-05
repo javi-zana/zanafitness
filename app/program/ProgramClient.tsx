@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import BottomNav from '@/components/BottomNav'
+import { SplitViewer, StructuredSplit, SplitDay } from '@/components/SplitBuilder'
 
 const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ssr: false })
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false })
@@ -81,7 +82,7 @@ function computeStreak(dates: string[]): number {
 
 // ─── Workout log section ──────────────────────────────────────────────────────
 
-type ExerciseRow = { id: number; move: string; kg: string; reps: string; sets: string }
+type ExerciseRow = { id: number; move: string; kg: string; reps: string; sets: string; targetReps?: string }
 type ParsedExercise = { move: string; kg: string; reps: string; sets: string }
 
 function parseWorkoutNotes(raw: string | null): { exercises: ParsedExercise[]; notes: string | null } {
@@ -166,11 +167,17 @@ function WorkoutLogSection({
   workoutLogs,
   milestones,
   onLogged,
+  split,
+  triggerDay,
+  onTriggerConsumed,
 }: {
   userId: string
   workoutLogs: WorkoutLogRecord[]
   milestones: string[]
   onLogged: (date: string, newMilestones: string[], newLog: WorkoutLogRecord) => void
+  split?: StructuredSplit | null
+  triggerDay?: SplitDay | null
+  onTriggerConsumed?: () => void
 }) {
   const supabase = createClient()
   const today = new Date().toISOString().split('T')[0]
@@ -178,11 +185,45 @@ function WorkoutLogSection({
   const todayLog = workoutLogs.find(w => w.logged_date === today)
   const todayLogged = !!todayLog
   const historyLogs = workoutLogs.filter(w => w.logged_date !== today)
-  const [open, setOpen] = useState(false)
+
+  const [step, setStep] = useState<'idle' | 'picking' | 'logging'>('idle')
+  const [selectedDay, setSelectedDay] = useState<SplitDay | null>(null)
   const [rows, setRows] = useState<ExerciseRow[]>([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   let nextId = rows.length + 1
+
+  function applyPreset(day: SplitDay) {
+    setSelectedDay(day)
+    const filled = day.exercises
+      .filter(e => e.name)
+      .map((e, i) => ({
+        id: i + 1,
+        move: e.name,
+        kg: '',
+        reps: '',
+        sets: e.sets != null ? String(e.sets) : '',
+        targetReps: e.reps || '',
+      }))
+    setRows(filled.length ? filled : [{ id: 1, move: '', kg: '', reps: '', sets: '' }])
+    nextId = filled.length + 1
+    setStep('logging')
+  }
+
+  function resetForm() {
+    setStep('idle')
+    setSelectedDay(null)
+    setRows([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
+    setNotes('')
+  }
+
+  // When SplitViewer's "Log Day X" button fires
+  useEffect(() => {
+    if (triggerDay) {
+      applyPreset(triggerDay)
+      onTriggerConsumed?.()
+    }
+  }, [triggerDay]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function updateRow(id: number, field: keyof ExerciseRow, value: string) {
     setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
@@ -199,7 +240,7 @@ function WorkoutLogSection({
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setLoading(true)
-    const exercises = rows.filter(r => r.move.trim())
+    const exercises = rows.filter(r => r.move.trim()).map(({ targetReps: _t, ...r }) => r)
     const payload = JSON.stringify({ v: 1, exercises, notes: notes.trim() || null })
     const { data: upserted } = await supabase
       .from('workout_logs')
@@ -224,9 +265,7 @@ function WorkoutLogSection({
     }
 
     onLogged(today, toAward, { id: upserted?.id ?? today, logged_date: today, notes: payload })
-    setRows([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
-    setNotes('')
-    setOpen(false)
+    resetForm()
     setLoading(false)
   }
 
@@ -253,12 +292,77 @@ function WorkoutLogSection({
     )
   }
 
-  if (open) {
+  // Step: day picker
+  if (step === 'picking') {
+    return (
+      <div className="mt-6 pt-6 border-t border-[var(--c-border)] space-y-3">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-semibold text-[var(--c-text2)]">Which session today?</p>
+          <button onClick={resetForm} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+        {split!.days.map(day => (
+          <button
+            key={day.id}
+            onClick={() => applyPreset(day)}
+            className="w-full flex items-start gap-3 p-4 rounded-2xl border border-[var(--c-border)] hover:border-[#b0e455]/40 hover:bg-[#b0e455]/4 transition text-left"
+          >
+            <div className="w-7 h-7 rounded-full bg-[#b0e455]/10 flex items-center justify-center shrink-0 mt-0.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-3.5 h-3.5">
+                <path d="M6 5v14M10 8l4 4-4 4M14 5v14" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[var(--c-text)]">{day.label}</p>
+              {day.muscleGroups.length > 0 && (
+                <p className="text-xs text-[var(--c-text4)] mt-0.5">{day.muscleGroups.join(' · ')}</p>
+              )}
+              {day.exercises.filter(e => e.name).length > 0 && (
+                <p className="text-xs text-[var(--c-text4)] mt-0.5">
+                  {day.exercises.filter(e => e.name).length} exercise{day.exercises.filter(e => e.name).length !== 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[var(--c-text4)] shrink-0 mt-1">
+              <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        ))}
+        <button
+          onClick={() => setStep('logging')}
+          className="w-full py-3 rounded-2xl border border-[var(--c-border)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] hover:border-[var(--c-border2)] transition"
+        >
+          Custom / No preset
+        </button>
+      </div>
+    )
+  }
+
+  // Step: logging form
+  if (step === 'logging') {
     return (
       <form onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[var(--c-card)] shadow-sm rounded-2xl p-5 border border-[var(--c-border)]">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-[var(--c-text2)]">Log today's workout</p>
-          <button type="button" onClick={() => setOpen(false)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
+          <div>
+            <p className="text-sm font-semibold text-[var(--c-text2)]">Log today's workout</p>
+            {selectedDay && (
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455] shrink-0" />
+                <p className="text-xs text-[var(--c-accent-text)]">{selectedDay.label}</p>
+                <button
+                  type="button"
+                  onClick={() => { setSelectedDay(null); setRows([{ id: 1, move: '', kg: '', reps: '', sets: '' }]) }}
+                  className="text-[10px] text-[var(--c-text4)] hover:text-[var(--c-text)] transition underline"
+                >
+                  change
+                </button>
+              </div>
+            )}
+          </div>
+          <button type="button" onClick={resetForm} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
               <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
             </svg>
@@ -266,7 +370,7 @@ function WorkoutLogSection({
         </div>
 
         {/* Exercise table header */}
-        <div className="grid grid-cols-[1fr_60px_52px_52px_24px] gap-1.5 px-1">
+        <div className="grid grid-cols-[1fr_60px_64px_52px_24px] gap-1.5 px-1">
           {['Move', 'kg', 'Reps', 'Sets', ''].map((h, i) => (
             <p key={i} className="text-[9px] font-semibold text-[var(--c-text4)] uppercase tracking-wider text-center first:text-left">{h}</p>
           ))}
@@ -275,7 +379,7 @@ function WorkoutLogSection({
         {/* Exercise rows */}
         <div className="space-y-2">
           {rows.map(row => (
-            <div key={row.id} className="grid grid-cols-[1fr_60px_52px_52px_24px] gap-1.5 items-center">
+            <div key={row.id} className="grid grid-cols-[1fr_60px_64px_52px_24px] gap-1.5 items-center">
               <input
                 value={row.move}
                 onChange={e => updateRow(row.id, 'move', e.target.value)}
@@ -293,9 +397,7 @@ function WorkoutLogSection({
               <input
                 value={row.reps}
                 onChange={e => updateRow(row.id, 'reps', e.target.value)}
-                placeholder="—"
-                type="number"
-                min="0"
+                placeholder={row.targetReps || '—'}
                 className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
               />
               <input
@@ -342,7 +444,7 @@ function WorkoutLogSection({
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={resetForm}
             className="flex-1 py-3 rounded-2xl border border-[var(--c-border)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition"
           >
             Cancel
@@ -359,10 +461,11 @@ function WorkoutLogSection({
     )
   }
 
+  // Step: idle — show Log button
   return (
     <div className="mt-6 pt-6 border-t border-[var(--c-border)]">
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => split?.days?.length ? setStep('picking') : setStep('logging')}
         className="w-full flex items-center justify-center gap-2 bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl text-sm font-semibold hover:bg-[#c9f070] transition active:scale-[0.98]"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">
@@ -603,6 +706,12 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
   const [saving, setSaving] = useState(false)
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLogRecord[]>(initialWorkoutLogs)
   const [milestones, setMilestones] = useState<string[]>(initialMilestones)
+  const [triggerLogDay, setTriggerLogDay] = useState<SplitDay | null>(null)
+
+  const structuredSplit: StructuredSplit | null = (() => {
+    const c = split?.content_json as { type?: string } | null
+    return c?.type === 'structured_split' ? (c as StructuredSplit) : null
+  })()
 
   function handleWorkoutLogged(date: string, newMilestones: string[], newLog: WorkoutLogRecord) {
     setWorkoutLogs(prev => {
@@ -703,6 +812,15 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
       return <HabitsDisplay data={content as HabitsContent} userId={userId} />
     }
 
+    if (activeTab === 'split' && structuredSplit) {
+      return (
+        <SplitViewer
+          split={structuredSplit}
+          onLogDay={day => setTriggerLogDay(day)}
+        />
+      )
+    }
+
     if (!hasContent(content)) {
       const sectionInfo: Record<string, { title: string; desc: string }> = {
         split: {
@@ -784,6 +902,9 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
             workoutLogs={workoutLogs}
             milestones={milestones}
             onLogged={handleWorkoutLogged}
+            split={structuredSplit}
+            triggerDay={triggerLogDay}
+            onTriggerConsumed={() => setTriggerLogDay(null)}
           />
         )}
       </div>

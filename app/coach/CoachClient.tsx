@@ -2,13 +2,8 @@
 
 import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from 'react'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
-
-const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), {
-  ssr: false,
-  loading: () => <div className="border border-[var(--c-border)] rounded-xl min-h-[220px] bg-[var(--c-bg)] animate-pulse" />,
-})
+import { SplitBuilder, StructuredSplit } from '@/components/SplitBuilder'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1162,18 +1157,6 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
     setSectionLoadKey(k => k + 1)
   }
 
-  async function saveSection() {
-    if (!selectedId) return
-    setSaving(true)
-    await supabase.from('program_sections').upsert(
-      { member_id: selectedId, section: activeSection, content_json: sections[activeSection] ?? {}, updated_by: userId },
-      { onConflict: 'member_id,section' }
-    )
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-
   async function saveHabitsSection(data: HabitsData) {
     if (!selectedId) return
     setSaving(true)
@@ -1198,6 +1181,19 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  async function saveSplitSection(data: StructuredSplit) {
+    if (!selectedId) return
+    setSaving(true)
+    await supabase.from('program_sections').upsert(
+      { member_id: selectedId, section: 'split', content_json: data, updated_by: userId },
+      { onConflict: 'member_id,section' }
+    )
+    setSections(prev => ({ ...prev, split: data }))
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+    setSaving(false)
   }
 
   if (!selectedId) {
@@ -1237,15 +1233,6 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
           </svg>
         </button>
         <p className="text-sm font-semibold text-[var(--c-text)]">{memberName(selected!)}</p>
-        {activeSection === 'split' && (
-          <button
-            onClick={saveSection}
-            disabled={saving}
-            className="ml-auto text-[10px] tracking-widest uppercase font-mono text-[var(--c-accent-text)] hover:opacity-75 transition disabled:opacity-50"
-          >
-            {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save'}
-          </button>
-        )}
       </div>
 
       {/* Section tabs */}
@@ -1288,13 +1275,17 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
           saving={saving}
           saved={saved}
         />
-      ) : (
-        <RichTextEditor
-          key={`${selectedId}-${activeSection}-${sectionLoadKey}`}
-          content={sections[activeSection] ?? null}
-          onChange={json => setSections(prev => ({ ...prev, [activeSection]: json }))}
+      ) : activeSection === 'split' ? (
+        <SplitBuilder
+          key={`${selectedId}-${sectionLoadKey}`}
+          initial={(() => {
+            const c = sections.split as { type?: string } | null | undefined
+            return c?.type === 'structured_split' ? (c as StructuredSplit) : null
+          })()}
+          memberName={memberName(selected!)}
+          onSave={saveSplitSection}
         />
-      )}
+      ) : null}
     </div>
   )
 }
