@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, useEffect, useRef, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import BottomNav from '@/components/BottomNav'
@@ -191,7 +191,15 @@ function WorkoutLogSection({
   const [rows, setRows] = useState<ExerciseRow[]>([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
+  const sectionElRef = useRef<HTMLElement | null>(null)
+  const sectionRef = (el: HTMLElement | null) => { sectionElRef.current = el }
   let nextId = rows.length + 1
+
+  useEffect(() => {
+    if (step !== 'idle') {
+      setTimeout(() => sectionElRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+    }
+  }, [step])
 
   function applyPreset(day: SplitDay) {
     setSelectedDay(day)
@@ -295,7 +303,7 @@ function WorkoutLogSection({
   // Step: day picker
   if (step === 'picking') {
     return (
-      <div className="mt-6 pt-6 border-t border-[var(--c-border)] space-y-3">
+      <div ref={sectionRef} className="mt-6 pt-6 border-t border-[var(--c-border)] space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold text-[var(--c-text2)]">Which session today?</p>
           <button onClick={resetForm} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
@@ -344,7 +352,7 @@ function WorkoutLogSection({
   // Step: logging form
   if (step === 'logging') {
     return (
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[var(--c-card)] shadow-sm rounded-2xl p-5 border border-[var(--c-border)]">
+      <form ref={sectionRef} onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[var(--c-card)] shadow-sm rounded-2xl p-5 border border-[var(--c-border)]">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-[var(--c-text2)]">Log today's workout</p>
