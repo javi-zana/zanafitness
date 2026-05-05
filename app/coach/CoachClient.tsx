@@ -2060,6 +2060,7 @@ function AdminTab({ userEmail }: { userEmail: string }) {
     if (!res.ok) { setSetupStatus(s => ({ ...s, [member.id]: 'error' })); return }
     setSetupStatus(s => ({ ...s, [member.id]: 'done' }))
     await loadData()
+    setTimeout(() => setNewMembers(prev => prev.filter(m => m.id !== member.id)), 1500)
   }
 
   async function handleQuickAssign(memberId: string) {
