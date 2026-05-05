@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
       last_message_body: message || null,
       last_message_at: sentAt,
       status: 'open',
+      unread: true,
     }, { onConflict: 'id' })
 
     if (upsertError) {

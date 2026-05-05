@@ -2043,6 +2043,16 @@ type IgConversation = {
   last_message_body: string | null
   last_message_at: string | null
   status: string
+  bucket: string
+  unread: boolean
+}
+
+const BUCKET_META: Record<string, { label: string; color: string }> = {
+  new:          { label: 'New',          color: '#94a3b8' },
+  interviewing: { label: 'Interviewing', color: '#b0e455' },
+  favorites:    { label: 'Favorites',    color: '#fbbf24' },
+  not_ready:    { label: 'Not Ready',    color: '#fb923c' },
+  declined:     { label: 'Declined',     color: '#f87171' },
 }
 
 type IgMessage = {
@@ -2054,7 +2064,7 @@ type IgMessage = {
   ai_suggested: boolean
 }
 
-const DROP_LINK_TEXT = `honestly ur the exact guy this works for\n\napply here https://zanafitness.com/apply, takes 3 mins, Javi reviews every app personally`
+const DROP_LINK_TEXT = `honestly ur the exact guy this works for\n\napply here https://zanafitness.com/apply, takes 3 mins. ill send you an email after to lock in a quick 15-min call where we map out the plan 🤝`
 
 function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string }) {
   const supabase = createClient()
@@ -2064,6 +2074,8 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
   const [reply, setReply] = useState('')
   const [sending, setSending] = useState(false)
   const [suggesting, setSuggesting] = useState(false)
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [filterBucket, setFilterBucket] = useState('all')
   const [loadingMsgs, setLoadingMsgs] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -2092,6 +2104,7 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
     if (!selectedId) return
     setLoadingMsgs(true)
     setMessages([])
+    setSuggestions([])
     supabase
       .from('ig_messages')
       .select('*')
@@ -2121,9 +2134,15 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
 
   async function handleSend() {
     if (!selectedId || !reply.trim() || sending) return
-    setSending(true)
     const text = reply.trim()
+    const tempId = `temp-${Date.now()}`
     setReply('')
+    setSuggestions([])
+    // Optimistic: show message instantly
+    setMessages(prev => [...prev, { id: tempId, conversation_id: selectedId, direction: 'outbound', body: text, sent_at: new Date().toISOString(), ai_suggested: false }])
+    // Auto-advance bucket locally
+    setConvos(prev => prev.map(c => c.id === selectedId ? { ...c, bucket: c.bucket === 'new' ? 'interviewing' : c.bucket, last_message_body: text, last_message_at: new Date().toISOString(), unread: false } : c))
+    setSending(true)
     await fetch('/api/instagram/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2135,6 +2154,7 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
   async function handleSuggest() {
     if (!selectedId || suggesting || messages.length === 0) return
     setSuggesting(true)
+    setSuggestions([])
     const formatted = messages.map(m => ({
       role: m.direction === 'inbound' ? 'user' : 'assistant',
       content: m.body,
@@ -2145,45 +2165,90 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
       body: JSON.stringify({ messages: formatted }),
     })
     const json = await res.json()
-    if (json.suggestion) setReply(json.suggestion)
+    if (json.suggestions?.length) setSuggestions(json.suggestions)
     setSuggesting(false)
   }
 
+  async function markRead(id: string) {
+    setConvos(prev => prev.map(c => c.id === id ? { ...c, unread: false } : c))
+    await fetch('/api/instagram/mark-read', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversationId: id }),
+    })
+  }
+
+  async function handleSetBucket(bucket: string) {
+    if (!selectedId) return
+    setConvos(prev => prev.map(c => c.id === selectedId ? { ...c, bucket } : c))
+    await fetch('/api/instagram/set-bucket', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversationId: selectedId, bucket }),
+    })
+  }
+
+  const filteredConvos = filterBucket === 'all' ? convos : convos.filter(c => (c.bucket ?? 'new') === filterBucket)
+  const unreadCount = convos.filter(c => c.unread).length
   const selected = convos.find(c => c.id === selectedId)
 
   return (
     <div className="flex h-[calc(100vh-120px)] lg:h-[calc(100vh-100px)] -mx-5 lg:-mx-10">
       {/* Conversation list */}
-      <div className={`w-full lg:w-72 shrink-0 border-r border-[var(--c-border)] overflow-y-auto ${selectedId ? 'hidden lg:block' : ''}`}>
-        {convos.length === 0 ? (
-          <div className="p-6 text-center text-[var(--c-text4)] text-sm">No DMs yet — waiting for the first webhook.</div>
-        ) : convos.map(c => (
-          <button
-            key={c.id}
-            onClick={() => setSelectedId(c.id)}
-            className={`w-full text-left px-4 py-3.5 border-b border-[var(--c-border)] transition-colors ${
-              selectedId === c.id ? 'bg-[var(--c-card)]' : 'hover:bg-[var(--c-card2)]'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] shrink-0 overflow-hidden flex items-center justify-center text-sm font-bold text-[var(--c-text3)]">
-                {c.profile_pic_url
-                  ? <img src={c.profile_pic_url} alt="" className="w-full h-full object-cover" />
-                  : (c.display_name ?? c.ig_username ?? '?').slice(0, 1).toUpperCase()}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline gap-1.5 min-w-0">
-                  <p className="text-sm font-semibold truncate">{c.display_name ?? c.ig_username ?? c.id}</p>
-                  {c.ig_username && <p className="text-[10px] text-[var(--c-text5)] truncate shrink-0">@{c.ig_username}</p>}
+      <div className={`w-full lg:w-72 shrink-0 border-r border-[var(--c-border)] flex flex-col overflow-hidden ${selectedId ? 'hidden lg:flex' : ''}`}>
+        {/* Filter tabs */}
+        <div className="flex flex-wrap gap-1 p-2 border-b border-[var(--c-border)] bg-[var(--c-bg)] shrink-0">
+          {(['all', 'new', 'interviewing', 'favorites', 'not_ready', 'declined'] as const).map(b => {
+            const meta = b !== 'all' ? BUCKET_META[b] : null
+            const isActive = filterBucket === b
+            return (
+              <button
+                key={b}
+                onClick={() => setFilterBucket(b)}
+                className="px-2 py-0.5 rounded-full text-[10px] font-semibold transition-all"
+                style={isActive
+                  ? { backgroundColor: meta ? meta.color : '#b0e455', color: b === 'new' || b === 'all' ? '#0f1a0c' : '#0f1a0c' }
+                  : { color: 'var(--c-text4)' }}
+              >
+                {b === 'all' ? `All${unreadCount > 0 ? ` · ${unreadCount}` : ''}` : meta!.label}
+              </button>
+            )
+          })}
+        </div>
+        {/* List */}
+        <div className="flex-1 overflow-y-auto">
+          {filteredConvos.length === 0 ? (
+            <div className="p-6 text-center text-[var(--c-text4)] text-sm">{convos.length === 0 ? 'No DMs yet.' : 'None here.'}</div>
+          ) : filteredConvos.map(c => (
+            <button
+              key={c.id}
+              onClick={() => { setSelectedId(c.id); if (c.unread) markRead(c.id) }}
+              className={`w-full text-left px-4 py-3.5 border-b border-[var(--c-border)] transition-colors ${
+                selectedId === c.id ? 'bg-[var(--c-card)]' : 'hover:bg-[var(--c-card2)]'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="relative shrink-0">
+                  <div className="w-9 h-9 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] overflow-hidden flex items-center justify-center text-sm font-bold text-[var(--c-text3)]">
+                    {c.profile_pic_url
+                      ? <img src={c.profile_pic_url} alt="" className="w-full h-full object-cover" />
+                      : (c.display_name ?? c.ig_username ?? '?').slice(0, 1).toUpperCase()}
+                  </div>
+                  {c.unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#b0e455] border-2 border-[var(--c-bg)]" />}
                 </div>
-                <p className="text-xs text-[var(--c-text4)] truncate mt-0.5">{c.last_message_body ?? ''}</p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-1.5 min-w-0">
+                    <p className={`text-sm truncate ${c.unread ? 'font-bold' : 'font-semibold'}`}>{c.display_name ?? c.ig_username ?? c.id}</p>
+                    {c.ig_username && <p className="text-[10px] text-[var(--c-text5)] shrink-0">@{c.ig_username}</p>}
+                  </div>
+                  <p className="text-xs text-[var(--c-text4)] truncate mt-0.5">{c.last_message_body ?? ''}</p>
+                </div>
+                <div className="flex flex-col items-end gap-1.5 shrink-0">
+                  {c.last_message_at && <span className="text-[10px] text-[var(--c-text5)]">{relTime(c.last_message_at)}</span>}
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: BUCKET_META[c.bucket ?? 'new']?.color ?? '#94a3b8' }} />
+                </div>
               </div>
-              {c.last_message_at && (
-                <span className="text-[10px] text-[var(--c-text5)] shrink-0">{relTime(c.last_message_at)}</span>
-              )}
-            </div>
-          </button>
-        ))}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Thread */}
@@ -2192,20 +2257,40 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
           <div className="flex-1 flex items-center justify-center text-[var(--c-text4)] text-sm">Select a conversation</div>
         ) : (
           <>
-            <div className="px-4 py-3 border-b border-[var(--c-border)] flex items-center gap-3 shrink-0">
-              <button onClick={() => setSelectedId(null)} className="lg:hidden text-[var(--c-text4)] p-1 -ml-1">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-                  <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-              <div className="w-8 h-8 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] shrink-0 overflow-hidden flex items-center justify-center text-sm font-bold text-[var(--c-text3)]">
-                {selected?.profile_pic_url
-                  ? <img src={selected.profile_pic_url} alt="" className="w-full h-full object-cover" />
-                  : (selected?.display_name ?? selected?.ig_username ?? '?').slice(0, 1).toUpperCase()}
+            <div className="border-b border-[var(--c-border)] shrink-0">
+              <div className="px-4 py-3 flex items-center gap-3">
+                <button onClick={() => setSelectedId(null)} className="lg:hidden text-[var(--c-text4)] p-1 -ml-1">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+                    <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <div className="w-8 h-8 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] shrink-0 overflow-hidden flex items-center justify-center text-sm font-bold text-[var(--c-text3)]">
+                  {selected?.profile_pic_url
+                    ? <img src={selected.profile_pic_url} alt="" className="w-full h-full object-cover" />
+                    : (selected?.display_name ?? selected?.ig_username ?? '?').slice(0, 1).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold truncate">{selected?.display_name ?? selected?.ig_username ?? selectedId}</p>
+                  {selected?.ig_username && <p className="text-xs text-[var(--c-text4)]">@{selected.ig_username}</p>}
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">{selected?.display_name ?? selected?.ig_username ?? selectedId}</p>
-                {selected?.ig_username && <p className="text-xs text-[var(--c-text4)]">@{selected.ig_username}</p>}
+              {/* Bucket selector */}
+              <div className="px-4 pb-2.5 flex gap-1.5 flex-wrap">
+                {(['interviewing', 'favorites', 'not_ready', 'declined'] as const).map(b => {
+                  const isActive = (selected?.bucket ?? 'new') === b
+                  return (
+                    <button
+                      key={b}
+                      onClick={() => handleSetBucket(b)}
+                      className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold border transition-all"
+                      style={isActive
+                        ? { backgroundColor: BUCKET_META[b].color + '22', borderColor: BUCKET_META[b].color, color: BUCKET_META[b].color }
+                        : { borderColor: 'var(--c-border)', color: 'var(--c-text4)' }}
+                    >
+                      {BUCKET_META[b].label}
+                    </button>
+                  )
+                })}
               </div>
             </div>
 
@@ -2230,6 +2315,20 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
             </div>
 
             <div className="px-4 py-3 border-t border-[var(--c-border)] space-y-2 shrink-0">
+              {suggestions.length > 0 && (
+                <div className="space-y-1.5">
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setReply(s); setSuggestions([]) }}
+                      className="w-full text-left px-3 py-2 rounded-xl bg-[var(--c-card)] border border-[var(--c-border)] hover:border-[#b0e455]/50 transition-colors text-xs text-[var(--c-text)] leading-snug"
+                    >
+                      <span className="text-[10px] font-bold text-[var(--c-accent-text)] mr-1.5">{i === 0 ? 'A' : 'B'}</span>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="flex gap-2">
                 <button
                   onClick={handleSuggest}

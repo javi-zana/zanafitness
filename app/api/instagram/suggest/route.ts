@@ -54,8 +54,8 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 100,
-      system: SYSTEM,
+      max_tokens: 220,
+      system: SYSTEM + '\n\nReturn exactly 2 different reply options. Format strictly as:\nA: <reply>\nB: <reply>\nNo other text.',
       messages: messages.slice(-6),
     }),
   })
@@ -66,6 +66,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'AI failed' }, { status: 502 })
   }
 
-  const suggestion = (json.content?.[0]?.text ?? '').trim()
-  return NextResponse.json({ suggestion })
+  const text = (json.content?.[0]?.text ?? '').trim()
+  const aMatch = text.match(/A:\s*([\s\S]+?)(?=\nB:|$)/)
+  const bMatch = text.match(/B:\s*([\s\S]+)/)
+  const suggestions = [aMatch?.[1]?.trim(), bMatch?.[1]?.trim()].filter(Boolean)
+  return NextResponse.json({ suggestions })
 }

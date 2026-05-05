@@ -63,7 +63,11 @@ export async function POST(req: NextRequest) {
     db.from('ig_conversations').update({
       last_message_body: message,
       last_message_at: now,
+      unread: false,
     }).eq('id', conversationId),
+    // Only auto-advance if still in 'new' — don't overwrite Favorites/Not Ready etc.
+    db.from('ig_conversations').update({ bucket: 'interviewing' })
+      .eq('id', conversationId).eq('bucket', 'new'),
   ])
 
   return NextResponse.json({ ok: true })
