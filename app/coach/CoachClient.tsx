@@ -2168,8 +2168,8 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
       body: JSON.stringify({ conversationId: selectedId, message: text }),
     }).then(async res => {
       if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: res.status }))
-        alert('Send failed: ' + (err.error ?? JSON.stringify(err)))
+        const text = await res.text().catch(() => String(res.status))
+        alert('Send failed: ' + text)
       }
     }).catch(err => alert('Send error: ' + err.message))
   }

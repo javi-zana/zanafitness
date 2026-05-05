@@ -44,10 +44,12 @@ export async function POST(req: NextRequest) {
     }),
   })
 
-  const mcJson = await mcRes.json()
+  const mcText = await mcRes.text()
+  console.error('[ig/send] ManyChat raw response:', mcRes.status, mcText)
+  let mcJson: Record<string, unknown> = {}
+  try { mcJson = JSON.parse(mcText) } catch { /* not JSON */ }
   if (!mcRes.ok || mcJson.status === 'error') {
-    console.error('[ig/send] ManyChat error:', mcJson)
-    return NextResponse.json({ error: mcJson.message ?? 'Send failed' }, { status: 502 })
+    return NextResponse.json({ error: mcJson.message ?? mcText ?? 'ManyChat error' }, { status: 502 })
   }
 
   const db = adminDb()
