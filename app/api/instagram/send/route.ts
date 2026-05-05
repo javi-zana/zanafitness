@@ -61,7 +61,8 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         subscriber_id: Number(conversationId),
-        message_tag: 'HUMAN_AGENT',
+        messaging_type: 'MESSAGE_TAG',
+        tag: 'HUMAN_AGENT',
         data: {
           version: 'v2',
           content: {
