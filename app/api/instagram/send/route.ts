@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { waitUntil } from '@vercel/functions'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
   const db = adminDb()
   const now = new Date().toISOString()
 
-  // Write to DB first — this is the source of truth for the UI
+  // Write to DB immediately — source of truth for the UI
   const [msgResult, convResult] = await Promise.all([
     db.from('ig_messages').insert({
       conversation_id: conversationId,
@@ -52,31 +53,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: err!.message }, { status: 500 })
   }
 
-  // Fire-and-forget ManyChat — don't block the response
-  // Vercel Node.js runtime keeps the Lambda alive until pending I/O drains
-  fetch('https://api.manychat.com/fb/sending/sendContent', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.MANYCHAT_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      subscriber_id: Number(conversationId),
-      data: {
-        version: 'v2',
-        content: {
-          messages: [{ type: 'text', text: message }],
-          actions: [],
-          quick_replies: [],
-        },
+  // waitUntil keeps the Lambda alive after the response is sent
+  // so the ManyChat call actually completes
+  waitUntil(
+    fetch('https://api.manychat.com/fb/sending/sendContent', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.MANYCHAT_API_KEY}`,
+        'Content-Type': 'application/json',
       },
-    }),
-  }).then(async res => {
-    const text = await res.text()
-    console.log('[ig/send] ManyChat:', res.status, text)
-  }).catch(err => {
-    console.error('[ig/send] ManyChat error:', err.message)
-  })
+      body: JSON.stringify({
+        subscriber_id: Number(conversationId),
+        data: {
+          version: 'v2',
+          content: {
+            messages: [{ type: 'text', text: message }],
+            actions: [],
+            quick_replies: [],
+          },
+        },
+      }),
+    }).then(async res => {
+      const text = await res.text()
+      console.log('[ig/send] ManyChat:', res.status, text)
+    }).catch(err => {
+      console.error('[ig/send] ManyChat error:', err.message)
+    })
+  )
 
   return NextResponse.json({ ok: true })
 }

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@vercel/functions": "^2.0.0",
     "@paddle/paddle-js": "^1.4.0",
     "@paddle/paddle-node-sdk": "^1.7.0",
     "@supabase/ssr": "^0.5.2",
