@@ -686,7 +686,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 // ─── Member detail panel ──────────────────────────────────────────────────────
 
-type WorkoutLog = { logged_date: string; notes: string | null }
+type WorkoutLog = { logged_date: string; notes: string | Record<string, unknown> | null }
 type CalorieLog = { logged_date: string; calories_eaten: number }
 type StatUpdateCoach = {
   id: string
@@ -698,9 +698,12 @@ type StatUpdateCoach = {
 }
 type ProgressPhoto = { id: string; photo_url: string; photo_type: 'before' | 'weekly'; taken_at: string; created_at: string }
 
-function parseExercises(raw: string | null): { move: string; kg: string; reps: string; sets: string }[] {
+function parseExercises(raw: string | Record<string, unknown> | null): { move: string; kg: string; reps: string; sets: string }[] {
   if (!raw) return []
-  try { return JSON.parse(raw).exercises ?? [] } catch { return [] }
+  try {
+    const p = typeof raw === 'string' ? JSON.parse(raw) : raw
+    return (p.exercises as { move: string; kg: string; reps: string; sets: string }[] | undefined) ?? []
+  } catch { return [] }
 }
 
 function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed }: {
