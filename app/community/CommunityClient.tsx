@@ -730,7 +730,12 @@ export default function CommunityClient({ userId, userEmail, userRole, firstName
   }
 
   async function handleDelete(postId: string) {
-    await supabase.from('community_posts').delete().eq('id', postId)
+    const res = await fetch('/api/delete-community-post', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ postId }),
+    })
+    if (!res.ok) return
     setPostsByTab(prev => ({
       ...prev,
       [activeTab]: prev[activeTab].filter(p => p.id !== postId),

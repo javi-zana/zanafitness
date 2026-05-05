@@ -1343,6 +1343,7 @@ function ApplicationsSection() {
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [actionStatus, setActionStatus] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin-applications')
@@ -1351,6 +1352,20 @@ function ApplicationsSection() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  async function handleDeleteApp(appId: string) {
+    setDeletingId(appId)
+    const res = await fetch('/api/delete-application', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ applicationId: appId }),
+    })
+    if (res.ok) {
+      setApps(prev => prev.filter(a => a.id !== appId))
+      setExpandedId(null)
+    }
+    setDeletingId(null)
+  }
 
   async function handleAction(appId: string, action: 'accept' | 'decline') {
     setActionStatus(s => ({ ...s, [appId]: 'loading' }))
@@ -1571,11 +1586,20 @@ function ApplicationsSection() {
             )}
 
             {/* Already responded */}
-            {!isPending && app.responded_at && (
-              <div className="pt-2 border-t border-[var(--c-border)]">
-                <p className="text-[10px] text-[var(--c-text4)] font-mono">
-                  {app.status === 'accepted' ? 'Accepted' : 'Declined'} · {appRelTime(app.responded_at)} · Email sent
-                </p>
+            {!isPending && (
+              <div className="pt-2 border-t border-[var(--c-border)] flex items-center justify-between">
+                {app.responded_at && (
+                  <p className="text-[10px] text-[var(--c-text4)] font-mono">
+                    {app.status === 'accepted' ? 'Accepted' : 'Declined'} · {appRelTime(app.responded_at)} · Email sent
+                  </p>
+                )}
+                <button
+                  onClick={() => handleDeleteApp(app.id)}
+                  disabled={deletingId === app.id}
+                  className="ml-auto text-[10px] text-[var(--c-text4)] hover:text-red-400 transition disabled:opacity-40"
+                >
+                  {deletingId === app.id ? 'Deleting…' : 'Delete'}
+                </button>
               </div>
             )}
           </div>
