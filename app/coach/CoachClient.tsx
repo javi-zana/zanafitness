@@ -314,8 +314,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   ]
 
   const communityIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg>
-  const inboxIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><line x1="22" y1="2" x2="11" y2="13" strokeLinecap="round" strokeLinejoin="round" /><polygon points="22 2 15 22 11 13 2 9 22 2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-  const applicationsIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M9 12h6M9 16h3M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+const applicationsIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M9 12h6M9 16h3M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg>
   const adminIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
   const showAdmin = isHeadCoach && userEmail === 'me@javilorenzana.com'
 
@@ -364,19 +363,6 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             {communityIcon}
             <span className="text-sm font-semibold">Community</span>
           </Link>
-          {showAdmin && (
-            <button
-              onClick={() => onChange('inbox')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
-                active === 'inbox'
-                  ? 'bg-[#b0e455] text-[#0b1509]'
-                  : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
-              }`}
-            >
-              {inboxIcon}
-              <span className="text-sm font-semibold">DM Inbox</span>
-            </button>
-          )}
           {showAdmin && (
             <button
               onClick={() => onChange('applications')}
@@ -447,21 +433,6 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
           </div>
           <span className="text-[9px] uppercase font-medium text-[var(--c-text4)]">Community</span>
         </Link>
-        {showAdmin && (
-          <button
-            onClick={() => onChange('inbox')}
-            className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
-          >
-            <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
-              active === 'inbox' ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
-            }`}>
-              {inboxIcon}
-            </div>
-            <span className={`text-[9px] uppercase font-medium ${
-              active === 'inbox' ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
-            }`}>DMs</span>
-          </button>
-        )}
         {showAdmin && (
           <button
             onClick={() => onChange('applications')}
@@ -2482,10 +2453,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
             coachAvatarColor={avatarColor}
           />
         )}
-        {activeTab === 'inbox' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
-          <InboxTab userId={userId} userEmail={userEmail} />
-        )}
-        {activeTab === 'applications' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
+{activeTab === 'applications' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
           <ApplicationsSection />
         )}
         {activeTab === 'admin' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
