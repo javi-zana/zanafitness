@@ -659,7 +659,7 @@ function TodayCard({
                 </svg>
               ) : (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-3.5 h-3.5 text-[var(--c-text4)]">
-                  <path d="M6 5v14M10 8l4 4-4 4M14 5v14" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M6 9v6M9 7v10M9 12h6M15 7v10M18 9v6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}
             </div>
