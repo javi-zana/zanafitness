@@ -3,6 +3,7 @@
 create table if not exists ig_conversations (
   id text primary key,              -- ManyChat subscriber_id
   display_name text,
+  ig_username text,
   profile_pic_url text,
   last_message_body text,
   last_message_at timestamptz,

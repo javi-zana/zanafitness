@@ -19,14 +19,15 @@ export async function POST(req: NextRequest) {
 
   console.log('[manychat/webhook] received:', JSON.stringify(body).slice(0, 500))
 
-  const subscriberId = String(body.subscriber_id ?? '').trim()
-  const message = String(body.message ?? '').trim()
-
-  if (!subscriberId || !message) return NextResponse.json({ ok: true })
-
+  // Support both "Full Contact Data" format and individual field format
+  const subscriberId = String(body.id ?? body.subscriber_id ?? '').trim()
   const displayName = (body.first_name as string | undefined) ?? null
   const profilePic = (body.profile_pic as string | undefined) ?? null
+  const message = String(body.last_input_text ?? body.message ?? '').trim()
+  const igUsername = (body.ig_username as string | undefined) ?? null
   const sentAt = new Date().toISOString()
+
+  if (!subscriberId) return NextResponse.json({ ok: true })
 
   const db = adminDb()
 
@@ -34,17 +35,20 @@ export async function POST(req: NextRequest) {
     id: subscriberId,
     display_name: displayName,
     profile_pic_url: profilePic,
-    last_message_body: message,
+    ig_username: igUsername,
+    last_message_body: message || null,
     last_message_at: sentAt,
     status: 'open',
   }, { onConflict: 'id' })
 
-  await db.from('ig_messages').insert({
-    conversation_id: subscriberId,
-    direction: 'inbound',
-    body: message,
-    sent_at: sentAt,
-  })
+  if (message) {
+    await db.from('ig_messages').insert({
+      conversation_id: subscriberId,
+      direction: 'inbound',
+      body: message,
+      sent_at: sentAt,
+    })
+  }
 
   return NextResponse.json({ ok: true })
 }
