@@ -317,7 +317,7 @@ export default function MessagesClient({
       </div>
 
       {/* Message list */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 lg:px-10 lg:max-w-3xl lg:mx-auto w-full pb-36 lg:pb-24">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 lg:px-6 w-full pb-36 lg:pb-24">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-sm text-[var(--c-text4)]">No messages yet.</p>

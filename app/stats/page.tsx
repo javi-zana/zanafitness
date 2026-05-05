@@ -7,7 +7,16 @@ export default async function StatsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: profile }, { data: stats }, { data: progressPhotos }] = await Promise.all([
+  const today = new Date().toISOString().split('T')[0]
+
+  const [
+    { data: profile },
+    { data: stats },
+    { data: progressPhotos },
+    { data: todayWorkout },
+    { data: todayCalorie },
+    { data: foodSection },
+  ] = await Promise.all([
     supabase
       .from('profiles')
       .select('first_name, weight_unit')
@@ -24,7 +33,32 @@ export default async function StatsPage() {
       .select('id, photo_url, photo_type, taken_at, created_at')
       .eq('member_id', user.id)
       .order('created_at', { ascending: true }),
+    supabase
+      .from('workout_logs')
+      .select('logged_date')
+      .eq('member_id', user.id)
+      .eq('logged_date', today)
+      .maybeSingle(),
+    supabase
+      .from('calorie_logs')
+      .select('calories_eaten')
+      .eq('member_id', user.id)
+      .eq('logged_date', today)
+      .maybeSingle(),
+    supabase
+      .from('program_sections')
+      .select('content_json')
+      .eq('member_id', user.id)
+      .eq('section', 'food')
+      .maybeSingle(),
   ])
+
+  const calorieTarget = (() => {
+    try {
+      const j = foodSection?.content_json as { type?: string; calorie_target?: number } | null
+      return j?.type === 'bmr' ? (j.calorie_target ?? null) : null
+    } catch { return null }
+  })()
 
   const lastUpdate = stats?.[0]?.created_at ?? null
   const daysSince = lastUpdate
@@ -39,6 +73,9 @@ export default async function StatsPage() {
       initialStats={stats ?? []}
       showNudge={showNudge}
       initialProgressPhotos={progressPhotos ?? []}
+      todayWorkoutLogged={!!todayWorkout}
+      todayCalories={todayCalorie?.calories_eaten ?? null}
+      calorieTarget={calorieTarget}
     />
   )
 }

@@ -30,6 +30,9 @@ type Props = {
   initialStats: StatUpdate[]
   showNudge: boolean
   initialProgressPhotos: ProgressPhoto[]
+  todayWorkoutLogged: boolean
+  todayCalories: number | null
+  calorieTarget: number | null
 }
 
 // ─── Weight helpers ────────────────────────────────────────────────────────────
@@ -604,9 +607,139 @@ function LogForm({
   )
 }
 
+// ─── Today card ───────────────────────────────────────────────────────────────
+
+function TodayCard({
+  userId,
+  workoutLogged,
+  initialCalories,
+  calorieTarget,
+}: {
+  userId: string
+  workoutLogged: boolean
+  initialCalories: number | null
+  calorieTarget: number | null
+}) {
+  const supabase = createClient()
+  const today = new Date().toISOString().split('T')[0]
+  const [calories, setCalories] = useState(initialCalories !== null ? String(initialCalories) : '')
+  const [savedCalories, setSavedCalories] = useState<number | null>(initialCalories)
+  const [saving, setSaving] = useState(false)
+
+  async function saveCalories() {
+    const val = Math.round(parseFloat(calories))
+    if (isNaN(val) || val < 0) return
+    setSaving(true)
+    await supabase
+      .from('calorie_logs')
+      .upsert({ member_id: userId, logged_date: today, calories_eaten: val }, { onConflict: 'member_id,logged_date' })
+    setSavedCalories(val)
+    setSaving(false)
+  }
+
+  const progressPct = savedCalories !== null && calorieTarget
+    ? Math.min(100, Math.round((savedCalories / calorieTarget) * 100))
+    : null
+  const isOver = savedCalories !== null && calorieTarget !== null && savedCalories > calorieTarget
+
+  return (
+    <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] overflow-hidden">
+      <div className="px-4 pt-4 pb-3 border-b border-[var(--c-border)]">
+        <p className="text-xs text-[var(--c-text4)] uppercase tracking-wide font-medium">Today</p>
+      </div>
+
+      <div className="divide-y divide-[var(--c-border)]">
+        {/* Workout row */}
+        <div className="flex items-center justify-between px-4 py-3 gap-3">
+          <div className="flex items-center gap-3">
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${workoutLogged ? 'bg-[#b0e455]' : 'bg-[var(--c-bg)] border border-[var(--c-border2)]'}`}>
+              {workoutLogged ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="2.5" className="w-3.5 h-3.5">
+                  <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-3.5 h-3.5 text-[var(--c-text4)]">
+                  <path d="M6 5v14M10 8l4 4-4 4M14 5v14" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[var(--c-text)]">Workout</p>
+              {workoutLogged && <p className="text-xs text-[var(--c-text4)]">Logged today</p>}
+            </div>
+          </div>
+          {!workoutLogged && (
+            <a
+              href="/program"
+              className="text-xs font-semibold text-[var(--c-accent-text)] hover:opacity-75 transition shrink-0"
+            >
+              Log →
+            </a>
+          )}
+        </div>
+
+        {/* Calorie row */}
+        <div className="px-4 py-3 space-y-2">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${savedCalories !== null ? 'bg-[#b0e455]' : 'bg-[var(--c-bg)] border border-[var(--c-border2)]'}`}>
+                {savedCalories !== null ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="2.5" className="w-3.5 h-3.5">
+                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-3.5 h-3.5 text-[var(--c-text4)]">
+                    <path d="M12 2a5 5 0 015 5c0 3-2 5-5 8-3-3-5-5-5-8a5 5 0 015-5z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <p className="text-sm font-medium text-[var(--c-text)]">Calories</p>
+            </div>
+            {calorieTarget && (
+              <span className="text-xs text-[var(--c-text4)] shrink-0">
+                {savedCalories !== null ? `${savedCalories} / ${calorieTarget} kcal` : `Target: ${calorieTarget} kcal`}
+              </span>
+            )}
+          </div>
+
+          {progressPct !== null && (
+            <div className="space-y-1">
+              <div className="h-1.5 bg-[var(--c-bg)] rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${isOver ? 'bg-[#f87171]' : 'bg-[#b0e455]'}`}
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2 items-center">
+            <input
+              type="number"
+              value={calories}
+              onChange={e => setCalories(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') saveCalories() }}
+              placeholder="Calories eaten today"
+              className="flex-1 bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+            />
+            <span className="text-xs text-[var(--c-text4)] shrink-0">kcal</span>
+            <button
+              onClick={saveCalories}
+              disabled={saving || !calories.trim()}
+              className="shrink-0 px-3 py-2 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+            >
+              {saving ? '…' : 'Save'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function StatsClient({ userId, weightUnit, initialStats, showNudge, initialProgressPhotos }: Props) {
+export default function StatsClient({ userId, weightUnit, initialStats, showNudge, initialProgressPhotos, todayWorkoutLogged, todayCalories, calorieTarget }: Props) {
   const [stats, setStats] = useState<StatUpdate[]>(initialStats)
   const [nudgeDismissed, setNudgeDismissed] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
@@ -674,6 +807,13 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
             </div>
           )}
 
+          <TodayCard
+            userId={userId}
+            workoutLogged={todayWorkoutLogged}
+            initialCalories={todayCalories}
+            calorieTarget={calorieTarget}
+          />
+
           {formOpen && (
             <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-5 border border-[var(--c-border)]">
               <h2 className="text-base font-bold text-[var(--c-text)] mb-5">New Update</h2>
@@ -686,7 +826,7 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
             </div>
           )}
 
-          {chartStats.length > 0 && !formOpen && (
+          {chartStats.length >= 2 && !formOpen && (
             <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
               <p className="text-xs text-[var(--c-text4)] uppercase tracking-wide mb-3">Weight trend</p>
               <WeightChart stats={chartStats} unit={weightUnit} />
