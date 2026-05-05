@@ -377,54 +377,58 @@ function WorkoutLogSection({
           </button>
         </div>
 
-        {/* Exercise table header */}
-        <div className="grid grid-cols-[1fr_60px_64px_52px_24px] gap-1.5 px-1">
-          {['Move', 'kg', 'Reps', 'Sets', ''].map((h, i) => (
-            <p key={i} className="text-[9px] font-semibold text-[var(--c-text4)] uppercase tracking-wider text-center first:text-left">{h}</p>
-          ))}
-        </div>
-
-        {/* Exercise rows */}
-        <div className="space-y-2">
+        {/* Exercise rows — stacked layout for mobile readability */}
+        <div className="space-y-3">
           {rows.map(row => (
-            <div key={row.id} className="grid grid-cols-[1fr_60px_64px_52px_24px] gap-1.5 items-center">
+            <div key={row.id} className="space-y-1.5">
               <input
                 value={row.move}
                 onChange={e => updateRow(row.id, 'move', e.target.value)}
                 placeholder="Exercise name"
-                className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+                className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
               />
-              <input
-                value={row.kg}
-                onChange={e => updateRow(row.id, 'kg', e.target.value)}
-                placeholder="—"
-                type="number"
-                min="0"
-                className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-              />
-              <input
-                value={row.reps}
-                onChange={e => updateRow(row.id, 'reps', e.target.value)}
-                placeholder={row.targetReps || '—'}
-                className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-              />
-              <input
-                value={row.sets}
-                onChange={e => updateRow(row.id, 'sets', e.target.value)}
-                placeholder="—"
-                type="number"
-                min="0"
-                className="bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-              />
-              <button
-                type="button"
-                onClick={() => removeRow(row.id)}
-                className="w-6 h-6 flex items-center justify-center text-[var(--c-text4)] hover:text-red-400 transition rounded-full"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
-                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-                </svg>
-              </button>
+              <div className="grid grid-cols-[1fr_1fr_1fr_28px] gap-1.5 items-end">
+                <div>
+                  <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest text-center mb-1">kg</p>
+                  <input
+                    value={row.kg}
+                    onChange={e => updateRow(row.id, 'kg', e.target.value)}
+                    placeholder="—"
+                    type="number"
+                    min="0"
+                    className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+                  />
+                </div>
+                <div>
+                  <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest text-center mb-1">Reps</p>
+                  <input
+                    value={row.reps}
+                    onChange={e => updateRow(row.id, 'reps', e.target.value)}
+                    placeholder={row.targetReps || '—'}
+                    className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+                  />
+                </div>
+                <div>
+                  <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest text-center mb-1">Sets</p>
+                  <input
+                    value={row.sets}
+                    onChange={e => updateRow(row.id, 'sets', e.target.value)}
+                    placeholder="—"
+                    type="number"
+                    min="0"
+                    className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeRow(row.id)}
+                  className="w-7 h-7 mb-0.5 flex items-center justify-center text-[var(--c-text4)] hover:text-red-400 transition rounded-full"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                    <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </div>
             </div>
           ))}
         </div>

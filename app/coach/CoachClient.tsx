@@ -688,6 +688,15 @@ const STATUS_LABEL: Record<string, string> = {
 
 type WorkoutLog = { logged_date: string; notes: string | null }
 type CalorieLog = { logged_date: string; calories_eaten: number }
+type StatUpdateCoach = {
+  id: string
+  weight_kg: number | null
+  confidence: number | null
+  milestone_text: string | null
+  created_at: string
+  stat_update_photos: { id: string; storage_path: string }[]
+}
+type ProgressPhoto = { id: string; photo_url: string; photo_type: 'before' | 'weekly'; taken_at: string; created_at: string }
 
 function parseExercises(raw: string | null): { move: string; kg: string; reps: string; sets: string }[] {
   if (!raw) return []
@@ -707,6 +716,9 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([])
   const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([])
   const [calorieTarget, setCalorieTarget] = useState<number | null>(null)
+  const [statUpdates, setStatUpdates] = useState<StatUpdateCoach[]>([])
+  const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([])
+  const [expandedLog, setExpandedLog] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -715,20 +727,22 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
       supabase.from('workout_logs').select('logged_date, notes').eq('member_id', member.id).gte('logged_date', thirtyDaysAgo).order('logged_date', { ascending: false }),
       supabase.from('calorie_logs').select('logged_date, calories_eaten').eq('member_id', member.id).gte('logged_date', thirtyDaysAgo).order('logged_date', { ascending: false }),
       supabase.from('program_sections').select('content_json').eq('member_id', member.id).eq('section', 'food').maybeSingle(),
-    ]).then(([wl, cl, food]) => {
+      supabase.from('stat_updates').select('id, weight_kg, confidence, milestone_text, created_at, stat_update_photos(id, storage_path)').eq('member_id', member.id).order('created_at', { ascending: false }).limit(20),
+      supabase.from('progress_photos').select('id, photo_url, photo_type, taken_at, created_at').eq('member_id', member.id).order('created_at', { ascending: true }),
+    ]).then(([wl, cl, food, su, pp]) => {
       setWorkoutLogs((wl.data ?? []) as WorkoutLog[])
       setCalorieLogs((cl.data ?? []) as CalorieLog[])
       const fc = food.data?.content_json as { type?: string; calorie_target?: number } | null
       if (fc?.type === 'bmr' && fc.calorie_target) setCalorieTarget(fc.calorie_target)
+      setStatUpdates((su.data ?? []) as StatUpdateCoach[])
+      setProgressPhotos((pp.data ?? []) as ProgressPhoto[])
       setLoading(false)
     })
   }, [member.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const workoutDateSet = new Set(workoutLogs.map(w => w.logged_date))
   const calorieMap = Object.fromEntries(calorieLogs.map(c => [c.logged_date, c.calories_eaten]))
-  const mostRecentWorkout = workoutLogs[0] ?? null
 
-  // Build last-7-days array (today first)
   const last7: { date: string; label: string; hasWorkout: boolean; calories: number | null }[] = []
   for (let i = 0; i < 7; i++) {
     const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0)
@@ -740,6 +754,14 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
       calories: calorieMap[key] ?? null,
     })
   }
+
+  const unit = (member.weight_unit as 'kg' | 'lb') ?? 'kg'
+  const beforePhoto = progressPhotos.find(p => p.photo_type === 'before') ?? null
+  const weeklyPhotos = progressPhotos.filter(p => p.photo_type === 'weekly')
+  const latestWeekly = weeklyPhotos[weeklyPhotos.length - 1] ?? null
+  const chartPts = [...statUpdates].reverse().filter(s => s.weight_kg != null).map(s =>
+    unit === 'lb' ? +(s.weight_kg! * 2.20462).toFixed(1) : +s.weight_kg!.toFixed(1)
+  )
 
   return (
     <div className="space-y-5">
@@ -799,7 +821,7 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
         </div>
       ) : (
         <>
-          {/* 7-day workout calendar */}
+          {/* 7-day overview */}
           <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
             <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Last 7 Days</p>
             <div className="flex justify-between gap-1">
@@ -836,37 +858,201 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
             )}
           </div>
 
-          {/* Most recent workout */}
-          {mostRecentWorkout && (
+          {/* Weight trend */}
+          {chartPts.length >= 2 && (
             <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
-              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-2">
-                Last Workout — {new Date(mostRecentWorkout.logged_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-              </p>
+              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Weight Trend</p>
               {(() => {
-                const exercises = parseExercises(mostRecentWorkout.notes)
-                if (!exercises.length) return <p className="text-xs text-[var(--c-text4)]">No exercises recorded</p>
+                const W = 300; const H = 60
+                const min = Math.min(...chartPts); const max = Math.max(...chartPts)
+                const range = max - min || 1
+                const coords = chartPts.map((w, i) => ({
+                  x: (i / (chartPts.length - 1)) * W,
+                  y: H - ((w - min) / range) * (H - 8) - 4,
+                }))
+                const polyline = coords.map(c => `${c.x},${c.y}`).join(' ')
+                const fillPath = [`M${coords[0].x},${H}`, ...coords.map(c => `L${c.x},${c.y}`), `L${coords[coords.length - 1].x},${H}`, 'Z'].join(' ')
+                const last = coords[coords.length - 1]
                 return (
-                  <div className="space-y-1">
-                    <div className="grid grid-cols-[1fr_44px_40px_40px] gap-1 px-1 mb-1">
-                      {['Move', 'kg', 'Reps', 'Sets'].map(h => (
-                        <p key={h} className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-wider text-center first:text-left">{h}</p>
-                      ))}
+                  <>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 72 }}>
+                      <defs>
+                        <linearGradient id={`cg-${member.id}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#b0e455" stopOpacity="0.25" />
+                          <stop offset="100%" stopColor="#b0e455" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <path d={fillPath} fill={`url(#cg-${member.id})`} />
+                      <polyline points={polyline} fill="none" stroke="#b0e455" strokeWidth="1.5" />
+                      <circle cx={last.x} cy={last.y} r="3" fill="#b0e455" />
+                    </svg>
+                    <div className="flex justify-between text-xs text-[var(--c-text4)] mt-1">
+                      <span>{chartPts[0]} {unit}</span>
+                      <span className="text-[var(--c-accent-text)] font-semibold">{chartPts[chartPts.length - 1]} {unit} — now</span>
                     </div>
-                    {exercises.map((ex, i) => (
-                      <div key={i} className="grid grid-cols-[1fr_44px_40px_40px] gap-1 items-center py-1 border-b border-[var(--c-border)] last:border-0">
-                        <p className="text-xs text-[var(--c-text)]">{ex.move}</p>
-                        <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.kg || '—'}</p>
-                        <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.reps || '—'}</p>
-                        <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.sets || '—'}</p>
-                      </div>
-                    ))}
-                  </div>
+                  </>
                 )
               })()}
             </div>
           )}
 
-          {/* Calorie adherence — last 7 days with target */}
+          {/* Progress photos */}
+          {(beforePhoto || latestWeekly) && (
+            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
+              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Progress Photos</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[10px] text-[var(--c-text4)] uppercase tracking-wide mb-1.5">Before</p>
+                  {beforePhoto ? (
+                    <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--c-bg)]">
+                      <img src={beforePhoto.photo_url} alt="Before" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="aspect-[3/4] rounded-2xl border border-dashed border-[var(--c-border)] flex items-center justify-center">
+                      <p className="text-[10px] text-[var(--c-text5)]">Not uploaded</p>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <p className="text-[10px] text-[var(--c-text4)] uppercase tracking-wide mb-1.5">
+                    {latestWeekly ? `Week ${weeklyPhotos.length}` : 'Latest'}
+                  </p>
+                  {latestWeekly ? (
+                    <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[var(--c-bg)]">
+                      <img src={latestWeekly.photo_url} alt="Latest" className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="aspect-[3/4] rounded-2xl border border-dashed border-[var(--c-border)] flex items-center justify-center">
+                      <p className="text-[10px] text-[var(--c-text5)]">No weekly yet</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {weeklyPhotos.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-1 mt-3 pt-3 border-t border-[var(--c-border)]">
+                  {progressPhotos.map(photo => {
+                    const weekIdx = progressPhotos.filter(p => p.photo_type === 'weekly' && new Date(p.created_at) <= new Date(photo.created_at)).length
+                    return (
+                      <div key={photo.id} className="shrink-0 flex flex-col items-center gap-1">
+                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-[var(--c-bg)]">
+                          <img src={photo.photo_url} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wide">
+                          {photo.photo_type === 'before' ? 'Before' : `Wk ${weekIdx}`}
+                        </p>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Check-in history */}
+          {statUpdates.length > 0 && (
+            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
+              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Check-in History</p>
+              <div className="space-y-3">
+                {statUpdates.map(su => {
+                  const date = new Date(su.created_at)
+                  const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                  return (
+                    <div key={su.id} className="border-b border-[var(--c-border)] last:border-0 pb-3 last:pb-0">
+                      <p className="text-[10px] text-[var(--c-text4)] mb-1.5">{formatted}</p>
+                      <div className="flex gap-4">
+                        {su.weight_kg != null && (
+                          <div>
+                            <p className="text-[9px] text-[var(--c-text4)] mb-0.5">Weight</p>
+                            <p className="text-sm font-bold text-[var(--c-text)]">
+                              {unit === 'lb' ? +(su.weight_kg * 2.20462).toFixed(1) : +su.weight_kg.toFixed(1)}
+                              <span className="text-xs text-[var(--c-text3)] ml-1">{unit}</span>
+                            </p>
+                          </div>
+                        )}
+                        {su.confidence != null && (
+                          <div>
+                            <p className="text-[9px] text-[var(--c-text4)] mb-0.5">Confidence</p>
+                            <p className="text-sm font-bold" style={{ color: confidenceColor(su.confidence) }}>
+                              {su.confidence}<span className="text-xs opacity-60 ml-0.5">/10</span>
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      {su.milestone_text && (
+                        <p className="text-xs text-[var(--c-text2)] mt-1.5 leading-relaxed">{su.milestone_text}</p>
+                      )}
+                      {su.stat_update_photos.length > 0 && (
+                        <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                          {su.stat_update_photos.map(photo => {
+                            const { data } = supabase.storage.from('stat-photos').getPublicUrl(photo.storage_path)
+                            return (
+                              <img key={photo.id} src={data.publicUrl} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[var(--c-bg)]" />
+                            )
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Workout logs */}
+          {workoutLogs.length > 0 && (
+            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
+              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Workout Logs</p>
+              <div className="space-y-0.5">
+                {workoutLogs.map(log => {
+                  const isExpanded = expandedLog === log.logged_date
+                  const exercises = parseExercises(log.notes)
+                  return (
+                    <div key={log.logged_date}>
+                      <button
+                        onClick={() => setExpandedLog(isExpanded ? null : log.logged_date)}
+                        className="w-full flex items-center justify-between py-2.5 border-b border-[var(--c-border)] last:border-0"
+                      >
+                        <p className="text-xs text-[var(--c-text)]">
+                          {new Date(log.logged_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[10px] text-[var(--c-text4)]">{exercises.length} exercise{exercises.length !== 1 ? 's' : ''}</p>
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-3 h-3 text-[var(--c-text4)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
+                            <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </div>
+                      </button>
+                      {isExpanded && (
+                        <div className="py-2">
+                          {exercises.length === 0 ? (
+                            <p className="text-xs text-[var(--c-text4)]">No exercises recorded</p>
+                          ) : (
+                            <div className="space-y-1">
+                              <div className="grid grid-cols-[1fr_44px_40px_40px] gap-1 px-1 mb-1">
+                                {['Move', 'kg', 'Reps', 'Sets'].map(h => (
+                                  <p key={h} className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-wider text-center first:text-left">{h}</p>
+                                ))}
+                              </div>
+                              {exercises.map((ex, i) => (
+                                <div key={i} className="grid grid-cols-[1fr_44px_40px_40px] gap-1 items-center py-1 border-b border-[var(--c-border)] last:border-0">
+                                  <p className="text-xs text-[var(--c-text)]">{ex.move}</p>
+                                  <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.kg || '—'}</p>
+                                  <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.reps || '—'}</p>
+                                  <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.sets || '—'}</p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Calorie adherence */}
           {calorieTarget !== null && calorieLogs.length > 0 && (
             <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
               <div className="flex items-center justify-between mb-3">
@@ -891,8 +1077,8 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
             </div>
           )}
 
-          {workoutLogs.length === 0 && calorieLogs.length === 0 && (
-            <p className="text-sm text-[var(--c-text4)] text-center py-6">No workout or calorie data yet.</p>
+          {statUpdates.length === 0 && workoutLogs.length === 0 && calorieLogs.length === 0 && progressPhotos.length === 0 && (
+            <p className="text-sm text-[var(--c-text4)] text-center py-6">No data yet for this member.</p>
           )}
         </>
       )}
@@ -1585,12 +1771,12 @@ function MessagesTab({
   )
 }
 
-// ─── Applications section (inside Admin tab) ──────────────────────────────────
+// ─── Applications Kanban ──────────────────────────────────────────────────────
 
 type Application = {
   id: string
   created_at: string
-  status: 'pending' | 'accepted' | 'declined'
+  status: 'pending' | 'accepted' | 'declined' | 'call_booked' | 'waiting' | 'closed'
   responded_at: string | null
   first_name: string | null
   email: string | null
@@ -1610,6 +1796,8 @@ type Application = {
   why_now: string | null
 }
 
+type KanbanColKey = 'new' | 'call_booked' | 'waiting' | 'closed'
+
 function appRelTime(dateStr: string) {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000)
   if (days === 0) return 'Today'
@@ -1617,17 +1805,25 @@ function appRelTime(dateStr: string) {
   return `${days}d ago`
 }
 
-const STATUS_BADGE: Record<string, string> = {
-  pending:  'text-[#fbbf24] bg-[#fbbf24]/10 border-[#fbbf24]/20',
-  accepted: 'text-[#16a34a] bg-[#16a34a]/10 border-[#16a34a]/20',
-  declined: 'text-[var(--c-text4)] bg-[var(--c-card)] border-[var(--c-border)]',
+function columnKey(status: Application['status']): KanbanColKey {
+  if (['accepted', 'call_booked'].includes(status)) return 'call_booked'
+  if (status === 'waiting') return 'waiting'
+  if (['declined', 'closed'].includes(status)) return 'closed'
+  return 'new'
 }
+
+const KANBAN_COLS: { key: KanbanColKey; label: string; accent: string; dim: string }[] = [
+  { key: 'new',        label: 'New',         accent: '#fbbf24', dim: '#fbbf24/15' },
+  { key: 'call_booked',label: 'Call Booked', accent: '#b0e455', dim: '#b0e455/15' },
+  { key: 'waiting',    label: 'Waiting',     accent: '#60a5fa', dim: '#60a5fa/15' },
+  { key: 'closed',     label: 'Closed',      accent: '#94a3b8', dim: '#94a3b8/15' },
+]
 
 function ApplicationsSection() {
   const [apps, setApps] = useState<Application[]>([])
   const [loading, setLoading] = useState(true)
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [actionStatus, setActionStatus] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
+  const [selectedApp, setSelectedApp] = useState<Application | null>(null)
+  const [actionState, setActionState] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -1638,7 +1834,60 @@ function ApplicationsSection() {
       .finally(() => setLoading(false))
   }, [])
 
-  async function handleDeleteApp(appId: string) {
+  // Keep selectedApp in sync when apps list updates
+  useEffect(() => {
+    if (selectedApp) {
+      const updated = apps.find(a => a.id === selectedApp.id)
+      if (updated) setSelectedApp(updated)
+    }
+  }, [apps]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleAction(appId: string, action: 'accept' | 'decline') {
+    setActionState(s => ({ ...s, [appId]: 'loading' }))
+    try {
+      const res = await fetch('/api/application-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId: appId, action }),
+      })
+      const json = await res.json().catch(() => ({}))
+      if (res.ok) {
+        const newStatus = action === 'accept' ? 'call_booked' : 'closed'
+        setApps(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus, responded_at: new Date().toISOString() } : a))
+        setActionState(s => ({ ...s, [appId]: 'done' }))
+      } else {
+        console.error('application-action error:', json.error)
+        setActionState(s => ({ ...s, [appId]: 'error' }))
+        setTimeout(() => setActionState(s => ({ ...s, [appId]: 'idle' })), 3000)
+      }
+    } catch {
+      setActionState(s => ({ ...s, [appId]: 'error' }))
+      setTimeout(() => setActionState(s => ({ ...s, [appId]: 'idle' })), 3000)
+    }
+  }
+
+  async function handleMove(appId: string, status: 'call_booked' | 'waiting' | 'closed') {
+    setActionState(s => ({ ...s, [appId]: 'loading' }))
+    try {
+      const res = await fetch('/api/move-application', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ applicationId: appId, status }),
+      })
+      if (res.ok) {
+        setApps(prev => prev.map(a => a.id === appId ? { ...a, status, responded_at: new Date().toISOString() } : a))
+        setActionState(s => ({ ...s, [appId]: 'idle' }))
+      } else {
+        setActionState(s => ({ ...s, [appId]: 'error' }))
+        setTimeout(() => setActionState(s => ({ ...s, [appId]: 'idle' })), 3000)
+      }
+    } catch {
+      setActionState(s => ({ ...s, [appId]: 'error' }))
+      setTimeout(() => setActionState(s => ({ ...s, [appId]: 'idle' })), 3000)
+    }
+  }
+
+  async function handleDelete(appId: string) {
     setDeletingId(appId)
     const res = await fetch('/api/delete-application', {
       method: 'DELETE',
@@ -1647,268 +1896,325 @@ function ApplicationsSection() {
     })
     if (res.ok) {
       setApps(prev => prev.filter(a => a.id !== appId))
-      setExpandedId(null)
+      setSelectedApp(null)
     }
     setDeletingId(null)
   }
 
-  async function handleAction(appId: string, action: 'accept' | 'decline') {
-    setActionStatus(s => ({ ...s, [appId]: 'loading' }))
-    try {
-      const res = await fetch('/api/application-action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId: appId, action }),
-      })
-      if (res.ok) {
-        setApps(prev => prev.map(a => a.id === appId
-          ? { ...a, status: action === 'accept' ? 'accepted' : 'declined', responded_at: new Date().toISOString() }
-          : a
-        ))
-        setActionStatus(s => ({ ...s, [appId]: 'done' }))
-        setTimeout(() => setExpandedId(null), 800)
-      } else {
-        const json = await res.json().catch(() => ({}))
-        console.error('application-action error:', json.error)
-        setActionStatus(s => ({ ...s, [appId]: 'error' }))
-        setTimeout(() => setActionStatus(s => ({ ...s, [appId]: 'idle' })), 3000)
-      }
-    } catch {
-      setActionStatus(s => ({ ...s, [appId]: 'error' }))
-      setTimeout(() => setActionStatus(s => ({ ...s, [appId]: 'idle' })), 3000)
-    }
-  }
-
-  const pending = apps.filter(a => a.status === 'pending')
-  const responded = apps.filter(a => a.status !== 'pending')
-
   if (loading) {
-    return <div className="py-4 text-center text-xs text-[var(--c-text4)] font-mono">Loading applications…</div>
+    return <div className="py-8 text-center text-xs text-[var(--c-text4)] font-mono">Loading…</div>
   }
 
   if (apps.length === 0) {
     return (
-      <div className="py-6 text-center">
+      <div className="py-10 text-center">
         <p className="text-xs text-[var(--c-text4)] font-mono">No applications yet.</p>
-        <p className="text-[10px] text-[var(--c-text5)] mt-1">Submissions from the apply form will appear here.</p>
+        <p className="text-[10px] text-[var(--c-text5)] mt-1">Submissions will appear here.</p>
       </div>
     )
   }
 
-  function AppCard({ app }: { app: Application }) {
-    const isExpanded = expandedId === app.id
-    const status = actionStatus[app.id] ?? 'idle'
-    const isPending = app.status === 'pending'
+  const colApps = (key: KanbanColKey) => apps.filter(a => columnKey(a.status) === key)
 
-    return (
-      <div className={`rounded-2xl border overflow-hidden transition-all ${
-        app.status === 'pending'
-          ? 'bg-[var(--c-card)] border-[var(--c-border)] shadow-sm'
-          : 'bg-[var(--c-card2)] border-[var(--c-border)]'
-      }`}>
-        {/* Row header */}
-        <button
-          onClick={() => setExpandedId(isExpanded ? null : app.id)}
-          className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--c-hover)] transition-colors"
-        >
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-            app.status === 'pending'
-              ? 'bg-[#fbbf24]/12 text-[#fbbf24] border border-[#fbbf24]/20'
-              : 'bg-[var(--c-accent-text)]/10 text-[var(--c-accent-text)] border border-[var(--c-border2)]'
-          }`}>
-            {(app.first_name ?? app.email ?? '?').charAt(0).toUpperCase()}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-[var(--c-text)] truncate">
-              {app.first_name ?? 'Unknown'}{app.email ? ` — ${app.email}` : ''}
-            </p>
-            <p className="text-[10px] text-[var(--c-text4)] font-mono mt-0.5">
-              {appRelTime(app.created_at)}
-              {app.age ? ` · ${app.age}` : ''}
-              {app.location ? ` · ${app.location}` : ''}
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className={`text-[9px] font-mono tracking-widest uppercase px-2 py-0.5 rounded border ${STATUS_BADGE[app.status]}`}>
-              {app.status}
-            </span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-              className={`w-3.5 h-3.5 text-[var(--c-text4)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-              <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        </button>
+  return (
+    <div className="space-y-5">
+      {/* Kanban board — horizontal scroll on mobile */}
+      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+        {KANBAN_COLS.map(col => {
+          const items = colApps(col.key)
+          return (
+            <div key={col.key} className="flex-none w-60 space-y-2">
+              {/* Column header */}
+              <div className="flex items-center gap-2 px-1">
+                <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: col.accent }} />
+                <p className="text-[10px] font-mono uppercase tracking-widest text-[var(--c-text3)] flex-1">{col.label}</p>
+                {items.length > 0 && (
+                  <span className="text-[10px] font-mono text-[var(--c-text4)] bg-[var(--c-card2)] px-1.5 py-0.5 rounded-full border border-[var(--c-border)]">{items.length}</span>
+                )}
+              </div>
 
-        {/* Expanded detail */}
-        {isExpanded && (
-          <div className="border-t border-[var(--c-border)] px-4 py-5 space-y-5">
+              {/* Cards */}
+              <div className="space-y-2 min-h-[80px]">
+                {items.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-[var(--c-border)] px-3 py-6 flex items-center justify-center">
+                    <p className="text-[10px] text-[var(--c-text5)] font-mono">Empty</p>
+                  </div>
+                )}
+                {items.map(app => {
+                  const isSelected = selectedApp?.id === app.id
+                  const state = actionState[app.id] ?? 'idle'
+                  return (
+                    <div
+                      key={app.id}
+                      className={`rounded-2xl border p-3 cursor-pointer transition-all ${
+                        isSelected
+                          ? 'bg-[var(--c-card)] border-[var(--c-accent-text)]/30 shadow-md'
+                          : 'bg-[var(--c-card)] border-[var(--c-border)] hover:border-[var(--c-border2)] shadow-sm'
+                      }`}
+                      onClick={() => setSelectedApp(isSelected ? null : app)}
+                    >
+                      {/* Name + time */}
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0" style={{ backgroundColor: `${col.accent}20`, color: col.accent }}>
+                            {(app.first_name ?? app.email ?? '?').charAt(0).toUpperCase()}
+                          </div>
+                          <p className="text-xs font-semibold text-[var(--c-text)] truncate">{app.first_name ?? app.email?.split('@')[0] ?? 'Unknown'}</p>
+                        </div>
+                        <p className="text-[9px] text-[var(--c-text5)] font-mono shrink-0">{appRelTime(app.created_at)}</p>
+                      </div>
 
-            {/* Contact row */}
-            <div className="grid grid-cols-2 gap-3">
-              {app.email && (
-                <div>
-                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Email</p>
-                  <p className="text-xs text-[var(--c-text2)] break-all">{app.email}</p>
+                      {/* Quick info */}
+                      {(app.age || app.location) && (
+                        <p className="text-[10px] text-[var(--c-text4)] mb-2 truncate">
+                          {[app.age, app.location].filter(Boolean).join(' · ')}
+                        </p>
+                      )}
+
+                      {/* Commitment bar */}
+                      {app.commitment != null && (
+                        <div className="mb-2">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest">Commit</p>
+                            <p className="text-[9px] font-mono" style={{ color: col.accent }}>{app.commitment}/10</p>
+                          </div>
+                          <div className="h-1 bg-[var(--c-bg)] rounded-full overflow-hidden">
+                            <div className="h-full rounded-full" style={{ width: `${app.commitment * 10}%`, backgroundColor: col.accent }} />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action buttons */}
+                      {col.key === 'new' && (
+                        <div className="flex gap-1.5 mt-2.5">
+                          <button
+                            onClick={e => { e.stopPropagation(); handleAction(app.id, 'decline') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-red-400 hover:border-red-400/30 transition disabled:opacity-40"
+                          >
+                            {state === 'loading' ? '…' : 'Decline'}
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleAction(app.id, 'accept') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl text-[10px] font-mono font-semibold transition disabled:opacity-40"
+                            style={{ backgroundColor: col.accent, color: '#0f1a0c' }}
+                          >
+                            {state === 'loading' ? '…' : state === 'done' ? '✓' : 'Accept'}
+                          </button>
+                        </div>
+                      )}
+                      {col.key === 'call_booked' && (
+                        <div className="flex gap-1.5 mt-2.5">
+                          <button
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'waiting') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl border border-[#60a5fa]/30 text-[10px] font-mono text-[#60a5fa] hover:bg-[#60a5fa]/8 transition disabled:opacity-40"
+                          >
+                            → Waiting
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'closed') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-[var(--c-text)] transition disabled:opacity-40"
+                          >
+                            → Close
+                          </button>
+                        </div>
+                      )}
+                      {col.key === 'waiting' && (
+                        <div className="flex gap-1.5 mt-2.5">
+                          <button
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'call_booked') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl border border-[#b0e455]/30 text-[10px] font-mono text-[#b0e455] hover:bg-[#b0e455]/8 transition disabled:opacity-40"
+                          >
+                            → Call
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'closed') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-[var(--c-text)] transition disabled:opacity-40"
+                          >
+                            → Close
+                          </button>
+                        </div>
+                      )}
+                      {col.key === 'closed' && (
+                        <button
+                          onClick={e => { e.stopPropagation(); handleMove(app.id, 'waiting') }}
+                          disabled={state === 'loading'}
+                          className="w-full mt-2.5 py-1.5 rounded-xl border border-[#60a5fa]/30 text-[10px] font-mono text-[#60a5fa] hover:bg-[#60a5fa]/8 transition disabled:opacity-40"
+                        >
+                          ← Reopen
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Detail drawer — shown below kanban when a card is selected */}
+      {selectedApp && (() => {
+        const app = selectedApp
+        const state = actionState[app.id] ?? 'idle'
+        const colKey = columnKey(app.status)
+        const col = KANBAN_COLS.find(c => c.key === colKey)!
+        return (
+          <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] overflow-hidden">
+            {/* Drawer header */}
+            <div className="flex items-center gap-3 px-4 py-4 border-b border-[var(--c-border)]">
+              <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0" style={{ backgroundColor: `${col.accent}20`, color: col.accent }}>
+                {(app.first_name ?? app.email ?? '?').charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-[var(--c-text)]">{app.first_name ?? 'Unknown'}</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: col.accent }} />
+                  <p className="text-[10px] font-mono text-[var(--c-text4)]">{col.label} · {appRelTime(app.created_at)}</p>
                 </div>
-              )}
-              {app.phone && (
-                <div>
-                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Phone / WhatsApp</p>
-                  <p className="text-xs text-[var(--c-text2)]">{app.phone}</p>
-                </div>
-              )}
-              {app.instagram && (
-                <div>
-                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Instagram</p>
-                  <p className="text-xs text-[var(--c-text2)]">@{app.instagram}</p>
-                </div>
-              )}
-              {app.work && (
-                <div>
-                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Work</p>
-                  <p className="text-xs text-[var(--c-text2)]">{app.work}</p>
-                </div>
-              )}
+              </div>
+              <button
+                onClick={() => setSelectedApp(null)}
+                className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition shrink-0"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+                </svg>
+              </button>
             </div>
 
-            {/* Training background */}
-            {(app.training_history || app.training_looks || app.coach_history) && (
-              <div className="space-y-2">
-                {app.training_history && (
+            <div className="px-4 py-5 space-y-5">
+              {/* Contact */}
+              <div className="grid grid-cols-2 gap-3">
+                {app.email && (
                   <div>
-                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Where they're at</p>
-                    <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
-                      {app.training_history}
-                    </p>
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Email</p>
+                    <p className="text-xs text-[var(--c-text2)] break-all">{app.email}</p>
                   </div>
                 )}
-                {app.training_looks && (
+                {app.phone && (
                   <div>
-                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Training overview</p>
-                    <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
-                      {app.training_looks}
-                    </p>
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Phone / WA</p>
+                    <p className="text-xs text-[var(--c-text2)]">{app.phone}</p>
                   </div>
                 )}
-                {app.coach_history && (
+                {app.instagram && (
                   <div>
-                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Coaching history</p>
-                    <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
-                      {app.coach_history}
-                    </p>
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Instagram</p>
+                    <p className="text-xs text-[var(--c-text2)]">@{app.instagram}</p>
+                  </div>
+                )}
+                {app.work && (
+                  <div>
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Work</p>
+                    <p className="text-xs text-[var(--c-text2)]">{app.work}</p>
                   </div>
                 )}
               </div>
-            )}
 
-            {/* Big answers */}
-            {app.mirror_goal && (
-              <div>
-                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Mirror goal</p>
-                <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">
-                  "{app.mirror_goal}"
-                </p>
-              </div>
-            )}
-
-            {app.what_stopped && (
-              <div>
-                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">What stopped them</p>
-                <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">
-                  "{app.what_stopped}"
-                </p>
-              </div>
-            )}
-
-            {app.why_now && (
-              <div>
-                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Why now</p>
-                <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">
-                  "{app.why_now}"
-                </p>
-              </div>
-            )}
-
-            {/* Scores row */}
-            <div className="flex gap-4">
-              {app.commitment !== null && (
-                <div className="bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
-                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Commitment</p>
-                  <p className="text-xl font-bold text-[var(--c-accent-text)] mt-0.5">{app.commitment}<span className="text-xs text-[var(--c-text3)]">/10</span></p>
-                </div>
-              )}
-              {app.investment_fit && (
-                <div className="flex-1 bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
-                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Investment fit</p>
-                  <p className="text-xs text-[var(--c-text2)] mt-1 leading-relaxed">{app.investment_fit}</p>
-                  {app.investment_why && (
-                    <p className="text-xs text-[var(--c-text3)] mt-1 leading-relaxed italic">{app.investment_why}</p>
+              {/* Training background */}
+              {(app.training_history || app.training_looks || app.coach_history) && (
+                <div className="space-y-2">
+                  {app.training_history && (
+                    <div>
+                      <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Where they&apos;re at</p>
+                      <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">{app.training_history}</p>
+                    </div>
+                  )}
+                  {app.training_looks && (
+                    <div>
+                      <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Training overview</p>
+                      <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">{app.training_looks}</p>
+                    </div>
+                  )}
+                  {app.coach_history && (
+                    <div>
+                      <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Coaching history</p>
+                      <p className="text-xs text-[var(--c-text2)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5">{app.coach_history}</p>
+                    </div>
                   )}
                 </div>
               )}
-            </div>
 
-            {/* Accept / Decline — only for pending */}
-            {isPending && (
-              <div className="pt-2 border-t border-[var(--c-border)] flex gap-3">
-                <button
-                  onClick={() => handleAction(app.id, 'decline')}
-                  disabled={status === 'loading'}
-                  className="flex-1 py-3 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[#f87171] hover:border-[#f87171]/30 transition disabled:opacity-40"
-                >
-                  {status === 'loading' ? '…' : status === 'error' ? 'Error — retry' : 'Decline'}
-                </button>
-                <button
-                  onClick={() => handleAction(app.id, 'accept')}
-                  disabled={status === 'loading'}
-                  className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
-                >
-                  {status === 'loading' ? 'Sending…'
-                    : status === 'done' ? 'Sent ✓'
-                    : 'Accept — Send Invite'}
-                </button>
+              {/* Big answers */}
+              {app.mirror_goal && (
+                <div>
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Mirror goal</p>
+                  <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">&quot;{app.mirror_goal}&quot;</p>
+                </div>
+              )}
+              {app.what_stopped && (
+                <div>
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">What stopped them</p>
+                  <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">&quot;{app.what_stopped}&quot;</p>
+                </div>
+              )}
+              {app.why_now && (
+                <div>
+                  <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Why now</p>
+                  <p className="text-sm text-[var(--c-text)] leading-relaxed bg-[var(--c-bg)] rounded-xl px-3 py-2.5 italic">&quot;{app.why_now}&quot;</p>
+                </div>
+              )}
+
+              {/* Scores */}
+              <div className="flex gap-4">
+                {app.commitment !== null && (
+                  <div className="bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Commitment</p>
+                    <p className="text-xl font-bold mt-0.5" style={{ color: col.accent }}>{app.commitment}<span className="text-xs text-[var(--c-text3)]">/10</span></p>
+                  </div>
+                )}
+                {app.investment_fit && (
+                  <div className="flex-1 bg-[var(--c-bg)] rounded-xl px-3 py-2.5">
+                    <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Investment fit</p>
+                    <p className="text-xs text-[var(--c-text2)] mt-1 leading-relaxed">{app.investment_fit}</p>
+                    {app.investment_why && <p className="text-xs text-[var(--c-text3)] mt-1 italic">{app.investment_why}</p>}
+                  </div>
+                )}
               </div>
-            )}
 
-            {/* Already responded */}
-            {!isPending && (
-              <div className="pt-2 border-t border-[var(--c-border)] flex items-center justify-between">
+              {/* Actions */}
+              {colKey === 'new' && (
+                <div className="flex gap-3 pt-2 border-t border-[var(--c-border)]">
+                  <button
+                    onClick={() => handleAction(app.id, 'decline')}
+                    disabled={state === 'loading'}
+                    className="flex-1 py-3 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[#f87171] hover:border-[#f87171]/30 transition disabled:opacity-40"
+                  >
+                    {state === 'loading' ? '…' : state === 'error' ? 'Error — retry' : 'Decline'}
+                  </button>
+                  <button
+                    onClick={() => handleAction(app.id, 'accept')}
+                    disabled={state === 'loading'}
+                    className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+                  >
+                    {state === 'loading' ? 'Sending…' : state === 'done' ? 'Sent ✓' : 'Accept — Send Invite'}
+                  </button>
+                </div>
+              )}
+
+              {/* Delete */}
+              <div className="flex items-center justify-between pt-1 border-t border-[var(--c-border)]">
                 {app.responded_at && (
-                  <p className="text-[10px] text-[var(--c-text4)] font-mono">
-                    {app.status === 'accepted' ? 'Accepted' : 'Declined'} · {appRelTime(app.responded_at)} · Email sent
-                  </p>
+                  <p className="text-[10px] text-[var(--c-text5)] font-mono">Email sent {appRelTime(app.responded_at)}</p>
                 )}
                 <button
-                  onClick={() => handleDeleteApp(app.id)}
+                  onClick={() => handleDelete(app.id)}
                   disabled={deletingId === app.id}
-                  className="ml-auto text-[10px] text-[var(--c-text4)] hover:text-red-400 transition disabled:opacity-40"
+                  className="ml-auto text-[10px] text-[var(--c-text5)] hover:text-red-400 transition disabled:opacity-40"
                 >
                   {deletingId === app.id ? 'Deleting…' : 'Delete'}
                 </button>
               </div>
-            )}
+            </div>
           </div>
-        )}
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Pending */}
-      {pending.length > 0 && (
-        <div className="space-y-2">
-          {pending.map(app => <AppCard key={app.id} app={app} />)}
-        </div>
-      )}
-
-      {/* Responded */}
-      {responded.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-[10px] text-[var(--c-text5)] font-mono tracking-widest uppercase mt-2">Responded</p>
-          {responded.map(app => <AppCard key={app.id} app={app} />)}
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }

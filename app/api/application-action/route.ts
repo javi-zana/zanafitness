@@ -233,7 +233,7 @@ export async function POST(req: NextRequest) {
   }
 
   await db.from('applications').update({
-    status: action === 'accept' ? 'accepted' : 'declined',
+    status: action === 'accept' ? 'call_booked' : 'closed',
     responded_at: new Date().toISOString(),
   }).eq('id', applicationId)
 
