@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 
+export const maxDuration = 30
+
 const ADMIN_EMAIL = 'me@javilorenzana.com'
 
 function adminDb() {
@@ -24,31 +26,47 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
 
-  // Send via ManyChat API
-  const mcRes = await fetch('https://api.manychat.com/fb/sending/sendContent', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.MANYCHAT_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      subscriber_id: Number(conversationId),
-      data: {
-        version: 'v2',
-        content: {
-          messages: [{ type: 'text', text: message }],
-          actions: [],
-          quick_replies: [],
-        },
-      },
-    }),
-  })
+  // Abort ManyChat call if it takes > 20s
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 20000)
 
-  const mcText = await mcRes.text()
-  console.error('[ig/send] ManyChat raw response:', mcRes.status, mcText)
+  let mcText = ''
   let mcJson: Record<string, unknown> = {}
-  try { mcJson = JSON.parse(mcText) } catch { /* not JSON */ }
-  if (!mcRes.ok || mcJson.status === 'error') {
+  let mcOk = false
+
+  try {
+    const mcRes = await fetch('https://api.manychat.com/fb/sending/sendContent', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Authorization': `Bearer ${process.env.MANYCHAT_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        subscriber_id: Number(conversationId),
+        data: {
+          version: 'v2',
+          content: {
+            messages: [{ type: 'text', text: message }],
+            actions: [],
+            quick_replies: [],
+          },
+        },
+      }),
+    })
+    mcOk = mcRes.ok
+    mcText = await mcRes.text()
+    try { mcJson = JSON.parse(mcText) } catch { /* not JSON */ }
+    console.log('[ig/send] ManyChat:', mcRes.status, mcText)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error('[ig/send] fetch error:', msg)
+    return NextResponse.json({ error: 'ManyChat unreachable: ' + msg }, { status: 502 })
+  } finally {
+    clearTimeout(timer)
+  }
+
+  if (!mcOk || mcJson.status === 'error') {
     return NextResponse.json({ error: mcJson.message ?? mcText ?? 'ManyChat error' }, { status: 502 })
   }
 
@@ -67,7 +85,6 @@ export async function POST(req: NextRequest) {
       last_message_at: now,
       unread: false,
     }).eq('id', conversationId),
-    // Only auto-advance if still in 'new' — don't overwrite Favorites/Not Ready etc.
     db.from('ig_conversations').update({ bucket: 'interviewing' })
       .eq('id', conversationId).eq('bucket', 'new'),
   ])
