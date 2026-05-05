@@ -360,12 +360,11 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
-      <div className="flex-1 flex flex-col lg:max-w-4xl lg:mx-auto lg:w-full">
-        <div className="flex-1 overflow-y-auto pb-24 lg:pb-10">
+        <div className="flex-1 overflow-y-auto pb-28 lg:pb-10">
 
           {/* ── Gradient hero card ─────────────────────────────────────────────── */}
           <div
-            className="relative mx-5 mt-14 lg:mt-6 lg:mx-8 rounded-3xl overflow-hidden p-6 lg:p-7"
+            className="relative mx-5 mt-14 lg:mt-6 lg:mx-10 rounded-3xl overflow-hidden p-6 lg:p-7"
             style={{ background: 'linear-gradient(145deg, #cbf14e 0%, #b0e455 45%, #87be2a 100%)' }}
           >
             {/* Radial glow */}
@@ -431,7 +430,7 @@ export default function DashboardClient({
           </div>
 
           {/* ── Content ────────────────────────────────────────────────────────── */}
-          <div className="px-5 lg:px-8 space-y-3 pt-4 pb-4">
+          <div className="px-5 lg:px-10 space-y-3 pt-4 pb-4">
 
             {/* Announcement — dark card so it pops against white background */}
             {latestAnnouncement && (
@@ -632,7 +631,6 @@ export default function DashboardClient({
 
           </div>
         </div>
-      </div>
       <BottomNav />
     </div>
   )

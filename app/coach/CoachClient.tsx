@@ -2700,15 +2700,15 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
     setActiveTab('programs')
   }
 
-  async function markAddressed(memberId: string) {
+  function markAddressed(memberId: string) {
     const now = new Date().toISOString()
-    await supabase.from('attention_snoozes').upsert({ coach_id: userId, member_id: memberId, snoozed_at: now })
     setSnoozes(prev => ({ ...prev, [memberId]: now }))
+    supabase.from('attention_snoozes').upsert({ coach_id: userId, member_id: memberId, snoozed_at: now })
   }
 
-  async function undoAddressed(memberId: string) {
-    await supabase.from('attention_snoozes').delete().eq('coach_id', userId).eq('member_id', memberId)
+  function undoAddressed(memberId: string) {
     setSnoozes(prev => { const next = { ...prev }; delete next[memberId]; return next })
+    supabase.from('attention_snoozes').delete().eq('coach_id', userId).eq('member_id', memberId)
   }
 
   const readMap = Object.fromEntries(myReads.map(r => [r.thread_id, r.last_read_at]))

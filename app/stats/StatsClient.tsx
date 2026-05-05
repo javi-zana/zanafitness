@@ -621,7 +621,6 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
 
   return (
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
-      <div className="flex-1 flex flex-col lg:max-w-4xl lg:mx-auto lg:w-full">
 
         <div className="px-5 pt-12 pb-4 flex items-center justify-between lg:px-10 lg:pt-10 lg:pb-5 lg:border-b lg:border-[var(--c-border)]">
           <div>
@@ -741,7 +740,6 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
           )}
 
         </div>
-      </div>
 
       <BottomNav />
     </div>
