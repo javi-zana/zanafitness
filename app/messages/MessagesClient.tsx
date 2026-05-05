@@ -131,6 +131,7 @@ export default function MessagesClient({
   initialMessages,
   otherReads,
   authorProfiles,
+  userProfile,
   isAdmin,
 }: Props) {
   const supabase = createClient()
@@ -330,15 +331,13 @@ export default function MessagesClient({
           const next = messages[i + 1]
           const showTs = shouldShowTimestamp(prev, msg)
 
-          // Determine whether to show sender name + avatar for non-own messages
           const prevIsSameSender = prev && prev.author_id === msg.author_id && !shouldShowTimestamp(prev, msg)
           const nextIsSameSender = next && next.author_id === msg.author_id && !shouldShowTimestamp(msg, next)
-          const showName = !isMine && !prevIsSameSender
-          // Show avatar on the last message of a consecutive run (bottom of group)
-          const showAvatar = !isMine && !nextIsSameSender
+          const showName = !prevIsSameSender
+          const showAvatar = !nextIsSameSender
 
           const isLastMine = msg.id === lastMine?.id
-          const profile = authorProfiles[msg.author_id]
+          const profile = isMine ? userProfile : authorProfiles[msg.author_id]
 
           return (
             <div key={msg.id}>
@@ -350,7 +349,7 @@ export default function MessagesClient({
 
               <div className={`flex ${isMine ? 'justify-end' : 'justify-start'} items-end gap-2`}>
 
-                {/* Left avatar slot for non-own messages */}
+                {/* Left avatar slot for incoming messages */}
                 {!isMine && (
                   showAvatar && profile
                     ? <AuthorAvatar profile={profile} />
@@ -358,10 +357,9 @@ export default function MessagesClient({
                 )}
 
                 {/* Bubble column */}
-                <div className={`max-w-[78%] ${isMine ? 'items-end' : 'items-start'} flex flex-col`}>
-                  {/* Sender name (only on first message of a run) */}
+                <div className={`max-w-[72%] ${isMine ? 'items-end' : 'items-start'} flex flex-col`}>
                   {showName && profile?.firstName && (
-                    <p className="text-xs text-[var(--c-text4)] mb-1 font-medium px-1">
+                    <p className={`text-xs text-[var(--c-text4)] mb-1 font-medium px-1 ${isMine ? 'text-right' : ''}`}>
                       {profile.firstName}
                     </p>
                   )}
@@ -388,6 +386,13 @@ export default function MessagesClient({
                     <p className="text-xs text-[var(--c-text4)] mt-1 mr-1">Seen</p>
                   )}
                 </div>
+
+                {/* Right avatar slot for own messages */}
+                {isMine && (
+                  showAvatar && profile
+                    ? <AuthorAvatar profile={profile} />
+                    : <div className="w-7 shrink-0" />
+                )}
               </div>
             </div>
           )
