@@ -706,6 +706,22 @@ function parseExercises(raw: string | Record<string, unknown> | null): { move: s
   } catch { return [] }
 }
 
+function computeExerciseProgression(logs: WorkoutLog[]): { move: string; sessions: { date: string; kg: number | null }[] }[] {
+  const map = new Map<string, { move: string; sessions: { date: string; kg: number | null }[] }>()
+  for (const log of [...logs].reverse()) {
+    for (const ex of parseExercises(log.notes)) {
+      if (!ex.move?.trim()) continue
+      const key = ex.move.trim().toLowerCase()
+      if (!map.has(key)) map.set(key, { move: ex.move.trim(), sessions: [] })
+      map.get(key)!.sessions.push({ date: log.logged_date, kg: ex.kg ? parseFloat(ex.kg) : null })
+    }
+  }
+  return Array.from(map.values())
+    .filter(e => e.sessions.length >= 2)
+    .sort((a, b) => b.sessions.length - a.sessions.length)
+    .slice(0, 6)
+}
+
 function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed }: {
   member: Member
   stat: Stat | null
@@ -746,16 +762,11 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
   const workoutDateSet = new Set(workoutLogs.map(w => w.logged_date))
   const calorieMap = Object.fromEntries(calorieLogs.map(c => [c.logged_date, c.calories_eaten]))
 
-  const last7: { date: string; label: string; hasWorkout: boolean; calories: number | null }[] = []
-  for (let i = 0; i < 7; i++) {
+  const last30: { date: string; hasWorkout: boolean; calories: number | null }[] = []
+  for (let i = 29; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0)
     const key = d.toISOString().split('T')[0]
-    last7.push({
-      date: key,
-      label: i === 0 ? 'T' : d.toLocaleDateString('en-US', { weekday: 'narrow' }),
-      hasWorkout: workoutDateSet.has(key),
-      calories: calorieMap[key] ?? null,
-    })
+    last30.push({ date: key, hasWorkout: workoutDateSet.has(key), calories: calorieMap[key] ?? null })
   }
 
   const unit = (member.weight_unit as 'kg' | 'lb') ?? 'kg'
@@ -824,39 +835,51 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
         </div>
       ) : (
         <>
-          {/* 7-day overview */}
+          {/* 30-day consistency */}
           <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
-            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Last 7 Days</p>
-            <div className="flex justify-between gap-1">
-              {[...last7].reverse().map(day => (
-                <div key={day.date} className="flex-1 flex flex-col items-center gap-1.5">
-                  <p className="text-[9px] text-[var(--c-text4)] font-mono">{day.label}</p>
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
-                    day.hasWorkout ? 'bg-[#b0e455] border border-[#b0e455]/40' : 'bg-[var(--c-bg)] border border-[var(--c-border2)]'
-                  }`}>
-                    {day.hasWorkout && (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="3" className="w-3 h-3">
-                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
-                  </div>
-                  {calorieTarget !== null && (
-                    <div className={`w-1.5 h-1.5 rounded-full ${
-                      day.calories === null ? 'bg-[var(--c-border2)]'
-                      : day.calories >= calorieTarget ? 'bg-[#86efac]'
-                      : day.calories >= calorieTarget * 0.8 ? 'bg-[#fbbf24]'
-                      : 'bg-[#f87171]'
-                    }`} title={day.calories !== null ? `${day.calories} kcal` : 'No log'} />
-                  )}
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">30-Day Consistency</p>
+              <p className="text-[9px] text-[var(--c-text4)] font-mono">{last30.filter(d => d.hasWorkout).length} / 30 workouts</p>
+            </div>
+            <div className="space-y-1">
+              {Array.from({ length: 5 }).map((_, row) => (
+                <div key={row} className="grid grid-cols-6 gap-1">
+                  {last30.slice(row * 6, row * 6 + 6).map(day => (
+                    <div
+                      key={day.date}
+                      title={`${day.date}${day.hasWorkout ? ' · workout' : ''}`}
+                      className={`h-4 rounded-sm ${day.hasWorkout ? 'bg-[#b0e455]' : 'bg-[var(--c-bg)] border border-[var(--c-border2)]'}`}
+                    />
+                  ))}
                 </div>
               ))}
             </div>
             {calorieTarget !== null && (
-              <div className="flex items-center gap-2 mt-3 pt-2 border-t border-[var(--c-border)]">
-                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#86efac]" /><span className="text-[9px] text-[var(--c-text4)]">On target</span></div>
-                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#fbbf24]" /><span className="text-[9px] text-[var(--c-text4)]">&gt;80%</span></div>
-                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#f87171]" /><span className="text-[9px] text-[var(--c-text4)]">Low</span></div>
-                <div className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[var(--c-border2)]" /><span className="text-[9px] text-[var(--c-text4)]">No log</span></div>
+              <div className="mt-3 pt-2 border-t border-[var(--c-border)]">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <p className="text-[9px] text-[var(--c-text5)] font-mono">Calories</p>
+                  <div className="flex items-center gap-1"><div className="w-2 h-1.5 rounded-sm bg-[#86efac]" /><span className="text-[9px] text-[var(--c-text4)]">On target</span></div>
+                  <div className="flex items-center gap-1"><div className="w-2 h-1.5 rounded-sm bg-[#fbbf24]" /><span className="text-[9px] text-[var(--c-text4)]">&gt;80%</span></div>
+                  <div className="flex items-center gap-1"><div className="w-2 h-1.5 rounded-sm bg-[#f87171]" /><span className="text-[9px] text-[var(--c-text4)]">Low</span></div>
+                </div>
+                <div className="space-y-0.5">
+                  {Array.from({ length: 5 }).map((_, row) => (
+                    <div key={row} className="grid grid-cols-6 gap-1">
+                      {last30.slice(row * 6, row * 6 + 6).map(day => (
+                        <div
+                          key={day.date}
+                          title={`${day.date}: ${day.calories ?? 'no log'} kcal`}
+                          className={`h-1.5 rounded-sm ${
+                            day.calories === null ? 'bg-[var(--c-border2)]'
+                            : day.calories >= calorieTarget ? 'bg-[#86efac]'
+                            : day.calories >= calorieTarget * 0.8 ? 'bg-[#fbbf24]'
+                            : 'bg-[#f87171]'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -955,6 +978,29 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
           {statUpdates.length > 0 && (
             <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
               <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Check-in History</p>
+              {(() => {
+                const confPts = [...statUpdates].reverse().filter(s => s.confidence != null).map(s => s.confidence as number)
+                if (confPts.length < 2) return null
+                const W = 300; const H = 36
+                const coords = confPts.map((v, i) => ({
+                  x: (i / (confPts.length - 1)) * W,
+                  y: H - ((v - 1) / 9) * (H - 6) - 3,
+                }))
+                const poly = coords.map(c => `${c.x},${c.y}`).join(' ')
+                const lastConf = confPts[confPts.length - 1]
+                return (
+                  <div className="mb-3 pb-3 border-b border-[var(--c-border)]">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-[9px] text-[var(--c-text5)] font-mono">Confidence trend (1–10)</p>
+                      <span className="text-[9px] font-mono font-semibold" style={{ color: confidenceColor(lastConf) }}>{lastConf}/10 now</span>
+                    </div>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 32 }}>
+                      <polyline points={poly} fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+                      <circle cx={coords[coords.length - 1].x} cy={coords[coords.length - 1].y} r="3" fill={confidenceColor(lastConf)} />
+                    </svg>
+                  </div>
+                )
+              })()}
               <div className="space-y-3">
                 {statUpdates.map(su => {
                   const date = new Date(su.created_at)
@@ -1055,30 +1101,101 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
             </div>
           )}
 
-          {/* Calorie adherence */}
-          {calorieTarget !== null && calorieLogs.length > 0 && (
+          {/* Calorie trend */}
+          {calorieLogs.length >= 2 && (
             <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Calorie Adherence</p>
-                <p className="text-[9px] text-[var(--c-text4)] font-mono">Target: {calorieTarget} kcal</p>
+                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Calorie Trend</p>
+                {calorieTarget !== null && <p className="text-[9px] text-[var(--c-text4)] font-mono">Target: {calorieTarget} kcal</p>}
               </div>
-              <div className="space-y-2">
-                {last7.filter(d => d.calories !== null).map(day => {
-                  const pct = Math.min(100, Math.round(((day.calories ?? 0) / calorieTarget) * 100))
-                  const isOver = (day.calories ?? 0) > calorieTarget
-                  return (
-                    <div key={day.date} className="flex items-center gap-3">
-                      <p className="text-[9px] text-[var(--c-text4)] font-mono w-8 shrink-0">{new Date(day.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })}</p>
-                      <div className="flex-1 h-2 bg-[var(--c-bg)] rounded-full overflow-hidden">
-                        <div className={`h-full rounded-full ${isOver ? 'bg-[#f87171]' : 'bg-[#b0e455]'}`} style={{ width: `${pct}%` }} />
-                      </div>
-                      <p className="text-[9px] text-[var(--c-text3)] font-mono w-12 text-right shrink-0">{day.calories} kcal</p>
+              {(() => {
+                const pts = [...calorieLogs].reverse()
+                const W = 300; const H = 60
+                const vals = pts.map(c => c.calories_eaten)
+                const allVals = calorieTarget != null ? [...vals, calorieTarget] : vals
+                const min = Math.max(0, Math.min(...allVals) - 200)
+                const max = Math.max(...allVals) + 200
+                const range = max - min || 1
+                const coords = vals.map((v, i) => ({
+                  x: (i / Math.max(vals.length - 1, 1)) * W,
+                  y: H - ((v - min) / range) * (H - 8) - 4,
+                }))
+                const poly = coords.map(c => `${c.x},${c.y}`).join(' ')
+                const targetY = calorieTarget != null ? H - ((calorieTarget - min) / range) * (H - 8) - 4 : null
+                const last = coords[coords.length - 1]
+                return (
+                  <>
+                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 64 }}>
+                      {targetY != null && (
+                        <line x1="0" y1={targetY} x2={W} y2={targetY} stroke="#b0e455" strokeWidth="1" strokeDasharray="4 3" opacity="0.5" />
+                      )}
+                      <polyline points={poly} fill="none" stroke="#60a5fa" strokeWidth="1.5" />
+                      {last && <circle cx={last.x} cy={last.y} r="3" fill="#60a5fa" />}
+                    </svg>
+                    <div className="flex justify-between text-[9px] text-[var(--c-text4)] font-mono mt-1">
+                      <span>{vals[0]} kcal</span>
+                      {calorieTarget !== null && <span className="text-[var(--c-text5)]">— — target</span>}
+                      <span className="text-[#60a5fa]">{vals[vals.length - 1]} kcal now</span>
                     </div>
-                  )
-                })}
-              </div>
+                  </>
+                )
+              })()}
             </div>
           )}
+
+          {/* Exercise progression */}
+          {(() => {
+            const progression = computeExerciseProgression(workoutLogs)
+            if (!progression.length) return null
+            return (
+              <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
+                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Exercise Progression</p>
+                <div className="space-y-3">
+                  {progression.map(ex => {
+                    const kgPts = ex.sessions.map(s => s.kg).filter((k): k is number => k != null && !isNaN(k))
+                    const first = kgPts[0]; const last = kgPts[kgPts.length - 1]
+                    const delta = kgPts.length >= 2 && first != null && last != null ? +(last - first).toFixed(1) : null
+                    const trendColor = delta == null ? '#94a3b8' : delta > 0 ? '#b0e455' : delta < 0 ? '#f87171' : '#94a3b8'
+                    return (
+                      <div key={ex.move} className="pb-3 border-b border-[var(--c-border)] last:border-0 last:pb-0">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <p className="text-xs font-medium text-[var(--c-text)] truncate">{ex.move}</p>
+                          <span className="text-[9px] text-[var(--c-text5)] font-mono shrink-0 ml-2">{ex.sessions.length} sessions</span>
+                        </div>
+                        {kgPts.length >= 2 ? (() => {
+                          const W = 160; const H = 24
+                          const minK = Math.min(...kgPts); const maxK = Math.max(...kgPts)
+                          const rangeK = maxK - minK || 1
+                          const coords = kgPts.map((v, i) => ({
+                            x: (i / (kgPts.length - 1)) * W,
+                            y: H - ((v - minK) / rangeK) * (H - 6) - 3,
+                          }))
+                          const poly = coords.map(c => `${c.x},${c.y}`).join(' ')
+                          return (
+                            <div className="flex items-center gap-3">
+                              <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: 72, height: 18, flexShrink: 0 }}>
+                                <polyline points={poly} fill="none" stroke={trendColor} strokeWidth="1.5" />
+                              </svg>
+                              <div className="flex items-center gap-1.5 text-[9px] font-mono">
+                                <span className="text-[var(--c-text4)]">{first} kg</span>
+                                <span className="text-[var(--c-text5)]">→</span>
+                                <span className="text-[var(--c-text4)]">{last} kg</span>
+                                {delta !== null && delta !== 0 && (
+                                  <span className="font-semibold" style={{ color: trendColor }}>({delta > 0 ? '+' : ''}{delta})</span>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })() : (
+                          <p className="text-[9px] text-[var(--c-text5)]">{ex.sessions.length} sessions · no weight logged</p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
 
           {statUpdates.length === 0 && workoutLogs.length === 0 && calorieLogs.length === 0 && progressPhotos.length === 0 && (
             <p className="text-sm text-[var(--c-text4)] text-center py-6">No data yet for this member.</p>
