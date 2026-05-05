@@ -52,6 +52,7 @@ type Props = {
   threads: Thread[]
   lastMessages: MsgPreview[]
   myReads: ReadReceipt[]
+  snoozeMap: Record<string, string>
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -470,13 +471,14 @@ const applicationsIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 
 // ─── Home tab ─────────────────────────────────────────────────────────────────
 
-function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstName }: {
+function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstName, snoozes }: {
   members: Member[]
   allStats: Stat[]
   threads: Thread[]
   lastMessages: MsgPreview[]
   isHeadCoach: boolean
   firstName: string | null
+  snoozes: Record<string, string>
 }) {
   const name = firstName ?? 'Coach'
   const h = new Date().getHours()
@@ -498,7 +500,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
     stat && Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) <= 7
   ).length
 
-  const needAttention = latestPerMember.filter(({ stat }) => needsAttention(stat)).length
+  const needAttention = latestPerMember.filter(({ member, stat }) => needsAttention(stat, snoozes[member.id])).length
 
   const recentActivity = [...allStats]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -605,11 +607,19 @@ function checkinStatus(stat: Stat | null): 'fresh' | 'ok' | 'overdue' | 'none' {
   return 'overdue'
 }
 
-function needsAttention(stat: Stat | null): boolean {
+function needsAttention(stat: Stat | null, snoozedAt?: string | null): boolean {
   if (!stat) return true
   const days = Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000)
-  if (days > 7) return true
-  return stat.confidence !== null && stat.confidence <= 3
+  const isOverdue = days > 7
+  const isLowConf = stat.confidence !== null && stat.confidence <= 3
+  if (!isOverdue && !isLowConf) return false
+  if (!snoozedAt) return true
+  const snoozeTime = new Date(snoozedAt).getTime()
+  // Low confidence: re-triggers if the stat was submitted after the snooze
+  if (isLowConf && new Date(stat.created_at).getTime() > snoozeTime) return true
+  // Overdue: re-triggers 7 days after the snooze if still no new check-in
+  if (isOverdue && (Date.now() - snoozeTime) > 7 * 86_400_000) return true
+  return false
 }
 
 const STATUS_DOT: Record<string, string> = {
@@ -636,10 +646,14 @@ function parseExercises(raw: string | null): { move: string; kg: string; reps: s
   try { return JSON.parse(raw).exercises ?? [] } catch { return [] }
 }
 
-function MemberDetailPanel({ member, onOpenProgram, onClose }: {
+function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed }: {
   member: Member
+  stat: Stat | null
+  snoozedAt: string | null
   onOpenProgram: (id: string) => void
   onClose: () => void
+  onMarkAddressed: () => void
+  onUndoAddressed: () => void
 }) {
   const supabase = createClient()
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([])
@@ -701,6 +715,35 @@ function MemberDetailPanel({ member, onOpenProgram, onClose }: {
           Edit Program →
         </button>
       </div>
+
+      {/* Attention banner */}
+      {needsAttention(stat, snoozedAt) ? (
+        <div className="flex items-center justify-between gap-3 bg-[#f87171]/10 border border-[#f87171]/30 rounded-xl px-4 py-3">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-[#f87171] shrink-0" />
+            <p className="text-xs text-[#f87171] font-medium">Needs attention</p>
+          </div>
+          <button
+            onClick={onMarkAddressed}
+            className="text-[10px] font-mono tracking-widest uppercase text-[#f87171] hover:opacity-75 transition shrink-0"
+          >
+            Mark Addressed
+          </button>
+        </div>
+      ) : snoozedAt ? (
+        <div className="flex items-center justify-between gap-3 bg-[var(--c-card2)] border border-[var(--c-border2)] rounded-xl px-4 py-3">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-[var(--c-text4)] shrink-0" />
+            <p className="text-xs text-[var(--c-text4)]">Marked as addressed</p>
+          </div>
+          <button
+            onClick={onUndoAddressed}
+            className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] hover:text-[var(--c-text3)] transition shrink-0"
+          >
+            Undo
+          </button>
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="flex justify-center py-12">
@@ -811,12 +854,15 @@ function MemberDetailPanel({ member, onOpenProgram, onClose }: {
 
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
-function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }: {
+function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
   threads: Thread[]
   lastMessages: MsgPreview[]
   onOpenProgram: (memberId: string) => void
+  snoozes: Record<string, string>
+  onMarkAddressed: (memberId: string) => void
+  onUndoAddressed: (memberId: string) => void
 }) {
   const supabase = createClient()
   const [stats, setStats] = useState<Stat[]>(allStats)
@@ -863,7 +909,7 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
     if (!stat) return false
     return Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) <= 7
   }).length
-  const needAttention = latestPerMember.filter(({ stat }) => needsAttention(stat)).length
+  const needAttention = latestPerMember.filter(({ member, stat }) => needsAttention(stat, snoozes[member.id])).length
 
   // Sort: overdue first, then ok, then fresh
   const sortedMembers = [...latestPerMember].sort((a, b) => {
@@ -881,11 +927,16 @@ function MembersTab({ members, allStats, threads, lastMessages, onOpenProgram }:
   }
 
   if (selectedMember) {
+    const selectedStat = stats.find(s => s.member_id === selectedMember.id) ?? null
     return (
       <MemberDetailPanel
         member={selectedMember}
+        stat={selectedStat}
+        snoozedAt={snoozes[selectedMember.id] ?? null}
         onOpenProgram={(id) => { setSelectedMember(null); onOpenProgram(id) }}
         onClose={() => setSelectedMember(null)}
+        onMarkAddressed={() => onMarkAddressed(selectedMember.id)}
+        onUndoAddressed={() => onUndoAddressed(selectedMember.id)}
       />
     )
   }
@@ -2585,14 +2636,27 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads }: Props) {
+export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads, snoozeMap }: Props) {
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState<CoachTab>('home')
   const [programMemberId, setProgramMemberId] = useState<string | null>(null)
+  const [snoozes, setSnoozes] = useState<Record<string, string>>(snoozeMap)
   const isHeadCoach = userRole === 'head_coach'
 
   function openMemberProgram(memberId: string) {
     setProgramMemberId(memberId)
     setActiveTab('programs')
+  }
+
+  async function markAddressed(memberId: string) {
+    const now = new Date().toISOString()
+    await supabase.from('attention_snoozes').upsert({ coach_id: userId, member_id: memberId, snoozed_at: now })
+    setSnoozes(prev => ({ ...prev, [memberId]: now }))
+  }
+
+  async function undoAddressed(memberId: string) {
+    await supabase.from('attention_snoozes').delete().eq('coach_id', userId).eq('member_id', memberId)
+    setSnoozes(prev => { const next = { ...prev }; delete next[memberId]; return next })
   }
 
   const TAB_TITLES: Record<CoachTab, string> = {
@@ -2633,10 +2697,10 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:pb-10 lg:pt-6">
         {activeTab === 'home' && (
-          <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} />
+          <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} />
         )}
         {activeTab === 'members' && (
-          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} onOpenProgram={openMemberProgram} />
+          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'programs' && (
           <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} />

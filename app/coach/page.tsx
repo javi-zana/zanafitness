@@ -69,7 +69,7 @@ export default async function CoachPage() {
 
   const threadIds = (threads ?? []).map(t => t.id)
 
-  const [{ data: lastMessages }, { data: myReads }] = await Promise.all([
+  const [{ data: lastMessages }, { data: myReads }, { data: snoozeRows }] = await Promise.all([
     threadIds.length
       ? admin
           .from('messages')
@@ -85,7 +85,14 @@ export default async function CoachPage() {
           .eq('user_id', user.id)
           .in('thread_id', threadIds)
       : Promise.resolve({ data: [] }),
+    supabase
+      .from('attention_snoozes')
+      .select('member_id, snoozed_at'),
   ])
+
+  const snoozeMap = Object.fromEntries(
+    (snoozeRows ?? []).map(s => [s.member_id as string, s.snoozed_at as string])
+  )
 
   return (
     <CoachClient
@@ -100,6 +107,7 @@ export default async function CoachPage() {
       threads={(threads ?? []) as { id: string; member_id: string }[]}
       lastMessages={(lastMessages ?? []) as { thread_id: string; body: string; created_at: string; author_id: string }[]}
       myReads={(myReads ?? []) as { thread_id: string; last_read_at: string }[]}
+      snoozeMap={snoozeMap}
     />
   )
 }
