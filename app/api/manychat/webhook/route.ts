@@ -24,9 +24,10 @@ export async function POST(req: NextRequest) {
   const profilePic = (body.profile_pic as string | undefined) ?? null
   const message = String(body.last_input_text ?? body.message ?? '').trim()
   const igUsername = (body.ig_username as string | undefined) ?? null
+  const direction = (body.direction as string | undefined) === 'outbound' ? 'outbound' : 'inbound'
   const sentAt = new Date().toISOString()
 
-  console.log('[manychat/webhook] parsed:', { subscriberId, displayName, message, igUsername })
+  console.log('[manychat/webhook] parsed:', { subscriberId, displayName, message, igUsername, direction })
 
   if (!subscriberId) {
     console.log('[manychat/webhook] no subscriberId, skipping')
@@ -35,25 +36,28 @@ export async function POST(req: NextRequest) {
 
   const db = adminDb()
 
-  const { error: upsertError } = await db.from('ig_conversations').upsert({
-    id: subscriberId,
-    display_name: displayName,
-    profile_pic_url: profilePic,
-    ig_username: igUsername,
-    last_message_body: message || null,
-    last_message_at: sentAt,
-    status: 'open',
-  }, { onConflict: 'id' })
+  // Only upsert conversation metadata on inbound messages
+  if (direction === 'inbound') {
+    const { error: upsertError } = await db.from('ig_conversations').upsert({
+      id: subscriberId,
+      display_name: displayName,
+      profile_pic_url: profilePic,
+      ig_username: igUsername,
+      last_message_body: message || null,
+      last_message_at: sentAt,
+      status: 'open',
+    }, { onConflict: 'id' })
 
-  if (upsertError) {
-    console.error('[manychat/webhook] upsert error:', JSON.stringify(upsertError))
-    return NextResponse.json({ error: upsertError.message }, { status: 500 })
+    if (upsertError) {
+      console.error('[manychat/webhook] upsert error:', JSON.stringify(upsertError))
+      return NextResponse.json({ error: upsertError.message }, { status: 500 })
+    }
   }
 
   if (message) {
     const { error: insertError } = await db.from('ig_messages').insert({
       conversation_id: subscriberId,
-      direction: 'inbound',
+      direction,
       body: message,
       sent_at: sentAt,
     })
@@ -62,6 +66,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  console.log('[manychat/webhook] stored conversation:', subscriberId)
+  console.log('[manychat/webhook] stored:', direction, subscriberId)
   return NextResponse.json({ ok: true })
 }
