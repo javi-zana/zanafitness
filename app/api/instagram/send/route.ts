@@ -47,6 +47,20 @@ export async function POST(req: NextRequest) {
   ])
 
   // Call ManyChat with 8s timeout — await so we can return the result for debugging
+  const mcPayload = {
+    subscriber_id: Number(conversationId),
+    tag: 'HUMAN_AGENT',
+    data: {
+      version: 'v2',
+      content: {
+        messages: [{ type: 'text', text: message }],
+        actions: [],
+        quick_replies: [],
+      },
+    },
+  }
+  console.log('[ig/send] ManyChat payload:', JSON.stringify(mcPayload))
+
   let mcStatus = 0
   let mcBody = ''
   try {
@@ -59,18 +73,7 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.MANYCHAT_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        subscriber_id: Number(conversationId),
-        tag: 'HUMAN_AGENT',
-        data: {
-          version: 'v2',
-          content: {
-            messages: [{ type: 'text', text: message }],
-            actions: [],
-            quick_replies: [],
-          },
-        },
-      }),
+      body: JSON.stringify(mcPayload),
     })
     clearTimeout(timer)
     mcStatus = mcRes.status
