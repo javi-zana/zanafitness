@@ -2166,8 +2166,10 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] flex items-center justify-center text-sm font-bold shrink-0 text-[var(--c-text3)]">
-                {(c.display_name ?? c.ig_username ?? '?').slice(0, 1).toUpperCase()}
+              <div className="w-9 h-9 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] shrink-0 overflow-hidden flex items-center justify-center text-sm font-bold text-[var(--c-text3)]">
+                {c.profile_pic_url
+                  ? <img src={c.profile_pic_url} alt="" className="w-full h-full object-cover" />
+                  : (c.display_name ?? c.ig_username ?? '?').slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-1.5 min-w-0">
@@ -2196,8 +2198,10 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
                   <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              <div className="w-8 h-8 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] flex items-center justify-center text-sm font-bold text-[var(--c-text3)] shrink-0">
-                {(selected?.display_name ?? selected?.ig_username ?? '?').slice(0, 1).toUpperCase()}
+              <div className="w-8 h-8 rounded-full bg-[var(--c-card2)] border border-[var(--c-border)] shrink-0 overflow-hidden flex items-center justify-center text-sm font-bold text-[var(--c-text3)]">
+                {selected?.profile_pic_url
+                  ? <img src={selected.profile_pic_url} alt="" className="w-full h-full object-cover" />
+                  : (selected?.display_name ?? selected?.ig_username ?? '?').slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate">{selected?.display_name ?? selected?.ig_username ?? selectedId}</p>
