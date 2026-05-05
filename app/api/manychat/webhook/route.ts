@@ -55,9 +55,6 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const ZANA_WARMER_REPLY = `hey thanks for messaging!! btw im Javi (just to properly intro myself haha) and before anything, i just wanted to ask: what's the #1 thing you're trying to change with your body rn and why?`
-  const WARMER_KEYWORDS = ['body', 'bodyy', 'bod', 'bodyyyy']
-
   if (message) {
     const { error: insertError } = await db.from('ig_messages').insert({
       conversation_id: subscriberId,
@@ -67,17 +64,6 @@ export async function POST(req: NextRequest) {
     })
     if (insertError) {
       console.error('[manychat/webhook] insert error:', JSON.stringify(insertError))
-    }
-
-    // Auto-store the Zana Warmer auto-reply when the trigger keyword is detected
-    if (direction === 'inbound' && WARMER_KEYWORDS.includes(message.toLowerCase())) {
-      const replySentAt = new Date(new Date(sentAt).getTime() + 2000).toISOString()
-      await db.from('ig_messages').insert({
-        conversation_id: subscriberId,
-        direction: 'outbound',
-        body: ZANA_WARMER_REPLY,
-        sent_at: replySentAt,
-      })
     }
   }
 
