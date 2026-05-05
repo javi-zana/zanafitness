@@ -471,7 +471,7 @@ const applicationsIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 
 // ─── Home tab ─────────────────────────────────────────────────────────────────
 
-function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstName, snoozes }: {
+function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
   threads: Thread[]
@@ -479,6 +479,8 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
   isHeadCoach: boolean
   firstName: string | null
   snoozes: Record<string, string>
+  onMarkAddressed: (memberId: string) => void
+  onUndoAddressed: (memberId: string) => void
 }) {
   const name = firstName ?? 'Coach'
   const h = new Date().getHours()
@@ -534,7 +536,6 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
         </div>
         <div
           className={`rounded-2xl p-3 text-center border shadow-sm ${needAttention > 0 ? 'bg-[#f87171]/8 border-[#f87171]/30' : 'bg-[var(--c-card)] border-[var(--c-border)]'}`}
-          style={undefined}
         >
           <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
           <p className="text-[9px] text-[var(--c-text4)] uppercase mt-0.5">Attn</p>
@@ -544,6 +545,45 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
           <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
         </div>
       </div>
+
+      {/* Attention list */}
+      {latestPerMember.some(({ member, stat }) => needsAttention(stat, snoozes[member.id]) || snoozes[member.id]) && (
+        <div className="space-y-2">
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Needs Attention</p>
+          {latestPerMember.filter(({ member, stat }) => needsAttention(stat, snoozes[member.id]) || snoozes[member.id]).map(({ member, stat }) => {
+            const attn = needsAttention(stat, snoozes[member.id])
+            const snoozed = !!snoozes[member.id]
+            return (
+              <div key={member.id} className={`flex items-center gap-3 rounded-2xl px-4 py-3 border ${attn ? 'bg-[#f87171]/8 border-[#f87171]/30' : 'bg-[var(--c-card)] border-[var(--c-border)]'}`}>
+                <div className="w-7 h-7 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[var(--c-accent-text)] shrink-0">
+                  {member.avatar_url ? <img src={member.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(member).charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-[var(--c-text)] truncate">{memberName(member)}</p>
+                  <p className={`text-[10px] font-mono ${attn ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>
+                    {attn ? (stat ? `${Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000)}d since check-in${stat.confidence !== null && stat.confidence <= 3 ? ` · ${stat.confidence}/10 conf` : ''}` : 'No check-ins yet') : 'Addressed'}
+                  </p>
+                </div>
+                {attn ? (
+                  <button
+                    onClick={() => onMarkAddressed(member.id)}
+                    className="shrink-0 text-[10px] font-mono tracking-widest uppercase text-[#f87171] border border-[#f87171]/40 rounded-lg px-3 py-1.5 hover:bg-[#f87171]/10 transition"
+                  >
+                    Mark Addressed
+                  </button>
+                ) : snoozed ? (
+                  <button
+                    onClick={() => onUndoAddressed(member.id)}
+                    className="shrink-0 text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] border border-[var(--c-border2)] rounded-lg px-3 py-1.5 hover:bg-[var(--c-hover)] transition"
+                  >
+                    Undo
+                  </button>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Quick links */}
       <div className="grid grid-cols-2 gap-3">
@@ -2697,7 +2737,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:pb-10 lg:pt-6">
         {activeTab === 'home' && (
-          <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} />
+          <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'members' && (
           <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
