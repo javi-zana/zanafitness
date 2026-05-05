@@ -764,8 +764,10 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
 
   const last30: { date: string; hasWorkout: boolean; calories: number | null }[] = []
   for (let i = 29; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0, 0, 0, 0)
-    const key = d.toISOString().split('T')[0]
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    // Use local date parts to avoid UTC midnight shifting date by one in UTC+ timezones
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     last30.push({ date: key, hasWorkout: workoutDateSet.has(key), calories: calorieMap[key] ?? null })
   }
 

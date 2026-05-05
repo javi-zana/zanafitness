@@ -571,10 +571,12 @@ function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }
 
 function BmrDisplay({ data, userId }: { data: BmrContent; userId: string }) {
   const supabase = createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const d = new Date()
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   const [calories, setCalories] = useState('')
   const [savedCalories, setSavedCalories] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     supabase
@@ -595,10 +597,16 @@ function BmrDisplay({ data, userId }: { data: BmrContent; userId: string }) {
     const val = Math.round(parseFloat(calories))
     if (isNaN(val) || val < 0) return
     setSaving(true)
-    await supabase
+    setSaveError(null)
+    const { error } = await supabase
       .from('calorie_logs')
       .upsert({ member_id: userId, logged_date: today, calories_eaten: val }, { onConflict: 'member_id,logged_date' })
-    setSavedCalories(val)
+    if (error) {
+      console.error('[calorie_logs] upsert error:', error)
+      setSaveError('Failed to save')
+    } else {
+      setSavedCalories(val)
+    }
     setSaving(false)
   }
 
@@ -687,6 +695,7 @@ function BmrDisplay({ data, userId }: { data: BmrContent; userId: string }) {
             {saving ? '…' : 'Save'}
           </button>
         </div>
+        {saveError && <p className="text-xs text-red-400">{saveError}</p>}
 
         {remaining !== null && (
           <div className={`rounded-xl px-4 py-3 flex items-center justify-between ${
