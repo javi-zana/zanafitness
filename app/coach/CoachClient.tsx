@@ -660,16 +660,17 @@ function checkinStatus(stat: Stat | null): 'fresh' | 'ok' | 'overdue' | 'none' {
 }
 
 function needsAttention(stat: Stat | null, snoozedAt?: string | null): boolean {
-  if (!stat) return true
+  if (!stat) {
+    if (!snoozedAt) return true
+    return (Date.now() - new Date(snoozedAt).getTime()) > 7 * 86_400_000
+  }
   const days = Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000)
   const isOverdue = days > 7
   const isLowConf = stat.confidence !== null && stat.confidence <= 3
   if (!isOverdue && !isLowConf) return false
   if (!snoozedAt) return true
   const snoozeTime = new Date(snoozedAt).getTime()
-  // Low confidence: re-triggers if the stat was submitted after the snooze
   if (isLowConf && new Date(stat.created_at).getTime() > snoozeTime) return true
-  // Overdue: re-triggers 7 days after the snooze if still no new check-in
   if (isOverdue && (Date.now() - snoozeTime) > 7 * 86_400_000) return true
   return false
 }
