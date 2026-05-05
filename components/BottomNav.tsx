@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { createClient } from '@/utils/supabase/client'
 import { useTheme } from '@/app/providers'
 
 const NAV = [
@@ -57,6 +59,43 @@ const NAV = [
 export default function BottomNav() {
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
+  const [unread, setUnread] = useState(false)
+
+  useEffect(() => {
+    const supabase = createClient()
+    let threadId: string | null = null
+
+    async function checkUnread() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data: thread } = await supabase.from('threads').select('id').eq('member_id', user.id).maybeSingle()
+      if (!thread) return
+      threadId = thread.id
+
+      const [{ data: lastMsg }, { data: readRow }] = await Promise.all([
+        supabase.from('messages').select('created_at, author_id').eq('thread_id', threadId).neq('author_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+        supabase.from('message_reads').select('last_read_at').eq('thread_id', threadId).eq('user_id', user.id).maybeSingle(),
+      ])
+
+      if (!lastMsg) { setUnread(false); return }
+      const lastRead = readRow?.last_read_at
+      setUnread(!lastRead || new Date(lastMsg.created_at) > new Date(lastRead))
+    }
+
+    checkUnread()
+
+    const channel = supabase.channel('bottomnav-unread')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, () => {
+        if (threadId) checkUnread()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reads' }, () => {
+        if (threadId) checkUnread()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   function isActive(href: string) {
     return href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href)
@@ -87,6 +126,7 @@ export default function BottomNav() {
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {NAV.map(item => {
             const active = isActive(item.href)
+            const showBadge = item.href === '/messages' && unread
             return (
               <Link
                 key={item.href}
@@ -97,7 +137,10 @@ export default function BottomNav() {
                     : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
                 }`}
               >
-                <span className={active ? 'text-[#0b1509]' : ''}>{item.icon}</span>
+                <span className={`relative ${active ? 'text-[#0b1509]' : ''}`}>
+                  {item.icon}
+                  {showBadge && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#f87171] rounded-full border-2 border-[var(--c-sidebar)]" />}
+                </span>
                 <span className="text-sm font-semibold">{item.label}</span>
               </Link>
             )
@@ -152,16 +195,18 @@ export default function BottomNav() {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex z-50">
         {NAV.map(item => {
           const active = isActive(item.href)
+          const showBadge = item.href === '/messages' && unread
           return (
             <Link
               key={item.href}
               href={item.href}
               className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
             >
-              <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
+              <div className={`relative w-12 h-7 flex items-center justify-center rounded-full transition-all ${
                 active ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
               }`}>
                 {item.icon}
+                {showBadge && <span className="absolute top-0 right-1.5 w-2 h-2 bg-[#f87171] rounded-full border border-[var(--c-backdrop)]" />}
               </div>
               <span className={`text-[9px] tracking-wide uppercase font-medium ${
                 active ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'

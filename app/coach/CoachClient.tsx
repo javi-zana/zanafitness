@@ -298,7 +298,7 @@ function BmrSection({ initial, onSave, saving, saved }: {
 
 // ─── Coach nav ────────────────────────────────────────────────────────────────
 
-function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avatarUrl, userEmail }: {
+function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avatarUrl, userEmail, unreadCount }: {
   active: CoachTab
   onChange: (t: CoachTab) => void
   isHeadCoach: boolean
@@ -306,6 +306,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   avatarColor: string
   avatarUrl: string | null
   userEmail: string
+  unreadCount: number
 }) {
   const tabs: { id: CoachTab; label: string; icon: JSX.Element }[] = [
     { id: 'home', label: 'Home', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" /></svg> },
@@ -353,8 +354,16 @@ const applicationsIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentCol
                   : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
               }`}
             >
-              {t.icon}
+              <span className="relative">
+                {t.icon}
+                {t.id === 'messages' && unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#f87171] rounded-full border-2 border-[var(--c-sidebar)]" />
+                )}
+              </span>
               <span className="text-sm font-semibold">{t.label}</span>
+              {t.id === 'messages' && unreadCount > 0 && active !== 'messages' && (
+                <span className="ml-auto text-[10px] font-mono bg-[#f87171]/15 text-[#f87171] px-1.5 py-0.5 rounded-full">{unreadCount}</span>
+              )}
             </button>
           ))}
           <Link
@@ -416,10 +425,13 @@ const applicationsIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentCol
             onClick={() => onChange(t.id)}
             className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
-            <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
+            <div className={`relative w-10 h-7 flex items-center justify-center rounded-full transition-all ${
               active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
             }`}>
               {t.icon}
+              {t.id === 'messages' && unreadCount > 0 && (
+                <span className="absolute top-0 right-1 w-2 h-2 bg-[#f87171] rounded-full border border-[var(--c-backdrop)]" />
+              )}
             </div>
             <span className={`text-[9px] uppercase font-medium ${
               active === t.id ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
@@ -2699,6 +2711,14 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
     setSnoozes(prev => { const next = { ...prev }; delete next[memberId]; return next })
   }
 
+  const readMap = Object.fromEntries(myReads.map(r => [r.thread_id, r.last_read_at]))
+  const unreadCount = threads.filter(t => {
+    const lastMsg = lastMessages.find(m => m.thread_id === t.id)
+    if (!lastMsg || lastMsg.author_id === userId) return false
+    const readAt = readMap[t.id]
+    return !readAt || new Date(lastMsg.created_at) > new Date(readAt)
+  }).length
+
   const TAB_TITLES: Record<CoachTab, string> = {
     home: 'Home',
     members: 'Members',
@@ -2773,6 +2793,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
         avatarColor={avatarColor}
         avatarUrl={avatarUrl}
         userEmail={userEmail}
+        unreadCount={unreadCount}
       />
     </div>
   )
