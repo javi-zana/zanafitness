@@ -2170,7 +2170,10 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
                 {(c.display_name ?? c.ig_username ?? '?').slice(0, 1).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold truncate">{c.display_name ?? c.ig_username ?? c.id}</p>
+                <div className="flex items-baseline gap-1.5 min-w-0">
+                  <p className="text-sm font-semibold truncate">{c.display_name ?? c.ig_username ?? c.id}</p>
+                  {c.ig_username && <p className="text-[10px] text-[var(--c-text5)] truncate shrink-0">@{c.ig_username}</p>}
+                </div>
                 <p className="text-xs text-[var(--c-text4)] truncate mt-0.5">{c.last_message_body ?? ''}</p>
               </div>
               {c.last_message_at && (
