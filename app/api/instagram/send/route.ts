@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
             actions: [],
             quick_replies: [],
           },
+          message_tag: 'HUMAN_AGENT',
         },
       }),
     })
