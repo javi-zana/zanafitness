@@ -2066,6 +2066,24 @@ type IgMessage = {
 
 const DROP_LINK_TEXT = `honestly ur the exact guy this works for\n\napply here https://zanafitness.com/apply, takes 3 mins. ill send you an email after to lock in a quick 15-min call where we map out the plan 🤝`
 
+// Javi already sends the opener auto-reply asking "what's the #1 thing you're trying to change"
+// So templates pick up from their response to that question
+const TEMPLATES: { stage: string; text: string }[] = [
+  { stage: 'Qualify', text: "how long have you been dealing with that?" },
+  { stage: 'Qualify', text: "what have you tried so far?" },
+  { stage: 'Qualify', text: "what's been the hardest part for you?" },
+  { stage: 'Qualify', text: "are you training at all rn or starting from scratch?" },
+  { stage: 'Qualify', text: "what does your routine look like right now?" },
+  { stage: 'Validate', text: "yeah that makes a lot of sense bro, that's one of the most common things i hear" },
+  { stage: 'Validate', text: "i get that, it's frustrating when you put in effort and nothing moves" },
+  { stage: 'Confirm',  text: "yeah that's exactly what we help with, body recomp is literally our thing" },
+  { stage: 'Confirm',  text: "sounds like you'd be a solid fit honestly" },
+  { stage: 'Convert',  text: "want to hop on a quick 15 mins? i'll map out exactly what we'd do for you" },
+  { stage: 'Convert',  text: "fill this out when you get a chance, takes 3 mins → zanafitness.com/apply" },
+  { stage: 'Decline',  text: "hey i appreciate you sharing that with me. based on where you're at right now, i don't think we'd be the best fit — but that doesn't mean you can't get there. keep going and feel free to reach out down the road 🙏" },
+  { stage: 'Decline',  text: "thanks for being open with me. i want to be honest — i think you'd benefit more from getting some foundations in place first before joining a structured program. the door's always open when you're ready 💪" },
+]
+
 function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string }) {
   const supabase = createClient()
   const [convos, setConvos] = useState<IgConversation[]>([])
@@ -2073,8 +2091,7 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
   const [messages, setMessages] = useState<IgMessage[]>([])
   const [reply, setReply] = useState('')
   const [sending, setSending] = useState(false)
-  const [suggesting, setSuggesting] = useState(false)
-  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [showTemplates, setShowTemplates] = useState(false)
   const [filterBucket, setFilterBucket] = useState('all')
   const [loadingMsgs, setLoadingMsgs] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -2104,7 +2121,7 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
     if (!selectedId) return
     setLoadingMsgs(true)
     setMessages([])
-    setSuggestions([])
+    setShowTemplates(false)
     supabase
       .from('ig_messages')
       .select('*')
@@ -2138,43 +2155,20 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
     const tempId = `temp-${Date.now()}`
     setSending(true)
     setReply('')
-    setSuggestions([])
+    setShowTemplates(false)
     // Show message instantly
     setMessages(prev => [...prev, { id: tempId, conversation_id: selectedId, direction: 'outbound', body: text, sent_at: new Date().toISOString(), ai_suggested: false }])
     setConvos(prev => prev.map(c => c.id === selectedId ? { ...c, bucket: c.bucket === 'new' ? 'interviewing' : c.bucket, last_message_body: text, last_message_at: new Date().toISOString(), unread: false } : c))
     setSending(false) // re-enable button immediately
 
-    // Send in background — remove optimistic msg if it fails
+    // Send in background
     fetch('/api/instagram/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ conversationId: selectedId, message: text }),
     }).then(async res => {
-      if (!res.ok) {
-        console.error('[send] failed, removing optimistic message')
-        setMessages(prev => prev.filter(m => m.id !== tempId))
-      }
-    }).catch(() => {
-      setMessages(prev => prev.filter(m => m.id !== tempId))
-    })
-  }
-
-  async function handleSuggest() {
-    if (!selectedId || suggesting || messages.length === 0) return
-    setSuggesting(true)
-    setSuggestions([])
-    const formatted = messages.map(m => ({
-      role: m.direction === 'inbound' ? 'user' : 'assistant',
-      content: m.body,
-    }))
-    const res = await fetch('/api/instagram/suggest', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: formatted }),
-    })
-    const json = await res.json()
-    if (json.suggestions?.length) setSuggestions(json.suggestions)
-    setSuggesting(false)
+      if (!res.ok) console.error('[send] failed:', await res.json().catch(() => null))
+    }).catch(err => console.error('[send] error:', err))
   }
 
   async function markRead(id: string) {
@@ -2331,27 +2325,33 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
             </div>
 
             <div className="px-4 py-3 border-t border-[var(--c-border)] space-y-2 shrink-0">
-              {suggestions.length > 0 && (
-                <div className="space-y-1.5">
-                  {suggestions.map((s, i) => (
-                    <button
-                      key={i}
-                      onClick={() => { setReply(s); setSuggestions([]) }}
-                      className="w-full text-left px-3 py-2 rounded-xl bg-[var(--c-card)] border border-[var(--c-border)] hover:border-[#b0e455]/50 transition-colors text-xs text-[var(--c-text)] leading-snug"
-                    >
-                      <span className="text-[10px] font-bold text-[var(--c-accent-text)] mr-1.5">{i === 0 ? 'A' : 'B'}</span>
-                      {s}
-                    </button>
-                  ))}
+              {showTemplates && (
+                <div className="border border-[var(--c-border)] rounded-xl overflow-hidden max-h-52 overflow-y-auto">
+                  {(['Qualify', 'Validate', 'Confirm', 'Convert', 'Decline'] as const).map(stage => {
+                    const stageTpls = TEMPLATES.filter(t => t.stage === stage)
+                    return (
+                      <div key={stage}>
+                        <p className="px-3 py-1 text-[9px] font-bold uppercase tracking-widest text-[var(--c-text4)] bg-[var(--c-bg)] border-b border-[var(--c-border)]">{stage}</p>
+                        {stageTpls.map((t, i) => (
+                          <button
+                            key={i}
+                            onClick={() => { setReply(t.text); setShowTemplates(false) }}
+                            className="w-full text-left px-3 py-2 text-xs text-[var(--c-text)] hover:bg-[var(--c-card2)] border-b border-[var(--c-border)] last:border-0 transition-colors leading-snug"
+                          >
+                            {t.text}
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
               <div className="flex gap-2">
                 <button
-                  onClick={handleSuggest}
-                  disabled={suggesting || messages.length === 0}
-                  className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--c-border)] text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)] transition disabled:opacity-40"
+                  onClick={() => setShowTemplates(p => !p)}
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${showTemplates ? 'border-[#b0e455]/60 text-[var(--c-accent-text)] bg-[#b0e455]/10' : 'border-[var(--c-border)] text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'}`}
                 >
-                  {suggesting ? '…' : '✦ AI Suggest'}
+                  ⚡ Templates
                 </button>
                 <button
                   onClick={() => setReply(DROP_LINK_TEXT)}
