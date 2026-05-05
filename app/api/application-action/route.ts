@@ -123,7 +123,10 @@ function acceptEmailHtml(firstName: string) {
 </html>`
 }
 
-function declineEmailHtml(firstName: string) {
+function declineEmailHtml(firstName: string, personalNote?: string) {
+  const noteHtml = personalNote?.trim()
+    ? `<p style="margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.75;color:#333333;font-style:italic;border-left:3px solid #d4d4d0;padding-left:16px;">${personalNote.trim()}</p>`
+    : ''
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -156,6 +159,8 @@ function declineEmailHtml(firstName: string) {
           <p style="margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:700;color:#111111;line-height:1.3;">
             Hey ${firstName}.
           </p>
+
+          ${noteHtml}
 
           <p style="margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.75;color:#444444;">
             Thank you for taking the time — I genuinely read every application, and yours was no different.
@@ -211,7 +216,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { applicationId, action } = await req.json()
+  const { applicationId, action, personalNote } = await req.json()
   if (!applicationId || !['accept', 'decline'].includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
@@ -246,7 +251,7 @@ export async function POST(req: NextRequest) {
     subject: action === 'accept'
       ? "Let's talk — here's the link to book your call"
       : 'Your Zana Application',
-    html: action === 'accept' ? acceptEmailHtml(firstName) : declineEmailHtml(firstName),
+    html: action === 'accept' ? acceptEmailHtml(firstName) : declineEmailHtml(firstName, personalNote),
   })
 
   if (emailErr) {

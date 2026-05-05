@@ -1825,6 +1825,7 @@ function ApplicationsSection() {
   const [selectedApp, setSelectedApp] = useState<Application | null>(null)
   const [actionState, setActionState] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [declineFlow, setDeclineFlow] = useState<{ appId: string; note: string; step: 'compose' | 'preview' } | null>(null)
 
   useEffect(() => {
     fetch('/api/admin-applications')
@@ -1842,19 +1843,20 @@ function ApplicationsSection() {
     }
   }, [apps]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleAction(appId: string, action: 'accept' | 'decline') {
+  async function handleAction(appId: string, action: 'accept' | 'decline', personalNote?: string) {
     setActionState(s => ({ ...s, [appId]: 'loading' }))
     try {
       const res = await fetch('/api/application-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId: appId, action }),
+        body: JSON.stringify({ applicationId: appId, action, personalNote }),
       })
       const json = await res.json().catch(() => ({}))
       if (res.ok) {
         const newStatus = action === 'accept' ? 'call_booked' : 'closed'
         setApps(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus, responded_at: new Date().toISOString() } : a))
         setActionState(s => ({ ...s, [appId]: 'done' }))
+        if (action === 'decline') setDeclineFlow(null)
       } else {
         console.error('application-action error:', json.error)
         setActionState(s => ({ ...s, [appId]: 'error' }))
@@ -1988,11 +1990,15 @@ function ApplicationsSection() {
                       {col.key === 'new' && (
                         <div className="flex gap-1.5 mt-2.5">
                           <button
-                            onClick={e => { e.stopPropagation(); handleAction(app.id, 'decline') }}
+                            onClick={e => {
+                              e.stopPropagation()
+                              setSelectedApp(app)
+                              setDeclineFlow({ appId: app.id, note: '', step: 'compose' })
+                            }}
                             disabled={state === 'loading'}
                             className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-red-400 hover:border-red-400/30 transition disabled:opacity-40"
                           >
-                            {state === 'loading' ? '…' : 'Decline'}
+                            Decline
                           </button>
                           <button
                             onClick={e => { e.stopPropagation(); handleAction(app.id, 'accept') }}
@@ -2180,21 +2186,88 @@ function ApplicationsSection() {
 
               {/* Actions */}
               {colKey === 'new' && (
-                <div className="flex gap-3 pt-2 border-t border-[var(--c-border)]">
-                  <button
-                    onClick={() => handleAction(app.id, 'decline')}
-                    disabled={state === 'loading'}
-                    className="flex-1 py-3 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[#f87171] hover:border-[#f87171]/30 transition disabled:opacity-40"
-                  >
-                    {state === 'loading' ? '…' : state === 'error' ? 'Error — retry' : 'Decline'}
-                  </button>
-                  <button
-                    onClick={() => handleAction(app.id, 'accept')}
-                    disabled={state === 'loading'}
-                    className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
-                  >
-                    {state === 'loading' ? 'Sending…' : state === 'done' ? 'Sent ✓' : 'Accept — Send Invite'}
-                  </button>
+                <div className="pt-2 border-t border-[var(--c-border)] space-y-3">
+                  {/* Decline flow — compose or preview step */}
+                  {declineFlow?.appId === app.id ? (
+                    <>
+                      {declineFlow.step === 'compose' && (
+                        <>
+                          <div>
+                            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-2">Personal note <span className="normal-case tracking-normal text-[var(--c-text5)]">— optional, appears at the top of the email</span></p>
+                            <textarea
+                              value={declineFlow.note}
+                              onChange={e => setDeclineFlow(prev => prev ? { ...prev, note: e.target.value } : null)}
+                              placeholder={`e.g. Really appreciated your honesty about where you're at — that kind of self-awareness is rare.`}
+                              rows={3}
+                              className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[var(--c-border)] resize-none transition leading-relaxed"
+                            />
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setDeclineFlow(null)}
+                              className="flex-1 py-2.5 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => setDeclineFlow(prev => prev ? { ...prev, step: 'preview' } : null)}
+                              className="flex-1 py-2.5 rounded-2xl bg-[var(--c-card2)] border border-[var(--c-border2)] text-sm text-[var(--c-text2)] hover:text-[var(--c-text)] transition"
+                            >
+                              Preview →
+                            </button>
+                          </div>
+                        </>
+                      )}
+                      {declineFlow.step === 'preview' && (
+                        <>
+                          <div className="bg-[var(--c-bg)] rounded-2xl p-4 space-y-2.5 border border-[var(--c-border)]">
+                            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Email preview — to {app.email}</p>
+                            <p className="text-sm font-bold text-[var(--c-text)]">Hey {app.first_name ?? 'there'}.</p>
+                            {declineFlow.note.trim() && (
+                              <p className="text-sm text-[var(--c-text)] italic leading-relaxed border-l-2 border-[var(--c-border2)] pl-3">{declineFlow.note.trim()}</p>
+                            )}
+                            <p className="text-sm text-[var(--c-text2)] leading-relaxed">Thank you for taking the time — I genuinely read every application, and yours was no different.</p>
+                            <p className="text-xs text-[var(--c-text4)] leading-relaxed">After sitting with it, I don&apos;t think the timing is right for us to work together. That&apos;s not a reflection of your goals or your drive — it&apos;s about fit...</p>
+                            <p className="text-xs text-[var(--c-text4)]">...Wishing you real progress on this. Keep going. 💪</p>
+                            <p className="text-sm text-[var(--c-text3)]">All the best,<br /><span className="font-semibold text-[var(--c-text2)]">Javi</span></p>
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setDeclineFlow(prev => prev ? { ...prev, step: 'compose' } : null)}
+                              className="flex-1 py-2.5 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition"
+                            >
+                              ← Edit Note
+                            </button>
+                            <button
+                              onClick={() => handleAction(app.id, 'decline', declineFlow.note.trim() || undefined)}
+                              disabled={state === 'loading'}
+                              className="flex-1 py-2.5 rounded-2xl bg-red-500/10 border border-red-400/30 text-sm font-semibold text-red-400 hover:bg-red-500/15 transition disabled:opacity-40"
+                            >
+                              {state === 'loading' ? 'Sending…' : state === 'error' ? 'Error — retry' : 'Send Email'}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    /* Normal accept / decline buttons */
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setDeclineFlow({ appId: app.id, note: '', step: 'compose' })}
+                        disabled={state === 'loading'}
+                        className="flex-1 py-3 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[#f87171] hover:border-[#f87171]/30 transition disabled:opacity-40"
+                      >
+                        Decline
+                      </button>
+                      <button
+                        onClick={() => handleAction(app.id, 'accept')}
+                        disabled={state === 'loading'}
+                        className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+                      >
+                        {state === 'loading' ? 'Sending…' : state === 'done' ? 'Sent ✓' : 'Accept — Send Invite'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 

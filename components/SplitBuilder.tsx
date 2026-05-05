@@ -26,7 +26,7 @@ function extractCustomGroups(days: SplitDay[]): string[] {
       if (!PRESET_MUSCLE_GROUPS.includes(g)) customs.add(g)
     }
   }
-  return [...customs]
+  return Array.from(customs)
 }
 
 // ─── SplitBuilder (coach editor) ─────────────────────────────────────────────
