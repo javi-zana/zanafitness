@@ -12,7 +12,7 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
-type Feature = { text: string; included: boolean };
+type Feature = { text: string; included: boolean; emphasize?: string };
 
 function PlanCard({
   label,
@@ -98,11 +98,18 @@ function PlanCard({
                   <X className="w-3 h-3 text-[#edf5e2]/20" strokeWidth={2.5} />
                 )}
               </div>
-              <span className={`text-sm ${
-                f.included
-                  ? featured ? "text-[#0f1a0c]/80" : "text-[#edf5e2]/70"
-                  : "text-[#edf5e2]/20 line-through"
-              }`}>{f.text}</span>
+              {(() => {
+                const cls = `text-sm ${f.included ? (featured ? "text-[#0f1a0c]/80" : "text-[#edf5e2]/70") : "text-[#edf5e2]/20 line-through"}`;
+                if (f.emphasize && f.text.includes(f.emphasize)) {
+                  const [before, after] = f.text.split(f.emphasize);
+                  return (
+                    <span className={cls}>
+                      {before}<span className={`font-bold ${featured ? "text-[#0f1a0c]" : "text-[#b0e455]"}`}>{f.emphasize}</span>{after}
+                    </span>
+                  );
+                }
+                return <span className={cls}>{f.text}</span>;
+              })()}
             </li>
           ))}
         </ul>
@@ -132,6 +139,8 @@ const committedFeatures: Feature[] = [
   { text: "Weekly check-ins with your coach", included: true },
   { text: "Direct access to Javi", included: true },
   { text: "Supplement & recovery guidance", included: true },
+  { text: "Video Calls on Demand", included: false },
+  { text: "Quarterly progress review call", included: false },
 ];
 
 const allInFeatures: Feature[] = [
@@ -139,9 +148,9 @@ const allInFeatures: Feature[] = [
   { text: "Personalised training split", included: true },
   { text: "Custom nutrition & macros", included: true },
   { text: "Weekly check-ins with your coach", included: true },
-  { text: "Video Calls on Demand", included: true },
-  { text: "Priority access to Javi", included: true },
+  { text: "Priority access to Javi", included: true, emphasize: "Priority" },
   { text: "Supplement & recovery guidance", included: true },
+  { text: "Video Calls on Demand", included: true },
   { text: "Quarterly progress review call", included: true },
 ];
 
