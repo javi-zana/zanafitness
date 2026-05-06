@@ -31,6 +31,20 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const pathname = request.nextUrl.pathname
+  const searchParams = request.nextUrl.searchParams
+
+  // Supabase auth errors redirect to the site root — catch and forward to login
+  if (pathname === '/' && searchParams.get('error')) {
+    const errorCode = searchParams.get('error_code')
+    const message = errorCode === 'otp_expired'
+      ? 'This link has expired. Please request a new one.'
+      : 'Authentication failed. Please try again.'
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.search = ''
+    url.searchParams.set('error', message)
+    return NextResponse.redirect(url)
+  }
 
   // Paths that require login only
   const authPaths = ['/profile', '/onboarding']
