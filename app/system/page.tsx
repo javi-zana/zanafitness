@@ -49,12 +49,14 @@ function PlanCard({
 
       {/* Header block */}
       <div className={`px-8 pt-8 pb-6 border-b ${featured ? "border-[#0f1a0c]/10" : "border-[#b0e455]/8"}`}>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between min-h-[24px] mb-4">
           <p className={`text-[10px] font-bold tracking-[0.2em] uppercase ${featured ? "text-[#0f1a0c]/50" : "text-[#b0e455]"}`}>{label}</p>
-          {featured && (
+          {featured ? (
             <span className="inline-block bg-[#0f1a0c] text-[#b0e455] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">
               Best Value
             </span>
+          ) : (
+            <span className="inline-block text-[10px] px-3 py-1 opacity-0 select-none">Best Value</span>
           )}
         </div>
 
