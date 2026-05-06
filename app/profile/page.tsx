@@ -348,7 +348,7 @@ export default function ProfilePage() {
             <textarea
               value={bio}
               onChange={e => setBio(e.target.value)}
-              placeholder="Tell the community a bit about yourself..."
+              placeholder="Tell us a bit about yourself..."
               rows={3}
               maxLength={200}
               className={`${inputCls} resize-none leading-relaxed`}

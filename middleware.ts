@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
   // Paths that require login only
   const authPaths = ['/profile', '/onboarding']
   // Paths that require login AND active subscription
-  const memberPaths = ['/dashboard', '/workout', '/nutrition', '/progress', '/guidance', '/stats', '/program', '/messages', '/community', '/schedule', '/coach']
+  const memberPaths = ['/dashboard', '/workout', '/nutrition', '/progress', '/guidance', '/stats', '/program', '/messages', '/schedule', '/coach']
 
   const needsAuth = authPaths.some(p => pathname.startsWith(p))
   const needsMembership = memberPaths.some(p => pathname.startsWith(p))

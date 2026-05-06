@@ -242,8 +242,7 @@ export default function LandingPage() {
                 {[
                   "Your training plan, updated as you progress",
                   "Weekly check-ins reviewed by Javi",
-                  "Direct messaging — coach + community",
-                  "Community feed to stay accountable",
+                  "Direct messaging with your coach",
                   "Weekly calendar & upcoming events",
                 ].map(f => (
                   <div key={f} className="flex gap-3 items-center">

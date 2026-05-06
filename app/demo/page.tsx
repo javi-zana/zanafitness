@@ -3,12 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 
-type Tab = "home" | "programs" | "community" | "messages" | "schedule";
+type Tab = "home" | "programs" | "messages" | "schedule";
 
 const NAV: { id: Tab; label: string; icon: React.ReactNode }[] = [
   { id: "home", label: "Home", icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round"/></svg> },
   { id: "programs", label: "Program", icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round"/></svg> },
-  { id: "community", label: "Community", icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round"/></svg> },
   { id: "messages", label: "Messages", icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round"/></svg> },
   { id: "schedule", label: "Schedule", icon: <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round"/></svg> },
 ];
@@ -195,55 +194,6 @@ function ProgramsTab() {
   );
 }
 
-function CommunityTab() {
-  const posts = [
-    { initials: "JL", name: "Javi", color: "#b0e455", time: "Today", category: "Announcement", content: "Big win from the team this week - 4 members hit PRs on deadlift. This is what consistent overload looks like. Keep going.", likes: 24, isCoach: true },
-    { initials: "PS", name: "Priya S.", color: "#86efac", time: "Today", category: "Check-in", content: "Week 7 Day 3 - Deadlifts felt strong. Hit 145kg × 3. Sleep has been 8hrs consistently. Feel like it's clicking now.", likes: 18, isCoach: false },
-    { initials: "MC", name: "Marcus C.", color: "#fbbf24", time: "Today", category: "Win", content: "New bench PR - 185 lbs × 5. Three weeks in and the numbers are moving. No going back now.", likes: 31, isCoach: false },
-  ];
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-xs text-[#edf5e2]/30 tracking-wider uppercase mb-0.5">Zana</p>
-        <h1 className="text-xl font-bold tracking-tight">Community</h1>
-      </div>
-      <div className="flex gap-2 border-b border-[#b0e455]/8 pb-0">
-        {["Announcements", "Wins", "Random"].map((t, i) => (
-          <button key={t} className={`px-4 py-2.5 text-sm font-medium border-b-2 -mb-px ${i === 0 ? "border-[#b0e455] text-[#b0e455]" : "border-transparent text-[#edf5e2]/30"}`}>{t}</button>
-        ))}
-      </div>
-      <div className="relative">
-        <textarea disabled placeholder="Share a win, ask a question..." className="w-full bg-[#1c2e16] border border-[#b0e455]/8 rounded-2xl p-4 text-sm text-[#edf5e2]/20 placeholder-[#edf5e2]/20 resize-none h-16 cursor-not-allowed"/>
-        <LockedOverlay/>
-      </div>
-      <div className="space-y-3">
-        {posts.map((p, i) => (
-          <div key={i} className={`rounded-2xl p-4 border ${p.isCoach ? "bg-[#162212] border-[#b0e455]/25 border-l-4 border-l-[#b0e455]" : "bg-[#1c2e16] border-[#b0e455]/8"}`}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0" style={{ color: p.color, backgroundColor: p.color + "15", border: `1px solid ${p.color}40` }}>{p.initials}</div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-[#edf5e2]">{p.name}</p>
-                  {p.isCoach && <span className="text-[9px] tracking-widest uppercase px-1.5 py-0.5 rounded-full bg-[#b0e455]/10 text-[#b0e455] border border-[#b0e455]/30 font-semibold">Coach</span>}
-                </div>
-                <p className="text-[10px] text-[#edf5e2]/30">{p.time} · {p.category}</p>
-              </div>
-            </div>
-            <p className="text-sm text-[#edf5e2]/70 leading-relaxed">{p.content}</p>
-            <div className="mt-3 flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#edf5e2]/25" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                <span className="text-xs text-[#edf5e2]/30">{p.likes}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function MessagesTab() {
   return (
     <div className="space-y-4">
@@ -331,7 +281,6 @@ export default function DemoPage() {
   const tabContent: Record<Tab, React.ReactNode> = {
     home: <HomeTab/>,
     programs: <ProgramsTab/>,
-    community: <CommunityTab/>,
     messages: <MessagesTab/>,
     schedule: <ScheduleTab/>,
   };

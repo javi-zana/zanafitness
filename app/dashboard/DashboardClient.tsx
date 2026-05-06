@@ -27,7 +27,6 @@ type Props = {
   threadId: string | null
   userId: string
   unreadCount: number
-  latestAnnouncement: { id: string; title: string; created_at: string } | null
   workoutDates: string[]
   milestones: string[]
   referralCode: string | null
@@ -66,13 +65,6 @@ function relTime(dateStr: string) {
   if (mins < 1) return 'just now'
   if (mins < 60) return `${mins}m ago`
   if (hours < 24) return `${hours}h ago`
-  return `${days}d ago`
-}
-
-function annRelTime(dateStr: string) {
-  const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000)
-  if (days === 0) return 'Today'
-  if (days === 1) return 'Yesterday'
   return `${days}d ago`
 }
 
@@ -303,7 +295,6 @@ export default function DashboardClient({
   threadId,
   userId,
   unreadCount: initialUnread,
-  latestAnnouncement,
   workoutDates,
   milestones,
   referralCode,
@@ -456,37 +447,10 @@ export default function DashboardClient({
           {/* ── Content ────────────────────────────────────────────────────────── */}
           <div className="px-5 lg:px-10 space-y-3 pt-4 pb-4">
 
-            {/* Announcement — dark card so it pops against white background */}
-            {latestAnnouncement && (
-              <Link href="/community"
-                className="block rounded-2xl p-4 active:scale-[0.99] transition-all overflow-hidden relative"
-                style={{ background: 'linear-gradient(135deg, #0f1a0c 0%, #1a3010 100%)' }}
-              >
-                <div className="absolute -top-8 -right-4 w-28 h-28 rounded-full bg-[#b0e455]/8 blur-2xl pointer-events-none" />
-                <div className="flex items-start gap-3 relative z-10">
-                  <div className="w-8 h-8 rounded-xl bg-[#b0e455]/20 flex items-center justify-center shrink-0">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-4 h-4">
-                      <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] text-[#b0e455] font-semibold uppercase tracking-wider mb-1">New Announcement</p>
-                    <p className="text-sm font-semibold text-white/90 leading-snug line-clamp-2">
-                      {latestAnnouncement.title}
-                    </p>
-                    <p className="text-xs text-white/40 mt-1">{annRelTime(latestAnnouncement.created_at)}</p>
-                  </div>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="w-4 h-4 opacity-30 shrink-0 mt-1">
-                    <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-              </Link>
-            )}
-
             {/* Week strip */}
             <WeekStrip workoutDates={workoutDates} />
 
-            {/* Check-in nudge — dark card to match announcement treatment */}
+            {/* Check-in nudge */}
             {needsUpdate && (
               <Link href="/stats"
                 className="block rounded-2xl p-4 active:scale-[0.99] transition-all overflow-hidden relative"
@@ -629,26 +593,6 @@ export default function DashboardClient({
 
             {/* Badges */}
             <BadgesSection milestones={milestones} />
-
-            {/* Community */}
-            <Link href="/community" className="block bg-[var(--c-card)] shadow-sm border border-[var(--c-border)] rounded-2xl p-4 hover:border-[var(--c-border2)] active:scale-[0.99] transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2" className="w-5 h-5">
-                    <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">Community</p>
-                  <p className="text-xs text-[var(--c-text4)] mt-0.5">Announcements & posts</p>
-                </div>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4 text-[var(--c-text5)] shrink-0">
-                  <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            </Link>
 
             {/* Referral */}
             {referralCode && <ReferralCard code={referralCode} />}
