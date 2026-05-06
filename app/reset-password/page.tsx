@@ -58,7 +58,7 @@ export default function ResetPasswordPage() {
     const { error: updateError } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (updateError) { setError(updateError.message); }
-    else { router.push('/dashboard'); router.refresh(); }
+    else { router.push('/auth/password-confirmed'); }
   };
 
   return (
