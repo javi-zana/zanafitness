@@ -1728,7 +1728,10 @@ function MessagesTab({
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [bucket, setBucket] = useState<MsgBucket>('all')
   const [showNewChat, setShowNewChat] = useState(false)
+  const [newChatMode, setNewChatMode] = useState<'dm' | 'group'>('dm')
   const [newChatSearch, setNewChatSearch] = useState('')
+  const [groupSelected, setGroupSelected] = useState<string[]>([])
+  const [groupName, setGroupName] = useState('')
   const [creatingChat, setCreatingChat] = useState(false)
   const [createChatError, setCreateChatError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -1883,6 +1886,52 @@ function MessagesTab({
     setCreatingChat(false)
   }
 
+  async function createGroup() {
+    if (groupSelected.length < 2) { setCreateChatError('Pick at least 2 people.'); return }
+    setCreatingChat(true)
+    setCreateChatError(null)
+    try {
+      const res = await fetch('/api/create-thread', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'custom', participant_ids: groupSelected, title: groupName.trim() || null }),
+      })
+      const json = await res.json()
+      if (!res.ok) { setCreateChatError(json.error ?? 'Failed to create group'); setCreatingChat(false); return }
+      if (json.thread_id) {
+        setShowNewChat(false)
+        setNewChatSearch('')
+        setGroupSelected([])
+        setGroupName('')
+        const selectedPeople = dmOptions.filter(o => groupSelected.includes(o.id))
+        const newThread: Thread = {
+          id: json.thread_id,
+          member_id: null,
+          thread_type: 'custom',
+          title: groupName.trim() || null,
+          is_group: true,
+          last_message_at: null,
+          participants: [
+            { user_id: userId, first_name: myName, email: '', role: isHeadCoach ? 'head_coach' : 'coach', avatar_url: myAvatarUrl, avatar_color: myAvatarColor },
+            ...selectedPeople.map(p => ({ user_id: p.id, first_name: p.name, email: '', role: p.label === 'Head Coach' ? 'head_coach' : p.label === 'Coach' ? 'coach' : 'member', avatar_url: p.avatarUrl, avatar_color: p.avatarColor })),
+          ],
+        }
+        setAllThreads(prev => [newThread, ...prev])
+        openThread(json.thread_id)
+      }
+    } catch { setCreateChatError('Network error — check your connection.') }
+    setCreatingChat(false)
+  }
+
+  function resetNewChat() {
+    setShowNewChat(false)
+    setNewChatMode('dm')
+    setNewChatSearch('')
+    setGroupSelected([])
+    setGroupName('')
+    setCreateChatError(null)
+  }
+
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   }
@@ -1948,39 +1997,106 @@ function MessagesTab({
         {showNewChat && (
           <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-[var(--c-text)] uppercase tracking-wider">Start a conversation</p>
-              <button onClick={() => { setShowNewChat(false); setCreateChatError(null) }} className="text-[var(--c-text4)] hover:text-[var(--c-text)] text-lg leading-none">×</button>
+              <p className="text-xs font-semibold text-[var(--c-text)] uppercase tracking-wider">New conversation</p>
+              <button onClick={resetNewChat} className="text-[var(--c-text4)] hover:text-[var(--c-text)] text-lg leading-none">×</button>
             </div>
+
+            {/* DM / Group toggle — head coach only */}
+            {isHeadCoach && (
+              <div className="flex gap-1 bg-[var(--c-card2)] rounded-xl p-1">
+                <button onClick={() => { setNewChatMode('dm'); setGroupSelected([]); setCreateChatError(null) }}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition ${newChatMode === 'dm' ? 'bg-[var(--c-card)] text-[var(--c-text)] shadow-sm' : 'text-[var(--c-text4)]'}`}>
+                  Direct Message
+                </button>
+                <button onClick={() => { setNewChatMode('group'); setCreateChatError(null) }}
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition ${newChatMode === 'group' ? 'bg-[var(--c-card)] text-[var(--c-text)] shadow-sm' : 'text-[var(--c-text4)]'}`}>
+                  Group Chat
+                </button>
+              </div>
+            )}
+
             {createChatError && (
               <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-3 py-2 text-xs text-[#f87171]">{createChatError}</div>
             )}
+
+            {/* Group name input */}
+            {newChatMode === 'group' && (
+              <input
+                value={groupName}
+                onChange={e => setGroupName(e.target.value)}
+                placeholder="Group name (optional)…"
+                className="w-full bg-[var(--c-card2)] border border-[var(--c-border)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40"
+              />
+            )}
+
             <input
               value={newChatSearch}
               onChange={e => setNewChatSearch(e.target.value)}
-              placeholder="Search by name…"
+              placeholder={newChatMode === 'group' ? 'Add people…' : 'Search by name…'}
               className="w-full bg-[var(--c-card2)] border border-[var(--c-border)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40"
             />
+
+            {/* Selected group members chips */}
+            {newChatMode === 'group' && groupSelected.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {groupSelected.map(id => {
+                  const o = dmOptions.find(x => x.id === id)
+                  return o ? (
+                    <span key={id} className="flex items-center gap-1.5 bg-[#b0e455]/15 border border-[#b0e455]/30 text-[var(--c-text)] text-xs font-medium px-2.5 py-1 rounded-full">
+                      {o.name}
+                      <button onClick={() => setGroupSelected(prev => prev.filter(x => x !== id))} className="text-[var(--c-text4)] hover:text-[var(--c-text)] leading-none">×</button>
+                    </span>
+                  ) : null
+                })}
+              </div>
+            )}
+
             <div className="space-y-1 max-h-48 overflow-y-auto">
-              {filteredDmOptions.map(o => (
-                <button
-                  key={o.id}
-                  onClick={() => startDM(o.id)}
-                  disabled={creatingChat}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[var(--c-card2)] transition text-left disabled:opacity-50"
-                >
-                  {o.avatarUrl
-                    ? <img src={o.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" style={{ border: `1.5px solid ${o.avatarColor ?? '#b0e455'}` }} />
-                    : <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: (o.avatarColor ?? '#b0e455') + '22', border: `1.5px solid ${o.avatarColor ?? '#b0e455'}`, color: o.avatarColor ?? '#b0e455' }}>{o.name.charAt(0).toUpperCase()}</div>
-                  }
-                  <div>
-                    <p className="text-sm font-medium text-[var(--c-text)]">{o.name}</p>
-                    <p className="text-xs text-[var(--c-text4)]">{o.label}</p>
-                  </div>
-                  {creatingChat && <div className="ml-auto w-4 h-4 border-2 border-[var(--c-border2)] border-t-[#b0e455] rounded-full animate-spin shrink-0" />}
-                </button>
-              ))}
-              {filteredDmOptions.length === 0 && <p className="text-xs text-[var(--c-text4)] px-3 py-2">No results</p>}
+              {filteredDmOptions.filter(o => !groupSelected.includes(o.id)).map(o => {
+                const isSelected = groupSelected.includes(o.id)
+                return (
+                  <button
+                    key={o.id}
+                    onClick={() => {
+                      if (newChatMode === 'dm') { startDM(o.id) }
+                      else { setGroupSelected(prev => prev.includes(o.id) ? prev.filter(x => x !== o.id) : [...prev, o.id]) }
+                    }}
+                    disabled={creatingChat}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition text-left disabled:opacity-50 ${isSelected ? 'bg-[#b0e455]/10' : 'hover:bg-[var(--c-card2)]'}`}
+                  >
+                    {o.avatarUrl
+                      ? <img src={o.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" style={{ border: `1.5px solid ${o.avatarColor ?? '#b0e455'}` }} />
+                      : <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: (o.avatarColor ?? '#b0e455') + '22', border: `1.5px solid ${o.avatarColor ?? '#b0e455'}`, color: o.avatarColor ?? '#b0e455' }}>{o.name.charAt(0).toUpperCase()}</div>
+                    }
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-[var(--c-text)]">{o.name}</p>
+                      <p className="text-xs text-[var(--c-text4)]">{o.label}</p>
+                    </div>
+                    {newChatMode === 'dm' && creatingChat && <div className="w-4 h-4 border-2 border-[var(--c-border2)] border-t-[#b0e455] rounded-full animate-spin shrink-0" />}
+                    {newChatMode === 'group' && (
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition ${isSelected ? 'bg-[#b0e455] border-[#b0e455]' : 'border-[var(--c-border2)]'}`}>
+                        {isSelected && <svg viewBox="0 0 24 24" fill="none" stroke="#0b1509" strokeWidth="3" className="w-3 h-3"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+              {filteredDmOptions.filter(o => !groupSelected.includes(o.id)).length === 0 && (
+                <p className="text-xs text-[var(--c-text4)] px-3 py-2">{groupSelected.length > 0 ? 'Everyone added' : 'No results'}</p>
+              )}
             </div>
+
+            {/* Group create button */}
+            {newChatMode === 'group' && (
+              <button
+                onClick={createGroup}
+                disabled={creatingChat || groupSelected.length < 2}
+                className="w-full py-2.5 rounded-xl bg-[#b0e455] text-[#0b1509] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40 flex items-center justify-center gap-2"
+              >
+                {creatingChat ? <div className="w-4 h-4 border-2 border-[#0b1509]/30 border-t-[#0b1509] rounded-full animate-spin" /> : null}
+                Create Group {groupSelected.length >= 2 ? `(${groupSelected.length + 1})` : ''}
+              </button>
+            )}
           </div>
         )}
 
