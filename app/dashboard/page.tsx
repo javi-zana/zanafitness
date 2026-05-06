@@ -111,6 +111,8 @@ export default async function DashboardPage() {
       weightUnit={((p?.weight_unit as string | null) as 'kg' | 'lb') ?? 'kg'}
       recentStats={stats ?? []}
       hasThread={!!thread}
+      threadId={thread?.id ?? null}
+      userId={user.id}
       unreadCount={unreadCount}
       latestAnnouncement={latestAnn ?? null}
       workoutDates={Array.from(new Set([

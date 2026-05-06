@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import BottomNav from '@/components/BottomNav'
 import { useTheme } from '@/app/providers'
+import { createClient } from '@/utils/supabase/client'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,8 @@ type Props = {
   weightUnit: 'kg' | 'lb'
   recentStats: StatUpdate[]
   hasThread: boolean
+  threadId: string | null
+  userId: string
   unreadCount: number
   latestAnnouncement: { id: string; title: string; created_at: string } | null
   workoutDates: string[]
@@ -297,7 +300,9 @@ export default function DashboardClient({
   weightUnit,
   recentStats,
   hasThread,
-  unreadCount,
+  threadId,
+  userId,
+  unreadCount: initialUnread,
   latestAnnouncement,
   workoutDates,
   milestones,
@@ -305,6 +310,25 @@ export default function DashboardClient({
 }: Props) {
   const { theme } = useTheme()
   const dark = theme === 'dark'
+  const [unreadCount, setUnreadCount] = useState(initialUnread)
+
+  useEffect(() => {
+    if (!threadId) return
+    const supabase = createClient()
+    const channel = supabase.channel('dashboard-unread')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
+        const msg = payload.new as { author_id: string; thread_id: string }
+        if (msg.thread_id === threadId && msg.author_id !== userId) {
+          setUnreadCount(c => c + 1)
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reads' }, () => {
+        setUnreadCount(0)
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [threadId, userId]) // eslint-disable-line
+
   const name = firstName ?? 'there'
   const streak = computeStreak(workoutDates)
   const latest = recentStats[0] ?? null

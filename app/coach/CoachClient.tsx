@@ -1633,14 +1633,30 @@ function threadDisplayName(thread: Thread, myId: string): string {
   if (thread.thread_type === 'coaches_group') return 'Team Chat'
   if (thread.thread_type === 'group_member') {
     const member = thread.participants.find(p => p.role === 'member')
-    const name = member?.first_name ?? member?.email.split('@')[0] ?? 'Member'
-    return name + ' · Group'
+    return member?.first_name ?? member?.email.split('@')[0] ?? 'Group'
   }
   if (thread.thread_type === 'dm') {
     const other = thread.participants.find(p => p.user_id !== myId)
     return other?.first_name ?? other?.email.split('@')[0] ?? 'Direct Message'
   }
-  return thread.title ?? 'Chat'
+  const fallback = thread.participants.filter(p => p.user_id !== myId).map(p => p.first_name ?? p.email.split('@')[0]).join(', ') || 'Group'
+  return thread.title ?? fallback
+}
+
+function isGroupThread(thread: Thread) {
+  return thread.thread_type === 'group_member' || thread.thread_type === 'coaches_group' || thread.thread_type === 'custom' || thread.is_group
+}
+
+function GroupBadge() {
+  return (
+    <span className="inline-flex items-center gap-0.5 bg-[#b0e455]/15 border border-[#b0e455]/35 text-[#5a8a20] dark:text-[#b0e455] text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md shrink-0">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="w-2.5 h-2.5">
+        <circle cx="9" cy="8" r="3" /><path d="M3 21v-1a5 5 0 015-5h4a5 5 0 015 5v1" strokeLinecap="round" />
+        <path d="M16 4a3 3 0 010 6M21 21v-1a4 4 0 00-3-3.87" strokeLinecap="round" />
+      </svg>
+      Group
+    </span>
+  )
 }
 
 function threadSubLabel(thread: Thread, myId: string): string {
@@ -1734,6 +1750,9 @@ function MessagesTab({
   const [groupName, setGroupName] = useState('')
   const [creatingChat, setCreatingChat] = useState(false)
   const [createChatError, setCreateChatError] = useState<string | null>(null)
+  const [renamingThread, setRenamingThread] = useState(false)
+  const [renameValue, setRenameValue] = useState('')
+  const [renameSaving, setRenameSaving] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -2123,9 +2142,12 @@ function MessagesTab({
                 {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#f87171] rounded-full border-2 border-[var(--c-bg)]" />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm truncate ${unread ? 'font-semibold text-[var(--c-text)]' : 'text-[var(--c-text2)]'}`}>
-                  {threadDisplayName(thread, userId)}
-                </p>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  {isGroupThread(thread) && <GroupBadge />}
+                  <p className={`text-sm truncate ${unread ? 'font-semibold text-[var(--c-text)]' : 'text-[var(--c-text2)]'}`}>
+                    {threadDisplayName(thread, userId)}
+                  </p>
+                </div>
                 <p className="text-[10px] text-[var(--c-text4)] truncate">{threadSubLabel(thread, userId)}</p>
                 {last && (
                   <p className={`text-[11px] truncate mt-0.5 ${unread ? 'text-[var(--c-text3)]' : 'text-[var(--c-text4)]'}`}>{last.body || '📎 Attachment'}</p>
@@ -2154,8 +2176,51 @@ function MessagesTab({
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <div>
-          <p className="text-sm font-semibold text-[var(--c-text)]">{thread ? threadDisplayName(thread, userId) : 'Chat'}</p>
+        <div className="flex-1 min-w-0">
+          {renamingThread && thread ? (
+            <form
+              onSubmit={async e => {
+                e.preventDefault()
+                if (!renameValue.trim()) return
+                setRenameSaving(true)
+                await fetch('/api/rename-thread', {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ thread_id: thread.id, title: renameValue.trim() }),
+                })
+                setAllThreads(prev => prev.map((t: Thread) => t.id === thread.id ? { ...t, title: renameValue.trim() } : t))
+                setRenamingThread(false)
+                setRenameSaving(false)
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                autoFocus
+                value={renameValue}
+                onChange={e => setRenameValue(e.target.value)}
+                className="text-sm font-semibold bg-[var(--c-card)] border border-[var(--c-border2)] rounded-lg px-2 py-0.5 text-[var(--c-text)] focus:outline-none focus:border-[#b0e455]/60 w-40"
+              />
+              <button type="submit" disabled={renameSaving} className="text-xs text-[#b0e455] font-semibold disabled:opacity-40">Save</button>
+              <button type="button" onClick={() => setRenamingThread(false)} className="text-xs text-[var(--c-text4)]">Cancel</button>
+            </form>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              {thread && isGroupThread(thread) && <GroupBadge />}
+              <p className="text-sm font-semibold text-[var(--c-text)] truncate">{thread ? threadDisplayName(thread, userId) : 'Chat'}</p>
+              {thread && isGroupThread(thread) && isHeadCoach && (
+                <button
+                  onClick={() => { setRenameValue(thread.title ?? threadDisplayName(thread, userId)); setRenamingThread(true) }}
+                  className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition shrink-0"
+                  title="Rename"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-3.5 h-3.5">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
           {thread && <p className="text-[10px] text-[var(--c-text4)]">{threadSubLabel(thread, userId)}</p>}
         </div>
       </div>

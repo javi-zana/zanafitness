@@ -1,8 +1,7 @@
 "use client";
 
 import { Check, X, TrendingUp, Leaf, Target } from "lucide-react";
-import Navbar from "@/app/components/Navbar";
-import Footer from "@/app/components/Footer";
+
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
@@ -119,7 +118,6 @@ const allInFeatures: Feature[] = [
 export default function SystemPage() {
   return (
     <main className="min-h-screen bg-[#0b1509] text-[#edf5e2] font-sans selection:bg-[#b0e455] selection:text-[#0f1a0c]">
-      <Navbar active="system" />
 
       {/* ── HEADER ───────────────────────────────────────────────────────────── */}
       <section className="pt-40 pb-24 px-6 text-center">
@@ -223,8 +221,6 @@ export default function SystemPage() {
           <p className="text-center text-xs text-[#edf5e2]/22 mt-8">7-day satisfaction guarantee · Secure checkout via Whop</p>
         </div>
       </section>
-
-      <Footer />
     </main>
   );
 }
