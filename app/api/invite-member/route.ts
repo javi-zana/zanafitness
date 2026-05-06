@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
   // Invite the user - sends a magic link / invite email
   const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://zanafitness.com"}/auth/callback`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://zanafitness.com"}/auth/callback?next=/reset-password`,
   });
 
   if (inviteError) {

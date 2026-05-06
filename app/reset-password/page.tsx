@@ -21,19 +21,31 @@ export default function ResetPasswordPage() {
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [ready, setReady] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'expired'>('loading');
 
   useEffect(() => {
     const supabase = createClient();
+
+    const timer = setTimeout(() => setStatus('expired'), 8000);
+
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
-      else {
-        const { data: listener } = supabase.auth.onAuthStateChange((event) => {
-          if (event === 'PASSWORD_RECOVERY') setReady(true);
-        });
-        return () => listener.subscription.unsubscribe();
+      if (data.session) {
+        clearTimeout(timer);
+        setStatus('ready');
       }
     });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+        clearTimeout(timer);
+        setStatus('ready');
+      }
+    });
+
+    return () => {
+      clearTimeout(timer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleReset = async (e: FormEvent) => {
@@ -43,9 +55,9 @@ export default function ResetPasswordPage() {
     setLoading(true);
     setError('');
     const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error: updateError } = await supabase.auth.updateUser({ password });
     setLoading(false);
-    if (error) { setError(error.message); }
+    if (updateError) { setError(updateError.message); }
     else { router.push('/dashboard'); router.refresh(); }
   };
 
@@ -69,11 +81,30 @@ export default function ResetPasswordPage() {
             <p className="text-sm text-[var(--c-text3)]">Choose a password for your account</p>
           </div>
 
-          {!ready ? (
+          {status === 'loading' && (
             <div className="flex justify-center py-8">
               <div className="w-6 h-6 border-2 border-[var(--c-border2)] border-t-[var(--c-accent-text)] rounded-full animate-spin" />
             </div>
-          ) : (
+          )}
+
+          {status === 'expired' && (
+            <div className="text-center space-y-5">
+              <div className="bg-red-500/8 border border-red-500/20 rounded-2xl px-5 py-5">
+                <p className="text-sm text-red-400 leading-relaxed">
+                  This link has expired or is invalid.<br />
+                  Please request a new one.
+                </p>
+              </div>
+              <Link
+                href="/login"
+                className="block w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors text-center"
+              >
+                Back to Login
+              </Link>
+            </div>
+          )}
+
+          {status === 'ready' && (
             <form onSubmit={handleReset} className="space-y-3">
               <input
                 type="password"
