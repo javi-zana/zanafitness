@@ -9,7 +9,24 @@ import { SplitBuilder, StructuredSplit } from '@/components/SplitBuilder'
 
 type Member = { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null; avatar_url: string | null; avatar_color: string | null }
 type Stat = { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }
-type Thread = { id: string; member_id: string }
+type ThreadParticipant = {
+  user_id: string
+  first_name: string | null
+  email: string
+  role: string
+  avatar_url: string | null
+  avatar_color: string | null
+}
+
+type Thread = {
+  id: string
+  member_id: string | null
+  thread_type: 'dm' | 'group_member' | 'coaches_group' | 'custom'
+  title: string | null
+  is_group: boolean
+  last_message_at: string | null
+  participants: ThreadParticipant[]
+}
 type MsgPreview = { thread_id: string; body: string; created_at: string; author_id: string }
 type ReadReceipt = { thread_id: string; last_read_at: string }
 type ChatMessage = { id: string; author_id: string; body: string; created_at: string; message_attachments: { id: string; storage_path: string; kind: string }[] }
@@ -35,6 +52,15 @@ type HabitsData = {
   habits: { id: string; text: string }[]
 }
 
+type CoachProfile = {
+  id: string
+  first_name: string | null
+  email: string
+  avatar_url: string | null
+  avatar_color: string | null
+  role: string
+}
+
 type Props = {
   userId: string
   userEmail: string
@@ -47,6 +73,7 @@ type Props = {
   threads: Thread[]
   lastMessages: MsgPreview[]
   myReads: ReadReceipt[]
+  coachProfiles: CoachProfile[]
   snoozeMap: Record<string, string>
 }
 
@@ -493,7 +520,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
   const h = new Date().getHours()
   const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
 
-  const threadToMember = Object.fromEntries(threads.map(t => [t.id, t.member_id]))
+  const threadToMember = Object.fromEntries(threads.filter(t => t.member_id).map(t => [t.id, t.member_id!]))
   const lastMsgByMember: Record<string, MsgPreview> = {}
   for (const msg of lastMessages) {
     const mid = threadToMember[msg.thread_id]
@@ -1242,8 +1269,8 @@ function MembersTab({ members, allStats, threads, lastMessages, myReads, userId,
     return () => { supabase.removeChannel(channel) }
   }, [members]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const threadToMember = Object.fromEntries(threads.map(t => [t.id, t.member_id]))
-  const memberToThread = Object.fromEntries(threads.map(t => [t.member_id, t.id]))
+  const threadToMember = Object.fromEntries(threads.filter(t => t.member_id).map(t => [t.id, t.member_id!]))
+  const memberToThread = Object.fromEntries(threads.filter(t => t.member_id).map(t => [t.member_id!, t.id]))
   const lastMsgByMember: Record<string, MsgPreview> = {}
   for (const msg of lastMessages) {
     const mid = threadToMember[msg.thread_id]
@@ -1600,41 +1627,114 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
 
 // ─── Messages tab ─────────────────────────────────────────────────────────────
 
+type MsgBucket = 'all' | 'coaches' | 'clients'
+
+function threadDisplayName(thread: Thread, myId: string): string {
+  if (thread.thread_type === 'coaches_group') return 'Team Chat'
+  if (thread.thread_type === 'group_member') {
+    const member = thread.participants.find(p => p.role === 'member')
+    const name = member?.first_name ?? member?.email.split('@')[0] ?? 'Member'
+    return name + ' · Group'
+  }
+  if (thread.thread_type === 'dm') {
+    const other = thread.participants.find(p => p.user_id !== myId)
+    return other?.first_name ?? other?.email.split('@')[0] ?? 'Direct Message'
+  }
+  return thread.title ?? 'Chat'
+}
+
+function threadSubLabel(thread: Thread, myId: string): string {
+  if (thread.thread_type === 'coaches_group') return 'All coaches'
+  if (thread.thread_type === 'group_member') {
+    const coaches = thread.participants.filter(p => p.role === 'coach' || p.role === 'head_coach')
+    return coaches.map(c => c.first_name ?? c.email.split('@')[0]).join(' · ')
+  }
+  if (thread.thread_type === 'dm') {
+    const other = thread.participants.find(p => p.user_id !== myId)
+    if (other?.role === 'head_coach') return 'Head Coach'
+    if (other?.role === 'coach') return 'Coach'
+    return 'Member'
+  }
+  return ''
+}
+
+function threadBucket(thread: Thread, myId: string): 'coaches' | 'clients' {
+  if (thread.thread_type === 'coaches_group') return 'coaches'
+  if (thread.thread_type === 'dm') {
+    const other = thread.participants.find(p => p.user_id !== myId)
+    return (other?.role === 'coach' || other?.role === 'head_coach') ? 'coaches' : 'clients'
+  }
+  return 'clients'
+}
+
+function threadLeadParticipant(thread: Thread, myId: string): ThreadParticipant | null {
+  if (thread.thread_type === 'group_member') return thread.participants.find(p => p.role === 'member') ?? null
+  if (thread.thread_type === 'dm') return thread.participants.find(p => p.user_id !== myId) ?? null
+  return null
+}
+
+function ParticipantAvatar({ p, size = 'sm' }: { p: ThreadParticipant | null; size?: 'sm' | 'md' }) {
+  const sz = size === 'sm' ? 'w-7 h-7 text-[11px]' : 'w-9 h-9 text-xs'
+  const color = p?.avatar_color ?? '#b0e455'
+  const initial = (p?.first_name ?? p?.email ?? '?').charAt(0).toUpperCase()
+  if (p?.avatar_url) return <img src={p.avatar_url} alt="" className={`${sz} rounded-full object-cover shrink-0`} style={{ border: `1.5px solid ${color}` }} />
+  return <div className={`${sz} rounded-full flex items-center justify-center font-bold shrink-0`} style={{ background: color + '22', border: `1.5px solid ${color}`, color }}>{initial}</div>
+}
+
+function GroupIcon({ size = 'sm' }: { size?: 'sm' | 'md' }) {
+  const sz = size === 'sm' ? 'w-7 h-7' : 'w-9 h-9'
+  return (
+    <div className={`${sz} rounded-full bg-[#b0e455]/15 border border-[#b0e455]/40 flex items-center justify-center shrink-0`}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
+        <circle cx="9" cy="7" r="3" /><path d="M3 21v-1.5a4.5 4.5 0 014.5-4.5h3A4.5 4.5 0 0115 19.5V21" strokeLinecap="round" />
+        <path d="M16 3.13a3 3 0 010 5.75M21 21v-1a3.5 3.5 0 00-3-3.47" strokeLinecap="round" />
+      </svg>
+    </div>
+  )
+}
+
 function MessagesTab({
   userId,
+  isHeadCoach,
   members,
+  coachProfiles,
   threads,
   lastMessages,
   myReads,
-  coachName,
-  coachAvatarUrl,
-  coachAvatarColor,
+  myName,
+  myAvatarUrl,
+  myAvatarColor,
 }: {
   userId: string
+  isHeadCoach: boolean
   members: Member[]
+  coachProfiles: CoachProfile[]
   threads: Thread[]
   lastMessages: MsgPreview[]
   myReads: ReadReceipt[]
-  coachName: string | null
-  coachAvatarUrl: string | null
-  coachAvatarColor: string
+  myName: string | null
+  myAvatarUrl: string | null
+  myAvatarColor: string
 }) {
   const supabase = createClient()
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [lastMsgState, setLastMsgState] = useState<MsgPreview[]>(lastMessages)
+  const [allThreads, setAllThreads] = useState<Thread[]>(threads)
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loadingMessages, setLoadingMessages] = useState(false)
+  const [bucket, setBucket] = useState<MsgBucket>('all')
+  const [showNewChat, setShowNewChat] = useState(false)
+  const [newChatSearch, setNewChatSearch] = useState('')
+  const [creatingChat, setCreatingChat] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
-  const threadMap = Object.fromEntries(threads.map(t => [t.id, t]))
+  const threadMap = Object.fromEntries(allThreads.map(t => [t.id, t]))
 
-  // Last message per thread — kept in sync as messages are loaded/sent
   const lastMsgByThread: Record<string, MsgPreview> = {}
   for (const msg of lastMsgState) {
     if (!lastMsgByThread[msg.thread_id]) lastMsgByThread[msg.thread_id] = msg
@@ -1643,19 +1743,23 @@ function MessagesTab({
   const readMap: Record<string, string> = {}
   for (const r of myReads) readMap[r.thread_id] = r.last_read_at
 
-  const sortedThreads = [...threads].sort((a, b) => {
-    const ta = lastMsgByThread[a.id]?.created_at ?? ''
-    const tb = lastMsgByThread[b.id]?.created_at ?? ''
-    return tb.localeCompare(ta)
-  })
-
   function isUnread(threadId: string) {
     const last = lastMsgByThread[threadId]
-    if (!last) return false
-    if (last.author_id === userId) return false
+    if (!last || last.author_id === userId) return false
     const read = readMap[threadId]
     return !read || new Date(last.created_at) > new Date(read)
   }
+
+  const sortedThreads = [...allThreads].sort((a, b) => {
+    const ta = lastMsgByThread[a.id]?.created_at ?? a.last_message_at ?? ''
+    const tb = lastMsgByThread[b.id]?.created_at ?? b.last_message_at ?? ''
+    return tb.localeCompare(ta)
+  })
+
+  const filteredThreads = sortedThreads.filter(t => {
+    if (bucket === 'all') return true
+    return threadBucket(t, userId) === bucket
+  })
 
   async function openThread(threadId: string) {
     setSelectedThreadId(threadId)
@@ -1667,7 +1771,6 @@ function MessagesTab({
       const json = await res.json()
       if (!res.ok) {
         setLoadError(`Could not load messages: ${json.error ?? 'Unknown error'}`)
-        console.error('get-thread-messages error:', json.error)
       } else {
         const msgs = json.messages as ChatMessage[]
         setChatMessages(msgs)
@@ -1679,24 +1782,19 @@ function MessagesTab({
           })
         }
       }
-    } catch (err) {
+    } catch {
       setLoadError('Network error loading messages.')
-      console.error('get-thread-messages fetch error:', err)
     }
     setLoadingMessages(false)
-    await supabase.from('message_reads').upsert({
-      thread_id: threadId, user_id: userId, last_read_at: new Date().toISOString(),
-    })
+    await supabase.from('message_reads').upsert({ thread_id: threadId, user_id: userId, last_read_at: new Date().toISOString() })
     setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'instant' }), 50)
   }
 
-  // Realtime for selected thread
   useEffect(() => {
     if (!selectedThreadId) return
     const channel = supabase
       .channel(`coach-${selectedThreadId}`)
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'messages', filter: `thread_id=eq.${selectedThreadId}` },
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `thread_id=eq.${selectedThreadId}` },
         payload => {
           const msg = payload.new as ChatMessage
           setChatMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, message_attachments: [] }])
@@ -1722,7 +1820,6 @@ function MessagesTab({
       const json = await res.json()
       if (!res.ok || !json.msg) {
         setSendError(`Failed to send: ${json.error ?? 'Unknown error'}`)
-        console.error('send-message error:', json.error)
       } else {
         setBody('')
         if (textareaRef.current) textareaRef.current.style.height = 'auto'
@@ -1733,32 +1830,141 @@ function MessagesTab({
         })
         setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
       }
-    } catch (err) {
+    } catch {
       setSendError('Network error — check your connection.')
-      console.error('send-message fetch error:', err)
     }
     setSending(false)
+  }
+
+  async function startDM(targetId: string) {
+    setCreatingChat(true)
+    try {
+      const res = await fetch('/api/create-thread', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'dm', participant_ids: [targetId] }),
+      })
+      const json = await res.json()
+      if (res.ok && json.thread_id) {
+        setShowNewChat(false)
+        setNewChatSearch('')
+        if (!allThreads.find(t => t.id === json.thread_id)) {
+          window.location.reload()
+        } else {
+          openThread(json.thread_id)
+        }
+      }
+    } catch { /* ignore */ }
+    setCreatingChat(false)
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
   }
 
-  // Thread inbox
+  // ── People available for new DM ─────────────────────────────────────────────
+  const dmOptions: { id: string; name: string; label: string; avatarUrl: string | null; avatarColor: string | null }[] = [
+    ...coachProfiles.map(c => ({
+      id: c.id,
+      name: c.first_name ?? c.email.split('@')[0],
+      label: c.role === 'head_coach' ? 'Head Coach' : 'Coach',
+      avatarUrl: c.avatar_url,
+      avatarColor: c.avatar_color,
+    })),
+    ...(isHeadCoach ? members.map(m => ({
+      id: m.id,
+      name: m.first_name ?? m.email.split('@')[0],
+      label: 'Member',
+      avatarUrl: m.avatar_url,
+      avatarColor: m.avatar_color,
+    })) : members.map(m => ({
+      id: m.id,
+      name: m.first_name ?? m.email.split('@')[0],
+      label: 'Member',
+      avatarUrl: m.avatar_url,
+      avatarColor: m.avatar_color,
+    }))),
+  ]
+  const filteredDmOptions = dmOptions.filter(o =>
+    !newChatSearch || o.name.toLowerCase().includes(newChatSearch.toLowerCase())
+  )
+
+  // ── Thread list view ────────────────────────────────────────────────────────
   if (!selectedThreadId) {
-    if (sortedThreads.length === 0) {
-      return (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-sm text-[var(--c-text4)]">No threads yet.</p>
-          <p className="text-xs text-[var(--c-text5)] mt-1">Use Admin to set up member threads.</p>
-        </div>
-      )
-    }
     return (
-      <div className="space-y-2">
-        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Inbox</p>
-        {sortedThreads.map(thread => {
-          const m = memberMap[thread.member_id]
+      <div className="space-y-3">
+        {/* Bucket tabs + New chat button */}
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1 flex-1">
+            {(['all', 'coaches', 'clients'] as MsgBucket[]).map(b => (
+              <button
+                key={b}
+                onClick={() => setBucket(b)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
+                  bucket === b
+                    ? 'bg-[#b0e455] text-[#0b1509]'
+                    : 'text-[var(--c-text4)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
+                }`}
+              >{b}</button>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowNewChat(v => !v)}
+            className="w-8 h-8 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center text-[var(--c-text3)] hover:text-[var(--c-text)] hover:border-[var(--c-border2)] transition"
+            title="New chat"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+
+        {/* New chat picker */}
+        {showNewChat && (
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-[var(--c-text)] uppercase tracking-wider">Start a conversation</p>
+              <button onClick={() => setShowNewChat(false)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] text-lg leading-none">×</button>
+            </div>
+            <input
+              value={newChatSearch}
+              onChange={e => setNewChatSearch(e.target.value)}
+              placeholder="Search by name…"
+              className="w-full bg-[var(--c-card2)] border border-[var(--c-border)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40"
+            />
+            <div className="space-y-1 max-h-48 overflow-y-auto">
+              {filteredDmOptions.map(o => (
+                <button
+                  key={o.id}
+                  onClick={() => startDM(o.id)}
+                  disabled={creatingChat}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[var(--c-card2)] transition text-left disabled:opacity-50"
+                >
+                  {o.avatarUrl
+                    ? <img src={o.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" style={{ border: `1.5px solid ${o.avatarColor ?? '#b0e455'}` }} />
+                    : <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: (o.avatarColor ?? '#b0e455') + '22', border: `1.5px solid ${o.avatarColor ?? '#b0e455'}`, color: o.avatarColor ?? '#b0e455' }}>{o.name.charAt(0).toUpperCase()}</div>
+                  }
+                  <div>
+                    <p className="text-sm font-medium text-[var(--c-text)]">{o.name}</p>
+                    <p className="text-xs text-[var(--c-text4)]">{o.label}</p>
+                  </div>
+                </button>
+              ))}
+              {filteredDmOptions.length === 0 && <p className="text-xs text-[var(--c-text4)] px-3 py-2">No results</p>}
+            </div>
+          </div>
+        )}
+
+        {filteredThreads.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-sm text-[var(--c-text4)]">No conversations yet.</p>
+            <p className="text-xs text-[var(--c-text5)] mt-1">Use + to start a new chat.</p>
+          </div>
+        )}
+
+        {filteredThreads.map(thread => {
+          const lead = threadLeadParticipant(thread, userId)
+          const isGroup = thread.is_group || thread.thread_type === 'group_member' || thread.thread_type === 'coaches_group'
           const last = lastMsgByThread[thread.id]
           const unread = isUnread(thread.id)
           return (
@@ -1768,26 +1974,21 @@ function MessagesTab({
               className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-3 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 hover:bg-[var(--c-hover)] transition text-left"
             >
               <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)]">
-                  {m?.avatar_url ? <img src={m.avatar_url} alt="" className="w-full h-full object-cover" /> : (m ? memberName(m).charAt(0).toUpperCase() : '?')}
-                </div>
-                {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#b0e455] rounded-full border-2 border-[var(--c-bg)]" />}
+                {isGroup && !lead ? <GroupIcon size="md" /> : <ParticipantAvatar p={lead} size="md" />}
+                {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#f87171] rounded-full border-2 border-[var(--c-bg)]" />}
               </div>
               <div className="flex-1 min-w-0">
                 <p className={`text-sm truncate ${unread ? 'font-semibold text-[var(--c-text)]' : 'text-[var(--c-text2)]'}`}>
-                  {m ? memberName(m) : 'Unknown'}
+                  {threadDisplayName(thread, userId)}
                 </p>
+                <p className="text-[10px] text-[var(--c-text4)] truncate">{threadSubLabel(thread, userId)}</p>
                 {last && (
                   <p className={`text-[11px] truncate mt-0.5 ${unread ? 'text-[var(--c-text3)]' : 'text-[var(--c-text4)]'}`}>{last.body || '📎 Attachment'}</p>
                 )}
               </div>
               <div className="flex flex-col items-end gap-1.5 shrink-0">
-                {last && (
-                  <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>{relTime(last.created_at)}</p>
-                )}
-                {unread && (
-                  <span className="text-[9px] font-mono font-bold uppercase tracking-widest bg-[#b0e455] text-[#0f1a0c] px-2 py-0.5 rounded-full">New</span>
-                )}
+                {last && <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>{relTime(last.created_at)}</p>}
+                {unread && <span className="text-[9px] font-mono font-bold uppercase tracking-widest bg-[#f87171]/15 text-[#f87171] px-2 py-0.5 rounded-full">New</span>}
               </div>
             </button>
           )
@@ -1796,9 +1997,9 @@ function MessagesTab({
     )
   }
 
-  // Thread chat view
+  // ── Chat view ───────────────────────────────────────────────────────────────
   const thread = threadMap[selectedThreadId]
-  const chatMember = thread ? memberMap[thread.member_id] : null
+  const participantMap = Object.fromEntries((thread?.participants ?? []).map(p => [p.user_id, p]))
 
   return (
     <div className="flex flex-col h-full">
@@ -1808,18 +2009,15 @@ function MessagesTab({
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <p className="text-sm font-semibold text-[var(--c-text)]">{chatMember ? memberName(chatMember) : 'Chat'}</p>
+        <div>
+          <p className="text-sm font-semibold text-[var(--c-text)]">{thread ? threadDisplayName(thread, userId) : 'Chat'}</p>
+          {thread && <p className="text-[10px] text-[var(--c-text4)]">{threadSubLabel(thread, userId)}</p>}
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-1 pb-4" style={{ maxHeight: 'calc(100vh - 340px)' }}>
-        {loadError && (
-          <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-3 text-xs text-[#f87171]">{loadError}</div>
-        )}
-        {loadingMessages && (
-          <div className="flex justify-center py-16">
-            <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
-          </div>
-        )}
+        {loadError && <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-3 text-xs text-[#f87171]">{loadError}</div>}
+        {loadingMessages && <div className="flex justify-center py-16"><div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" /></div>}
         {!loadError && !loadingMessages && chatMessages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-sm text-[var(--c-text4)]">No messages yet.</p>
@@ -1832,23 +2030,15 @@ function MessagesTab({
           const next = chatMessages[i + 1]
           const isFirst = !prev || prev.author_id !== msg.author_id
           const isLast = !next || next.author_id !== msg.author_id
-
-          const memberAvatar = chatMember?.avatar_url
-            ? <img src={chatMember.avatar_url} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" style={{ border: `1.5px solid ${chatMember.avatar_color ?? '#b0e455'}` }} />
-            : <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ background: (chatMember?.avatar_color ?? '#b0e455') + '22', border: `1.5px solid ${chatMember?.avatar_color ?? '#b0e455'}`, color: chatMember?.avatar_color ?? '#b0e455' }}>{(chatMember ? memberName(chatMember) : '?').charAt(0).toUpperCase()}</div>
-
-          const coachAvatar = coachAvatarUrl
-            ? <img src={coachAvatarUrl} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" style={{ border: `1.5px solid ${coachAvatarColor}` }} />
-            : <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ background: coachAvatarColor + '22', border: `1.5px solid ${coachAvatarColor}`, color: coachAvatarColor }}>{(coachName ?? 'J').charAt(0).toUpperCase()}</div>
-
-          const displayName = isMine ? (coachName ?? 'Coach') : (chatMember ? memberName(chatMember) : 'Member')
-
+          const authorP = isMine
+            ? { user_id: userId, first_name: myName, email: '', role: 'coach', avatar_url: myAvatarUrl, avatar_color: myAvatarColor }
+            : (participantMap[msg.author_id] ?? null)
           return (
             <div key={msg.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
-              {!isMine && (isLast ? memberAvatar : <div className="w-7 shrink-0" />)}
+              {!isMine && (isLast ? <ParticipantAvatar p={authorP} /> : <div className="w-7 shrink-0" />)}
               <div className={`max-w-[75%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                {isFirst && (
-                  <p className="text-[11px] text-[var(--c-text4)] font-medium mb-1 px-1">{displayName}</p>
+                {isFirst && authorP?.first_name && (
+                  <p className="text-[11px] text-[var(--c-text4)] font-medium mb-1 px-1">{authorP.first_name}</p>
                 )}
                 <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                   isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[var(--c-card)] text-[var(--c-text)] border border-[var(--c-border)] rounded-bl-sm'
@@ -1856,18 +2046,14 @@ function MessagesTab({
                   {msg.body}
                 </div>
               </div>
-              {isMine && (isLast ? coachAvatar : <div className="w-7 shrink-0" />)}
+              {isMine && (isLast ? <ParticipantAvatar p={authorP} /> : <div className="w-7 shrink-0" />)}
             </div>
           )
         })}
         <div ref={bottomRef} />
       </div>
 
-      {sendError && (
-        <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-2.5 text-xs text-[#f87171] mb-2">
-          {sendError}
-        </div>
-      )}
+      {sendError && <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-2.5 text-xs text-[#f87171] mb-2">{sendError}</div>}
 
       <div className="flex items-end gap-2 pt-3 border-t border-[var(--c-border)]">
         <textarea
@@ -2126,6 +2312,14 @@ function ApplicationsSection() {
                             <div className="h-full rounded-full" style={{ width: `${app.commitment * 10}%`, backgroundColor: col.accent }} />
                           </div>
                         </div>
+                      )}
+
+                      {/* Investment fit */}
+                      {app.investment_fit && (
+                        <p className="text-[10px] text-[var(--c-text4)] mb-2 truncate">
+                          <span className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest mr-1">Invest:</span>
+                          {app.investment_fit}
+                        </p>
                       )}
 
                       {/* Action buttons */}
@@ -3228,7 +3422,7 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads, snoozeMap }: Props) {
+export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads, coachProfiles, snoozeMap }: Props) {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<CoachTab>('home')
   const [programMemberId, setProgramMemberId] = useState<string | null>(null)
@@ -3329,13 +3523,15 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
         {activeTab === 'messages' && (
           <MessagesTab
             userId={userId}
+            isHeadCoach={isHeadCoach}
             members={members}
+            coachProfiles={coachProfiles}
             threads={threads}
             lastMessages={lastMessages}
             myReads={myReads}
-            coachName={firstName}
-            coachAvatarUrl={avatarUrl}
-            coachAvatarColor={avatarColor}
+            myName={firstName}
+            myAvatarUrl={avatarUrl}
+            myAvatarColor={avatarColor}
           />
         )}
 {activeTab === 'applications' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (

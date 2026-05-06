@@ -68,28 +68,28 @@ export default function BottomNav() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: thread } = await supabase.from('threads').select('id').eq('member_id', user.id).maybeSingle()
-      if (!thread) { setUnread(false); return }
+      // Collect all thread IDs: via member_id (legacy) and thread_participants
+      const [{ data: legacyThread }, { data: participations }] = await Promise.all([
+        supabase.from('threads').select('id').eq('member_id', user.id).maybeSingle(),
+        supabase.from('thread_participants').select('thread_id').eq('user_id', user.id),
+      ])
+      const ids = Array.from(new Set([
+        ...(legacyThread ? [legacyThread.id as string] : []),
+        ...((participations ?? []).map(p => p.thread_id as string)),
+      ]))
+      if (!ids.length) { setUnread(false); return }
 
-      const { data: readRow } = await supabase
-        .from('message_reads')
-        .select('last_read_at')
-        .eq('thread_id', thread.id)
-        .eq('user_id', user.id)
-        .maybeSingle()
+      const [{ data: reads }, { data: messages }] = await Promise.all([
+        supabase.from('message_reads').select('thread_id, last_read_at').eq('user_id', user.id).in('thread_id', ids),
+        supabase.from('messages').select('thread_id, created_at').in('thread_id', ids).neq('author_id', user.id).order('created_at', { ascending: false }).limit(ids.length),
+      ])
 
-      const { data: messages } = await supabase
-        .from('messages')
-        .select('created_at')
-        .eq('thread_id', thread.id)
-        .neq('author_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-
-      if (!messages?.length) { setUnread(false); return }
-      const lastMsgAt = messages[0].created_at
-      const lastRead = readRow?.last_read_at
-      setUnread(!lastRead || new Date(lastMsgAt) > new Date(lastRead))
+      const readMap = Object.fromEntries((reads ?? []).map(r => [r.thread_id as string, r.last_read_at as string]))
+      const hasUnread = (messages ?? []).some(m => {
+        const read = readMap[m.thread_id as string]
+        return !read || new Date(m.created_at as string) > new Date(read)
+      })
+      setUnread(hasUnread)
     }
 
     checkUnread()

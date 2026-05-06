@@ -26,80 +26,84 @@ export default async function MessagesPage() {
 
   if (profile?.role === 'head_coach' || profile?.role === 'coach') redirect('/coach')
 
-  const isAdmin = profile?.role === 'head_coach' && user.email === 'me@javilorenzana.com'
-
-  const { data: thread } = await admin
-    .from('threads')
-    .select('id')
-    .eq('member_id', user.id)
-    .maybeSingle()
-
   const userProfile = {
     firstName: profile?.first_name ?? null,
     avatarUrl: profile?.avatar_url ?? null,
     avatarColor: profile?.avatar_color ?? '#b0e455',
   }
 
-  if (!thread) {
-    return (
-      <MessagesClient
-        userId={user.id}
-        threadId={null}
-        initialMessages={[]}
-        otherReads={[]}
-        authorProfiles={{}}
-        userProfile={userProfile}
-        isAdmin={isAdmin}
-      />
-    )
-  }
+  // Load all threads this member is a participant of
+  const { data: participations } = await admin
+    .from('thread_participants')
+    .select('thread_id')
+    .eq('user_id', user.id)
 
-  const [{ data: messages }, { data: reads }] = await Promise.all([
-    admin
-      .from('messages')
-      .select('id, author_id, body, created_at, message_attachments(id, storage_path, kind)')
-      .eq('thread_id', thread.id)
-      .order('created_at', { ascending: true })
-      .limit(100),
-    admin
-      .from('message_reads')
-      .select('user_id, last_read_at')
-      .eq('thread_id', thread.id),
+  // Also include legacy thread via member_id
+  const { data: legacyThread } = await admin
+    .from('threads')
+    .select('id')
+    .eq('member_id', user.id)
+    .maybeSingle()
+
+  const threadIdSet = new Set([
+    ...(participations ?? []).map(p => p.thread_id as string),
+    ...(legacyThread ? [legacyThread.id as string] : []),
   ])
+  const allThreadIds = Array.from(threadIdSet)
 
-  // Fetch profiles for all unique message authors
-  const authorIds = Array.from(new Set((messages ?? []).map(m => m.author_id)))
-  const { data: authorRows } = authorIds.length > 0
+  const { data: threadsRaw } = allThreadIds.length
     ? await admin
-        .from('profiles')
-        .select('id, first_name, avatar_url, avatar_color')
-        .in('id', authorIds)
+        .from('threads')
+        .select('id, member_id, thread_type, title, is_group, last_message_at')
+        .in('id', allThreadIds)
     : { data: [] }
 
-  const authorProfiles: Record<string, { firstName: string | null; avatarUrl: string | null; avatarColor: string }> = {}
-  for (const row of authorRows ?? []) {
-    authorProfiles[row.id] = {
-      firstName: row.first_name ?? null,
-      avatarUrl: row.avatar_url ?? null,
-      avatarColor: row.avatar_color ?? '#b0e455',
-    }
+  // Load participants with profiles
+  const { data: participantRows } = allThreadIds.length
+    ? await admin.from('thread_participants').select('thread_id, user_id').in('thread_id', allThreadIds)
+    : { data: [] }
+
+  const participantUserIds = Array.from(new Set((participantRows ?? []).map(p => p.user_id as string)))
+  const { data: participantProfiles } = participantUserIds.length
+    ? await admin.from('profiles').select('id, first_name, avatar_url, avatar_color, role, email').in('id', participantUserIds)
+    : { data: [] }
+
+  const profileMap = Object.fromEntries((participantProfiles ?? []).map(p => [p.id as string, p]))
+
+  const threads = (threadsRaw ?? []).map(t => ({
+    id: t.id as string,
+    member_id: t.member_id as string | null,
+    thread_type: (t.thread_type ?? 'dm') as 'dm' | 'group_member' | 'coaches_group' | 'custom',
+    title: t.title as string | null,
+    is_group: t.is_group as boolean,
+    last_message_at: t.last_message_at as string | null,
+    participants: (participantRows ?? [])
+      .filter(p => p.thread_id === t.id)
+      .map(p => {
+        const prof = profileMap[p.user_id as string]
+        return {
+          user_id: p.user_id as string,
+          first_name: prof?.first_name ?? null,
+          email: prof?.email ?? '',
+          role: prof?.role ?? 'member',
+          avatar_url: prof?.avatar_url ?? null,
+          avatar_color: prof?.avatar_color ?? null,
+        }
+      }),
+  }))
+
+  // Mark all as read on load
+  if (allThreadIds.length) {
+    await admin.from('message_reads').upsert(
+      allThreadIds.map(tid => ({ thread_id: tid, user_id: user.id, last_read_at: new Date().toISOString() }))
+    )
   }
-
-  await admin
-    .from('message_reads')
-    .upsert({ thread_id: thread.id, user_id: user.id, last_read_at: new Date().toISOString() })
-
-  const otherReads = (reads ?? []).filter(r => r.user_id !== user.id)
 
   return (
     <MessagesClient
       userId={user.id}
-      threadId={thread.id}
-      initialMessages={messages ?? []}
-      otherReads={otherReads}
-      authorProfiles={authorProfiles}
+      threads={threads}
       userProfile={userProfile}
-      isAdmin={isAdmin}
     />
   )
 }
