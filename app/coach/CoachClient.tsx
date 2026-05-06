@@ -1631,16 +1631,16 @@ type MsgBucket = 'all' | 'coaches' | 'clients'
 
 function threadDisplayName(thread: Thread, myId: string): string {
   if (thread.thread_type === 'coaches_group') return 'Team Chat'
-  if (thread.thread_type === 'group_member') {
-    const member = thread.participants.find(p => p.role === 'member')
-    return member?.first_name ?? member?.email.split('@')[0] ?? 'Group'
-  }
   if (thread.thread_type === 'dm') {
     const other = thread.participants.find(p => p.user_id !== myId)
     return other?.first_name ?? other?.email.split('@')[0] ?? 'Direct Message'
   }
-  const fallback = thread.participants.filter(p => p.user_id !== myId).map(p => p.first_name ?? p.email.split('@')[0]).join(', ') || 'Group'
-  return thread.title ?? fallback
+  if (thread.title) return thread.title
+  if (thread.thread_type === 'group_member') {
+    const member = thread.participants.find(p => p.role === 'member')
+    return member?.first_name ?? member?.email.split('@')[0] ?? 'Group'
+  }
+  return thread.participants.filter(p => p.user_id !== myId).map(p => p.first_name ?? p.email.split('@')[0]).join(', ') || 'Group'
 }
 
 function isGroupThread(thread: Thread) {
