@@ -127,7 +127,19 @@ export default function SystemPage() {
           <h1 className="font-display leading-none mb-5" style={{ fontSize: "clamp(52px, 7vw, 92px)" }}>
             The System.
           </h1>
-          <p className="text-sm font-medium text-[#b0e455] tracking-wider">Not a program. A protocol.</p>
+          <p className="text-sm font-medium text-[#b0e455] tracking-wider">For Asian professionals who are done letting the body be the last thing they haven&apos;t figured out.</p>
+        </div>
+      </section>
+
+      {/* ── PAIN CALLOUT ─────────────────────────────────────────────────────── */}
+      <section className="py-16 px-6">
+        <div className="max-w-2xl mx-auto text-center">
+          <p className="text-[#edf5e2]/60 text-base leading-relaxed">
+            You&apos;ve built the career. The income. The wardrobe. You dress well, earn well, and carry yourself well — but in photos, at the beach, in the mirror, something&apos;s still off. You&apos;ve tried programs built for bodybuilders, diets you couldn&apos;t stick to, and schedules that assumed you had 2 free hours a day.
+          </p>
+          <p className="text-[#edf5e2]/80 text-base leading-relaxed mt-4 font-medium">
+            The body is the one domain that still feels chaotic. That&apos;s exactly what this fixes.
+          </p>
         </div>
       </section>
 
@@ -135,7 +147,7 @@ export default function SystemPage() {
       <section className="py-20 px-6 bg-[#0f1a0c] border-y border-[#b0e455]/6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-5">Structure</p>
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-5">How it works</p>
             <h2 className="font-display leading-none" style={{ fontSize: "clamp(32px, 4vw, 52px)" }}>
               Three pillars. One system.
             </h2>
@@ -147,22 +159,22 @@ export default function SystemPage() {
                 icon: <TrendingUp className="w-6 h-6 text-[#b0e455] stroke-1" />,
                 num: "01",
                 title: "Training",
-                sub: "Calculated Overload",
-                desc: "A simple, progressive split built for your schedule — not a bodybuilder's. 45–60 minute sessions, structured to build the lean aesthetic look: shoulders, chest, arms.",
+                sub: "Built for your schedule",
+                desc: "45–60 minute sessions, 4 days a week. No bro splits, no 2-hour sessions. A progressive plan built around client calls, travel, and late nights — structured to build the lean, aesthetic look: shoulders, chest, arms. The kind that fills a fitted shirt properly.",
               },
               {
                 icon: <Leaf className="w-6 h-6 text-[#b0e455] stroke-1" />,
                 num: "02",
                 title: "Nutrition",
-                sub: "Linear Alignment",
-                desc: "No elimination diets. No extreme cuts. Real food, clear macro targets, and meal habits that fit your life in Singapore, Manila, Jakarta, or wherever you are.",
+                sub: "Clarity, not restriction",
+                desc: "You eat out. You travel. You're not meal-prepping on Sundays like a bodybuilder. We give you clear macro targets and real food habits that work in Singapore, Manila, Jakarta — or wherever you are. No obsessive tracking. No elimination diets. Just a system you can actually follow.",
               },
               {
                 icon: <Target className="w-6 h-6 text-[#b0e455] stroke-[1.5]" />,
                 num: "03",
                 title: "Guidance",
-                sub: "Constant Adaptation",
-                desc: "Weekly check-ins. Adjustments when life gets busy. A coach who understands your world — the travel, the client dinners, the demanding schedule.",
+                sub: "Accountability that adapts",
+                desc: "Weekly check-ins with a coach who actually understands your world — the client dinners, the business travel, the gym access that changes every week. When life gets busy, the plan adjusts. You don't fall off. You just adapt.",
               },
             ].map(p => (
               <div key={p.num} className="bg-[#162212] rounded-3xl p-8 border border-[#b0e455]/6 hover:border-[#b0e455]/14 transition-colors">
@@ -184,12 +196,14 @@ export default function SystemPage() {
       {/* ── CORE STATEMENT ────────────────────────────────────────────────────── */}
       <section className="py-24 px-6 text-center">
         <div className="max-w-3xl mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-10">The Result</p>
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-10">The outcome</p>
           <h2 className="font-display leading-[1.08]" style={{ fontSize: "clamp(28px, 4vw, 52px)" }}>
-            The physique compounds into everything
-            you&apos;ve built — career, confidence, presence.
-            Start building it <span className="text-[#b0e455]">right.</span>
+            When the body matches everything else you&apos;ve built — it amplifies{" "}
+            <span className="text-[#b0e455]">all of it.</span>
           </h2>
+          <p className="text-[#edf5e2]/45 text-base leading-relaxed mt-8 max-w-xl mx-auto">
+            Quiet confidence in a meeting. Presence in a room. The kind of guy who clearly takes care of himself without making a thing of it. The physique stops being a goal and becomes a quiet asset — one that compounds with your career, your relationships, and how you carry yourself everywhere.
+          </p>
         </div>
       </section>
 
@@ -201,18 +215,32 @@ export default function SystemPage() {
             <h2 className="font-display leading-none mb-4" style={{ fontSize: "clamp(36px, 5vw, 64px)" }}>Choose Your<br />Commitment Level.</h2>
             <p className="text-sm text-[#edf5e2]/40">All plans include the full system. Choose how long you&apos;re in.</p>
           </div>
+          {/* Commitment duration callouts */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {[
+              { months: "4", label: "months", note: "Kickstart commitment" },
+              { months: "12", label: "months", note: "Full transformation" },
+            ].map(tier => (
+              <div key={tier.months} className="flex flex-col items-center justify-center bg-[#0f1a0c] border border-[#b0e455]/10 rounded-2xl py-5 gap-1">
+                <span className="font-display text-5xl leading-none text-[#b0e455]">{tier.months}</span>
+                <span className="text-xs font-bold tracking-widest uppercase text-[#edf5e2]/40">{tier.label}</span>
+                <span className="text-[10px] text-[#edf5e2]/25 mt-1">{tier.note}</span>
+              </div>
+            ))}
+          </div>
+
           <div className="grid md:grid-cols-2 gap-5">
             <PlanCard
-              label="Committed"
+              label="Committed — 4 Months"
               price={500}
               commitment="4-month commitment"
               checkoutUrl="https://whop.com/checkout/plan_DAY1fwI5NfqJe"
               features={committedFeatures}
             />
             <PlanCard
-              label="All In"
-              price={400}
-              commitment="12-month commitment"
+              label="All In — 12 Months"
+              price={350}
+              commitment="12-month commitment · Best value"
               checkoutUrl="https://whop.com/checkout/plan_BwaPVLzVFjYWL"
               features={allInFeatures}
               featured
