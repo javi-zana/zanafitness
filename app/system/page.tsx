@@ -115,15 +115,30 @@ export default function SystemPage() {
   return (
     <main className="min-h-screen bg-[#0b1509] text-[#edf5e2] font-sans selection:bg-[#b0e455] selection:text-[#0f1a0c]">
 
-      {/* ── HEADER ───────────────────────────────────────────────────────────── */}
-      <section className="pt-36 pb-20 px-6 text-center">
-        <div className="max-w-xl mx-auto flex flex-col items-center">
+      {/* ── HEADER + HOOK ─────────────────────────────────────────────────────── */}
+      <section className="pt-36 pb-24 px-6 text-center">
+        <div className="max-w-2xl mx-auto flex flex-col items-center">
           <ZanaLogo className="h-9 md:h-11 text-[#edf5e2] mb-12 opacity-60" />
           <div className="w-6 h-px bg-[#b0e455]/30 mb-8" />
-          <h1 className="font-display leading-none mb-5" style={{ fontSize: "clamp(48px, 7vw, 88px)" }}>
+
+          <h1 className="font-display leading-none mb-12" style={{ fontSize: "clamp(48px, 7vw, 88px)" }}>
             The System.
           </h1>
-          <p className="text-sm text-[#edf5e2]/50 leading-relaxed max-w-sm">
+
+          {/* Javi quote as hook */}
+          <div className="max-w-lg">
+            <p className="text-[#edf5e2]/80 text-lg md:text-xl leading-relaxed font-light italic">
+              &ldquo;I always say that getting fit is one of the best financial decisions I have ever made. This is how I did it — and how you can too.&rdquo;
+            </p>
+            <div className="flex items-center justify-center gap-3 mt-6">
+              <div className="w-8 h-px bg-[#b0e455]/40" />
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/70">Javi Lorenzana</p>
+              <div className="w-8 h-px bg-[#b0e455]/40" />
+            </div>
+          </div>
+
+          {/* Pain bridge */}
+          <p className="text-[#edf5e2]/35 text-sm leading-relaxed mt-12 max-w-sm">
             Career sorted. Income sorted. Wardrobe sorted. The body is the last piece — and the one that still feels chaotic.
           </p>
         </div>
@@ -179,7 +194,7 @@ export default function SystemPage() {
         </div>
       </section>
 
-      {/* ── CORE STATEMENT ────────────────────────────────────────────────────── */}
+      {/* ── OUTCOME ───────────────────────────────────────────────────────────── */}
       <section className="py-24 px-6 text-center">
         <div className="max-w-2xl mx-auto">
           <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-8">The outcome</p>
@@ -190,16 +205,6 @@ export default function SystemPage() {
           <p className="text-[#edf5e2]/40 text-sm leading-relaxed mt-6 max-w-md mx-auto">
             The right physique changes how you walk into a meeting, how you show up on camera, how people read you before you say a word. It&apos;s not vanity — it&apos;s leverage. And unlike most investments, this one compounds daily.
           </p>
-        </div>
-      </section>
-
-      {/* ── JAVI QUOTE ───────────────────────────────────────────────────────── */}
-      <section className="py-16 px-6 border-t border-[#b0e455]/6">
-        <div className="max-w-xl mx-auto text-center">
-          <p className="text-[#edf5e2]/70 text-base leading-relaxed italic">
-            &ldquo;I always say that getting fit is one of the best financial decisions I have ever made. This is how I did it — and how you can too.&rdquo;
-          </p>
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/60 mt-4">Javi Lorenzana</p>
         </div>
       </section>
 
