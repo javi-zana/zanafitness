@@ -1644,6 +1644,7 @@ function threadDisplayName(thread: Thread, myId: string): string {
 }
 
 function isGroupThread(thread: Thread) {
+  if (thread.thread_type === 'dm') return false
   return thread.thread_type === 'group_member' || thread.thread_type === 'coaches_group' || thread.thread_type === 'custom' || thread.is_group
 }
 
