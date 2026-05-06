@@ -80,8 +80,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error?.message ?? 'Failed to create thread' }, { status: 500 })
   }
 
+  const { data: participantProfiles } = await admin
+    .from('profiles')
+    .select('id, role')
+    .in('id', allParticipants)
+
+  const roleMap = Object.fromEntries((participantProfiles ?? []).map(p => [p.id as string, p.role as string]))
+
   await admin.from('thread_participants').insert(
-    allParticipants.map(uid => ({ thread_id: thread.id, user_id: uid, added_by: user.id }))
+    allParticipants.map(uid => ({
+      thread_id: thread.id,
+      user_id: uid,
+      role: roleMap[uid] ?? 'member',
+      added_by: user.id,
+    }))
   )
 
   return NextResponse.json({ thread_id: thread.id, existing: false })
