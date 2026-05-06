@@ -184,12 +184,22 @@ export default function SystemPage() {
         <div className="max-w-2xl mx-auto">
           <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-8">The outcome</p>
           <h2 className="font-display leading-[1.08]" style={{ fontSize: "clamp(26px, 4vw, 48px)" }}>
-            When the body matches everything else you&apos;ve built — it amplifies{" "}
-            <span className="text-[#b0e455]">all of it.</span>
+            The one investment that shows up{" "}
+            <span className="text-[#b0e455]">in every room.</span>
           </h2>
           <p className="text-[#edf5e2]/40 text-sm leading-relaxed mt-6 max-w-md mx-auto">
-            Presence in a room. Quiet confidence without making a thing of it. A physique that compounds with your career, your relationships, how you carry yourself.
+            The right physique changes how you walk into a meeting, how you show up on camera, how people read you before you say a word. It&apos;s not vanity — it&apos;s leverage. And unlike most investments, this one compounds daily.
           </p>
+        </div>
+      </section>
+
+      {/* ── JAVI QUOTE ───────────────────────────────────────────────────────── */}
+      <section className="py-16 px-6 border-t border-[#b0e455]/6">
+        <div className="max-w-xl mx-auto text-center">
+          <p className="text-[#edf5e2]/70 text-base leading-relaxed italic">
+            &ldquo;I always say that getting fit is one of the best financial decisions I have ever made. This is how I did it — and how you can too.&rdquo;
+          </p>
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/60 mt-4">Javi Lorenzana</p>
         </div>
       </section>
 
