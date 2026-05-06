@@ -16,77 +16,107 @@ type Feature = { text: string; included: boolean };
 
 function PlanCard({
   label,
+  months,
   price,
-  commitment,
+  total,
   checkoutUrl,
   features,
   featured,
 }: {
   label: string;
+  months: number;
   price: number;
-  commitment: string;
+  total: number;
   checkoutUrl: string;
   features: Feature[];
   featured?: boolean;
 }) {
+  const dim = featured ? "text-[#0f1a0c]/50" : "text-[#edf5e2]/35";
+  const bright = featured ? "text-[#0f1a0c]" : "text-[#edf5e2]";
+
   return (
     <div
-      className={`flex flex-col rounded-3xl p-8 relative overflow-hidden ${
+      className={`flex flex-col rounded-3xl relative overflow-hidden ${
         featured
           ? "bg-[#b0e455] text-[#0f1a0c]"
           : "bg-[#162212] border border-[#b0e455]/10 text-[#edf5e2]"
       }`}
     >
       {featured && (
-        <>
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ backgroundImage: 'radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.22) 0%, transparent 60%)' }} />
-          <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-[#0f1a0c] text-[#b0e455] text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap border border-[#b0e455]/20">
-            Best Value
-          </span>
-        </>
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: 'radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.18) 0%, transparent 55%)' }} />
       )}
 
-      <p className={`text-[10px] font-bold tracking-[0.2em] uppercase mb-3 ${featured ? "text-[#0f1a0c]/50" : "text-[#b0e455]"}`}>{label}</p>
-      <div className="flex items-end gap-1.5 mb-1">
-        <span className={`font-display text-5xl leading-none ${featured ? "text-[#0f1a0c]" : "text-[#edf5e2]"}`}>${price}</span>
-        <span className={`text-sm mb-1.5 ${featured ? "text-[#0f1a0c]/45" : "text-[#edf5e2]/35"}`}>/mo</span>
-      </div>
-      <p className={`text-xs mb-7 ${featured ? "text-[#0f1a0c]/45" : "text-[#edf5e2]/35"}`}>{commitment}</p>
+      {/* Header block */}
+      <div className={`px-8 pt-8 pb-6 border-b ${featured ? "border-[#0f1a0c]/10" : "border-[#b0e455]/8"}`}>
+        {featured && (
+          <span className="inline-block bg-[#0f1a0c] text-[#b0e455] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4">
+            Best Value
+          </span>
+        )}
+        <p className={`text-[10px] font-bold tracking-[0.2em] uppercase mb-4 ${featured ? "text-[#0f1a0c]/50" : "text-[#b0e455]"}`}>{label}</p>
 
-      <ul className="space-y-3 mb-8 flex-1">
-        {features.map((f) => (
-          <li key={f.text} className="flex items-center gap-3">
-            <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-              f.included
-                ? featured ? "bg-[#0f1a0c]/10" : "bg-[#b0e455]/10"
-                : "bg-[#edf5e2]/4"
-            }`}>
-              {f.included ? (
-                <Check className={`w-3 h-3 ${featured ? "text-[#0f1a0c]" : "text-[#b0e455]"}`} strokeWidth={2.5} />
-              ) : (
-                <X className="w-3 h-3 text-[#edf5e2]/25" strokeWidth={2.5} />
-              )}
+        {/* Duration */}
+        <div className="flex items-baseline gap-2 mb-1">
+          <span className={`font-display text-5xl leading-none ${bright}`}>{months}</span>
+          <span className={`text-base font-semibold ${dim}`}>months</span>
+        </div>
+        <p className={`text-xs mb-5 ${dim}`}>commitment period</p>
+
+        {/* Price */}
+        <div className={`flex items-center justify-between rounded-2xl px-4 py-3 ${featured ? "bg-[#0f1a0c]/8" : "bg-[#b0e455]/6"}`}>
+          <div>
+            <div className="flex items-end gap-1">
+              <span className={`font-display text-3xl leading-none ${bright}`}>${price}</span>
+              <span className={`text-xs mb-0.5 ${dim}`}>/month</span>
             </div>
-            <span className={`text-sm ${
-              f.included
-                ? featured ? "text-[#0f1a0c]/80" : "text-[#edf5e2]/70"
-                : "text-[#edf5e2]/25 line-through"
-            }`}>{f.text}</span>
-          </li>
-        ))}
-      </ul>
+            <p className={`text-[10px] mt-0.5 ${dim}`}>${total.toLocaleString()} billed over {months} months</p>
+          </div>
+          <div className={`text-right text-[10px] font-bold tracking-wide uppercase ${featured ? "text-[#0f1a0c]/40" : "text-[#b0e455]/50"}`}>
+            {featured ? "Save $600" : ""}
+          </div>
+        </div>
+      </div>
 
-      <a
-        href={checkoutUrl}
-        className={`w-full py-3.5 rounded-2xl text-sm font-semibold transition-colors text-center ${
-          featured
-            ? "bg-[#0f1a0c] text-[#b0e455] hover:bg-[#0a1208]"
-            : "bg-[#b0e455] text-[#0f1a0c] hover:bg-[#c9f070]"
-        }`}
-      >
-        Join the System
-      </a>
+      {/* Features */}
+      <div className="px-8 py-6 flex-1">
+        <ul className="space-y-3">
+          {features.map((f) => (
+            <li key={f.text} className="flex items-center gap-3">
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                f.included
+                  ? featured ? "bg-[#0f1a0c]/10" : "bg-[#b0e455]/10"
+                  : "bg-[#edf5e2]/4"
+              }`}>
+                {f.included ? (
+                  <Check className={`w-3 h-3 ${featured ? "text-[#0f1a0c]" : "text-[#b0e455]"}`} strokeWidth={2.5} />
+                ) : (
+                  <X className="w-3 h-3 text-[#edf5e2]/20" strokeWidth={2.5} />
+                )}
+              </div>
+              <span className={`text-sm ${
+                f.included
+                  ? featured ? "text-[#0f1a0c]/80" : "text-[#edf5e2]/70"
+                  : "text-[#edf5e2]/20 line-through"
+              }`}>{f.text}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* CTA */}
+      <div className="px-8 pb-8">
+        <a
+          href={checkoutUrl}
+          className={`w-full py-3.5 rounded-2xl text-sm font-semibold transition-colors text-center block ${
+            featured
+              ? "bg-[#0f1a0c] text-[#b0e455] hover:bg-[#0a1208]"
+              : "bg-[#b0e455] text-[#0f1a0c] hover:bg-[#c9f070]"
+          }`}
+        >
+          Start Now
+        </a>
+      </div>
     </div>
   );
 }
@@ -218,16 +248,18 @@ export default function SystemPage() {
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             <PlanCard
-              label="Committed · 4 Months"
+              label="Committed"
+              months={4}
               price={500}
-              commitment="4-month minimum"
+              total={2000}
               checkoutUrl="https://whop.com/checkout/plan_DAY1fwI5NfqJe"
               features={committedFeatures}
             />
             <PlanCard
-              label="All In · 12 Months"
+              label="All In"
+              months={12}
               price={350}
-              commitment="12-month commitment"
+              total={4200}
               checkoutUrl="https://whop.com/checkout/plan_BwaPVLzVFjYWL"
               features={allInFeatures}
               featured
