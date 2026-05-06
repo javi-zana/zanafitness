@@ -132,7 +132,6 @@ const committedFeatures: Feature[] = [
   { text: "Weekly check-ins with your coach", included: true },
   { text: "Direct access to Javi", included: true },
   { text: "Supplement & recovery guidance", included: true },
-  { text: "Quarterly progress review call", included: false },
 ];
 
 const allInFeatures: Feature[] = [
@@ -140,7 +139,8 @@ const allInFeatures: Feature[] = [
   { text: "Personalised training split", included: true },
   { text: "Custom nutrition & macros", included: true },
   { text: "Weekly check-ins with your coach", included: true },
-  { text: "Direct access to Javi", included: true },
+  { text: "Video Calls on Demand", included: true },
+  { text: "Priority access to Javi", included: true },
   { text: "Supplement & recovery guidance", included: true },
   { text: "Quarterly progress review call", included: true },
 ];
