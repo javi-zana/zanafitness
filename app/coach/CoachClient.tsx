@@ -1730,6 +1730,7 @@ function MessagesTab({
   const [showNewChat, setShowNewChat] = useState(false)
   const [newChatSearch, setNewChatSearch] = useState('')
   const [creatingChat, setCreatingChat] = useState(false)
+  const [createChatError, setCreateChatError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -1838,6 +1839,7 @@ function MessagesTab({
 
   async function startDM(targetId: string) {
     setCreatingChat(true)
+    setCreateChatError(null)
     try {
       const res = await fetch('/api/create-thread', {
         method: 'POST',
@@ -1845,16 +1847,39 @@ function MessagesTab({
         body: JSON.stringify({ type: 'dm', participant_ids: [targetId] }),
       })
       const json = await res.json()
-      if (res.ok && json.thread_id) {
+      if (!res.ok) {
+        setCreateChatError(json.error ?? 'Failed to create thread')
+        setCreatingChat(false)
+        return
+      }
+      if (json.thread_id) {
         setShowNewChat(false)
         setNewChatSearch('')
-        if (!allThreads.find(t => t.id === json.thread_id)) {
-          window.location.reload()
+        const existing = allThreads.find(t => t.id === json.thread_id)
+        if (existing) {
+          openThread(json.thread_id)
         } else {
+          // Build thread optimistically from what we know — no page reload needed
+          const target = dmOptions.find(o => o.id === targetId)
+          const newThread: Thread = {
+            id: json.thread_id,
+            member_id: null,
+            thread_type: 'dm',
+            title: null,
+            is_group: false,
+            last_message_at: null,
+            participants: [
+              { user_id: userId, first_name: myName, email: '', role: isHeadCoach ? 'head_coach' : 'coach', avatar_url: myAvatarUrl, avatar_color: myAvatarColor },
+              ...(target ? [{ user_id: target.id, first_name: target.name, email: '', role: target.label === 'Head Coach' ? 'head_coach' : target.label === 'Coach' ? 'coach' : 'member', avatar_url: target.avatarUrl, avatar_color: target.avatarColor }] : []),
+            ],
+          }
+          setAllThreads(prev => [newThread, ...prev])
           openThread(json.thread_id)
         }
       }
-    } catch { /* ignore */ }
+    } catch (err) {
+      setCreateChatError('Network error — check your connection.')
+    }
     setCreatingChat(false)
   }
 
@@ -1924,8 +1949,11 @@ function MessagesTab({
           <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-4 space-y-3">
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold text-[var(--c-text)] uppercase tracking-wider">Start a conversation</p>
-              <button onClick={() => setShowNewChat(false)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] text-lg leading-none">×</button>
+              <button onClick={() => { setShowNewChat(false); setCreateChatError(null) }} className="text-[var(--c-text4)] hover:text-[var(--c-text)] text-lg leading-none">×</button>
             </div>
+            {createChatError && (
+              <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-3 py-2 text-xs text-[#f87171]">{createChatError}</div>
+            )}
             <input
               value={newChatSearch}
               onChange={e => setNewChatSearch(e.target.value)}
@@ -1948,6 +1976,7 @@ function MessagesTab({
                     <p className="text-sm font-medium text-[var(--c-text)]">{o.name}</p>
                     <p className="text-xs text-[var(--c-text4)]">{o.label}</p>
                   </div>
+                  {creatingChat && <div className="ml-auto w-4 h-4 border-2 border-[var(--c-border2)] border-t-[#b0e455] rounded-full animate-spin shrink-0" />}
                 </button>
               ))}
               {filteredDmOptions.length === 0 && <p className="text-xs text-[var(--c-text4)] px-3 py-2">No results</p>}
