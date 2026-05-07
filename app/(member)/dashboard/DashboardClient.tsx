@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import BottomNav from '@/components/BottomNav'
 import { useTheme } from '@/app/providers'
 import { createClient } from '@/utils/supabase/client'
 
@@ -599,7 +598,6 @@ export default function DashboardClient({
 
           </div>
         </div>
-      <BottomNav />
     </div>
   )
 }

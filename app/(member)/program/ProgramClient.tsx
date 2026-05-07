@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
-import BottomNav from '@/components/BottomNav'
 import { SplitViewer, StructuredSplit, SplitDay } from '@/components/SplitBuilder'
 
 const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ssr: false })
@@ -942,7 +941,6 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
         )}
       </div>
 
-      <BottomNav />
     </div>
   )
 }

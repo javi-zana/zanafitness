@@ -2,7 +2,6 @@
 
 import { useState, useRef, FormEvent } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import BottomNav from '@/components/BottomNav'
 import { useTheme } from '@/app/providers'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -881,7 +880,6 @@ export default function StatsClient({ userId, weightUnit, initialStats, showNudg
 
         </div>
 
-      <BottomNav />
     </div>
   )
 }

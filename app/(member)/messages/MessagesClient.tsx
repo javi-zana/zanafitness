@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, KeyboardEvent } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import BottomNav from '@/components/BottomNav'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -135,7 +134,6 @@ function NoThread() {
           <p className="text-xs text-[var(--c-text3)]">Your coach will open your thread once you're fully onboarded.</p>
         </div>
       </div>
-      <BottomNav />
     </div>
   )
 }
@@ -441,7 +439,6 @@ export default function MessagesClient({ userId, threads, userProfile }: Props) 
         )}
       </div>
 
-      <BottomNav />
     </div>
   )
 }
