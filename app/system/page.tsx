@@ -71,13 +71,12 @@ function PlanCard({
         <div className={`flex items-center justify-between rounded-2xl px-4 py-3 ${featured ? "bg-[#0f1a0c]/8" : "bg-[#b0e455]/6"}`}>
           <div>
             <div className="flex items-end gap-1">
-              <span className={`font-display text-3xl leading-none ${bright}`}>${price}</span>
-              <span className={`text-xs mb-0.5 ${dim}`}>/month</span>
+              <span className={`font-display text-3xl leading-none ${bright}`}>${total.toLocaleString()}</span>
             </div>
-            <p className={`text-[10px] mt-0.5 ${dim}`}>${total.toLocaleString()} billed over {months} months</p>
+            <p className={`text-[10px] mt-0.5 ${dim}`}>${price} billed per month</p>
           </div>
           <div className={`text-right text-[10px] font-bold tracking-wide uppercase ${featured ? "text-[#0f1a0c]/40" : "text-[#b0e455]/50"}`}>
-            {featured ? "Save $600" : ""}
+            {featured ? "Save $1,800" : ""}
           </div>
         </div>
       </div>
@@ -256,7 +255,7 @@ export default function SystemPage() {
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-4">Commitment</p>
-            <h2 className="font-display leading-none mb-3" style={{ fontSize: "clamp(30px, 4vw, 52px)" }}>Choose your commitment.</h2>
+            <h2 className="font-display leading-none mb-3" style={{ fontSize: "clamp(30px, 4vw, 52px)" }}>The Zana Fitness System.</h2>
             <p className="text-sm text-[#edf5e2]/35">All plans include the full system.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
