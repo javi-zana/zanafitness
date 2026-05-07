@@ -25,6 +25,7 @@ function LoginForm() {
   const [error, setError] = useState(!noAccess ? (searchParams.get('error') ?? '') : '');
   const [forgotSent, setForgotSent] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
+  const [showActivate, setShowActivate] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
 
@@ -62,6 +63,60 @@ function LoginForm() {
       setForgotSent(true);
     }
   };
+
+  if (showActivate) {
+    return (
+      <form onSubmit={handleLogin} className="space-y-4">
+        <div className="text-center mb-2">
+          <span className="inline-flex items-center gap-2 bg-[#b0e455]/10 border border-[#b0e455]/25 rounded-full px-3 py-1 mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
+            <p className="text-[11px] font-medium text-[#b0e455] tracking-wide">First time</p>
+          </span>
+          <p className="text-base font-semibold text-[var(--c-text)] mb-1.5">Welcome to Zana</p>
+          <p className="text-sm text-[var(--c-text3)] leading-relaxed">
+            Enter the email and password<br />your coach gave you on the call.
+          </p>
+        </div>
+        <input
+          type="email"
+          placeholder="Email address"
+          required
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          autoComplete="email"
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          required
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          autoComplete="current-password"
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] rounded-2xl px-4 py-4 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] focus:outline-none focus:border-[#b0e455]/40 transition-colors"
+        />
+        {error && (
+          <div className="bg-red-500/8 border border-red-500/20 rounded-xl px-4 py-3">
+            <p className="text-sm text-red-400 text-center">{error}</p>
+          </div>
+        )}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Activating...' : 'Activate Account →'}
+        </button>
+        <button
+          type="button"
+          onClick={() => { setShowActivate(false); setError(''); }}
+          className="w-full text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
+        >
+          ← Back
+        </button>
+      </form>
+    );
+  }
 
   if (showForgot) {
     return forgotSent ? (
@@ -194,6 +249,19 @@ function LoginForm() {
         <Link href="/system" className="text-sm text-[var(--c-accent-text)] hover:opacity-75 transition-colors">
           View plans
         </Link>
+      </div>
+
+      <div className="pt-5 mt-2 border-t border-[var(--c-border)]">
+        <button
+          type="button"
+          onClick={() => { setShowActivate(true); setError(''); }}
+          className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] hover:border-[#b0e455]/40 hover:bg-[var(--c-hover)] text-[var(--c-text)] font-semibold text-sm py-4 rounded-2xl transition-colors flex items-center justify-center gap-2"
+        >
+          New member? Activate your account
+          <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[var(--c-accent-text)]">
+            <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+          </svg>
+        </button>
       </div>
     </form>
   );
