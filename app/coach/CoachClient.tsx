@@ -581,62 +581,64 @@ function HomeTab({ members, allStats, activities, mutateActivity, removeActivity
 
   const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
 
+  const attentionMembers = latestPerMember.filter(({ member, stat }) =>
+    needsAttention(stat, snoozes[member.id]) || snoozes[member.id]
+  )
+
+  // Empty state — no members yet
+  if (members.length === 0) {
+    return (
+      <div className="max-w-2xl mx-auto py-12 lg:py-20 space-y-6 text-center">
+        <h1 className="font-display leading-none text-4xl lg:text-5xl">
+          {greet}, {name}.
+        </h1>
+        <p className="text-sm text-[var(--c-text3)] max-w-md mx-auto leading-relaxed">
+          {isHeadCoach
+            ? 'No clients yet. Head to Admin to onboard your first member — once they post, this is where you\'ll watch them work.'
+            : 'No clients assigned yet. Once you have members, their activity will live here.'}
+        </p>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-5">
-      {/* Greeting hero */}
-      <div
-        className="rounded-3xl p-5 lg:p-6 relative overflow-hidden"
-        style={{ background: 'linear-gradient(145deg, #cbf14e 0%, #b0e455 45%, #87be2a 100%)' }}
-      >
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: 'radial-gradient(ellipse at 10% 90%, rgba(255,255,255,0.2) 0%, transparent 55%)' }} />
-        <div className="relative z-10">
-          <p className="text-xs text-[#1a3300]/50 font-medium" suppressHydrationWarning>{greet},</p>
-          <h1 className="text-2xl lg:text-3xl font-bold text-[#1a3300] tracking-tight leading-tight mt-0.5">{name}.</h1>
-          <p className="text-xs text-[#1a3300]/50 mt-1.5">
-            {isHeadCoach ? 'Full access · Head coach' : 'Coach view'}
-          </p>
-        </div>
+    <div className="max-w-2xl mx-auto space-y-6">
+
+      {/* Greeting */}
+      <div className="space-y-1">
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono" suppressHydrationWarning>{greet}</p>
+        <h1 className="font-display leading-none text-3xl lg:text-4xl">{name}.</h1>
+        <p className="text-sm text-[var(--c-text3)] mt-2">
+          {members.length} {members.length === 1 ? 'client' : 'clients'}
+          {' · '}
+          <span className={needAttention > 0 ? 'text-[#f87171] font-semibold' : ''}>
+            {needAttention} need{needAttention === 1 ? 's' : ''} attention
+          </span>
+          {' · '}
+          {activeThisWeek} active this week
+        </p>
       </div>
 
-      {/* Summary row */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
-          <p className="text-2xl font-bold text-[var(--c-text)]">{members.length}</p>
-          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Members</p>
-        </div>
-        <div
-          className={`rounded-2xl p-3 text-center border shadow-sm ${needAttention > 0 ? 'bg-[#f87171]/8 border-[#f87171]/30' : 'bg-[var(--c-card)] border-[var(--c-border)]'}`}
-        >
-          <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
-          <p className="text-[9px] text-[var(--c-text4)] uppercase mt-0.5">Attn</p>
-        </div>
-        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
-          <p className="text-2xl font-bold text-[#16a34a]">{activeThisWeek}</p>
-          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
-        </div>
-      </div>
-
-      {/* Attention list */}
-      {latestPerMember.some(({ member, stat }) => needsAttention(stat, snoozes[member.id]) || snoozes[member.id]) && (
+      {/* Needs Attention — only render if there's something */}
+      {attentionMembers.length > 0 && (
         <div className="space-y-2">
           <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Needs Attention</p>
-          {latestPerMember.filter(({ member, stat }) => needsAttention(stat, snoozes[member.id]) || snoozes[member.id]).map(({ member, stat }) => {
+          {attentionMembers.map(({ member, stat }) => {
             const attn = needsAttention(stat, snoozes[member.id])
             const snoozed = !!snoozes[member.id]
             const daysQuiet = stat ? Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) : null
             const lowConf = stat?.confidence != null && stat.confidence <= 3
             return (
               <div key={member.id} className={`flex items-center gap-3 rounded-2xl px-4 py-3 border ${attn ? 'bg-[#f87171]/8 border-[#f87171]/30' : 'bg-[var(--c-card)] border-[var(--c-border)]'}`}>
-                <div className="w-7 h-7 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[var(--c-accent-text)] shrink-0">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-[11px] font-bold text-[var(--c-accent-text)] shrink-0">
                   {member.avatar_url ? <img src={member.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(member).charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-[var(--c-text)] truncate">{memberName(member)}</p>
-                  <p className={`text-[10px] font-mono ${attn ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>
+                  <p className="text-sm font-semibold text-[var(--c-text)] truncate">{memberName(member)}</p>
+                  <p className={`text-[11px] ${attn ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>
                     {attn
                       ? (daysQuiet !== null
-                          ? `${daysQuiet}d quiet${lowConf ? ` · ${stat?.confidence}/10 conf` : ''}`
+                          ? `${daysQuiet}d quiet${lowConf ? ` · ${stat?.confidence}/10 confidence` : ''}`
                           : 'No posts yet')
                       : 'Addressed'}
                   </p>
@@ -644,21 +646,21 @@ function HomeTab({ members, allStats, activities, mutateActivity, removeActivity
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     onClick={() => onMessageMember(member.id)}
-                    className="text-[10px] font-mono tracking-widest uppercase text-[#3b82f6] border border-[#3b82f6]/40 rounded-lg px-3 py-1.5 hover:bg-[#3b82f6]/10 transition"
+                    className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-accent-text)] border border-[var(--c-accent-text)]/40 rounded-lg px-3 py-1.5 hover:bg-[var(--c-accent-text)]/10 transition active:scale-95"
                   >
                     Message
                   </button>
                   {attn ? (
                     <button
                       onClick={() => onMarkAddressed(member.id)}
-                      className="text-[10px] font-mono tracking-widest uppercase text-[#f87171] border border-[#f87171]/40 rounded-lg px-3 py-1.5 hover:bg-[#f87171]/10 transition"
+                      className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] border border-[var(--c-border2)] rounded-lg px-3 py-1.5 hover:bg-[var(--c-hover)] transition active:scale-95"
                     >
-                      Addressed
+                      Done
                     </button>
                   ) : snoozed ? (
                     <button
                       onClick={() => onUndoAddressed(member.id)}
-                      className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] border border-[var(--c-border2)] rounded-lg px-3 py-1.5 hover:bg-[var(--c-hover)] transition"
+                      className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] border border-[var(--c-border2)] rounded-lg px-3 py-1.5 hover:bg-[var(--c-hover)] transition active:scale-95"
                     >
                       Undo
                     </button>
@@ -670,45 +672,29 @@ function HomeTab({ members, allStats, activities, mutateActivity, removeActivity
         </div>
       )}
 
-      {/* Quick links */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
-          <p className="text-[10px] text-[#3b82f6] uppercase tracking-wider font-mono mb-1">Programs</p>
-          <p className="text-sm font-semibold text-[var(--c-text)]">{members.length} member{members.length !== 1 ? 's' : ''}</p>
-          <p className="text-[10px] text-[var(--c-text3)] mt-0.5">Click Programs to edit</p>
-        </div>
-        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
-          <p className="text-[10px] text-[#9333ea] uppercase tracking-wider font-mono mb-1">Messages</p>
-          <p className="text-sm font-semibold text-[var(--c-text)]">{threads.length} thread{threads.length !== 1 ? 's' : ''}</p>
-          <p className="text-[10px] text-[var(--c-text3)] mt-0.5">Click Messages to chat</p>
-        </div>
-      </div>
-
-      {/* Unified activity feed across assigned members */}
-      {activities.length > 0 && (
-        <div>
-          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Activity Feed</p>
-          <div className="space-y-3">
-            {activities.slice(0, 20).map(a => (
-              <ActivityCard
-                key={a.id}
-                activity={a}
-                currentUserId={userId}
-                showMemberName
-                onMutate={mutateActivity}
-                onDelete={removeActivity}
-              />
-            ))}
+      {/* Activity feed — the main thing */}
+      <div className="space-y-3">
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Activity</p>
+        {activities.length === 0 ? (
+          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-8 text-center">
+            <p className="text-sm text-[var(--c-text3)] leading-relaxed">
+              Nothing posted yet.<br />
+              When your clients log activity, it shows up here.
+            </p>
           </div>
-        </div>
-      )}
-
-      {members.length === 0 && (
-        <div className="text-center py-10">
-          <p className="text-sm text-[var(--c-text4)]">No members assigned yet.</p>
-          {isHeadCoach && <p className="text-xs text-[var(--c-text5)] mt-1">Use Admin to invite and set up members.</p>}
-        </div>
-      )}
+        ) : (
+          activities.slice(0, 20).map(a => (
+            <ActivityCard
+              key={a.id}
+              activity={a}
+              currentUserId={userId}
+              showMemberName
+              onMutate={mutateActivity}
+              onDelete={removeActivity}
+            />
+          ))
+        )}
+      </div>
     </div>
   )
 }
@@ -3844,15 +3830,10 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
 
   return (
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
-      {/* Header */}
-      <div className="px-5 pt-12 pb-4 flex items-start justify-between lg:px-8 lg:pt-7 lg:pb-4 lg:border-b lg:border-[var(--c-border)]">
-        <div>
-          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">
-            Zana · Coach Portal
-          </p>
-          <h1 className="text-xl font-semibold tracking-tight mt-0.5 lg:text-2xl">{TAB_TITLES[activeTab]}</h1>
-        </div>
-        <Link href="/profile" className="shrink-0 mt-1 lg:hidden">
+      {/* Header — minimal: just the current tab + avatar on mobile */}
+      <div className="px-5 pt-10 pb-3 flex items-center justify-between lg:hidden">
+        <p className="text-[11px] text-[var(--c-text4)] tracking-widest uppercase font-mono">{TAB_TITLES[activeTab]}</p>
+        <Link href="/profile" className="shrink-0">
           <div
             className="w-9 h-9 rounded-full border-2 flex items-center justify-center text-xs font-bold overflow-hidden"
             style={{ borderColor: avatarColor + '50', backgroundColor: avatarColor + '18', color: avatarColor }}
