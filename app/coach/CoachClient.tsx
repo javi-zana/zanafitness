@@ -907,7 +907,7 @@ function IntakeCard({ member }: { member: Member }) {
   )
 }
 
-function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed }: {
+function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed, onDeleted, canDelete }: {
   member: Member
   stat: Stat | null
   snoozedAt: string | null
@@ -915,10 +915,14 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
   onClose: () => void
   onMarkAddressed: () => void
   onUndoAddressed: () => void
+  onDeleted: () => void
+  canDelete: boolean
 }) {
   const supabase = createClient()
   const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([])
   const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([])
+  const [deleteState, setDeleteState] = useState<'idle' | 'confirm' | 'deleting' | 'error'>('idle')
+  const [deleteError, setDeleteError] = useState('')
   const [calorieTarget, setCalorieTarget] = useState<number | null>(null)
   const [statUpdates, setStatUpdates] = useState<StatUpdateCoach[]>([])
   const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([])
@@ -1391,19 +1395,92 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
           )}
         </>
       )}
+
+      {canDelete && (
+        <div className="pt-6 mt-2 border-t border-[var(--c-border)] space-y-2">
+          <p className="text-[9px] text-[#dc2626] font-mono uppercase tracking-widest mb-2">Danger Zone</p>
+          {deleteState === 'idle' && (
+            <button
+              type="button"
+              onClick={() => setDeleteState('confirm')}
+              className="w-full text-xs font-mono tracking-widest uppercase text-[#dc2626] border border-[#dc2626]/30 hover:bg-[#dc2626]/8 rounded-lg py-3 transition"
+            >
+              Delete Member
+            </button>
+          )}
+          {deleteState === 'confirm' && (
+            <div className="space-y-2">
+              <p className="text-xs text-[var(--c-text3)] leading-relaxed">
+                This will permanently delete <span className="text-[var(--c-text)] font-medium">{member.first_name ?? member.email}</span> and all their data — workouts, photos, messages, intake. The email becomes free to invite again.
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => { setDeleteState('idle'); setDeleteError('') }}
+                  className="text-xs font-mono tracking-widest uppercase text-[var(--c-text4)] border border-[var(--c-border)] hover:bg-[var(--c-hover)] rounded-lg py-3 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setDeleteState('deleting')
+                    setDeleteError('')
+                    try {
+                      const res = await fetch('/api/admin-action', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete_member', memberId: member.id }),
+                      })
+                      const json = await res.json().catch(() => ({}))
+                      if (!res.ok) throw new Error(json.error ?? 'Delete failed')
+                      onDeleted()
+                    } catch (err) {
+                      setDeleteState('error')
+                      setDeleteError(err instanceof Error ? err.message : 'Delete failed')
+                    }
+                  }}
+                  className="text-xs font-mono tracking-widest uppercase bg-[#dc2626] text-white hover:bg-[#b91c1c] rounded-lg py-3 transition"
+                >
+                  Confirm Delete
+                </button>
+              </div>
+            </div>
+          )}
+          {deleteState === 'deleting' && (
+            <div className="flex items-center justify-center gap-2 py-3">
+              <div className="w-3.5 h-3.5 border-2 border-[var(--c-border2)] border-t-[#dc2626] rounded-full animate-spin" />
+              <p className="text-xs text-[var(--c-text3)]">Deleting…</p>
+            </div>
+          )}
+          {deleteState === 'error' && (
+            <div className="space-y-2">
+              <p className="text-xs text-[#dc2626]">{deleteError}</p>
+              <button
+                type="button"
+                onClick={() => { setDeleteState('idle'); setDeleteError('') }}
+                className="text-xs text-[var(--c-text3)] underline"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
 
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
-function MembersTab({ members, allStats, threads, lastMessages, myReads, userId, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
+function MembersTab({ members, allStats, threads, lastMessages, myReads, userId, userEmail, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
   threads: Thread[]
   lastMessages: MsgPreview[]
   myReads: ReadReceipt[]
   userId: string
+  userEmail: string
   onOpenProgram: (memberId: string) => void
   snoozes: Record<string, string>
   onMarkAddressed: (memberId: string) => void
@@ -1489,10 +1566,12 @@ function MembersTab({ members, allStats, threads, lastMessages, myReads, userId,
         member={selectedMember}
         stat={selectedStat}
         snoozedAt={snoozes[selectedMember.id] ?? null}
+        canDelete={userEmail === 'me@javilorenzana.com'}
         onOpenProgram={(id) => { setSelectedMember(null); onOpenProgram(id) }}
         onClose={() => setSelectedMember(null)}
         onMarkAddressed={() => onMarkAddressed(selectedMember.id)}
         onUndoAddressed={() => onUndoAddressed(selectedMember.id)}
+        onDeleted={() => { setSelectedMember(null); window.location.reload() }}
       />
     )
   }
@@ -3979,7 +4058,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
           <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'members' && (
-          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
+          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'programs' && (
           <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} />
