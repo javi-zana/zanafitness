@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { SplitBuilder, StructuredSplit } from '@/components/SplitBuilder'
 import { ActivityCard } from '@/components/ActivityCard'
+import { useTheme } from '@/app/providers'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -357,6 +358,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   userEmail: string
   unreadCount: number
 }) {
+  const { theme, toggleTheme } = useTheme()
   const tabs: { id: CoachTab; label: string; icon: JSX.Element }[] = [
     { id: 'home', label: 'Home', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" /></svg> },
     { id: 'members', label: 'Members', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg> },
@@ -453,6 +455,22 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             </div>
             <span className="text-sm font-semibold">Profile</span>
           </Link>
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all w-full text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]"
+          >
+            {theme === 'dark' ? (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 shrink-0">
+                <circle cx="12" cy="12" r="5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5 shrink-0">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+            <span className="text-sm font-semibold">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+          </button>
           <p className="text-[9px] text-[var(--c-text5)] uppercase tracking-widest px-3 pt-2">© 2026 Zana</p>
         </div>
       </aside>
