@@ -536,7 +536,7 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
 
 // ─── Home tab ─────────────────────────────────────────────────────────────────
 
-function HomeTab({ members, allStats, activities, userId, threads, lastMessages, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed }: {
+function HomeTab({ members, allStats, activities, userId, threads, lastMessages, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed, onMessageMember }: {
   members: Member[]
   allStats: Stat[]
   activities: ActivityWithDetails[]
@@ -548,6 +548,7 @@ function HomeTab({ members, allStats, activities, userId, threads, lastMessages,
   snoozes: Record<string, string>
   onMarkAddressed: (memberId: string) => void
   onUndoAddressed: (memberId: string) => void
+  onMessageMember: (memberId: string) => void
 }) {
   const router = useRouter()
   const name = firstName ?? 'Coach'
@@ -621,6 +622,8 @@ function HomeTab({ members, allStats, activities, userId, threads, lastMessages,
           {latestPerMember.filter(({ member, stat }) => needsAttention(stat, snoozes[member.id]) || snoozes[member.id]).map(({ member, stat }) => {
             const attn = needsAttention(stat, snoozes[member.id])
             const snoozed = !!snoozes[member.id]
+            const daysQuiet = stat ? Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) : null
+            const lowConf = stat?.confidence != null && stat.confidence <= 3
             return (
               <div key={member.id} className={`flex items-center gap-3 rounded-2xl px-4 py-3 border ${attn ? 'bg-[#f87171]/8 border-[#f87171]/30' : 'bg-[var(--c-card)] border-[var(--c-border)]'}`}>
                 <div className="w-7 h-7 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[var(--c-accent-text)] shrink-0">
@@ -629,24 +632,36 @@ function HomeTab({ members, allStats, activities, userId, threads, lastMessages,
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-[var(--c-text)] truncate">{memberName(member)}</p>
                   <p className={`text-[10px] font-mono ${attn ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>
-                    {attn ? (stat ? `${Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000)}d since check-in${stat.confidence !== null && stat.confidence <= 3 ? ` · ${stat.confidence}/10 conf` : ''}` : 'No check-ins yet') : 'Addressed'}
+                    {attn
+                      ? (daysQuiet !== null
+                          ? `${daysQuiet}d quiet${lowConf ? ` · ${stat?.confidence}/10 conf` : ''}`
+                          : 'No posts yet')
+                      : 'Addressed'}
                   </p>
                 </div>
-                {attn ? (
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
-                    onClick={() => onMarkAddressed(member.id)}
-                    className="shrink-0 text-[10px] font-mono tracking-widest uppercase text-[#f87171] border border-[#f87171]/40 rounded-lg px-3 py-1.5 hover:bg-[#f87171]/10 transition"
+                    onClick={() => onMessageMember(member.id)}
+                    className="text-[10px] font-mono tracking-widest uppercase text-[#3b82f6] border border-[#3b82f6]/40 rounded-lg px-3 py-1.5 hover:bg-[#3b82f6]/10 transition"
                   >
-                    Mark Addressed
+                    Message
                   </button>
-                ) : snoozed ? (
-                  <button
-                    onClick={() => onUndoAddressed(member.id)}
-                    className="shrink-0 text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] border border-[var(--c-border2)] rounded-lg px-3 py-1.5 hover:bg-[var(--c-hover)] transition"
-                  >
-                    Undo
-                  </button>
-                ) : null}
+                  {attn ? (
+                    <button
+                      onClick={() => onMarkAddressed(member.id)}
+                      className="text-[10px] font-mono tracking-widest uppercase text-[#f87171] border border-[#f87171]/40 rounded-lg px-3 py-1.5 hover:bg-[#f87171]/10 transition"
+                    >
+                      Addressed
+                    </button>
+                  ) : snoozed ? (
+                    <button
+                      onClick={() => onUndoAddressed(member.id)}
+                      className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] border border-[var(--c-border2)] rounded-lg px-3 py-1.5 hover:bg-[var(--c-hover)] transition"
+                    >
+                      Undo
+                    </button>
+                  ) : null}
+                </div>
               </div>
             )
           })}
@@ -1694,6 +1709,8 @@ function MessagesTab({
   myName,
   myAvatarUrl,
   myAvatarColor,
+  initialThreadId,
+  onInitialThreadConsumed,
 }: {
   userId: string
   isHeadCoach: boolean
@@ -1705,9 +1722,18 @@ function MessagesTab({
   myName: string | null
   myAvatarUrl: string | null
   myAvatarColor: string
+  initialThreadId?: string | null
+  onInitialThreadConsumed?: () => void
 }) {
   const supabase = createClient()
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null)
+  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(initialThreadId ?? null)
+
+  useEffect(() => {
+    if (initialThreadId && initialThreadId !== selectedThreadId) {
+      setSelectedThreadId(initialThreadId)
+      onInitialThreadConsumed?.()
+    }
+  }, [initialThreadId]) // eslint-disable-line react-hooks/exhaustive-deps
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [lastMsgState, setLastMsgState] = useState<MsgPreview[]>(lastMessages)
   const [allThreads, setAllThreads] = useState<Thread[]>(threads)
@@ -3666,6 +3692,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<CoachTab>('home')
   const [programMemberId, setProgramMemberId] = useState<string | null>(null)
+  const [initialMessageThreadId, setInitialMessageThreadId] = useState<string | null>(null)
   const [snoozes, setSnoozes] = useState<Record<string, string>>(snoozeMap)
   const isHeadCoach = userRole === 'head_coach'
 
@@ -3690,6 +3717,12 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   function openMemberProgram(memberId: string) {
     setProgramMemberId(memberId)
     setActiveTab('programs')
+  }
+
+  function openMemberMessage(memberId: string) {
+    const thread = threads.find(t => t.member_id === memberId && !t.is_group)
+    if (thread) setInitialMessageThreadId(thread.id)
+    setActiveTab('messages')
   }
 
   function markAddressed(memberId: string) {
@@ -3770,7 +3803,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:pb-10 lg:pt-6">
         {activeTab === 'home' && (
-          <HomeTab members={members} allStats={allStats} activities={activities} userId={userId} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
+          <HomeTab members={members} allStats={allStats} activities={activities} userId={userId} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} onMessageMember={openMemberMessage} />
         )}
         {activeTab === 'members' && (
           <MembersTab members={members} allStats={allStats} activities={activities} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
@@ -3790,6 +3823,8 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
             myName={firstName}
             myAvatarUrl={avatarUrl}
             myAvatarColor={avatarColor}
+            initialThreadId={initialMessageThreadId}
+            onInitialThreadConsumed={() => setInitialMessageThreadId(null)}
           />
         )}
 {activeTab === 'applications' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
