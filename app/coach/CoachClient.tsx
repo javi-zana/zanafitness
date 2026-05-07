@@ -1305,9 +1305,11 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
 
   if (members.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="text-sm text-[var(--c-text4)]">No members assigned yet.</p>
-        <p className="text-xs text-[var(--c-text5)] mt-1">Use Admin to invite members.</p>
+      <div className="max-w-2xl mx-auto py-12 lg:py-20 space-y-4 text-center">
+        <h1 className="font-display leading-none text-3xl lg:text-4xl">No clients yet.</h1>
+        <p className="text-sm text-[var(--c-text3)] max-w-md mx-auto leading-relaxed">
+          Head to More → Admin to onboard your first member. Once they sign in, you&apos;ll see them here.
+        </p>
       </div>
     )
   }
@@ -1494,24 +1496,38 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
   }
 
   if (!selectedId) {
+    if (members.length === 0) {
+      return (
+        <div className="max-w-2xl mx-auto py-12 lg:py-20 space-y-4 text-center">
+          <h1 className="font-display leading-none text-3xl lg:text-4xl">Programs.</h1>
+          <p className="text-sm text-[var(--c-text3)] max-w-md mx-auto leading-relaxed">
+            No clients yet. Once you invite members, you'll come here to build their split, set calorie targets, and define daily habits.
+          </p>
+        </div>
+      )
+    }
     return (
-      <div>
-        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Select a member to edit their program</p>
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="space-y-1">
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Programs</p>
+          <h1 className="font-display leading-none text-3xl lg:text-4xl">Pick a client.</h1>
+          <p className="text-sm text-[var(--c-text3)] mt-2">Build their split, food plan, and daily habits.</p>
+        </div>
         <div className="space-y-2">
           {members.map(m => (
             <button
               key={m.id}
               onClick={() => selectMember(m.id)}
-              className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-3 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 hover:bg-[var(--c-hover)] transition text-left"
+              className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-4 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/30 hover:bg-[var(--c-hover)] transition text-left active:scale-[0.99]"
             >
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)] shrink-0">
+              <div className="w-11 h-11 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-sm font-mono font-bold text-[var(--c-accent-text)] shrink-0">
                 {m.avatar_url ? <img src={m.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(m).charAt(0).toUpperCase()}
               </div>
-              <div>
-                <p className="text-sm font-semibold text-[var(--c-text)]">{memberName(m)}</p>
-                <p className="text-[10px] text-[var(--c-text4)] font-mono">Split · Food · Habits</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-[var(--c-text)] truncate">{memberName(m)}</p>
+                <p className="text-[11px] text-[var(--c-text4)] mt-0.5">Split · Food · Habits</p>
               </div>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-4 h-4 text-[var(--c-text4)] ml-auto">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[var(--c-text4)] shrink-0">
                 <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
@@ -3047,7 +3063,14 @@ function AdminTab({ userEmail }: { userEmail: string }) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="max-w-2xl mx-auto space-y-8">
+
+      {/* Header */}
+      <div className="space-y-1">
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Admin</p>
+        <h1 className="font-display leading-none text-3xl lg:text-4xl">Tools.</h1>
+        <p className="text-sm text-[var(--c-text3)] mt-2">Onboard new clients, assign coaches, send updates.</p>
+      </div>
 
       {/* ── New member notifications ── */}
       {newMembers.length > 0 && (
@@ -3221,7 +3244,8 @@ function AdminTab({ userEmail }: { userEmail: string }) {
 
       {/* ── Create member account ── */}
       <div>
-        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Create New Member</p>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-1">Onboarding a new client?</p>
+        <p className="text-xs text-[var(--c-text4)] mb-3">Create their account on the call. We&apos;ll generate a password you can share — they&apos;ll be guided into onboarding the moment they sign in.</p>
 
         {inviteCredentials ? (
           <div className="space-y-3">
