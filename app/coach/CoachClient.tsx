@@ -57,7 +57,7 @@ type Thread = {
 type MsgPreview = { thread_id: string; body: string; created_at: string; author_id: string }
 type ReadReceipt = { thread_id: string; last_read_at: string }
 type ChatMessage = { id: string; author_id: string; body: string; created_at: string; message_attachments: { id: string; storage_path: string; kind: string }[] }
-type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'inbox' | 'applications' | 'admin'
+type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'inbox' | 'applications' | 'admin' | 'more'
 type Section = 'split' | 'food' | 'habits'
 
 type BmrData = {
@@ -367,9 +367,10 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
     { id: 'messages', label: 'Messages', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
   ]
 
-  const applicationsIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M9 12h6M9 16h3M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-  const adminIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" /><circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" /></svg>
+  const moreIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>
   const showAdmin = isHeadCoach && userEmail === 'me@javilorenzana.com'
+  // 'More' visually highlights when viewing any of its hidden sub-tabs
+  const moreActive = active === 'more' || active === 'applications' || active === 'admin'
 
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
 
@@ -419,28 +420,15 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
           ))}
           {showAdmin && (
             <button
-              onClick={() => onChange('applications')}
+              onClick={() => onChange('more')}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
-                active === 'applications'
+                moreActive
                   ? 'bg-[#b0e455] text-[#0b1509]'
                   : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
               }`}
             >
-              {applicationsIcon}
-              <span className="text-sm font-semibold">Applications</span>
-            </button>
-          )}
-          {showAdmin && (
-            <button
-              onClick={() => onChange('admin')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-left ${
-                active === 'admin'
-                  ? 'bg-[#b0e455] text-[#0b1509]'
-                  : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
-              }`}
-            >
-              {adminIcon}
-              <span className="text-sm font-semibold">Admin</span>
+              {moreIcon}
+              <span className="text-sm font-semibold">More</span>
             </button>
           )}
         </nav>
@@ -477,13 +465,12 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
       </aside>
 
       {/* ── Mobile bottom bar ─────────────────────────────────────────────── */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex overflow-x-auto z-50 [&::-webkit-scrollbar]:hidden relative" style={{ scrollbarWidth: 'none' }}>
-        {showAdmin && <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[var(--c-backdrop)] to-transparent z-10" />}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex z-50">
         {tabs.map(t => (
           <button
             key={t.id}
             onClick={() => onChange(t.id)}
-            className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
+            className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
             <div className={`relative w-10 h-7 flex items-center justify-center rounded-full transition-all ${
               active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
@@ -502,32 +489,17 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
         ))}
         {showAdmin && (
           <button
-            onClick={() => onChange('applications')}
-            className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
+            onClick={() => onChange('more')}
+            className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
           >
             <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
-              active === 'applications' ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
+              moreActive ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
             }`}>
-              {applicationsIcon}
+              {moreIcon}
             </div>
             <span className={`text-[9px] uppercase font-medium ${
-              active === 'applications' ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
-            }`}>Apps</span>
-          </button>
-        )}
-        {showAdmin && (
-          <button
-            onClick={() => onChange('admin')}
-            className="grow shrink-0 basis-[60px] flex flex-col items-center gap-1 py-2.5 transition-colors"
-          >
-            <div className={`w-10 h-7 flex items-center justify-center rounded-full transition-all ${
-              active === 'admin' ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
-            }`}>
-              {adminIcon}
-            </div>
-            <span className={`text-[9px] uppercase font-medium ${
-              active === 'admin' ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
-            }`}>Admin</span>
+              moreActive ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
+            }`}>More</span>
           </button>
         )}
       </nav>
@@ -972,27 +944,58 @@ function MemberDetailPanel({ member, stat, activities, mutateActivity, removeAct
   }
   const activeCount = last30Days.filter(d => d.active).length
 
+  // Quick stats
+  const daysIntoProgram = member.onboarded_at
+    ? Math.floor((Date.now() - new Date(member.onboarded_at).getTime()) / 86_400_000)
+    : null
+  const posts30d = activities.length // already filtered to this member by parent
+  const activeDateSet = new Set(activities.map(a => a.created_at.split('T')[0]))
+  let streak = 0
+  for (let i = 0; i < 60; i++) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    if (activeDateSet.has(key)) streak++
+    else if (i > 0) break
+  }
+  const memberDisplayName = member.first_name ?? member.email.split('@')[0]
+
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <button onClick={onClose} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+    <div className="max-w-2xl mx-auto space-y-5">
+      {/* Top bar — close + program edit */}
+      <div className="flex items-center justify-between">
+        <button onClick={onClose} className="flex items-center gap-1.5 text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
+          <span className="text-[11px] uppercase tracking-widest font-mono">Roster</span>
         </button>
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="w-8 h-8 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[var(--c-accent-text)] shrink-0">
-            {member.avatar_url ? <img src={member.avatar_url} alt="" className="w-full h-full object-cover" /> : (member.first_name ?? member.email).charAt(0).toUpperCase()}
-          </div>
-          <p className="text-sm font-semibold text-[var(--c-text)] truncate">{member.first_name ?? member.email.split('@')[0]}</p>
-        </div>
         <button
           onClick={() => onOpenProgram(member.id)}
-          className="shrink-0 text-[10px] font-mono tracking-widest uppercase text-[var(--c-accent-text)] hover:opacity-75 transition"
+          className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-accent-text)] hover:opacity-75 transition border border-[var(--c-accent-text)]/40 rounded-lg px-3 py-1.5 hover:bg-[var(--c-accent-text)]/10 active:scale-95"
         >
-          Edit Program →
+          Edit Program
         </button>
+      </div>
+
+      {/* Client profile header */}
+      <div className="flex items-start gap-4">
+        <div className="w-16 h-16 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xl font-bold text-[var(--c-accent-text)] shrink-0">
+          {member.avatar_url ? <img src={member.avatar_url} alt="" className="w-full h-full object-cover" /> : memberDisplayName.charAt(0).toUpperCase()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <h2 className="text-2xl font-display leading-none truncate">{memberDisplayName}.</h2>
+          <p className="text-xs text-[var(--c-text4)] truncate mt-1">{member.email}</p>
+          <div className="flex items-center gap-3 mt-2.5 text-[11px] text-[var(--c-text4)] flex-wrap">
+            {daysIntoProgram !== null && (
+              <span><span className="text-[var(--c-text2)] font-semibold">{daysIntoProgram}</span>d in program</span>
+            )}
+            {streak > 0 && (
+              <span><span className="text-[var(--c-text2)] font-semibold">{streak}</span>d streak</span>
+            )}
+            <span><span className="text-[var(--c-text2)] font-semibold">{posts30d}</span> {posts30d === 1 ? 'post' : 'posts'} / 30d</span>
+          </div>
+        </div>
       </div>
 
       {/* Attention banner */}
@@ -1264,15 +1267,27 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
 
   const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
 
+  // Per-member: latest activity (any kind) + count of activities in last 30 days
+  const thirtyDaysAgo = Date.now() - 30 * 86_400_000
+  const latestActivityByMember: Record<string, ActivityWithDetails | null> = {}
+  const activityCount30dByMember: Record<string, number> = {}
+  for (const a of activities) {
+    if (!latestActivityByMember[a.member_id] ||
+        new Date(a.created_at).getTime() > new Date(latestActivityByMember[a.member_id]!.created_at).getTime()) {
+      latestActivityByMember[a.member_id] = a
+    }
+    if (new Date(a.created_at).getTime() >= thirtyDaysAgo) {
+      activityCount30dByMember[a.member_id] = (activityCount30dByMember[a.member_id] ?? 0) + 1
+    }
+  }
+
   const latestPerMember = members.map(m => ({
     member: m,
     stat: stats.find(s => s.member_id === m.id) ?? null,
     lastMsg: lastMsgByMember[m.id] ?? null,
+    latestActivity: latestActivityByMember[m.id] ?? null,
+    posts30d: activityCount30dByMember[m.id] ?? 0,
   }))
-
-  const recentStream = [...stats]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 20)
 
   // Summary counts
   const totalMembers = members.length
@@ -1319,120 +1334,85 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
     )
   }
 
-  return (
-    <div className="space-y-6">
+  const KIND_EMOJI: Record<ActivityWithDetails['kind'], string> = {
+    workout: '🏋️',
+    win: '🏆',
+    meal: '🍽️',
+  }
 
-      {/* Summary stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
-          <p className="text-2xl font-bold text-[var(--c-text)]">{totalMembers}</p>
-          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Total</p>
-        </div>
-        <div
-          className={`rounded-2xl p-3 text-center border shadow-sm ${needAttention > 0 ? 'bg-[#f87171]/8 border-[#f87171]/30' : 'bg-[var(--c-card)] border-[var(--c-border)]'}`}
-          style={undefined}
-        >
-          <p className={`text-2xl font-bold ${needAttention > 0 ? 'text-[#f87171]' : 'text-[var(--c-text4)]'}`}>{needAttention}</p>
-          <p className="text-[9px] text-[var(--c-text4)] uppercase mt-0.5">Attn</p>
-        </div>
-        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-3 text-center border border-[var(--c-border)]">
-          <p className="text-2xl font-bold text-[#16a34a]">{activeThisWeek}</p>
-          <p className="text-[9px] text-[var(--c-text4)] uppercase tracking-wider mt-0.5">Active</p>
-        </div>
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+
+      {/* Header */}
+      <div className="space-y-1">
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Roster</p>
+        <h1 className="font-display leading-none text-3xl lg:text-4xl">{totalMembers} {totalMembers === 1 ? 'client' : 'clients'}.</h1>
+        <p className="text-sm text-[var(--c-text3)] mt-2">
+          <span className={needAttention > 0 ? 'text-[#f87171] font-semibold' : ''}>
+            {needAttention} need{needAttention === 1 ? 's' : ''} attention
+          </span>
+          {' · '}
+          {activeThisWeek} active this week
+        </p>
       </div>
 
-      {/* Roster */}
-      <div>
-        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Roster</p>
-        <div className="space-y-2">
-          {sortedMembers.map(({ member, stat, lastMsg }) => {
-            const status = checkinStatus(stat)
-            return (
-              <button
-                key={member.id}
-                onClick={() => setSelectedMember(member)}
-                className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-4 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 transition-colors text-left"
-              >
-                <div className="relative shrink-0">
-                  <div className="w-9 h-9 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-mono font-bold text-[var(--c-accent-text)]">
-                    {member.avatar_url ? <img src={member.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(member).charAt(0).toUpperCase()}
-                  </div>
-                  <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--c-card2)] ${STATUS_DOT[status]}`} />
+      {/* Roster — richer rows */}
+      <div className="space-y-2">
+        {sortedMembers.map(({ member, stat, latestActivity, posts30d }) => {
+          const status = checkinStatus(stat)
+          const daysQuiet = stat ? Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) : null
+          return (
+            <button
+              key={member.id}
+              onClick={() => setSelectedMember(member)}
+              className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-4 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/30 hover:bg-[var(--c-hover)] transition text-left active:scale-[0.99]"
+            >
+              <div className="relative shrink-0">
+                <div className="w-11 h-11 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-sm font-mono font-bold text-[var(--c-accent-text)]">
+                  {member.avatar_url ? <img src={member.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(member).charAt(0).toUpperCase()}
                 </div>
-                <div className="flex-1 min-w-0">
+                <span className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-[var(--c-card)] ${STATUS_DOT[status]}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-[var(--c-text)] truncate">{memberName(member)}</p>
-                  <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                    {stat ? (
-                      <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>
-                        Check-in {relTime(stat.created_at)} ago
-                        {stat.weight_kg != null ? ` · ${toDisplay(stat.weight_kg, member.weight_unit)}` : ''}
-                        {stat.confidence != null ? <span style={{ color: confidenceColor(stat.confidence) }}> · {stat.confidence}/10</span> : null}
-                      </p>
-                    ) : (
-                      <p className="text-[10px] text-[var(--c-text4)] font-mono">No check-ins</p>
-                    )}
-                    {lastMsg && (
-                      <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>Msg {relTime(lastMsg.created_at)} ago</p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-col items-end gap-1.5 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-full ${
-                      status === 'fresh' ? 'text-[#15803d] bg-[#15803d]/10'
-                      : status === 'ok' ? 'text-[#b45309] bg-[#b45309]/10'
-                      : status === 'overdue' ? 'text-[#dc2626] bg-[#dc2626]/10'
-                      : 'text-[var(--c-text4)] bg-[var(--c-card)]'
-                    }`}>
-                      {STATUS_LABEL[status]}
-                    </span>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[var(--c-text4)]">
-                      <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </div>
                   {unreadMembers.has(member.id) && (
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest bg-[#b0e455] text-[#0f1a0c] px-2 py-0.5 rounded-full">New</span>
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest bg-[#b0e455] text-[#0f1a0c] px-2 py-0.5 rounded-full shrink-0">New msg</span>
                   )}
                 </div>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {recentStream.length > 0 && (
-        <div>
-          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Recent updates</p>
-          <div className="space-y-2">
-            {recentStream.map(s => {
-              const m = memberMap[s.member_id]
-              if (!m) return null
-              return (
-                <div key={s.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="text-xs font-semibold text-[var(--c-text)]">{memberName(m)}</p>
-                    <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>{relTime(s.created_at)} ago</p>
-                  </div>
-                  <div className="flex gap-4">
-                    {s.weight_kg != null && (
-                      <div>
-                        <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Weight</p>
-                        <p className="text-sm font-semibold text-[var(--c-text)]">{toDisplay(s.weight_kg, m.weight_unit)}</p>
-                      </div>
-                    )}
-                    {s.confidence != null && (
-                      <div>
-                        <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Confidence</p>
-                        <p className="text-sm font-semibold" style={{ color: confidenceColor(s.confidence) }}>{s.confidence}/10</p>
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[var(--c-text4)]">
+                  {latestActivity ? (
+                    <span suppressHydrationWarning>
+                      <span aria-hidden>{KIND_EMOJI[latestActivity.kind]}</span> {relTime(latestActivity.created_at)} ago
+                      {latestActivity.confidence != null && (
+                        <span style={{ color: confidenceColor(latestActivity.confidence) }}> · {latestActivity.confidence}/10</span>
+                      )}
+                    </span>
+                  ) : (
+                    <span>No posts yet</span>
+                  )}
+                  {posts30d > 0 && (
+                    <span className="text-[var(--c-text5)]">· {posts30d} in 30d</span>
+                  )}
                 </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {daysQuiet !== null && daysQuiet >= 3 && (
+                  <span className={`text-[10px] font-medium tracking-wide uppercase px-2 py-0.5 rounded-full ${
+                    daysQuiet >= 7 ? 'text-[#dc2626] bg-[#dc2626]/10'
+                    : 'text-[#b45309] bg-[#b45309]/10'
+                  }`}>
+                    {daysQuiet}d quiet
+                  </span>
+                )}
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[var(--c-text4)]">
+                  <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -3724,6 +3704,63 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
   )
 }
 
+// ─── More page (houses Applications + Admin under one nav slot) ──────────────
+
+function MorePage({ onChange }: { onChange: (t: CoachTab) => void }) {
+  const items: { id: CoachTab; label: string; description: string; icon: JSX.Element }[] = [
+    {
+      id: 'applications',
+      label: 'Applications',
+      description: 'New leads who applied to join — review and follow up.',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5 text-[var(--c-accent-text)]">
+          <path d="M9 12h6M9 16h3M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      id: 'admin',
+      label: 'Admin',
+      description: 'Create members, assign coaches, broadcast updates.',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5 text-[var(--c-accent-text)]">
+          <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="12" cy="12" r="3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+  ]
+
+  return (
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="space-y-1">
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">More</p>
+        <h1 className="font-display leading-none text-3xl lg:text-4xl">Tools.</h1>
+      </div>
+      <div className="space-y-2">
+        {items.map(item => (
+          <button
+            key={item.id}
+            onClick={() => onChange(item.id)}
+            className="w-full text-left bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-4 hover:border-[var(--c-accent-text)]/30 hover:bg-[var(--c-hover)] transition flex items-start gap-4 active:scale-[0.99]"
+          >
+            <div className="shrink-0 w-10 h-10 rounded-xl bg-[var(--c-accent-text)]/8 border border-[var(--c-border2)] flex items-center justify-center">
+              {item.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[var(--c-text)]">{item.label}</p>
+              <p className="text-xs text-[var(--c-text3)] mt-0.5 leading-relaxed">{item.description}</p>
+            </div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4 text-[var(--c-text4)] mt-2 shrink-0">
+              <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, activities, threads, lastMessages, myReads, coachProfiles, snoozeMap }: Props) {
@@ -3824,6 +3861,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
     inbox: 'DM Inbox',
     applications: 'Applications',
     admin: 'Admin',
+    more: 'More',
   }
 
   const initials = (firstName ?? userEmail.split('@')[0]).slice(0, 1).toUpperCase()
@@ -3878,6 +3916,9 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
         )}
         {activeTab === 'admin' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
           <AdminTab userEmail={userEmail} />
+        )}
+        {activeTab === 'more' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
+          <MorePage onChange={setActiveTab} />
         )}
       </div>
 
