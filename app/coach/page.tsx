@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
-import CoachClient from './CoachClient'
+import CoachClient, { type MemberWithIntake } from './CoachClient'
 
 export default async function CoachPage() {
   const supabase = await createClient()
@@ -46,7 +46,16 @@ export default async function CoachPage() {
   // Load member profiles and stats
   const [{ data: members }, { data: allStats }] = await Promise.all([
     memberIds.length
-      ? admin.from('profiles').select('id, first_name, email, role, weight_unit, avatar_url, avatar_color').in('id', memberIds)
+      ? admin.from('profiles').select(`
+          id, first_name, email, role, weight_unit, avatar_url, avatar_color,
+          gender, age, height_cm, location, occupation, work_schedule,
+          starting_weight_kg, starting_body_fat_pct, waist_cm, chest_cm, hips_cm,
+          mirror_goal, target_date, why_motivation, success_vision,
+          training_years, training_frequency_per_week, training_current_state, training_access, training_equipment, training_injuries,
+          diet_typical_day, diet_meals_per_day, diet_who_cooks, diet_restrictions, diet_dislikes, diet_alcohol_frequency, diet_supplements, diet_eating_out_frequency,
+          lifestyle_sleep_hours, lifestyle_sleep_quality, lifestyle_stress_level, lifestyle_travel_frequency, lifestyle_energy_level,
+          intake_notes, onboarded_at
+        `).in('id', memberIds)
       : Promise.resolve({ data: [] }),
     memberIds.length
       ? admin.from('stat_updates')
@@ -152,7 +161,7 @@ export default async function CoachPage() {
       firstName={profile?.first_name ?? null}
       avatarColor={profile?.avatar_color ?? '#b0e455'}
       avatarUrl={profile?.avatar_url ?? null}
-      members={(members ?? []) as { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null; avatar_url: string | null; avatar_color: string | null }[]}
+      members={(members ?? []) as MemberWithIntake[]}
       allStats={(allStats ?? []) as { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }[]}
       threads={threads}
       lastMessages={(lastMessages ?? []) as { thread_id: string; body: string; created_at: string; author_id: string }[]}

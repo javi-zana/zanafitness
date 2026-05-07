@@ -39,14 +39,14 @@ export default function PasswordConfirmedPage() {
             Password set.
           </h1>
           <p className="text-sm text-[var(--c-text3)] leading-relaxed mb-10">
-            Your account is ready. Head to your dashboard<br />to get started.
+            Now let's set up your profile<br />so we can build your program.
           </p>
 
           <Link
-            href="/dashboard"
+            href="/onboarding"
             className="block w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors text-center"
           >
-            Go to Dashboard
+            Continue
           </Link>
 
         </div>

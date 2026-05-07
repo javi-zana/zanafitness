@@ -7,7 +7,30 @@ import { SplitBuilder, StructuredSplit } from '@/components/SplitBuilder'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Member = { id: string; first_name: string | null; email: string; role: string; weight_unit: string | null; avatar_url: string | null; avatar_color: string | null }
+type Member = {
+  id: string; first_name: string | null; email: string; role: string;
+  weight_unit: string | null; avatar_url: string | null; avatar_color: string | null;
+  // Intake / onboarding (all optional — null until member finishes onboarding)
+  gender?: string | null; age?: number | null; height_cm?: number | null;
+  location?: string | null; occupation?: string | null; work_schedule?: string | null;
+  starting_weight_kg?: number | null; starting_body_fat_pct?: number | null;
+  waist_cm?: number | null; chest_cm?: number | null; hips_cm?: number | null;
+  mirror_goal?: string | null; target_date?: string | null;
+  why_motivation?: string | null; success_vision?: string | null;
+  training_years?: string | null; training_frequency_per_week?: number | null;
+  training_current_state?: string | null; training_access?: string | null;
+  training_equipment?: string | null; training_injuries?: string | null;
+  diet_typical_day?: string | null; diet_meals_per_day?: number | null;
+  diet_who_cooks?: string | null; diet_restrictions?: string | null;
+  diet_dislikes?: string | null; diet_alcohol_frequency?: string | null;
+  diet_supplements?: string | null; diet_eating_out_frequency?: string | null;
+  lifestyle_sleep_hours?: number | null; lifestyle_sleep_quality?: string | null;
+  lifestyle_stress_level?: number | null; lifestyle_travel_frequency?: string | null;
+  lifestyle_energy_level?: string | null;
+  intake_notes?: string | null;
+  onboarded_at?: string | null;
+}
+export type MemberWithIntake = Member
 type Stat = { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }
 type ThreadParticipant = {
   user_id: string
@@ -735,6 +758,155 @@ function computeExerciseProgression(logs: WorkoutLog[]): { move: string; session
     .slice(0, 6)
 }
 
+// ─── Intake card (member onboarding data shown to coach) ─────────────────────
+
+function Field({ label, value }: { label: string; value: string | number | null | undefined }) {
+  if (value == null || value === '') return null
+  return (
+    <div className="space-y-1">
+      <p className="text-[9px] uppercase tracking-widest font-mono text-[var(--c-text5)]">{label}</p>
+      <p className="text-sm text-[var(--c-text)] whitespace-pre-wrap break-words">{value}</p>
+    </div>
+  )
+}
+
+function IntakeCard({ member }: { member: Member }) {
+  const [open, setOpen] = useState(false)
+
+  const hasAny = !!(
+    member.gender || member.age || member.height_cm || member.location || member.occupation || member.work_schedule ||
+    member.starting_weight_kg || member.starting_body_fat_pct || member.waist_cm || member.chest_cm || member.hips_cm ||
+    member.mirror_goal || member.target_date || member.why_motivation || member.success_vision ||
+    member.training_years || member.training_frequency_per_week || member.training_current_state ||
+    member.training_access || member.training_equipment || member.training_injuries ||
+    member.diet_typical_day || member.diet_meals_per_day || member.diet_who_cooks ||
+    member.diet_restrictions || member.diet_dislikes || member.diet_alcohol_frequency ||
+    member.diet_supplements || member.diet_eating_out_frequency ||
+    member.lifestyle_sleep_hours || member.lifestyle_sleep_quality || member.lifestyle_stress_level ||
+    member.lifestyle_travel_frequency || member.lifestyle_energy_level || member.intake_notes
+  )
+
+  if (!hasAny) {
+    return (
+      <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
+        <div className="flex items-center justify-between">
+          <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Intake</p>
+          <p className="text-[10px] text-[var(--c-text5)]">Not completed</p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)]">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between p-4 hover:bg-[var(--c-hover)] rounded-2xl transition"
+      >
+        <div className="flex items-center gap-2">
+          <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Intake</p>
+          {member.onboarded_at && (
+            <p className="text-[10px] text-[var(--c-text5)]">
+              · completed {new Date(member.onboarded_at).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+          className={`w-4 h-4 text-[var(--c-text4)] transition-transform ${open ? 'rotate-180' : ''}`}>
+          <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-5 space-y-5">
+          {/* Basics */}
+          <div className="space-y-3">
+            <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest">Basics</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <Field label="Gender" value={member.gender} />
+              <Field label="Age" value={member.age} />
+              <Field label="Height" value={member.height_cm ? `${member.height_cm} cm` : null} />
+              <Field label="Location" value={member.location} />
+              <Field label="Occupation" value={member.occupation} />
+            </div>
+            <Field label="Work schedule" value={member.work_schedule} />
+          </div>
+
+          {/* Starting metrics */}
+          <div className="space-y-3 pt-3 border-t border-[var(--c-border)]">
+            <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest">Starting Metrics</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <Field label="Starting weight" value={member.starting_weight_kg ? `${member.starting_weight_kg} kg` : null} />
+              <Field label="Body fat (est)" value={member.starting_body_fat_pct ? `${member.starting_body_fat_pct}%` : null} />
+              <Field label="Chest" value={member.chest_cm ? `${member.chest_cm} cm` : null} />
+              <Field label="Waist" value={member.waist_cm ? `${member.waist_cm} cm` : null} />
+              <Field label="Hips" value={member.hips_cm ? `${member.hips_cm} cm` : null} />
+            </div>
+          </div>
+
+          {/* Goal */}
+          <div className="space-y-3 pt-3 border-t border-[var(--c-border)]">
+            <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest">Goal</p>
+            <Field label="Mirror goal" value={member.mirror_goal} />
+            <Field label="Target date" value={member.target_date ? new Date(member.target_date).toLocaleDateString() : null} />
+            <Field label="Why now" value={member.why_motivation} />
+            <Field label="Success vision" value={member.success_vision} />
+          </div>
+
+          {/* Training */}
+          <div className="space-y-3 pt-3 border-t border-[var(--c-border)]">
+            <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest">Training</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <Field label="Years training" value={member.training_years} />
+              <Field label="Sessions / week" value={member.training_frequency_per_week} />
+            </div>
+            <Field label="Access" value={member.training_access} />
+            <Field label="Current state" value={member.training_current_state} />
+            <Field label="Equipment" value={member.training_equipment} />
+            <Field label="Injuries / limitations" value={member.training_injuries} />
+          </div>
+
+          {/* Diet */}
+          <div className="space-y-3 pt-3 border-t border-[var(--c-border)]">
+            <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest">Diet</p>
+            <Field label="Typical day" value={member.diet_typical_day} />
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <Field label="Meals / day" value={member.diet_meals_per_day} />
+              <Field label="Who cooks" value={member.diet_who_cooks} />
+              <Field label="Alcohol" value={member.diet_alcohol_frequency} />
+              <Field label="Eating out" value={member.diet_eating_out_frequency} />
+            </div>
+            <Field label="Restrictions" value={member.diet_restrictions} />
+            <Field label="Dislikes" value={member.diet_dislikes} />
+            <Field label="Supplements" value={member.diet_supplements} />
+          </div>
+
+          {/* Lifestyle */}
+          <div className="space-y-3 pt-3 border-t border-[var(--c-border)]">
+            <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest">Lifestyle</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <Field label="Sleep" value={member.lifestyle_sleep_hours ? `${member.lifestyle_sleep_hours} hrs` : null} />
+              <Field label="Stress" value={member.lifestyle_stress_level ? `${member.lifestyle_stress_level} / 10` : null} />
+              <Field label="Sleep quality" value={member.lifestyle_sleep_quality} />
+              <Field label="Travel" value={member.lifestyle_travel_frequency} />
+            </div>
+            <Field label="Daytime energy" value={member.lifestyle_energy_level} />
+          </div>
+
+          {/* Notes */}
+          {member.intake_notes && (
+            <div className="space-y-3 pt-3 border-t border-[var(--c-border)]">
+              <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest">Notes</p>
+              <Field label="From the member" value={member.intake_notes} />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed }: {
   member: Member
   stat: Stat | null
@@ -843,6 +1015,8 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
           </button>
         </div>
       ) : null}
+
+      <IntakeCard member={member} />
 
       {loading ? (
         <div className="flex justify-center py-12">

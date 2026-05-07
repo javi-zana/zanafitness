@@ -75,7 +75,7 @@ export async function middleware(request: NextRequest) {
     )
     const { data: profile } = await serviceClient
       .from('profiles')
-      .select('status, role')
+      .select('status, role, onboarded_at')
       .eq('id', user.id)
       .single()
 
@@ -84,6 +84,14 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/'
       url.searchParams.set('error', 'no_access')
+      return NextResponse.redirect(url)
+    }
+
+    // Members with no intake yet must finish onboarding before entering the app
+    if (profile?.role === 'member' && !profile?.onboarded_at) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/onboarding'
+      url.search = ''
       return NextResponse.redirect(url)
     }
   }
