@@ -39,12 +39,21 @@ export async function GET(req: NextRequest) {
   const hasAccess = participant || assignment || profile?.role === 'head_coach'
   if (!hasAccess) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const { data: messages, error } = await admin
+  const since = req.nextUrl.searchParams.get('since')
+
+  let query = admin
     .from('messages')
     .select('id, author_id, body, created_at, message_attachments(id, storage_path, kind)')
     .eq('thread_id', threadId)
     .order('created_at', { ascending: true })
-    .limit(100)
+
+  if (since) {
+    query = query.gt('created_at', since)
+  } else {
+    query = query.limit(100)
+  }
+
+  const { data: messages, error } = await query
 
   if (error) {
     console.error('get-thread-messages error:', error)

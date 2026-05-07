@@ -1762,6 +1762,7 @@ function MessagesTab({
   const [renameSaving, setRenameSaving] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const latestMsgAt = useRef<string | null>(null)
 
   const threadMap = Object.fromEntries(allThreads.map(t => [t.id, t]))
 
@@ -1834,6 +1835,42 @@ function MessagesTab({
       )
       .subscribe()
     return () => { supabase.removeChannel(channel) }
+  }, [selectedThreadId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep latest message timestamp in a ref for polling
+  useEffect(() => {
+    if (chatMessages.length > 0) {
+      latestMsgAt.current = chatMessages[chatMessages.length - 1].created_at
+    }
+  }, [chatMessages])
+
+  // Polling — guaranteed fallback every 3s
+  useEffect(() => {
+    if (!selectedThreadId) return
+    const poll = async () => {
+      const since = latestMsgAt.current
+      if (!since) return
+      try {
+        const res = await fetch(`/api/get-thread-messages?thread_id=${selectedThreadId}&since=${encodeURIComponent(since)}`)
+        const json = await res.json()
+        if (!json.messages?.length) return
+        setChatMessages(prev => {
+          const ids = new Set(prev.map(m => m.id))
+          const fresh = (json.messages as ChatMessage[]).filter((m: ChatMessage) => !ids.has(m.id))
+          if (!fresh.length) return prev
+          const last = fresh[fresh.length - 1]
+          setLastMsgState(p => {
+            const filtered = p.filter(m => m.thread_id !== selectedThreadId)
+            return [{ thread_id: selectedThreadId!, body: last.body, created_at: last.created_at, author_id: last.author_id }, ...filtered]
+          })
+          setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+          supabase.from('message_reads').upsert({ thread_id: selectedThreadId, user_id: userId, last_read_at: new Date().toISOString() })
+          return [...prev, ...fresh.map(m => ({ ...m, message_attachments: [] }))]
+        })
+      } catch { /* silent */ }
+    }
+    const interval = setInterval(poll, 3000)
+    return () => clearInterval(interval)
   }, [selectedThreadId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function send() {

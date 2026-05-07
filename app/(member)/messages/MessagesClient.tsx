@@ -155,6 +155,7 @@ export default function MessagesClient({ userId, threads, userProfile }: Props) 
   const [sendError, setSendError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const latestMsgAt = useRef<string | null>(null)
 
   if (allThreads.length === 0) return <NoThread />
 
@@ -189,22 +190,37 @@ export default function MessagesClient({ userId, threads, userProfile }: Props) 
     }).then(() => setReadMap(prev => ({ ...prev, [selectedThreadId!]: new Date().toISOString() })))
   }, [selectedThreadId]) // eslint-disable-line
 
-  // Realtime
+  // Keep latest message timestamp in a ref for polling
+  useEffect(() => {
+    if (messages.length > 0) {
+      latestMsgAt.current = messages[messages.length - 1].created_at
+    }
+  }, [messages])
+
+  // Polling — guaranteed fallback every 3s
   useEffect(() => {
     if (!selectedThreadId) return
-    const channel = supabase
-      .channel(`member-thread-${selectedThreadId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `thread_id=eq.${selectedThreadId}` },
-        payload => {
-          const msg = payload.new as Message
-          setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, message_attachments: [] }])
-          setLastMsgByThread(prev => ({ ...prev, [selectedThreadId!]: { body: msg.body, created_at: msg.created_at, author_id: msg.author_id } }))
+    const poll = async () => {
+      const since = latestMsgAt.current
+      if (!since) return
+      try {
+        const res = await fetch(`/api/get-thread-messages?thread_id=${selectedThreadId}&since=${encodeURIComponent(since)}`)
+        const json = await res.json()
+        if (!json.messages?.length) return
+        setMessages(prev => {
+          const ids = new Set(prev.map(m => m.id))
+          const fresh = (json.messages as Message[]).filter(m => !ids.has(m.id))
+          if (!fresh.length) return prev
+          const last = fresh[fresh.length - 1]
+          setLastMsgByThread(p => ({ ...p, [selectedThreadId!]: { body: last.body, created_at: last.created_at, author_id: last.author_id } }))
           setTimeout(() => scrollToBottom(true), 50)
           supabase.from('message_reads').upsert({ thread_id: selectedThreadId, user_id: userId, last_read_at: new Date().toISOString() })
-        }
-      )
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+          return [...prev, ...fresh]
+        })
+      } catch { /* silent */ }
+    }
+    const interval = setInterval(poll, 3000)
+    return () => clearInterval(interval)
   }, [selectedThreadId]) // eslint-disable-line
 
   function handleBodyChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
