@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { fetchActivities } from '@/utils/activities'
 import CoachClient, { type MemberWithIntake } from './CoachClient'
 
 export default async function CoachPage() {
@@ -43,8 +44,8 @@ export default async function CoachPage() {
     memberIds = (assignments ?? []).map(a => a.member_id)
   }
 
-  // Load member profiles and stats
-  const [{ data: members }, { data: allStats }] = await Promise.all([
+  // Load member profiles + activity feed (replaces legacy stat_updates / workout_logs / calorie_logs)
+  const [{ data: members }, activities] = await Promise.all([
     memberIds.length
       ? admin.from('profiles').select(`
           id, first_name, email, role, weight_unit, avatar_url, avatar_color,
@@ -57,13 +58,7 @@ export default async function CoachPage() {
           intake_notes, onboarded_at
         `).in('id', memberIds)
       : Promise.resolve({ data: [] }),
-    memberIds.length
-      ? admin.from('stat_updates')
-          .select('id, member_id, weight_kg, confidence, created_at')
-          .in('member_id', memberIds)
-          .order('created_at', { ascending: false })
-          .limit(memberIds.length * 10)
-      : Promise.resolve({ data: [] }),
+    memberIds.length ? fetchActivities(admin, memberIds, 100) : Promise.resolve([]),
   ])
 
   // ── Load all threads this coach participates in ──────────────────────────────
@@ -162,7 +157,7 @@ export default async function CoachPage() {
       avatarColor={profile?.avatar_color ?? '#b0e455'}
       avatarUrl={profile?.avatar_url ?? null}
       members={(members ?? []) as MemberWithIntake[]}
-      allStats={(allStats ?? []) as { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }[]}
+      activities={activities}
       threads={threads}
       lastMessages={(lastMessages ?? []) as { thread_id: string; body: string; created_at: string; author_id: string }[]}
       myReads={(myReads ?? []) as { thread_id: string; last_read_at: string }[]}

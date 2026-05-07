@@ -417,10 +417,8 @@ function exerciseTarget(ex: SplitExercise): string {
 
 export function SplitViewer({
   split,
-  onLogDay,
 }: {
   split: StructuredSplit
-  onLogDay: (day: SplitDay) => void
 }) {
   const [expandedId, setExpandedId] = useState<string | null>(split.days[0]?.id ?? null)
 
@@ -488,14 +486,6 @@ export function SplitViewer({
                 {namedExercises.length === 0 && (
                   <p className="text-xs text-[var(--c-text4)]">No exercises scheduled for this day.</p>
                 )}
-
-                {/* Log button */}
-                <button
-                  onClick={() => onLogDay(day)}
-                  className="w-full py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition active:scale-[0.98]"
-                >
-                  Log {day.label}
-                </button>
               </div>
             )}
           </div>

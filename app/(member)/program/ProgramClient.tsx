@@ -37,7 +37,6 @@ type Props = {
   food: SectionData
   habits: SectionData
   principles: PrinciplesData
-  workoutLogs: WorkoutLogRecord[]
   milestones: string[]
 }
 
@@ -568,52 +567,7 @@ function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }
 
 // ─── BMR display (member-facing food tab) ─────────────────────────────────────
 
-function BmrDisplay({ data, userId }: { data: BmrContent; userId: string }) {
-  const supabase = createClient()
-  const d = new Date()
-  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-  const [calories, setCalories] = useState('')
-  const [savedCalories, setSavedCalories] = useState<number | null>(null)
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
-
-  useEffect(() => {
-    supabase
-      .from('calorie_logs')
-      .select('calories_eaten')
-      .eq('member_id', userId)
-      .eq('logged_date', today)
-      .maybeSingle()
-      .then(({ data: row }) => {
-        if (row) {
-          setSavedCalories(row.calories_eaten)
-          setCalories(String(row.calories_eaten))
-        }
-      })
-  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function saveCalories() {
-    const val = Math.round(parseFloat(calories))
-    if (isNaN(val) || val < 0) return
-    setSaving(true)
-    setSaveError(null)
-    const { error } = await supabase
-      .from('calorie_logs')
-      .upsert({ member_id: userId, logged_date: today, calories_eaten: val }, { onConflict: 'member_id,logged_date' })
-    if (error) {
-      console.error('[calorie_logs] upsert error:', error)
-      setSaveError('Failed to save')
-    } else {
-      setSavedCalories(val)
-    }
-    setSaving(false)
-  }
-
-  const calN = parseFloat(calories)
-  const remaining = !isNaN(calN) ? data.calorie_target - calN : null
-  const progressPct = savedCalories !== null ? Math.min(100, Math.round((savedCalories / data.calorie_target) * 100)) : 0
-  const isOver = savedCalories !== null && savedCalories > data.calorie_target
-
+function BmrDisplay({ data }: { data: BmrContent }) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
@@ -653,60 +607,6 @@ function BmrDisplay({ data, userId }: { data: BmrContent; userId: string }) {
           <p className="text-sm text-[var(--c-text2)] leading-relaxed">{data.notes}</p>
         </div>
       ) : null}
-
-      <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)] space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Track Today's Calories</p>
-          {savedCalories !== null && (
-            <span className="text-[9px] text-[var(--c-accent-text)] font-mono">Saved {savedCalories} kcal</span>
-          )}
-        </div>
-
-        {savedCalories !== null && (
-          <div className="space-y-1">
-            <div className="h-2 bg-[var(--c-bg)] rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${isOver ? 'bg-[#f87171]' : 'bg-[#b0e455]'}`}
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-[9px] text-[var(--c-text4)] font-mono">
-              <span>{savedCalories} eaten</span>
-              <span>{progressPct}% of target</span>
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-2 items-center">
-          <input
-            type="number"
-            value={calories}
-            onChange={e => setCalories(e.target.value)}
-            placeholder="Enter calories eaten"
-            className="flex-1 bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-4 py-3 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-          />
-          <span className="text-sm text-[var(--c-text4)] shrink-0">kcal</span>
-          <button
-            onClick={saveCalories}
-            disabled={saving || !calories.trim()}
-            className="shrink-0 px-4 py-3 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
-          >
-            {saving ? '…' : 'Save'}
-          </button>
-        </div>
-        {saveError && <p className="text-xs text-red-400">{saveError}</p>}
-
-        {remaining !== null && (
-          <div className={`rounded-xl px-4 py-3 flex items-center justify-between ${
-            remaining >= 0 ? 'bg-[#86efac]/8 border border-[#86efac]/15' : 'bg-[#f87171]/8 border border-[#f87171]/15'
-          }`}>
-            <span className="text-sm text-[var(--c-text3)]">{remaining >= 0 ? 'Remaining' : 'Over by'}</span>
-            <span className={`text-lg font-bold font-mono ${remaining >= 0 ? 'text-[var(--c-accent-text)]' : 'text-[#f87171]'}`}>
-              {Math.abs(remaining)} kcal
-            </span>
-          </div>
-        )}
-      </div>
     </div>
   )
 }
@@ -728,7 +628,7 @@ function EmptyState({ message }: { message: string }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ userId, firstName, role, split, food, habits, principles, workoutLogs: initialWorkoutLogs, milestones: initialMilestones }: Props) {
+export default function ProgramClient({ userId, firstName, role, split, food, habits, principles, milestones: initialMilestones }: Props) {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<Tab>('split')
   const [editingPrinciples, setEditingPrinciples] = useState(false)
@@ -736,22 +636,11 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     principles?.content_json ?? null
   )
   const [saving, setSaving] = useState(false)
-  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLogRecord[]>(initialWorkoutLogs)
-  const [milestones, setMilestones] = useState<string[]>(initialMilestones)
-  const [triggerLogDay, setTriggerLogDay] = useState<SplitDay | null>(null)
 
   const structuredSplit: StructuredSplit | null = (() => {
     const c = split?.content_json as { type?: string } | null
     return c?.type === 'structured_split' ? (c as StructuredSplit) : null
   })()
-
-  function handleWorkoutLogged(date: string, newMilestones: string[], newLog: WorkoutLogRecord) {
-    setWorkoutLogs(prev => {
-      const without = prev.filter(w => w.logged_date !== date)
-      return [newLog, ...without]
-    })
-    if (newMilestones.length) setMilestones(prev => [...prev, ...newMilestones])
-  }
 
   const isHeadCoach = role === 'head_coach'
   const name = firstName ? `${firstName}'s` : 'Your'
@@ -837,7 +726,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     const updatedAt = section?.updated_at
 
     if (activeTab === 'food' && content && (content as { type?: string }).type === 'bmr') {
-      return <BmrDisplay data={content as BmrContent} userId={userId} />
+      return <BmrDisplay data={content as BmrContent} />
     }
 
     if (activeTab === 'habits' && content && (content as { type?: string }).type === 'habits') {
@@ -845,12 +734,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     }
 
     if (activeTab === 'split' && structuredSplit) {
-      return (
-        <SplitViewer
-          split={structuredSplit}
-          onLogDay={day => setTriggerLogDay(day)}
-        />
-      )
+      return <SplitViewer split={structuredSplit} />
     }
 
     if (!hasContent(content)) {
@@ -928,17 +812,6 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
 
       <div className="flex-1 overflow-y-auto px-5 py-6 pb-28 lg:px-10 lg:pb-10 lg:py-8">
         {renderContent()}
-        {activeTab === 'split' && !isHeadCoach && (
-          <WorkoutLogSection
-            userId={userId}
-            workoutLogs={workoutLogs}
-            milestones={milestones}
-            onLogged={handleWorkoutLogged}
-            split={structuredSplit}
-            triggerDay={triggerLogDay}
-            onTriggerConsumed={() => setTriggerLogDay(null)}
-          />
-        )}
       </div>
 
     </div>

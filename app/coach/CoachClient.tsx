@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef, FormEvent, KeyboardEvent } from 'react'
+import { useState, useEffect, useRef, useCallback, FormEvent, KeyboardEvent } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { SplitBuilder, StructuredSplit } from '@/components/SplitBuilder'
+import { ActivityCard } from '@/components/ActivityCard'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -84,6 +86,8 @@ type CoachProfile = {
   role: string
 }
 
+import type { ActivityWithDetails } from '@/components/ActivityCard'
+
 type Props = {
   userId: string
   userEmail: string
@@ -92,7 +96,7 @@ type Props = {
   avatarColor: string
   avatarUrl: string | null
   members: Member[]
-  allStats: Stat[]
+  activities: ActivityWithDetails[]
   threads: Thread[]
   lastMessages: MsgPreview[]
   myReads: ReadReceipt[]
@@ -514,9 +518,11 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
 
 // ─── Home tab ─────────────────────────────────────────────────────────────────
 
-function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed }: {
+function HomeTab({ members, allStats, activities, userId, threads, lastMessages, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
+  activities: ActivityWithDetails[]
+  userId: string
   threads: Thread[]
   lastMessages: MsgPreview[]
   isHeadCoach: boolean
@@ -525,6 +531,7 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
   onMarkAddressed: (memberId: string) => void
   onUndoAddressed: (memberId: string) => void
 }) {
+  const router = useRouter()
   const name = firstName ?? 'Coach'
   const h = new Date().getHours()
   const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
@@ -642,30 +649,20 @@ function HomeTab({ members, allStats, threads, lastMessages, isHeadCoach, firstN
         </div>
       </div>
 
-      {/* Recent check-ins */}
-      {recentActivity.length > 0 && (
+      {/* Unified activity feed across assigned members */}
+      {activities.length > 0 && (
         <div>
-          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Recent Check-ins</p>
-          <div className="space-y-2">
-            {recentActivity.map(s => {
-              const m = memberMap[s.member_id]
-              if (!m) return null
-              return (
-                <div key={s.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl px-4 py-3 flex items-center gap-3 border border-[var(--c-border)]">
-                  <div className="w-7 h-7 rounded-full overflow-hidden bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-[10px] font-bold text-[var(--c-accent-text)] shrink-0">
-                    {m.avatar_url ? <img src={m.avatar_url} alt="" className="w-full h-full object-cover" /> : memberName(m).charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[var(--c-text)] truncate">{memberName(m)}</p>
-                    <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>
-                      {relTime(s.created_at)} ago
-                      {s.weight_kg != null ? ` · ${toDisplay(s.weight_kg, m.weight_unit)}` : ''}
-                      {s.confidence != null ? ` · ${s.confidence}/10` : ''}
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
+          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Activity Feed</p>
+          <div className="space-y-3">
+            {activities.slice(0, 20).map(a => (
+              <ActivityCard
+                key={a.id}
+                activity={a}
+                currentUserId={userId}
+                showMemberName
+                onChange={() => router.refresh()}
+              />
+            ))}
           </div>
         </div>
       )}
@@ -902,9 +899,11 @@ function IntakeCard({ member }: { member: Member }) {
   )
 }
 
-function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed, onDeleted, canDelete }: {
+function MemberDetailPanel({ member, stat, activities, currentUserId, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed, onDeleted, canDelete }: {
   member: Member
   stat: Stat | null
+  activities: ActivityWithDetails[]
+  currentUserId: string
   snoozedAt: string | null
   onOpenProgram: (id: string) => void
   onClose: () => void
@@ -914,54 +913,43 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
   canDelete: boolean
 }) {
   const supabase = createClient()
-  const [workoutLogs, setWorkoutLogs] = useState<WorkoutLog[]>([])
-  const [calorieLogs, setCalorieLogs] = useState<CalorieLog[]>([])
+  const router = useRouter()
+  const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([])
+  const [loading, setLoading] = useState(true)
   const [deleteState, setDeleteState] = useState<'idle' | 'confirm' | 'deleting' | 'error'>('idle')
   const [deleteError, setDeleteError] = useState('')
-  const [calorieTarget, setCalorieTarget] = useState<number | null>(null)
-  const [statUpdates, setStatUpdates] = useState<StatUpdateCoach[]>([])
-  const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([])
-  const [expandedLog, setExpandedLog] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 86_400_000).toISOString().split('T')[0]
-    Promise.all([
-      supabase.from('workout_logs').select('logged_date, notes').eq('member_id', member.id).gte('logged_date', thirtyDaysAgo).order('logged_date', { ascending: false }),
-      supabase.from('calorie_logs').select('logged_date, calories_eaten').eq('member_id', member.id).gte('logged_date', thirtyDaysAgo).order('logged_date', { ascending: false }),
-      supabase.from('program_sections').select('content_json').eq('member_id', member.id).eq('section', 'food').maybeSingle(),
-      supabase.from('stat_updates').select('id, weight_kg, confidence, milestone_text, created_at, stat_update_photos(id, storage_path)').eq('member_id', member.id).order('created_at', { ascending: false }).limit(20),
-      supabase.from('progress_photos').select('id, photo_url, photo_type, taken_at, created_at').eq('member_id', member.id).order('created_at', { ascending: true }),
-    ]).then(([wl, cl, food, su, pp]) => {
-      setWorkoutLogs((wl.data ?? []) as WorkoutLog[])
-      setCalorieLogs((cl.data ?? []) as CalorieLog[])
-      const fc = food.data?.content_json as { type?: string; calorie_target?: number } | null
-      if (fc?.type === 'bmr' && fc.calorie_target) setCalorieTarget(fc.calorie_target)
-      setStatUpdates((su.data ?? []) as StatUpdateCoach[])
-      setProgressPhotos((pp.data ?? []) as ProgressPhoto[])
-      setLoading(false)
-    })
+    supabase
+      .from('progress_photos')
+      .select('id, photo_url, photo_type, taken_at, created_at')
+      .eq('member_id', member.id)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        setProgressPhotos((data ?? []) as ProgressPhoto[])
+        setLoading(false)
+      })
   }, [member.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const workoutDateSet = new Set(workoutLogs.map(w => w.logged_date))
-  const calorieMap = Object.fromEntries(calorieLogs.map(c => [c.logged_date, c.calories_eaten]))
+  const refresh = useCallback(() => router.refresh(), [router])
 
-  const last30: { date: string; hasWorkout: boolean; calories: number | null }[] = []
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    // Use local date parts to avoid UTC midnight shifting date by one in UTC+ timezones
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    last30.push({ date: key, hasWorkout: workoutDateSet.has(key), calories: calorieMap[key] ?? null })
-  }
-
-  const unit = (member.weight_unit as 'kg' | 'lb') ?? 'kg'
   const beforePhoto = progressPhotos.find(p => p.photo_type === 'before') ?? null
   const weeklyPhotos = progressPhotos.filter(p => p.photo_type === 'weekly')
   const latestWeekly = weeklyPhotos[weeklyPhotos.length - 1] ?? null
-  const chartPts = [...statUpdates].reverse().filter(s => s.weight_kg != null).map(s =>
-    unit === 'lb' ? +(s.weight_kg! * 2.20462).toFixed(1) : +s.weight_kg!.toFixed(1)
-  )
+
+  // Confidence trend from activities
+  const confPts = [...activities].reverse().map(a => a.confidence)
+  const lastConf = activities[0]?.confidence ?? null
+
+  const last30Days: { date: string; active: boolean }[] = []
+  const activeDates = new Set(activities.map(a => a.created_at.split('T')[0]))
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    last30Days.push({ date: key, active: activeDates.has(key) })
+  }
+  const activeCount = last30Days.filter(d => d.active).length
 
   return (
     <div className="space-y-5">
@@ -1023,92 +1011,46 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
         </div>
       ) : (
         <>
-          {/* 30-day consistency */}
+          {/* 30-day activity calendar */}
           <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
             <div className="flex items-center justify-between mb-3">
-              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">30-Day Consistency</p>
-              <p className="text-[9px] text-[var(--c-text4)] font-mono">{last30.filter(d => d.hasWorkout).length} / 30 workouts</p>
+              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">30-Day Activity</p>
+              <p className="text-[9px] text-[var(--c-text4)] font-mono">{activeCount} / 30 days</p>
             </div>
             <div className="space-y-1">
               {Array.from({ length: 5 }).map((_, row) => (
                 <div key={row} className="grid grid-cols-6 gap-1">
-                  {last30.slice(row * 6, row * 6 + 6).map(day => (
+                  {last30Days.slice(row * 6, row * 6 + 6).map(day => (
                     <div
                       key={day.date}
-                      title={`${day.date}${day.hasWorkout ? ' · workout' : ''}`}
-                      className={`h-4 rounded-sm ${day.hasWorkout ? 'bg-[#b0e455]' : 'bg-[var(--c-bg)] border border-[var(--c-border2)]'}`}
+                      title={`${day.date}${day.active ? ' · posted' : ''}`}
+                      className={`h-4 rounded-sm ${day.active ? 'bg-[#b0e455]' : 'bg-[var(--c-bg)] border border-[var(--c-border2)]'}`}
                     />
                   ))}
                 </div>
               ))}
             </div>
-            {calorieTarget !== null && (
-              <div className="mt-3 pt-2 border-t border-[var(--c-border)]">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <p className="text-[9px] text-[var(--c-text5)] font-mono">Calories</p>
-                  <div className="flex items-center gap-1"><div className="w-2 h-1.5 rounded-sm bg-[#86efac]" /><span className="text-[9px] text-[var(--c-text4)]">On target</span></div>
-                  <div className="flex items-center gap-1"><div className="w-2 h-1.5 rounded-sm bg-[#fbbf24]" /><span className="text-[9px] text-[var(--c-text4)]">&gt;80%</span></div>
-                  <div className="flex items-center gap-1"><div className="w-2 h-1.5 rounded-sm bg-[#f87171]" /><span className="text-[9px] text-[var(--c-text4)]">Low</span></div>
+            {confPts.length >= 2 && lastConf != null && (() => {
+              const W = 300; const H = 36
+              const coords = confPts.map((v, i) => ({
+                x: (i / (confPts.length - 1)) * W,
+                y: H - ((v - 1) / 9) * (H - 6) - 3,
+              }))
+              const poly = coords.map(c => `${c.x},${c.y}`).join(' ')
+              return (
+                <div className="mt-3 pt-3 border-t border-[var(--c-border)]">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <p className="text-[9px] text-[var(--c-text5)] font-mono">Confidence trend (1–10)</p>
+                    <span className="text-[9px] font-mono font-semibold" style={{ color: confidenceColor(lastConf) }}>{lastConf}/10 now</span>
+                  </div>
+                  <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 32 }}>
+                    <polyline points={poly} fill="none" stroke="#94a3b8" strokeWidth="1.5" />
+                    <circle cx={coords[coords.length - 1].x} cy={coords[coords.length - 1].y} r="3" fill={confidenceColor(lastConf)} />
+                  </svg>
                 </div>
-                <div className="space-y-0.5">
-                  {Array.from({ length: 5 }).map((_, row) => (
-                    <div key={row} className="grid grid-cols-6 gap-1">
-                      {last30.slice(row * 6, row * 6 + 6).map(day => (
-                        <div
-                          key={day.date}
-                          title={`${day.date}: ${day.calories ?? 'no log'} kcal`}
-                          className={`h-1.5 rounded-sm ${
-                            day.calories === null ? 'bg-[var(--c-border2)]'
-                            : day.calories >= calorieTarget ? 'bg-[#86efac]'
-                            : day.calories >= calorieTarget * 0.8 ? 'bg-[#fbbf24]'
-                            : 'bg-[#f87171]'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+              )
+            })()}
           </div>
-
-          {/* Weight trend */}
-          {chartPts.length >= 2 && (
-            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
-              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Weight Trend</p>
-              {(() => {
-                const W = 300; const H = 60
-                const min = Math.min(...chartPts); const max = Math.max(...chartPts)
-                const range = max - min || 1
-                const coords = chartPts.map((w, i) => ({
-                  x: (i / (chartPts.length - 1)) * W,
-                  y: H - ((w - min) / range) * (H - 8) - 4,
-                }))
-                const polyline = coords.map(c => `${c.x},${c.y}`).join(' ')
-                const fillPath = [`M${coords[0].x},${H}`, ...coords.map(c => `L${c.x},${c.y}`), `L${coords[coords.length - 1].x},${H}`, 'Z'].join(' ')
-                const last = coords[coords.length - 1]
-                return (
-                  <>
-                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 72 }}>
-                      <defs>
-                        <linearGradient id={`cg-${member.id}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#b0e455" stopOpacity="0.25" />
-                          <stop offset="100%" stopColor="#b0e455" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      <path d={fillPath} fill={`url(#cg-${member.id})`} />
-                      <polyline points={polyline} fill="none" stroke="#b0e455" strokeWidth="1.5" />
-                      <circle cx={last.x} cy={last.y} r="3" fill="#b0e455" />
-                    </svg>
-                    <div className="flex justify-between text-xs text-[var(--c-text4)] mt-1">
-                      <span>{chartPts[0]} {unit}</span>
-                      <span className="text-[var(--c-accent-text)] font-semibold">{chartPts[chartPts.length - 1]} {unit} — now</span>
-                    </div>
-                  </>
-                )
-              })()}
-            </div>
-          )}
 
           {/* Progress photos */}
           {(beforePhoto || latestWeekly) && (
@@ -1162,232 +1104,24 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
             </div>
           )}
 
-          {/* Check-in history */}
-          {statUpdates.length > 0 && (
-            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
-              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Check-in History</p>
-              {(() => {
-                const confPts = [...statUpdates].reverse().filter(s => s.confidence != null).map(s => s.confidence as number)
-                if (confPts.length < 2) return null
-                const W = 300; const H = 36
-                const coords = confPts.map((v, i) => ({
-                  x: (i / (confPts.length - 1)) * W,
-                  y: H - ((v - 1) / 9) * (H - 6) - 3,
-                }))
-                const poly = coords.map(c => `${c.x},${c.y}`).join(' ')
-                const lastConf = confPts[confPts.length - 1]
-                return (
-                  <div className="mb-3 pb-3 border-b border-[var(--c-border)]">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <p className="text-[9px] text-[var(--c-text5)] font-mono">Confidence trend (1–10)</p>
-                      <span className="text-[9px] font-mono font-semibold" style={{ color: confidenceColor(lastConf) }}>{lastConf}/10 now</span>
-                    </div>
-                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 32 }}>
-                      <polyline points={poly} fill="none" stroke="#94a3b8" strokeWidth="1.5" />
-                      <circle cx={coords[coords.length - 1].x} cy={coords[coords.length - 1].y} r="3" fill={confidenceColor(lastConf)} />
-                    </svg>
-                  </div>
-                )
-              })()}
+          {/* Activity feed for this member */}
+          <div>
+            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Activity</p>
+            {activities.length === 0 ? (
+              <p className="text-sm text-[var(--c-text4)] text-center py-6">No activity logged yet.</p>
+            ) : (
               <div className="space-y-3">
-                {statUpdates.map(su => {
-                  const date = new Date(su.created_at)
-                  const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                  return (
-                    <div key={su.id} className="border-b border-[var(--c-border)] last:border-0 pb-3 last:pb-0">
-                      <p className="text-[10px] text-[var(--c-text4)] mb-1.5">{formatted}</p>
-                      <div className="flex gap-4">
-                        {su.weight_kg != null && (
-                          <div>
-                            <p className="text-[9px] text-[var(--c-text4)] mb-0.5">Weight</p>
-                            <p className="text-sm font-bold text-[var(--c-text)]">
-                              {unit === 'lb' ? +(su.weight_kg * 2.20462).toFixed(1) : +su.weight_kg.toFixed(1)}
-                              <span className="text-xs text-[var(--c-text3)] ml-1">{unit}</span>
-                            </p>
-                          </div>
-                        )}
-                        {su.confidence != null && (
-                          <div>
-                            <p className="text-[9px] text-[var(--c-text4)] mb-0.5">Confidence</p>
-                            <p className="text-sm font-bold" style={{ color: confidenceColor(su.confidence) }}>
-                              {su.confidence}<span className="text-xs opacity-60 ml-0.5">/10</span>
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                      {su.milestone_text && (
-                        <p className="text-xs text-[var(--c-text2)] mt-1.5 leading-relaxed">{su.milestone_text}</p>
-                      )}
-                      {su.stat_update_photos.length > 0 && (
-                        <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
-                          {su.stat_update_photos.map(photo => {
-                            const { data } = supabase.storage.from('stat-photos').getPublicUrl(photo.storage_path)
-                            return (
-                              <img key={photo.id} src={data.publicUrl} alt="" className="w-16 h-16 rounded-xl object-cover shrink-0 bg-[var(--c-bg)]" />
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+                {activities.map(a => (
+                  <ActivityCard
+                    key={a.id}
+                    activity={a}
+                    currentUserId={currentUserId}
+                    onChange={refresh}
+                  />
+                ))}
               </div>
-            </div>
-          )}
-
-          {/* Workout logs */}
-          {workoutLogs.length > 0 && (
-            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
-              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Workout Logs</p>
-              <div className="space-y-0.5">
-                {workoutLogs.map(log => {
-                  const isExpanded = expandedLog === log.logged_date
-                  const exercises = parseExercises(log.notes)
-                  return (
-                    <div key={log.logged_date}>
-                      <button
-                        onClick={() => setExpandedLog(isExpanded ? null : log.logged_date)}
-                        className="w-full flex items-center justify-between py-2.5 border-b border-[var(--c-border)] last:border-0"
-                      >
-                        <p className="text-xs text-[var(--c-text)]">
-                          {new Date(log.logged_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <p className="text-[10px] text-[var(--c-text4)]">{exercises.length} exercise{exercises.length !== 1 ? 's' : ''}</p>
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-3 h-3 text-[var(--c-text4)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                            <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                      </button>
-                      {isExpanded && (
-                        <div className="py-2">
-                          {exercises.length === 0 ? (
-                            <p className="text-xs text-[var(--c-text4)]">No exercises recorded</p>
-                          ) : (
-                            <div className="space-y-1">
-                              <div className="grid grid-cols-[1fr_44px_40px_40px] gap-1 px-1 mb-1">
-                                {['Move', 'kg', 'Reps', 'Sets'].map(h => (
-                                  <p key={h} className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-wider text-center first:text-left">{h}</p>
-                                ))}
-                              </div>
-                              {exercises.map((ex, i) => (
-                                <div key={i} className="grid grid-cols-[1fr_44px_40px_40px] gap-1 items-center py-1 border-b border-[var(--c-border)] last:border-0">
-                                  <p className="text-xs text-[var(--c-text)]">{ex.move}</p>
-                                  <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.kg || '—'}</p>
-                                  <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.reps || '—'}</p>
-                                  <p className="text-xs text-[var(--c-text3)] font-mono text-center">{ex.sets || '—'}</p>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Calorie trend */}
-          {calorieLogs.length >= 2 && (
-            <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Calorie Trend</p>
-                {calorieTarget !== null && <p className="text-[9px] text-[var(--c-text4)] font-mono">Target: {calorieTarget} kcal</p>}
-              </div>
-              {(() => {
-                const pts = [...calorieLogs].reverse()
-                const W = 300; const H = 60
-                const vals = pts.map(c => c.calories_eaten)
-                const allVals = calorieTarget != null ? [...vals, calorieTarget] : vals
-                const min = Math.max(0, Math.min(...allVals) - 200)
-                const max = Math.max(...allVals) + 200
-                const range = max - min || 1
-                const coords = vals.map((v, i) => ({
-                  x: (i / Math.max(vals.length - 1, 1)) * W,
-                  y: H - ((v - min) / range) * (H - 8) - 4,
-                }))
-                const poly = coords.map(c => `${c.x},${c.y}`).join(' ')
-                const targetY = calorieTarget != null ? H - ((calorieTarget - min) / range) * (H - 8) - 4 : null
-                const last = coords[coords.length - 1]
-                return (
-                  <>
-                    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 64 }}>
-                      {targetY != null && (
-                        <line x1="0" y1={targetY} x2={W} y2={targetY} stroke="#b0e455" strokeWidth="1" strokeDasharray="4 3" opacity="0.5" />
-                      )}
-                      <polyline points={poly} fill="none" stroke="#60a5fa" strokeWidth="1.5" />
-                      {last && <circle cx={last.x} cy={last.y} r="3" fill="#60a5fa" />}
-                    </svg>
-                    <div className="flex justify-between text-[9px] text-[var(--c-text4)] font-mono mt-1">
-                      <span>{vals[0]} kcal</span>
-                      {calorieTarget !== null && <span className="text-[var(--c-text5)]">— — target</span>}
-                      <span className="text-[#60a5fa]">{vals[vals.length - 1]} kcal now</span>
-                    </div>
-                  </>
-                )
-              })()}
-            </div>
-          )}
-
-          {/* Exercise progression */}
-          {(() => {
-            const progression = computeExerciseProgression(workoutLogs)
-            if (!progression.length) return null
-            return (
-              <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
-                <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Exercise Progression</p>
-                <div className="space-y-3">
-                  {progression.map(ex => {
-                    const kgPts = ex.sessions.map(s => s.kg).filter((k): k is number => k != null && !isNaN(k))
-                    const first = kgPts[0]; const last = kgPts[kgPts.length - 1]
-                    const delta = kgPts.length >= 2 && first != null && last != null ? +(last - first).toFixed(1) : null
-                    const trendColor = delta == null ? '#94a3b8' : delta > 0 ? '#b0e455' : delta < 0 ? '#f87171' : '#94a3b8'
-                    return (
-                      <div key={ex.move} className="pb-3 border-b border-[var(--c-border)] last:border-0 last:pb-0">
-                        <div className="flex items-center justify-between mb-1.5">
-                          <p className="text-xs font-medium text-[var(--c-text)] truncate">{ex.move}</p>
-                          <span className="text-[9px] text-[var(--c-text5)] font-mono shrink-0 ml-2">{ex.sessions.length} sessions</span>
-                        </div>
-                        {kgPts.length >= 2 ? (() => {
-                          const W = 160; const H = 24
-                          const minK = Math.min(...kgPts); const maxK = Math.max(...kgPts)
-                          const rangeK = maxK - minK || 1
-                          const coords = kgPts.map((v, i) => ({
-                            x: (i / (kgPts.length - 1)) * W,
-                            y: H - ((v - minK) / rangeK) * (H - 6) - 3,
-                          }))
-                          const poly = coords.map(c => `${c.x},${c.y}`).join(' ')
-                          return (
-                            <div className="flex items-center gap-3">
-                              <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" style={{ width: 72, height: 18, flexShrink: 0 }}>
-                                <polyline points={poly} fill="none" stroke={trendColor} strokeWidth="1.5" />
-                              </svg>
-                              <div className="flex items-center gap-1.5 text-[9px] font-mono">
-                                <span className="text-[var(--c-text4)]">{first} kg</span>
-                                <span className="text-[var(--c-text5)]">→</span>
-                                <span className="text-[var(--c-text4)]">{last} kg</span>
-                                {delta !== null && delta !== 0 && (
-                                  <span className="font-semibold" style={{ color: trendColor }}>({delta > 0 ? '+' : ''}{delta})</span>
-                                )}
-                              </div>
-                            </div>
-                          )
-                        })() : (
-                          <p className="text-[9px] text-[var(--c-text5)]">{ex.sessions.length} sessions · no weight logged</p>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            )
-          })()}
-
-          {statUpdates.length === 0 && workoutLogs.length === 0 && calorieLogs.length === 0 && progressPhotos.length === 0 && (
-            <p className="text-sm text-[var(--c-text4)] text-center py-6">No data yet for this member.</p>
-          )}
+            )}
+          </div>
         </>
       )}
 
@@ -1468,9 +1202,10 @@ function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, on
 
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
-function MembersTab({ members, allStats, threads, lastMessages, myReads, userId, userEmail, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
+function MembersTab({ members, allStats, activities, threads, lastMessages, myReads, userId, userEmail, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
+  activities: ActivityWithDetails[]
   threads: Thread[]
   lastMessages: MsgPreview[]
   myReads: ReadReceipt[]
@@ -1482,24 +1217,8 @@ function MembersTab({ members, allStats, threads, lastMessages, myReads, userId,
   onUndoAddressed: (memberId: string) => void
 }) {
   const supabase = createClient()
-  const [stats, setStats] = useState<Stat[]>(allStats)
+  const [stats] = useState<Stat[]>(allStats)
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
-
-  useEffect(() => {
-    const memberIds = members.map(m => m.id)
-    if (!memberIds.length) return
-    const channel = supabase
-      .channel('coach-member-stats')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'stat_updates', filter: `member_id=in.(${memberIds.join(',')})` },
-        payload => {
-          setStats(prev => [payload.new as Stat, ...prev])
-        }
-      )
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [members]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const threadToMember = Object.fromEntries(threads.filter(t => t.member_id).map(t => [t.id, t.member_id!]))
   const memberToThread = Object.fromEntries(threads.filter(t => t.member_id).map(t => [t.member_id!, t.id]))
@@ -1556,10 +1275,13 @@ function MembersTab({ members, allStats, threads, lastMessages, myReads, userId,
 
   if (selectedMember) {
     const selectedStat = stats.find(s => s.member_id === selectedMember.id) ?? null
+    const memberActivities = activities.filter(a => a.member_id === selectedMember.id)
     return (
       <MemberDetailPanel
         member={selectedMember}
         stat={selectedStat}
+        activities={memberActivities}
+        currentUserId={userId}
         snoozedAt={snoozes[selectedMember.id] ?? null}
         canDelete={userEmail === 'me@javilorenzana.com'}
         onOpenProgram={(id) => { setSelectedMember(null); onOpenProgram(id) }}
@@ -3922,12 +3644,30 @@ function InboxTab({ userEmail: _userEmail }: { userId: string; userEmail: string
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, allStats, threads, lastMessages, myReads, coachProfiles, snoozeMap }: Props) {
+export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, activities, threads, lastMessages, myReads, coachProfiles, snoozeMap }: Props) {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<CoachTab>('home')
   const [programMemberId, setProgramMemberId] = useState<string | null>(null)
   const [snoozes, setSnoozes] = useState<Record<string, string>>(snoozeMap)
   const isHeadCoach = userRole === 'head_coach'
+
+  // Derive a Stat-shape "latest activity per member" for legacy attention/needsAttention logic
+  const allStats: Stat[] = (() => {
+    const seen = new Set<string>()
+    const out: Stat[] = []
+    for (const a of activities) {
+      if (seen.has(a.member_id)) continue
+      seen.add(a.member_id)
+      out.push({
+        id: a.id,
+        member_id: a.member_id,
+        weight_kg: null,
+        confidence: a.confidence,
+        created_at: a.created_at,
+      })
+    }
+    return out
+  })()
 
   function openMemberProgram(memberId: string) {
     setProgramMemberId(memberId)
@@ -4012,10 +3752,10 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:pb-10 lg:pt-6">
         {activeTab === 'home' && (
-          <HomeTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
+          <HomeTab members={members} allStats={allStats} activities={activities} userId={userId} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'members' && (
-          <MembersTab members={members} allStats={allStats} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
+          <MembersTab members={members} allStats={allStats} activities={activities} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'programs' && (
           <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} />

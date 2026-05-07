@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { fetchActivities } from '@/utils/activities'
 import DashboardClient from './DashboardClient'
 
 const COACH_EMAILS = ['me@javilorenzana.com', 'bea.ongg@gmail.com']
@@ -11,7 +12,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('first_name, role, avatar_color, avatar_url, fitness_goal, weight_unit')
+    .select('first_name, role, avatar_color, avatar_url')
     .eq('id', user.id)
     .single()
 
@@ -23,39 +24,22 @@ export default async function DashboardPage() {
 
   const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString().split('T')[0]
 
-  const [{ data: stats }, { data: thread }, { data: workoutLogs }, { data: milestoneRows }, { data: referralRow }, { data: statDates }] = await Promise.all([
+  const [
+    { data: thread },
+    { data: milestoneRows },
+    { data: referralRow },
+    activities,
+    { data: activityDateRows },
+  ] = await Promise.all([
+    supabase.from('threads').select('id').eq('member_id', user.id).maybeSingle(),
+    supabase.from('member_milestones').select('type').eq('member_id', user.id),
+    supabase.from('referrals').select('code').eq('referrer_id', user.id).maybeSingle(),
+    fetchActivities(supabase, [user.id], 10),
     supabase
-      .from('stat_updates')
-      .select('id, weight_kg, confidence, milestone_text, created_at')
-      .eq('member_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(10),
-    supabase
-      .from('threads')
-      .select('id')
-      .eq('member_id', user.id)
-      .maybeSingle(),
-    supabase
-      .from('workout_logs')
-      .select('logged_date')
-      .eq('member_id', user.id)
-      .gte('logged_date', ninetyDaysAgo)
-      .order('logged_date', { ascending: false }),
-    supabase
-      .from('member_milestones')
-      .select('type')
-      .eq('member_id', user.id),
-    supabase
-      .from('referrals')
-      .select('code')
-      .eq('referrer_id', user.id)
-      .maybeSingle(),
-    supabase
-      .from('stat_updates')
+      .from('activities')
       .select('created_at')
       .eq('member_id', user.id)
-      .gte('created_at', ninetyDaysAgo + 'T00:00:00')
-      .order('created_at', { ascending: false }),
+      .gte('created_at', ninetyDaysAgo + 'T00:00:00'),
   ])
 
   let referralCode = referralRow?.code ?? null
@@ -92,26 +76,21 @@ export default async function DashboardPage() {
     ).length
   }
 
-  const p = profile as Record<string, unknown> | null
+  const activeDates = Array.from(new Set(
+    (activityDateRows ?? []).map(r => (r.created_at as string).split('T')[0])
+  ))
 
   return (
     <DashboardClient
-      firstName={(p?.first_name as string | null) ?? null}
-      avatarUrl={(p?.avatar_url as string | null) ?? null}
-      avatarColor={(p?.avatar_color as string | null) ?? '#b0e455'}
-      fitnessGoal={(p?.fitness_goal as string | null) ?? null}
-      weightUnit={((p?.weight_unit as string | null) as 'kg' | 'lb') ?? 'kg'}
-      recentStats={stats ?? []}
-      hasThread={!!thread}
-      threadId={thread?.id ?? null}
       userId={user.id}
-      unreadCount={unreadCount}
-      workoutDates={Array.from(new Set([
-        ...(workoutLogs ?? []).map(w => w.logged_date as string),
-        ...(statDates ?? []).map(s => (s.created_at as string).split('T')[0]),
-      ]))}
+      firstName={profile?.first_name ?? null}
+      avatarUrl={profile?.avatar_url ?? null}
+      avatarColor={profile?.avatar_color ?? '#b0e455'}
+      activities={activities}
+      activeDates={activeDates}
       milestones={(milestoneRows ?? []).map(m => m.type as string)}
       referralCode={referralCode}
+      unreadCount={unreadCount}
     />
   )
 }
