@@ -26,10 +26,9 @@ function LoginForm() {
   const noAccess = searchParams.get('error') === 'no_access';
   const [error, setError] = useState(!noAccess ? (searchParams.get('error') ?? '') : '');
   const [forgotSent, setForgotSent] = useState(false);
-  const [recoveryMode, setRecoveryMode] = useState<'forgot' | 'activate' | null>(null);
+  const [showForgot, setShowForgot] = useState(false);
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotLoading, setForgotLoading] = useState(false);
-  const isActivate = recoveryMode === 'activate';
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -61,7 +60,7 @@ function LoginForm() {
     setForgotSent(true);
   };
 
-  if (recoveryMode) {
+  if (showForgot) {
     return forgotSent ? (
       <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-8 text-center space-y-4">
         <div className="w-12 h-12 rounded-full border-2 border-[var(--c-accent-text)] flex items-center justify-center mx-auto bg-[var(--c-accent-text)]/8">
@@ -71,12 +70,11 @@ function LoginForm() {
         </div>
         <p className="text-sm font-semibold text-[var(--c-accent-text)]">Check your inbox</p>
         <p className="text-sm text-[var(--c-text)]/55 leading-relaxed">
-          {isActivate
-            ? <>An activation link was sent to<br /><span className="text-[var(--c-text)] font-medium">{forgotEmail}</span>.<br />Click it to set your password and finish setup.</>
-            : <>A reset link was sent to<br /><span className="text-[var(--c-text)] font-medium">{forgotEmail}</span></>}
+          A reset link was sent to<br />
+          <span className="text-[var(--c-text)] font-medium">{forgotEmail}</span>
         </p>
         <button
-          onClick={() => { setRecoveryMode(null); setForgotSent(false); setForgotEmail(''); }}
+          onClick={() => { setShowForgot(false); setForgotSent(false); setForgotEmail(''); }}
           className="text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
         >
           ← Back to sign in
@@ -84,20 +82,9 @@ function LoginForm() {
       </div>
     ) : (
       <form onSubmit={handleForgotPassword} className="space-y-4">
-        {isActivate && (
-          <div className="text-center mb-2">
-            <p className="text-base font-semibold text-[var(--c-text)] mb-1.5">Activate your account</p>
-            <p className="text-sm text-[var(--c-text3)] leading-relaxed">
-              Enter the email your coach used to invite you.<br />
-              We'll send you a link to set your password.
-            </p>
-          </div>
-        )}
-        {!isActivate && (
-          <p className="text-sm text-[var(--c-text3)] text-center leading-relaxed">
-            Enter your email and we'll send a reset link.
-          </p>
-        )}
+        <p className="text-sm text-[var(--c-text3)] text-center leading-relaxed">
+          Enter your email and we'll send a reset link.
+        </p>
         <input
           type="email"
           placeholder="Email address"
@@ -111,11 +98,11 @@ function LoginForm() {
           disabled={forgotLoading}
           className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-40"
         >
-          {forgotLoading ? 'Sending...' : isActivate ? 'Send Activation Link' : 'Send Reset Link'}
+          {forgotLoading ? 'Sending...' : 'Send Reset Link'}
         </button>
         <button
           type="button"
-          onClick={() => setRecoveryMode(null)}
+          onClick={() => setShowForgot(false)}
           className="w-full text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
         >
           ← Back to sign in
@@ -196,25 +183,14 @@ function LoginForm() {
       <div className="flex justify-center pt-1">
         <button
           type="button"
-          onClick={() => setRecoveryMode('forgot')}
+          onClick={() => setShowForgot(true)}
           className="text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
         >
           Forgot password?
         </button>
       </div>
 
-      <div className="pt-5 mt-2 border-t border-[var(--c-border)] space-y-3">
-        <button
-          type="button"
-          onClick={() => setRecoveryMode('activate')}
-          className="w-full bg-[var(--c-card)] border border-[var(--c-border2)] hover:border-[#b0e455]/40 hover:bg-[var(--c-hover)] text-[var(--c-text)] font-semibold text-sm py-4 rounded-2xl transition-colors flex items-center justify-center gap-2"
-        >
-          New member? Activate your account
-          <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5 text-[var(--c-accent-text)]">
-            <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
-          </svg>
-        </button>
-
+      <div className="pt-4 border-t border-[var(--c-border)]">
         <div className="bg-[#b0e455]/10 border border-[#b0e455]/25 rounded-2xl p-4">
           <p className="text-xs font-semibold text-[var(--c-text)] text-center mb-1">Not a member yet?</p>
           <p className="text-[11px] text-[var(--c-text3)] text-center mb-3">Apply to get access — takes 3 minutes.</p>

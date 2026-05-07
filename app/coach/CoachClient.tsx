@@ -3022,8 +3022,11 @@ function AdminTab({ userEmail }: { userEmail: string }) {
 
   // Invite
   const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteFirstName, setInviteFirstName] = useState('')
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
   const [inviteMsg, setInviteMsg] = useState('')
+  const [inviteCredentials, setInviteCredentials] = useState<{ email: string; password: string; first_name: string | null } | null>(null)
+  const [copiedField, setCopiedField] = useState<'email' | 'password' | 'both' | null>(null)
 
   // Thread setup
   const [setupStatus, setSetupStatus] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
@@ -3084,26 +3087,40 @@ function AdminTab({ userEmail }: { userEmail: string }) {
     e.preventDefault()
     if (!inviteEmail.trim()) return
     setInviteStatus('loading')
+    setInviteMsg('')
     try {
       const res = await fetch('/api/invite-member', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-coach-email': userEmail },
-        body: JSON.stringify({ email: inviteEmail.trim(), plan: 'member' }),
+        body: JSON.stringify({
+          email: inviteEmail.trim(),
+          plan: 'member',
+          first_name: inviteFirstName.trim() || null,
+        }),
       })
       const json = await res.json()
       if (res.ok) {
         setInviteStatus('ok')
-        setInviteMsg('Invite sent! Refresh to see them in the list.')
+        setInviteCredentials({ email: json.email, password: json.password, first_name: json.first_name })
         setInviteEmail('')
+        setInviteFirstName('')
         setTimeout(() => loadData(), 2000)
       } else {
         setInviteStatus('error')
-        setInviteMsg(json.error ?? 'Failed to send invite.')
+        setInviteMsg(json.error ?? 'Failed to create account.')
+        setTimeout(() => { setInviteStatus('idle'); setInviteMsg('') }, 4000)
       }
     } catch {
       setInviteStatus('error'); setInviteMsg('Network error.')
+      setTimeout(() => { setInviteStatus('idle'); setInviteMsg('') }, 4000)
     }
-    setTimeout(() => { setInviteStatus('idle'); setInviteMsg('') }, 4000)
+  }
+
+  function copyToClipboard(text: string, field: 'email' | 'password' | 'both') {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedField(field)
+      setTimeout(() => setCopiedField(null), 1500)
+    })
   }
 
   async function handleAssign(e: FormEvent) {
@@ -3382,28 +3399,105 @@ function AdminTab({ userEmail }: { userEmail: string }) {
         </div>
       )}
 
-      {/* ── Invite member ── */}
+      {/* ── Create member account ── */}
       <div>
-        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Invite New Member</p>
-        <form onSubmit={handleInvite} className="space-y-3">
-          <input
-            type="email"
-            value={inviteEmail}
-            onChange={e => setInviteEmail(e.target.value)}
-            placeholder="member@email.com"
-            className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-[var(--c-text)] text-sm placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition"
-          />
-          <button
-            type="submit"
-            disabled={inviteStatus === 'loading' || !inviteEmail.trim()}
-            className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
-          >
-            {inviteStatus === 'loading' ? 'Sending…' : 'Send Invite'}
-          </button>
-          {inviteMsg && (
-            <p className={`text-xs font-medium ${inviteStatus === 'ok' ? 'text-[#15803d]' : 'text-[#dc2626]'}`}>{inviteMsg}</p>
-          )}
-        </form>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Create New Member</p>
+
+        {inviteCredentials ? (
+          <div className="space-y-3">
+            <div className="bg-[#b0e455]/8 border border-[#b0e455]/30 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#b0e455]/20 flex items-center justify-center">
+                  <svg viewBox="0 0 16 16" className="w-3 h-3 text-[#b0e455]" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M2 8l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <p className="text-xs font-semibold text-[var(--c-text)]">
+                  Account created{inviteCredentials.first_name ? ` for ${inviteCredentials.first_name}` : ''}
+                </p>
+              </div>
+              <p className="text-[11px] text-[var(--c-text3)] leading-relaxed">
+                Share these credentials with the member. They&apos;ll log in at zanafitness.com and be guided through onboarding.
+              </p>
+
+              {/* Email row */}
+              <div className="bg-[var(--c-bg)] border border-[var(--c-border)] rounded-lg px-3 py-2.5 flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] uppercase tracking-widest font-mono text-[var(--c-text5)] mb-0.5">Email</p>
+                  <p className="text-sm text-[var(--c-text)] font-mono truncate">{inviteCredentials.email}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(inviteCredentials.email, 'email')}
+                  className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] hover:text-[var(--c-accent-text)] transition shrink-0"
+                >
+                  {copiedField === 'email' ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+
+              {/* Password row */}
+              <div className="bg-[var(--c-bg)] border border-[var(--c-border)] rounded-lg px-3 py-2.5 flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] uppercase tracking-widest font-mono text-[var(--c-text5)] mb-0.5">Password</p>
+                  <p className="text-sm text-[var(--c-text)] font-mono truncate select-all">{inviteCredentials.password}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(inviteCredentials.password, 'password')}
+                  className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] hover:text-[var(--c-accent-text)] transition shrink-0"
+                >
+                  {copiedField === 'password' ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => copyToClipboard(`Email: ${inviteCredentials.email}\nPassword: ${inviteCredentials.password}`, 'both')}
+                className="w-full py-2.5 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-[11px] tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition"
+              >
+                {copiedField === 'both' ? 'Copied to clipboard ✓' : 'Copy Both'}
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => { setInviteCredentials(null); setInviteStatus('idle') }}
+              className="w-full py-2.5 rounded-lg border border-[var(--c-border)] text-[var(--c-text3)] text-[11px] tracking-widest uppercase font-mono hover:bg-[var(--c-hover)] transition"
+            >
+              Create Another
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleInvite} className="space-y-3">
+            <input
+              type="text"
+              value={inviteFirstName}
+              onChange={e => setInviteFirstName(e.target.value)}
+              placeholder="First name (optional)"
+              autoComplete="given-name"
+              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-[var(--c-text)] text-sm placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition"
+            />
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={e => setInviteEmail(e.target.value)}
+              placeholder="member@email.com"
+              required
+              autoComplete="email"
+              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-[var(--c-text)] text-sm placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition"
+            />
+            <button
+              type="submit"
+              disabled={inviteStatus === 'loading' || !inviteEmail.trim()}
+              className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
+            >
+              {inviteStatus === 'loading' ? 'Creating…' : 'Create Account'}
+            </button>
+            {inviteMsg && (
+              <p className={`text-xs font-medium ${inviteStatus === 'ok' ? 'text-[#15803d]' : 'text-[#dc2626]'}`}>{inviteMsg}</p>
+            )}
+          </form>
+        )}
       </div>
 
       {/* ── Broadcast ── */}

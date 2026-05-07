@@ -1,10 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 
 const COACH_EMAILS = ["me@javilorenzana.com", "bea.ongg@gmail.com"];
 
+// Readable alphabet: omits 0/O, 1/l/I to make the password easy to dictate
+const PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+
+function generatePassword(length = 12): string {
+  const bytes = randomBytes(length);
+  let pw = "";
+  for (let i = 0; i < length; i++) {
+    pw += PASSWORD_ALPHABET[bytes[i] % PASSWORD_ALPHABET.length];
+  }
+  return pw;
+}
+
 export async function POST(req: NextRequest) {
-  const { email, plan } = await req.json();
+  const { email, plan, first_name } = await req.json();
 
   if (!email || !plan) {
     return NextResponse.json({ error: "Email and plan are required." }, { status: 400 });
@@ -22,42 +35,49 @@ export async function POST(req: NextRequest) {
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 
-  // Invite the user - sends a magic link / invite email
-  const { data: inviteData, error: inviteError } = await supabase.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://zanafitness.com"}/auth/callback?next=/reset-password`,
+  const password = generatePassword();
+
+  // Create the auth user with email already confirmed (no verification email sent)
+  const { data: createData, error: createError } = await supabase.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: first_name ? { first_name } : undefined,
   });
 
-  if (inviteError) {
-    // If user already exists, just update their profile
-    if (!inviteError.message.includes("already been registered")) {
-      return NextResponse.json({ error: inviteError.message }, { status: 400 });
-    }
+  if (createError) {
+    const alreadyExists = /already been registered|already exists/i.test(createError.message);
+    return NextResponse.json(
+      {
+        error: alreadyExists
+          ? "An account with that email already exists."
+          : createError.message,
+      },
+      { status: alreadyExists ? 409 : 400 }
+    );
   }
 
-  // Upsert the profile with active status and chosen plan
-  const userId = inviteData?.user?.id;
-  if (userId) {
-    await supabase.from("profiles").upsert({
+  const userId = createData.user?.id;
+  if (!userId) {
+    return NextResponse.json({ error: "Failed to create account." }, { status: 500 });
+  }
+
+  // Create the profile row
+  const { error: profileError } = await supabase.from("profiles").upsert(
+    {
       id: userId,
       email,
       plan,
       status: "active",
       role: "member",
-    }, { onConflict: "id" });
-  } else {
-    // User already existed - find them by email and update profile
-    const { data: existingUser } = await supabase.auth.admin.listUsers();
-    const user = existingUser?.users?.find(u => u.email === email);
-    if (user) {
-      await supabase.from("profiles").upsert({
-        id: user.id,
-        email,
-        plan,
-        status: "active",
-        role: "member",
-      }, { onConflict: "id" });
-    }
+      first_name: first_name ?? null,
+    },
+    { onConflict: "id" }
+  );
+
+  if (profileError) {
+    return NextResponse.json({ error: profileError.message }, { status: 500 });
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, email, password, first_name: first_name ?? null });
 }
