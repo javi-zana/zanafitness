@@ -49,16 +49,82 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Assign member to coach ────────────────────────────────────────────────
+  // Also ensures the member's messaging thread is a group containing
+  // [member, head coach (me), assigned coach]. Removes any previously-assigned
+  // coach who's no longer on the assignment.
   if (action === 'assign') {
     const { memberId, coachId } = body
     if (!memberId || !coachId) return NextResponse.json({ error: 'memberId and coachId required' }, { status: 400 })
 
-    const { error } = await admin
+    // 1. Upsert the assignment (member_id is unique conflict key, so this replaces any old coach)
+    const { error: assignErr } = await admin
       .from('coach_assignments')
       .upsert({ member_id: memberId, coach_id: coachId }, { onConflict: 'member_id' })
+    if (assignErr) return NextResponse.json({ error: assignErr.message }, { status: 500 })
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ ok: true })
+    // 2. Read all current assignments for this member (in case schema allows multiple)
+    const { data: assignmentRows } = await admin
+      .from('coach_assignments')
+      .select('coach_id')
+      .eq('member_id', memberId)
+    const assignedCoachIds = (assignmentRows ?? []).map(r => r.coach_id as string)
+
+    // 3. Find or create the member's thread (member_id is UNIQUE on threads)
+    const { data: existing } = await admin
+      .from('threads')
+      .select('id')
+      .eq('member_id', memberId)
+      .maybeSingle()
+
+    let threadId: string
+    if (existing) {
+      threadId = existing.id as string
+    } else {
+      const { data: newThread, error: te } = await admin
+        .from('threads')
+        .insert({ member_id: memberId, created_by: user.id })
+        .select('id')
+        .single()
+      if (te || !newThread) return NextResponse.json({ error: te?.message ?? 'Failed to create thread' }, { status: 500 })
+      threadId = newThread.id as string
+    }
+
+    // 4. Mark thread as a coaching group
+    await admin
+      .from('threads')
+      .update({ is_group: true, thread_type: 'group_member' })
+      .eq('id', threadId)
+
+    // 5. Sync participants to exactly: [member, head coach (me), ...all assigned coaches]
+    const desired = new Set<string>([memberId, user.id, ...assignedCoachIds])
+
+    const { data: currentParts } = await admin
+      .from('thread_participants')
+      .select('user_id')
+      .eq('thread_id', threadId)
+    const currentSet = new Set((currentParts ?? []).map(p => p.user_id as string))
+
+    const toAdd = Array.from(desired).filter(uid => !currentSet.has(uid))
+    if (toAdd.length > 0) {
+      await admin.from('thread_participants').insert(
+        toAdd.map(uid => ({
+          thread_id: threadId,
+          user_id: uid,
+          role: uid === memberId ? 'member' : uid === user.id ? 'head_coach' : 'coach',
+        }))
+      )
+    }
+
+    const toRemove = Array.from(currentSet).filter(uid => !desired.has(uid))
+    if (toRemove.length > 0) {
+      await admin
+        .from('thread_participants')
+        .delete()
+        .eq('thread_id', threadId)
+        .in('user_id', toRemove)
+    }
+
+    return NextResponse.json({ ok: true, threadId })
   }
 
   // ── Broadcast message to all threads ─────────────────────────────────────
