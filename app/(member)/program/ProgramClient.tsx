@@ -27,7 +27,6 @@ type HabitsContent = {
 }
 
 type SectionData = { section: string; content_json: object; updated_at: string } | null
-type PrinciplesData = { content_json: object; updated_at: string } | null
 
 type Props = {
   userId: string
@@ -36,11 +35,10 @@ type Props = {
   split: SectionData
   food: SectionData
   habits: SectionData
-  principles: PrinciplesData
   milestones: string[]
 }
 
-type Tab = 'split' | 'food' | 'habits' | 'principles'
+type Tab = 'split' | 'food' | 'habits'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -628,14 +626,8 @@ function EmptyState({ message }: { message: string }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ userId, firstName, role, split, food, habits, principles, milestones: initialMilestones }: Props) {
-  const supabase = createClient()
+export default function ProgramClient({ userId, firstName, role, split, food, habits }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('split')
-  const [editingPrinciples, setEditingPrinciples] = useState(false)
-  const [principlesContent, setPrinciplesContent] = useState<object | null>(
-    principles?.content_json ?? null
-  )
-  const [saving, setSaving] = useState(false)
 
   const structuredSplit: StructuredSplit | null = (() => {
     const c = split?.content_json as { type?: string } | null
@@ -649,76 +641,9 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     { id: 'split', label: `${name} Split` },
     { id: 'food', label: `${name} Food` },
     { id: 'habits', label: `${name} Habits` },
-    { id: 'principles', label: 'Principles' },
   ]
 
-  async function savePrinciples() {
-    setSaving(true)
-    await supabase
-      .from('principles_doc')
-      .update({ content_json: principlesContent, updated_by: userId })
-      .eq('id', '00000000-0000-0000-0000-000000000001')
-    setSaving(false)
-    setEditingPrinciples(false)
-  }
-
   function renderContent() {
-    if (activeTab === 'principles') {
-      const content = principlesContent
-      const updatedAt = principles?.updated_at
-
-      return (
-        <div className="space-y-4">
-          {isHeadCoach && (
-            <div className="flex justify-end gap-4">
-              {editingPrinciples ? (
-                <>
-                  <button
-                    onClick={() => setEditingPrinciples(false)}
-                    className="text-sm text-[var(--c-text4)] hover:text-[var(--c-text)] transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={savePrinciples}
-                    disabled={saving}
-                    className="text-sm font-semibold text-[var(--c-accent-text)] hover:text-[#c9f070] transition disabled:opacity-50"
-                  >
-                    {saving ? 'Saving…' : 'Save'}
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => setEditingPrinciples(true)}
-                  className="text-sm text-[var(--c-text4)] hover:text-[var(--c-accent-text)] transition"
-                >
-                  Edit
-                </button>
-              )}
-            </div>
-          )}
-
-          {editingPrinciples ? (
-            <RichTextEditor content={content} onChange={setPrinciplesContent} />
-          ) : hasContent(content) ? (
-            <>
-              <RichTextViewer content={content} />
-              {updatedAt && (
-                <p className="text-xs text-[var(--c-text4)] pt-2" suppressHydrationWarning>{relativeTime(updatedAt)}</p>
-              )}
-            </>
-          ) : (
-            <EmptyState
-              message={
-                isHeadCoach
-                  ? 'No principles written yet. Tap Edit to add.'
-                  : 'Principles haven\'t been written yet.'
-              }
-            />
-          )}
-        </div>
-      )
-    }
 
     const sectionMap = { split, food, habits }
     const section = sectionMap[activeTab]
@@ -794,10 +719,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
           {TABS.map(tab => (
             <button
               key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id)
-                setEditingPrinciples(false)
-              }}
+              onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 -mb-px ${
                 activeTab === tab.id
                   ? 'border-[var(--c-accent-text)] text-[var(--c-accent-text)]'
