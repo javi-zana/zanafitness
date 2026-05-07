@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import { SplitBuilder, StructuredSplit } from '@/components/SplitBuilder'
 import { ActivityCard } from '@/components/ActivityCard'
 import { useTheme } from '@/app/providers'
+import { useActivityRealtime } from '@/utils/use-activity-realtime'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -536,10 +537,12 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
 
 // ─── Home tab ─────────────────────────────────────────────────────────────────
 
-function HomeTab({ members, allStats, activities, userId, threads, lastMessages, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed, onMessageMember }: {
+function HomeTab({ members, allStats, activities, mutateActivity, removeActivity, userId, threads, lastMessages, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed, onMessageMember }: {
   members: Member[]
   allStats: Stat[]
   activities: ActivityWithDetails[]
+  mutateActivity: (id: string, m: (a: ActivityWithDetails) => ActivityWithDetails) => void
+  removeActivity: (id: string) => void
   userId: string
   threads: Thread[]
   lastMessages: MsgPreview[]
@@ -550,7 +553,6 @@ function HomeTab({ members, allStats, activities, userId, threads, lastMessages,
   onUndoAddressed: (memberId: string) => void
   onMessageMember: (memberId: string) => void
 }) {
-  const router = useRouter()
   const name = firstName ?? 'Coach'
   const h = new Date().getHours()
   const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
@@ -693,7 +695,8 @@ function HomeTab({ members, allStats, activities, userId, threads, lastMessages,
                 activity={a}
                 currentUserId={userId}
                 showMemberName
-                onChange={() => router.refresh()}
+                onMutate={mutateActivity}
+                onDelete={removeActivity}
               />
             ))}
           </div>
@@ -932,10 +935,12 @@ function IntakeCard({ member }: { member: Member }) {
   )
 }
 
-function MemberDetailPanel({ member, stat, activities, currentUserId, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed, onDeleted, canDelete }: {
+function MemberDetailPanel({ member, stat, activities, mutateActivity, removeActivity, currentUserId, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed, onDeleted, canDelete }: {
   member: Member
   stat: Stat | null
   activities: ActivityWithDetails[]
+  mutateActivity: (id: string, m: (a: ActivityWithDetails) => ActivityWithDetails) => void
+  removeActivity: (id: string) => void
   currentUserId: string
   snoozedAt: string | null
   onOpenProgram: (id: string) => void
@@ -946,7 +951,6 @@ function MemberDetailPanel({ member, stat, activities, currentUserId, snoozedAt,
   canDelete: boolean
 }) {
   const supabase = createClient()
-  const router = useRouter()
   const [progressPhotos, setProgressPhotos] = useState<ProgressPhoto[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteState, setDeleteState] = useState<'idle' | 'confirm' | 'deleting' | 'error'>('idle')
@@ -963,8 +967,6 @@ function MemberDetailPanel({ member, stat, activities, currentUserId, snoozedAt,
         setLoading(false)
       })
   }, [member.id]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const refresh = useCallback(() => router.refresh(), [router])
 
   const beforePhoto = progressPhotos.find(p => p.photo_type === 'before') ?? null
   const weeklyPhotos = progressPhotos.filter(p => p.photo_type === 'weekly')
@@ -1149,7 +1151,8 @@ function MemberDetailPanel({ member, stat, activities, currentUserId, snoozedAt,
                     key={a.id}
                     activity={a}
                     currentUserId={currentUserId}
-                    onChange={refresh}
+                    onMutate={mutateActivity}
+                    onDelete={removeActivity}
                   />
                 ))}
               </div>
@@ -1235,10 +1238,12 @@ function MemberDetailPanel({ member, stat, activities, currentUserId, snoozedAt,
 
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
-function MembersTab({ members, allStats, activities, threads, lastMessages, myReads, userId, userEmail, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
+function MembersTab({ members, allStats, activities, mutateActivity, removeActivity, threads, lastMessages, myReads, userId, userEmail, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
   activities: ActivityWithDetails[]
+  mutateActivity: (id: string, m: (a: ActivityWithDetails) => ActivityWithDetails) => void
+  removeActivity: (id: string) => void
   threads: Thread[]
   lastMessages: MsgPreview[]
   myReads: ReadReceipt[]
@@ -1314,6 +1319,8 @@ function MembersTab({ members, allStats, activities, threads, lastMessages, myRe
         member={selectedMember}
         stat={selectedStat}
         activities={memberActivities}
+        mutateActivity={mutateActivity}
+        removeActivity={removeActivity}
         currentUserId={userId}
         snoozedAt={snoozes[selectedMember.id] ?? null}
         canDelete={userEmail === 'me@javilorenzana.com'}
@@ -3696,11 +3703,24 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
   const [snoozes, setSnoozes] = useState<Record<string, string>>(snoozeMap)
   const isHeadCoach = userRole === 'head_coach'
 
-  // Derive a Stat-shape "latest activity per member" for legacy attention/needsAttention logic
+  // Live activity feed across all assigned members. Author lookup so incoming
+  // realtime comments show the right name (members commenting on their own posts).
+  const memberIds = members.map(m => m.id)
+  const authorMap = Object.fromEntries(
+    members.map(m => [m.id, { name: m.first_name ?? m.email.split('@')[0], role: 'member' as const }])
+  )
+  const { activities: liveActivities, mutate: mutateActivity, remove: removeActivity } = useActivityRealtime({
+    initial: activities,
+    memberIds,
+    authorMap,
+  })
+
+  // Derive a Stat-shape "latest activity per member" from the live feed for
+  // attention/needsAttention logic.
   const allStats: Stat[] = (() => {
     const seen = new Set<string>()
     const out: Stat[] = []
-    for (const a of activities) {
+    for (const a of liveActivities) {
       if (seen.has(a.member_id)) continue
       seen.add(a.member_id)
       out.push({
@@ -3803,10 +3823,10 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:pb-10 lg:pt-6">
         {activeTab === 'home' && (
-          <HomeTab members={members} allStats={allStats} activities={activities} userId={userId} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} onMessageMember={openMemberMessage} />
+          <HomeTab members={members} allStats={allStats} activities={liveActivities} mutateActivity={mutateActivity} removeActivity={removeActivity} userId={userId} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} onMessageMember={openMemberMessage} />
         )}
         {activeTab === 'members' && (
-          <MembersTab members={members} allStats={allStats} activities={activities} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
+          <MembersTab members={members} allStats={allStats} activities={liveActivities} mutateActivity={mutateActivity} removeActivity={removeActivity} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'programs' && (
           <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} />

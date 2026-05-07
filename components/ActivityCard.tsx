@@ -22,6 +22,8 @@ export type ActivityComment = {
   created_at: string
   author_name?: string | null
   author_role?: 'member' | 'coach' | 'head_coach' | null
+  /** Local-only: marks a comment that hasn't been confirmed by the server yet. */
+  pending?: boolean
 }
 
 export type ActivityWithDetails = {
@@ -62,16 +64,22 @@ function confidenceColor(v: number) {
   return '#15803d'
 }
 
+type Mutator = (id: string, m: (a: ActivityWithDetails) => ActivityWithDetails) => void
+
 export function ActivityCard({
   activity,
   currentUserId,
   showMemberName = false,
-  onChange,
+  onMutate,
+  onDelete,
 }: {
   activity: ActivityWithDetails
   currentUserId: string
   showMemberName?: boolean
-  onChange: () => void
+  /** Apply a mutation to this activity in the parent list (optimistic update). */
+  onMutate: Mutator
+  /** Remove this activity from the parent list (optimistic delete). */
+  onDelete: (id: string) => void
 }) {
   const meta = KIND_META[activity.kind]
   const isOwner = activity.member_id === currentUserId
@@ -79,54 +87,116 @@ export function ActivityCard({
   const likeCount = activity.reactions.length
 
   const [commentText, setCommentText] = useState('')
-  const [posting, setPosting] = useState(false)
-  const [busyLike, setBusyLike] = useState(false)
-  const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [likeBump, setLikeBump] = useState(false)
 
   async function toggleLike() {
-    setBusyLike(true)
-    await fetch('/api/activity-reaction', {
-      method: liked ? 'DELETE' : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ activity_id: activity.id }),
-    })
-    setBusyLike(false)
-    onChange()
+    const wasLiked = liked
+    // Optimistic
+    onMutate(activity.id, a => ({
+      ...a,
+      reactions: wasLiked
+        ? a.reactions.filter(r => !(r.user_id === currentUserId && r.kind === 'like'))
+        : [...a.reactions.filter(r => r.user_id !== currentUserId), { user_id: currentUserId, kind: 'like' }],
+    }))
+    if (!wasLiked) {
+      setLikeBump(true)
+      setTimeout(() => setLikeBump(false), 250)
+    }
+    // API
+    try {
+      const res = await fetch('/api/activity-reaction', {
+        method: wasLiked ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activity_id: activity.id }),
+      })
+      if (!res.ok) throw new Error()
+    } catch {
+      // Rollback
+      onMutate(activity.id, a => ({
+        ...a,
+        reactions: wasLiked
+          ? [...a.reactions, { user_id: currentUserId, kind: 'like' }]
+          : a.reactions.filter(r => !(r.user_id === currentUserId && r.kind === 'like')),
+      }))
+    }
   }
 
   async function handleComment(e: FormEvent) {
     e.preventDefault()
-    if (!commentText.trim()) return
-    setPosting(true)
-    await fetch('/api/activity-comment', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ activity_id: activity.id, body: commentText.trim() }),
-    })
-    setPosting(false)
+    const text = commentText.trim()
+    if (!text) return
+
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const optimistic: ActivityComment = {
+      id: tempId,
+      author_id: currentUserId,
+      body: text,
+      created_at: new Date().toISOString(),
+      author_name: null, // shown as "You" since author_id matches
+      pending: true,
+    }
+    onMutate(activity.id, a => ({ ...a, comments: [...a.comments, optimistic] }))
     setCommentText('')
-    onChange()
+
+    try {
+      const res = await fetch('/api/activity-comment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activity_id: activity.id, body: text }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Failed')
+      // Replace temp with real (keep author_name/role if realtime hasn't filled it)
+      onMutate(activity.id, a => ({
+        ...a,
+        comments: a.comments.map(c =>
+          c.id === tempId
+            ? { ...json.comment, author_name: c.author_name, author_role: c.author_role }
+            : c
+        ),
+      }))
+    } catch {
+      // Remove temp on failure
+      onMutate(activity.id, a => ({ ...a, comments: a.comments.filter(c => c.id !== tempId) }))
+      setCommentText(text) // restore so user can retry
+    }
   }
 
   async function deleteComment(commentId: string) {
-    await fetch('/api/activity-comment', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: commentId }),
+    // Optimistic
+    let removed: ActivityComment | undefined
+    onMutate(activity.id, a => {
+      removed = a.comments.find(c => c.id === commentId)
+      return { ...a, comments: a.comments.filter(c => c.id !== commentId) }
     })
-    onChange()
+    try {
+      const res = await fetch('/api/activity-comment', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: commentId }),
+      })
+      if (!res.ok) throw new Error()
+    } catch {
+      // Rollback
+      if (removed) {
+        const r = removed
+        onMutate(activity.id, a => ({ ...a, comments: [...a.comments, r] }))
+      }
+    }
   }
 
   async function deleteActivity() {
-    setDeleting(true)
-    await fetch('/api/activities', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: activity.id }),
-    })
-    setDeleting(false)
-    onChange()
+    onDelete(activity.id)
+    try {
+      await fetch('/api/activities', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: activity.id }),
+      })
+    } catch {
+      // Best-effort: a failed delete is rare; if the user tries again the temp will resync from server.
+    }
   }
 
   return (
@@ -167,10 +237,9 @@ export function ActivityCard({
                 <button
                   type="button"
                   onClick={deleteActivity}
-                  disabled={deleting}
-                  className="text-[10px] uppercase tracking-wide text-[#dc2626] hover:opacity-75 disabled:opacity-40"
+                  className="text-[10px] uppercase tracking-wide text-[#dc2626] hover:opacity-75"
                 >
-                  {deleting ? '…' : 'delete'}
+                  delete
                 </button>
               </div>
             )}
@@ -185,7 +254,7 @@ export function ActivityCard({
           <div className={`grid gap-2 mb-3 ${activity.photos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
             {activity.photos.map(p => (
               // eslint-disable-next-line @next/next/no-img-element
-              <img key={p.id} src={p.photo_url} alt=""
+              <img key={p.id} src={p.photo_url} alt="" loading="lazy"
                 className="w-full max-h-96 object-cover rounded-xl bg-[var(--c-bg)]" />
             ))}
           </div>
@@ -208,12 +277,17 @@ export function ActivityCard({
           <button
             type="button"
             onClick={toggleLike}
-            disabled={busyLike}
-            className={`flex items-center gap-1.5 text-xs font-medium transition ${
+            className={`flex items-center gap-1.5 text-xs font-medium transition active:scale-95 ${
               liked ? 'text-[#dc2626]' : 'text-[var(--c-text3)] hover:text-[var(--c-text)]'
             }`}
           >
-            <svg viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+            <svg
+              viewBox="0 0 24 24"
+              fill={liked ? 'currentColor' : 'none'}
+              stroke="currentColor"
+              strokeWidth="2"
+              className={`w-4 h-4 transition-transform duration-200 ${likeBump ? 'scale-125' : 'scale-100'}`}
+            >
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span>{likeCount > 0 ? likeCount : ''}</span>
@@ -229,7 +303,7 @@ export function ActivityCard({
               const isMine = c.author_id === currentUserId
               return (
                 <div key={c.id} className="flex items-start gap-2 group">
-                  <div className="flex-1 min-w-0 bg-[var(--c-bg)] rounded-lg px-3 py-2">
+                  <div className={`flex-1 min-w-0 bg-[var(--c-bg)] rounded-lg px-3 py-2 transition-opacity ${c.pending ? 'opacity-60' : 'opacity-100'}`}>
                     <div className="flex items-baseline justify-between gap-2 mb-0.5">
                       <p className="text-[11px] font-semibold text-[var(--c-text)]">
                         {c.author_name ?? (isMine ? 'You' : 'Coach')}
@@ -241,7 +315,7 @@ export function ActivityCard({
                     </div>
                     <p className="text-sm text-[var(--c-text2)] leading-relaxed whitespace-pre-wrap">{c.body}</p>
                   </div>
-                  {isMine && (
+                  {isMine && !c.pending && (
                     <button
                       type="button"
                       onClick={() => deleteComment(c.id)}
@@ -269,10 +343,10 @@ export function ActivityCard({
           />
           <button
             type="submit"
-            disabled={posting || !commentText.trim()}
-            className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-accent-text)] hover:opacity-75 transition disabled:opacity-30 px-2"
+            disabled={!commentText.trim()}
+            className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-accent-text)] hover:opacity-75 transition disabled:opacity-30 px-2 active:scale-95"
           >
-            {posting ? '…' : 'Post'}
+            Post
           </button>
         </form>
       </div>

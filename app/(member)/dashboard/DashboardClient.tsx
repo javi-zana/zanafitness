@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { ActivityCard, type ActivityWithDetails } from '@/components/ActivityCard'
+import { useActivityRealtime } from '@/utils/use-activity-realtime'
 
 function computeStreak(dates: string[]): number {
   if (dates.length === 0) return 0
@@ -50,11 +50,20 @@ export default function DashboardClient({
   referralCode: string | null
   unreadCount: number
 }) {
-  const router = useRouter()
   const [referralCopied, setReferralCopied] = useState(false)
 
-  const refresh = useCallback(() => router.refresh(), [router])
-  const streak = computeStreak(activeDates)
+  const { activities: liveActivities, mutate, remove } = useActivityRealtime({
+    initial: activities,
+    memberIds: [userId],
+    authorMap: {},
+  })
+
+  // Derive streak from live activities so it stays in sync after posting
+  const liveActiveDates = Array.from(new Set([
+    ...activeDates,
+    ...liveActivities.map(a => a.created_at.split('T')[0]),
+  ]))
+  const streak = computeStreak(liveActiveDates)
   const initials = (firstName ?? 'M').charAt(0).toUpperCase()
   const earned = new Set(milestones)
 
@@ -141,7 +150,7 @@ export default function DashboardClient({
               </Link>
             )}
           </div>
-          {activities.length === 0 ? (
+          {liveActivities.length === 0 ? (
             <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-6 text-center">
               <p className="text-sm text-[var(--c-text3)] leading-relaxed">
                 Nothing posted yet.<br />
@@ -149,12 +158,13 @@ export default function DashboardClient({
               </p>
             </div>
           ) : (
-            activities.slice(0, 5).map(a => (
+            liveActivities.slice(0, 5).map(a => (
               <ActivityCard
                 key={a.id}
                 activity={a}
                 currentUserId={userId}
-                onChange={refresh}
+                onMutate={mutate}
+                onDelete={remove}
               />
             ))
           )}

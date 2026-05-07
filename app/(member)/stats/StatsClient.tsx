@@ -4,6 +4,7 @@ import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { ActivityComposer } from '@/components/ActivityComposer'
 import { ActivityCard, type ActivityWithDetails } from '@/components/ActivityCard'
+import { useActivityRealtime } from '@/utils/use-activity-realtime'
 
 export default function StatsClient({
   userId,
@@ -16,9 +17,11 @@ export default function StatsClient({
 }) {
   const router = useRouter()
 
-  const refresh = useCallback(() => {
-    router.refresh()
-  }, [router])
+  const { activities, mutate, remove } = useActivityRealtime({
+    initial: initialActivities,
+    memberIds: [userId],
+    authorMap: {}, // member side: their own comments show 'You'; coach comments show 'Coach' badge
+  })
 
   const goHome = useCallback(() => {
     router.push('/dashboard')
@@ -41,7 +44,7 @@ export default function StatsClient({
 
         <div className="mt-8 space-y-3">
           <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Recent Activity</p>
-          {initialActivities.length === 0 ? (
+          {activities.length === 0 ? (
             <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-6 text-center">
               <p className="text-sm text-[var(--c-text3)] leading-relaxed">
                 Nothing logged yet.<br />
@@ -49,12 +52,13 @@ export default function StatsClient({
               </p>
             </div>
           ) : (
-            initialActivities.map(a => (
+            activities.map(a => (
               <ActivityCard
                 key={a.id}
                 activity={a}
                 currentUserId={userId}
-                onChange={refresh}
+                onMutate={mutate}
+                onDelete={remove}
               />
             ))
           )}
