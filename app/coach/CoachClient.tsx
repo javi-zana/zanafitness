@@ -3372,44 +3372,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
         )}
       </div>
 
-      {/* ── Members ── */}
-      <div>
-        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Members ({members.length})</p>
-        {members.length === 0 ? (
-          <p className="text-xs text-[var(--c-text4)] font-mono">No members yet. Invite one below.</p>
-        ) : (
-          <div className="space-y-2">
-            {members.map(m => {
-              const coach = coachName(assignMap[m.id])
-              const hasThread = threadMemberIds.has(m.id)
-              return (
-                <div key={m.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl px-4 py-3 flex items-center gap-3 border border-[var(--c-border)]">
-                  <div className="w-8 h-8 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[var(--c-accent-text)] shrink-0">
-                    {profileName(m).charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--c-text)]">{profileName(m)}</p>
-                    <p className="text-[10px] text-[var(--c-text4)] font-mono truncate">{m.email}</p>
-                    <p className="text-[10px] text-[var(--c-text4)] font-mono mt-0.5">
-                      {coach ? `Coach: ${profileName(coach)}` : 'No coach assigned'}
-                      {' · '}
-                      {hasThread ? 'Messaging active' : 'No thread'}
-                    </p>
-                  </div>
-                  <span className={`text-[10px] font-medium tracking-wide uppercase px-2.5 py-0.5 rounded-lg border ${
-                    hasThread
-                      ? 'text-[#15803d] border-[#15803d]/25 bg-[#15803d]/8'
-                      : 'text-[var(--c-text4)] border-[var(--c-border)]'
-                  }`}>
-                    {hasThread ? 'active' : 'pending'}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
       {/* ── Assign member to coach ── */}
       {coaches.length > 0 && members.length > 0 && (
         <div>
