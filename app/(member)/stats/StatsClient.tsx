@@ -20,6 +20,10 @@ export default function StatsClient({
     router.refresh()
   }, [router])
 
+  const goHome = useCallback(() => {
+    router.push('/dashboard')
+  }, [router])
+
   return (
     <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] pb-24 lg:pb-8 lg:pl-52">
       <div className="px-5 pt-8 pb-6 max-w-2xl mx-auto w-full">
@@ -33,7 +37,7 @@ export default function StatsClient({
           </p>
         </div>
 
-        <ActivityComposer onPosted={refresh} />
+        <ActivityComposer onPosted={goHome} />
 
         <div className="mt-8 space-y-3">
           <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Recent Activity</p>

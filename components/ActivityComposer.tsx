@@ -136,16 +136,16 @@ export function ActivityComposer({ onPosted }: { onPosted: () => void }) {
           className="hidden"
         />
         {photoPreview ? (
-          <div className="relative inline-block">
+          <div className="relative">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photoPreview} alt="" className="max-h-40 rounded-xl" />
+            <img src={photoPreview} alt="" className="w-full max-h-72 object-cover rounded-xl" />
             <button
               type="button"
               onClick={clearPhoto}
-              className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition"
+              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition"
               aria-label="Remove photo"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
                 <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" />
               </svg>
             </button>
@@ -154,12 +154,13 @@ export function ActivityComposer({ onPosted }: { onPosted: () => void }) {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="text-xs text-[var(--c-text3)] hover:text-[var(--c-text)] transition flex items-center gap-1.5"
+            className="w-full flex items-center justify-center gap-2 py-5 rounded-xl border-2 border-dashed border-[var(--c-border2)] bg-[var(--c-bg)] hover:border-[#b0e455]/50 hover:bg-[#b0e455]/5 transition text-[var(--c-text3)] hover:text-[var(--c-text)]"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-4 h-4">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="w-5 h-5">
+              <path d="M3 16l5-5a2 2 0 012.83 0L16 16M14 14l1.5-1.5a2 2 0 012.83 0L21 15M3 5h18a1 1 0 011 1v12a1 1 0 01-1 1H3a1 1 0 01-1-1V6a1 1 0 011-1zM10 9a1 1 0 11-2 0 1 1 0 012 0z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Add photo (optional)
+            <span className="text-sm font-medium">Add a photo</span>
+            <span className="text-[11px] text-[var(--c-text5)]">— optional</span>
           </button>
         )}
       </div>
