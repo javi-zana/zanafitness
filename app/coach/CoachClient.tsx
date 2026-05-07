@@ -2213,8 +2213,9 @@ function MessagesTab({
   const participantMap = Object.fromEntries((thread?.participants ?? []).map(p => [p.user_id, p]))
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center gap-3 mb-4">
+    <div className="flex flex-col">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-4 shrink-0">
         <button onClick={() => setSelectedThreadId(null)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition shrink-0">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
             <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -2269,7 +2270,8 @@ function MessagesTab({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-1 pb-4" style={{ maxHeight: 'calc(100vh - 340px)' }}>
+      {/* Messages (flow naturally with parent scroll; bottom padding clears the fixed composer) */}
+      <div className="space-y-1 pb-36 lg:pb-24">
         {loadError && <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-3 text-xs text-[#f87171]">{loadError}</div>}
         {loadingMessages && <div className="flex justify-center py-16"><div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" /></div>}
         {!loadError && !loadingMessages && chatMessages.length === 0 && (
@@ -2307,27 +2309,33 @@ function MessagesTab({
         <div ref={bottomRef} />
       </div>
 
-      {sendError && <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-2.5 text-xs text-[#f87171] mb-2">{sendError}</div>}
-
-      <div className="flex items-end gap-2 pt-3 border-t border-[var(--c-border)]">
-        <textarea
-          ref={textareaRef}
-          value={body}
-          onChange={e => { setBody(e.target.value); setSendError(null); const ta = textareaRef.current; if (ta) { ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight}px` } }}
-          onKeyDown={handleKeyDown}
-          placeholder="Message…"
-          rows={1}
-          className="flex-1 bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl px-4 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] resize-none focus:outline-none focus:border-[#b0e455]/40 transition max-h-28 overflow-y-auto leading-relaxed"
-        />
-        <button
-          onClick={send}
-          disabled={sending || !body.trim()}
-          className="shrink-0 w-9 h-9 rounded-full bg-[#b0e455] flex items-center justify-center text-[#0f1a0c] hover:bg-[#c9f070] transition disabled:opacity-30 mb-0.5"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 translate-x-px">
-            <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
+      {/* Composer pinned to viewport bottom, accounts for coach mobile nav + desktop sidebar */}
+      <div className="fixed bottom-16 left-0 right-0 lg:bottom-0 lg:left-52 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] px-4 py-3 z-40">
+        {sendError && (
+          <div className="mb-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20">
+            <p className="text-xs text-red-400">{sendError}</p>
+          </div>
+        )}
+        <div className="flex items-end gap-2 max-w-3xl mx-auto">
+          <textarea
+            ref={textareaRef}
+            value={body}
+            onChange={e => { setBody(e.target.value); setSendError(null); const ta = textareaRef.current; if (ta) { ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight}px` } }}
+            onKeyDown={handleKeyDown}
+            placeholder="Message…"
+            rows={1}
+            className="flex-1 bg-[var(--c-card2)] border border-[var(--c-border)] rounded-2xl px-4 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] resize-none focus:outline-none focus:border-[#b0e455]/35 transition max-h-32 overflow-y-auto leading-relaxed"
+          />
+          <button
+            onClick={send}
+            disabled={sending || !body.trim()}
+            className="shrink-0 w-9 h-9 rounded-full bg-[#b0e455] flex items-center justify-center text-[#0f1a0c] hover:bg-[#c9f070] transition disabled:opacity-30 mb-0.5 active:scale-95"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 translate-x-px">
+              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   )
