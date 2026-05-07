@@ -839,9 +839,6 @@ function IntakeCard({ member }: { member: Member }) {
             <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               <Field label="Starting weight" value={member.starting_weight_kg ? `${member.starting_weight_kg} kg` : null} />
               <Field label="Body fat (est)" value={member.starting_body_fat_pct ? `${member.starting_body_fat_pct}%` : null} />
-              <Field label="Chest" value={member.chest_cm ? `${member.chest_cm} cm` : null} />
-              <Field label="Waist" value={member.waist_cm ? `${member.waist_cm} cm` : null} />
-              <Field label="Hips" value={member.hips_cm ? `${member.hips_cm} cm` : null} />
             </div>
           </div>
 
@@ -850,8 +847,6 @@ function IntakeCard({ member }: { member: Member }) {
             <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest">Goal</p>
             <Field label="Mirror goal" value={member.mirror_goal} />
             <Field label="Target date" value={member.target_date ? new Date(member.target_date).toLocaleDateString() : null} />
-            <Field label="Why now" value={member.why_motivation} />
-            <Field label="Success vision" value={member.success_vision} />
           </div>
 
           {/* Training */}

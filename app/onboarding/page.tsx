@@ -36,15 +36,10 @@ type IntakeForm = {
   // Starting metrics
   starting_weight_kg: string;
   starting_body_fat_pct: string;
-  waist_cm: string;
-  chest_cm: string;
-  hips_cm: string;
 
   // Goal
   mirror_goal: string;
   target_date: string;
-  why_motivation: string;
-  success_vision: string;
 
   // Training
   training_years: string;
@@ -77,8 +72,8 @@ type IntakeForm = {
 
 const empty: IntakeForm = {
   first_name: '', gender: '', age: '', height_cm: '', location: '', occupation: '', work_schedule: '',
-  starting_weight_kg: '', starting_body_fat_pct: '', waist_cm: '', chest_cm: '', hips_cm: '',
-  mirror_goal: '', target_date: '', why_motivation: '', success_vision: '',
+  starting_weight_kg: '', starting_body_fat_pct: '',
+  mirror_goal: '', target_date: '',
   training_years: '', training_frequency_per_week: '', training_current_state: '', training_access: '', training_equipment: '', training_injuries: '',
   diet_typical_day: '', diet_meals_per_day: '', diet_who_cooks: '', diet_restrictions: '', diet_dislikes: '', diet_alcohol_frequency: '', diet_supplements: '', diet_eating_out_frequency: '',
   lifestyle_sleep_hours: '', lifestyle_sleep_quality: '', lifestyle_stress_level: '', lifestyle_travel_frequency: '', lifestyle_energy_level: '',
@@ -131,13 +126,8 @@ function toProfileRow(f: IntakeForm) {
     work_schedule: str(f.work_schedule),
     starting_weight_kg: num(f.starting_weight_kg),
     starting_body_fat_pct: num(f.starting_body_fat_pct),
-    waist_cm: num(f.waist_cm),
-    chest_cm: num(f.chest_cm),
-    hips_cm: num(f.hips_cm),
     mirror_goal: str(f.mirror_goal),
     target_date: str(f.target_date),
-    why_motivation: str(f.why_motivation),
-    success_vision: str(f.success_vision),
     training_years: str(f.training_years),
     training_frequency_per_week: num(f.training_frequency_per_week),
     training_current_state: str(f.training_current_state),
@@ -168,8 +158,7 @@ function fromProfileRow(p: Record<string, unknown>): IntakeForm {
     first_name: s('first_name'), gender: s('gender'), age: s('age'), height_cm: s('height_cm'),
     location: s('location'), occupation: s('occupation'), work_schedule: s('work_schedule'),
     starting_weight_kg: s('starting_weight_kg'), starting_body_fat_pct: s('starting_body_fat_pct'),
-    waist_cm: s('waist_cm'), chest_cm: s('chest_cm'), hips_cm: s('hips_cm'),
-    mirror_goal: s('mirror_goal'), target_date: s('target_date'), why_motivation: s('why_motivation'), success_vision: s('success_vision'),
+    mirror_goal: s('mirror_goal'), target_date: s('target_date'),
     training_years: s('training_years'), training_frequency_per_week: s('training_frequency_per_week'),
     training_current_state: s('training_current_state'), training_access: s('training_access'),
     training_equipment: s('training_equipment'), training_injuries: s('training_injuries'),
@@ -522,24 +511,6 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className={labelCls}>Chest (cm)</label>
-                  <input type="number" value={form.chest_cm} onChange={e => set('chest_cm', e.target.value)}
-                    placeholder="—" className={inputCls} step="0.1" />
-                </div>
-                <div>
-                  <label className={labelCls}>Waist (cm)</label>
-                  <input type="number" value={form.waist_cm} onChange={e => set('waist_cm', e.target.value)}
-                    placeholder="—" className={inputCls} step="0.1" />
-                </div>
-                <div>
-                  <label className={labelCls}>Hips (cm)</label>
-                  <input type="number" value={form.hips_cm} onChange={e => set('hips_cm', e.target.value)}
-                    placeholder="—" className={inputCls} step="0.1" />
-                </div>
-              </div>
-
               <div>
                 <label className={labelCls}>Starting photos</label>
                 <p className="text-[11px] text-white/30 mb-3">
@@ -588,7 +559,7 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* ── 2: Goal & motivation ── */}
+          {/* ── 2: Goal ── */}
           {step === 2 && (
             <>
               <div className="mb-6">
@@ -596,27 +567,15 @@ export default function OnboardingPage() {
                 <p className="text-sm text-white/35">Specific outcomes. We work backwards from here.</p>
               </div>
               <div>
-                <label className={labelCls}>Mirror goal — what do you want to look like? *</label>
-                <textarea value={form.mirror_goal} rows={4} onChange={e => set('mirror_goal', e.target.value)}
-                  placeholder="e.g. Lean and visibly defined. Shirt off at Bali in October without thinking twice."
+                <label className={labelCls}>Mirror goal — what does success look like? *</label>
+                <textarea value={form.mirror_goal} rows={6} onChange={e => set('mirror_goal', e.target.value)}
+                  placeholder="e.g. Lean and visibly defined. Shirt off at Bali in October without thinking twice — clothes fitting, lifts going up, energy through the day."
                   className={textareaCls} />
               </div>
               <div>
                 <label className={labelCls}>Target date *</label>
                 <input type="date" value={form.target_date} onChange={e => set('target_date', e.target.value)}
                   className={inputCls} />
-              </div>
-              <div>
-                <label className={labelCls}>Why this, why now?</label>
-                <textarea value={form.why_motivation} rows={4} onChange={e => set('why_motivation', e.target.value)}
-                  placeholder="The real motivation — wedding, photoshoot, just sick of it, etc."
-                  className={textareaCls} />
-              </div>
-              <div>
-                <label className={labelCls}>What does success look like in 6 months?</label>
-                <textarea value={form.success_vision} rows={3} onChange={e => set('success_vision', e.target.value)}
-                  placeholder="e.g. Down 6kg, lifting 4x a week without thinking, no more back pain, clothes fit again."
-                  className={textareaCls} />
               </div>
             </>
           )}
