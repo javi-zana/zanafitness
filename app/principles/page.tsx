@@ -27,97 +27,96 @@ type Principle = {
 const principles: Principle[] = [
   {
     num: "01",
-    title: "Protein is the most important thing.",
-    lead: "If you only fix one thing, fix this. It's the difference between losing fat and losing muscle — and between being satisfied and being hungry all day.",
+    title: "Simple doesn't mean easy.",
+    lead: "Getting fit is simple. But simple doesn't mean easy. The hard part isn't knowing what to do — it's doing it consistently when life gets in the way.",
     cards: [
       {
         label: "Why",
-        body: "Protein is what your body uses to build and hold muscle. It's also the most satiating macro by a wide margin. Most clients I start with are eating about half of what they need without realising it.",
+        body: "The gap between knowing and doing is where 99% of fitness failure happens. The information has been free and largely the same for decades. The reason most people don't have the body they want isn't a missing secret — it's that they haven't applied the basics consistently for long enough.",
       },
       {
         label: "How",
-        body: "Anchor every meal with a protein source — chicken, beef, fish, eggs, Greek yogurt. Aim for ~1g per pound of bodyweight per day. Build the meal around the protein, not the other way around.",
+        body: "Don't chase complexity. Don't add new tactics until the basics are bulletproof. The temptation to optimise, biohack, or stack supplements is almost always procrastination dressed up as work.",
       },
       {
         label: "The Lever",
-        body: "One fist of chicken ≈ 100g. One fist at every meal puts you 80% of the way there. We don't track macros — we track this anchor.",
+        body: "When something isn't working, the answer is rarely a new tactic. The question is: am I actually doing the basic thing? The honest answer is almost always no.",
       },
     ],
-    aside: "Carbs are a condiment, not the meal. Time them around training.",
   },
   {
     num: "02",
-    title: "Sleep well.",
-    lead: "You can't out-train a 5-hour night. Recovery happens here, not in the gym.",
+    title: "Lifestyle habits are everything.",
+    lead: "Lifestyle habits are ~80% of being fit. The other 20% is what happens at the gym.",
     cards: [
       {
         label: "Why",
-        body: "Sleep is when muscle is built and hunger hormones reset. Skip it and the next day's training is a 6/10, the next day's eating is chaos. The compounding effect is bigger than any supplement.",
+        body: "An hour in the gym is 4% of your day. The other 96% — what you eat, how you sleep, how much you walk, how you handle stress — is what actually moves the needle. The workout is the smallest lever, not the biggest.",
       },
       {
         label: "How",
-        body: "Aim for 7+ hours, same window every night. Dark room, cool temperature, no phone in bed. If sleep is currently broken, fix this before fixing anything else.",
+        body: "Build the day around a few non-negotiables: protein at every meal, 8k+ steps, a consistent bedtime, water on the desk. The workout slots into a life that's already pulling in the right direction.",
       },
       {
         label: "The Lever",
-        body: "Under 7 hours = train lighter that day, lean harder on protein, skip the workout if it'd be sloppy. Don't be a hero on no sleep — that's how you get hurt.",
+        body: "If you had 30 minutes of effort to spend, none of it would be in the gym. The gym is leverage on a base that's already there — without the base, it's just a workout.",
       },
     ],
   },
   {
     num: "03",
-    title: "Prepare for your workout.",
-    lead: "An unprepared workout is a 6/10. The intensity floor is 8. The difference is in the prep.",
+    title: "Train hard, but don't get injured.",
+    lead: "Hard training is what actually changes the body. Injury is what undoes it. The job is doing both — at the same time, for years.",
     cards: [
       {
         label: "Why",
-        body: "Walking in cold and unfed gives you a mediocre session. Mediocre sessions, repeated, build a mediocre body. The work outside the gym buys the work inside it.",
+        body: "Easy sessions don't move the needle — the body only adapts when it's pushed past where it's comfortable. But an injury is 6–12 weeks off, and that resets everything. The most underrated principle in fitness is being in the gym next week.",
       },
       {
         label: "How",
-        body: "Eat 60–90 minutes before — protein plus a carb. Warm up the lift you're about to do (light sets of the actual movement, not generic stretching). Caffeine if you use it.",
+        body: "8/10 intensity floor on every working set. Compounds first, accessories second. Progressive overload — add weight every other week. Form before weight, always. Sharp pain stops the set; dull ache gets reported at check-in.",
       },
       {
         label: "The Lever",
-        body: "Walk in already knowing your numbers. The program tells you what to do. Your one job is to execute at 8/10 or higher, every set.",
+        body: "Train like you want to be doing this in ten years. Hard enough to grow, smart enough to keep going. Better to leave a rep in the tank than miss eight weeks.",
       },
     ],
   },
   {
     num: "04",
-    title: "Progressive overload.",
-    lead: "Same weights week after week = same body. Muscle only grows when it's asked to.",
+    title: "Get enough sleep.",
+    lead: "You can't out-train a 5-hour night. Recovery happens here, not in the gym.",
     cards: [
       {
         label: "Why",
-        body: "Lifting the same weight forever maintains, doesn't build. The mechanism is mechanical: lift heavier than last time, the body adapts. No adaptation, no change.",
+        body: "Sleep is when muscle is built and hunger hormones reset. Skip it and the next day's training is a 6/10, the next day's eating is chaos. Bad sleep wrecks the whole stack.",
       },
       {
         label: "How",
-        body: "Add weight every other week. 135 → 145 in two weeks. If a lift feels easy two sessions in a row, the weight goes up next session.",
+        body: "7+ hours, same window every night. Dark room, cool temperature, no phone in bed. If sleep is currently broken, fix it before fixing anything else.",
       },
       {
         label: "The Lever",
-        body: "Log every set. The log isn't analysis — it's the contract. If the numbers aren't moving over a month, something is broken and we fix it at check-in.",
+        body: "Under 7 hours? Train lighter that day, lean harder on protein, skip the workout if it'd be sloppy. Don't be a hero on no sleep — that's how injuries happen.",
       },
     ],
   },
   {
     num: "05",
-    title: "Don't get injured.",
-    lead: "Every great physique I know has one thing in common: their owner has been in the gym, consistently, for years. Injuries break that.",
+    title: "Fitness should feel effortless.",
+    lead: "If it feels like punishment, it won't last. Long-term, the only fitness that compounds is the kind you actually enjoy. Let's have fun with this.",
     cards: [
       {
         label: "Why",
-        body: "An injury is 6–12 weeks off. The whole system stops, the body softens, motivation tanks. The most underrated principle in fitness is being in the gym next week.",
+        body: "Long-term, motivation runs out. Discipline runs out. What's left is identity and habit — and you only build those around things you don't hate. The clients who keep their results are the ones who stopped white-knuckling and started living it.",
       },
       {
         label: "How",
-        body: "Form before weight, always. Deload when the body asks. Sharp pain → stop. Dull ache → tell the coach. Ego adds weight; experience subtracts it.",
+        body: "Find the lifts you like. Eat food you actually want, within the rules. Pick a gym you don't dread. Within the principles there's a lot of room — find your version.",
       },
       {
         label: "The Lever",
-        body: "Better to leave a rep in the tank than miss eight weeks. The progression is patient. The injury is not.",
+        body: "At some point this should stop feeling like a project and start feeling like who you are. That's the goal — not a deadline, an identity.",
       },
     ],
   },
@@ -203,7 +202,7 @@ export default function PrinciplesPage() {
           </h1>
 
           <p className="text-[#edf5e2]/75 text-base md:text-lg leading-relaxed max-w-xl">
-            Most fitness content is noise. After years of testing — on myself, then on clients — I keep coming back to the same five levers. Get these right and the body changes. Get them wrong and nothing else matters: not the supplement stack, not the program, not the macros.
+            Most fitness content is noise. After years of testing — on myself, then on clients — I keep coming back to the same five principles. Get these right and the body changes. Get them wrong, and nothing else matters.
           </p>
 
           <div className="w-8 h-px bg-[#b0e455]/30 my-10" />
