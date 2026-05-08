@@ -7,7 +7,7 @@ export default async function ProgramPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: profile }, { data: sections }, { data: milestoneRows }] = await Promise.all([
+  const [{ data: profile }, { data: sections }, { data: milestoneRows }, { data: notesRows }] = await Promise.all([
     supabase
       .from('profiles')
       .select('first_name, role')
@@ -21,11 +21,36 @@ export default async function ProgramPage() {
       .from('member_milestones')
       .select('type')
       .eq('member_id', user.id),
+    supabase
+      .from('coach_notes')
+      .select('id, author_id, body, created_at, updated_at, author:profiles!coach_notes_author_id_fkey(first_name, email)')
+      .eq('member_id', user.id)
+      .order('created_at', { ascending: false }),
   ])
 
   const sectionMap = Object.fromEntries(
     (sections ?? []).map(s => [s.section, s])
   )
+
+  type NoteRow = {
+    id: string
+    author_id: string
+    body: string
+    created_at: string
+    updated_at: string
+    author: { first_name: string | null; email: string } | { first_name: string | null; email: string }[] | null
+  }
+  const notes = (notesRows ?? []).map((n: NoteRow) => {
+    const a = Array.isArray(n.author) ? n.author[0] : n.author
+    return {
+      id: n.id,
+      author_id: n.author_id,
+      author_name: a?.first_name ?? a?.email?.split('@')[0] ?? 'Coach',
+      body: n.body,
+      created_at: n.created_at,
+      updated_at: n.updated_at,
+    }
+  })
 
   return (
     <ProgramClient
@@ -36,6 +61,7 @@ export default async function ProgramPage() {
       food={sectionMap['food'] ?? null}
       habits={sectionMap['habits'] ?? null}
       milestones={(milestoneRows ?? []).map(m => m.type as string)}
+      notes={notes}
     />
   )
 }

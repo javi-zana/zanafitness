@@ -58,7 +58,16 @@ type MsgPreview = { thread_id: string; body: string; created_at: string; author_
 type ReadReceipt = { thread_id: string; last_read_at: string }
 type ChatMessage = { id: string; author_id: string; body: string; created_at: string; message_attachments: { id: string; storage_path: string; kind: string }[] }
 type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'inbox' | 'applications' | 'admin' | 'more'
-type Section = 'split' | 'food' | 'habits'
+type Section = 'split' | 'food' | 'habits' | 'notes'
+
+type CoachNote = {
+  id: string
+  author_id: string
+  author_name: string
+  body: string
+  created_at: string
+  updated_at: string
+}
 
 type BmrData = {
   type: 'bmr'
@@ -1421,7 +1430,7 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
 
 // ─── Programs tab ─────────────────────────────────────────────────────────────
 
-function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; userId: string; initialMemberId?: string | null }) {
+function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { members: Member[]; userId: string; initialMemberId?: string | null; isHeadCoach: boolean }) {
   const supabase = createClient()
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<Section>('split')
@@ -1432,7 +1441,7 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
   const [saved, setSaved] = useState(false)
 
   const selected = members.find(m => m.id === selectedId) ?? null
-  const SECTIONS: Section[] = ['split', 'food', 'habits']
+  const SECTIONS: Section[] = ['split', 'food', 'habits', 'notes']
 
   useEffect(() => {
     if (initialMemberId && initialMemberId !== selectedId) {
@@ -1598,7 +1607,225 @@ function ProgramsTab({ members, userId, initialMemberId }: { members: Member[]; 
           memberName={memberName(selected!)}
           onSave={saveSplitSection}
         />
+      ) : activeSection === 'notes' ? (
+        <CoachNotesSection
+          key={`${selectedId}-notes`}
+          memberId={selectedId!}
+          currentUserId={userId}
+          isHeadCoach={isHeadCoach}
+        />
       ) : null}
+    </div>
+  )
+}
+
+// ─── Coach notes section (composer + feed) ──────────────────────────────────
+
+function noteRelTime(iso: string) {
+  const d = new Date(iso)
+  const diffDays = Math.floor((Date.now() - d.getTime()) / 86_400_000)
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: new Date().getFullYear() === d.getFullYear() ? undefined : 'numeric' })
+}
+
+type CoachNoteRow = {
+  id: string
+  author_id: string
+  body: string
+  created_at: string
+  updated_at: string
+  author: { first_name: string | null; email: string } | { first_name: string | null; email: string }[] | null
+}
+
+function rowToNote(n: CoachNoteRow): CoachNote {
+  const a = Array.isArray(n.author) ? n.author[0] : n.author
+  return {
+    id: n.id,
+    author_id: n.author_id,
+    author_name: a?.first_name ?? a?.email?.split('@')[0] ?? 'Coach',
+    body: n.body,
+    created_at: n.created_at,
+    updated_at: n.updated_at,
+  }
+}
+
+function CoachNotesSection({ memberId, currentUserId, isHeadCoach }: { memberId: string; currentUserId: string; isHeadCoach: boolean }) {
+  const supabase = createClient()
+  const [notes, setNotes] = useState<CoachNote[]>([])
+  const [loading, setLoading] = useState(true)
+  const [body, setBody] = useState('')
+  const [posting, setPosting] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editBody, setEditBody] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const NOTES_QUERY = 'id, author_id, body, created_at, updated_at, author:profiles!coach_notes_author_id_fkey(first_name, email)'
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      setLoading(true)
+      const { data, error: fetchErr } = await supabase
+        .from('coach_notes')
+        .select(NOTES_QUERY)
+        .eq('member_id', memberId)
+        .order('created_at', { ascending: false })
+      if (cancelled) return
+      if (fetchErr) {
+        setError('Failed to load notes.')
+      } else {
+        setNotes((data ?? []).map((n) => rowToNote(n as unknown as CoachNoteRow)))
+      }
+      setLoading(false)
+    }
+    load()
+    return () => { cancelled = true }
+  }, [memberId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function postNote() {
+    const trimmed = body.trim()
+    if (!trimmed) return
+    setPosting(true)
+    setError(null)
+    const { data, error: insertErr } = await supabase
+      .from('coach_notes')
+      .insert({ member_id: memberId, author_id: currentUserId, body: trimmed })
+      .select(NOTES_QUERY)
+      .single()
+    if (insertErr || !data) {
+      setError('Failed to add note — please try again.')
+      setPosting(false)
+      return
+    }
+    setNotes(prev => [rowToNote(data as unknown as CoachNoteRow), ...prev])
+    setBody('')
+    setPosting(false)
+  }
+
+  function startEdit(note: CoachNote) {
+    setEditingId(note.id)
+    setEditBody(note.body)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+    setEditBody('')
+  }
+
+  async function saveEdit(noteId: string) {
+    const trimmed = editBody.trim()
+    if (!trimmed) return
+    setError(null)
+    const { data, error: updateErr } = await supabase
+      .from('coach_notes')
+      .update({ body: trimmed })
+      .eq('id', noteId)
+      .select(NOTES_QUERY)
+      .single()
+    if (updateErr || !data) {
+      setError('Failed to save edit.')
+      return
+    }
+    const updated = rowToNote(data as unknown as CoachNoteRow)
+    setNotes(prev => prev.map(n => n.id === noteId ? updated : n))
+    cancelEdit()
+  }
+
+  async function deleteNote(noteId: string) {
+    if (!confirm('Delete this note? This cannot be undone.')) return
+    setError(null)
+    const { error: delErr } = await supabase.from('coach_notes').delete().eq('id', noteId)
+    if (delErr) {
+      setError('Failed to delete note.')
+      return
+    }
+    setNotes(prev => prev.filter(n => n.id !== noteId))
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Composer */}
+      <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4 space-y-3">
+        <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest">New note</p>
+        <textarea
+          value={body}
+          onChange={e => setBody(e.target.value)}
+          maxLength={5000}
+          rows={4}
+          placeholder="What did you discuss? What are they focused on next?"
+          className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
+        />
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] text-[var(--c-text4)]">{body.length}/5000</p>
+          <button
+            onClick={postNote}
+            disabled={posting || !body.trim()}
+            className="px-4 py-2 rounded-xl bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {posting ? 'Saving…' : 'Add note'}
+          </button>
+        </div>
+        {error && <p className="text-xs text-red-400">{error}</p>}
+      </div>
+
+      {/* Feed */}
+      {loading ? (
+        <div className="flex justify-center py-10">
+          <div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" />
+        </div>
+      ) : notes.length === 0 ? (
+        <div className="bg-[var(--c-card2)] rounded-2xl p-5 text-center">
+          <p className="text-sm text-[var(--c-text4)]">No notes yet. Drop the first one above.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {notes.map(note => {
+            const canEdit = note.author_id === currentUserId || isHeadCoach
+            const isEditing = editingId === note.id
+            return (
+              <div key={note.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-[var(--c-accent-text)]">{note.author_name}</p>
+                  <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest" suppressHydrationWarning>{noteRelTime(note.created_at)}</p>
+                </div>
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <textarea
+                      value={editBody}
+                      onChange={e => setEditBody(e.target.value)}
+                      maxLength={5000}
+                      rows={4}
+                      className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2.5 text-sm text-[var(--c-text)] focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button onClick={cancelEdit} className="px-3 py-1.5 rounded-lg text-xs text-[var(--c-text3)] hover:text-[var(--c-text)] transition">Cancel</button>
+                      <button
+                        onClick={() => saveEdit(note.id)}
+                        disabled={!editBody.trim()}
+                        className="px-3 py-1.5 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-sm text-[var(--c-text2)] leading-relaxed whitespace-pre-wrap">{note.body}</p>
+                    {canEdit && (
+                      <div className="flex justify-end gap-3 mt-3 pt-3 border-t border-[var(--c-border)]">
+                        <button onClick={() => startEdit(note)} className="text-[10px] font-mono uppercase tracking-widest text-[var(--c-text4)] hover:text-[var(--c-text)] transition">Edit</button>
+                        <button onClick={() => deleteNote(note.id)} className="text-[10px] font-mono uppercase tracking-widest text-[var(--c-text4)] hover:text-red-400 transition">Delete</button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -3917,7 +4144,7 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
           <MembersTab members={members} allStats={allStats} activities={liveActivities} mutateActivity={mutateActivity} removeActivity={removeActivity} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'programs' && (
-          <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} />
+          <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} isHeadCoach={isHeadCoach} />
         )}
         {activeTab === 'messages' && (
           <MessagesTab

@@ -28,6 +28,15 @@ type HabitsContent = {
 
 type SectionData = { section: string; content_json: object; updated_at: string } | null
 
+type CoachNote = {
+  id: string
+  author_id: string
+  author_name: string
+  body: string
+  created_at: string
+  updated_at: string
+}
+
 type Props = {
   userId: string
   firstName: string | null
@@ -36,9 +45,10 @@ type Props = {
   food: SectionData
   habits: SectionData
   milestones: string[]
+  notes: CoachNote[]
 }
 
-type Tab = 'split' | 'food' | 'habits'
+type Tab = 'split' | 'food' | 'habits' | 'notes'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -609,6 +619,55 @@ function BmrDisplay({ data }: { data: BmrContent }) {
   )
 }
 
+// ─── Coach notes feed (read-only) ────────────────────────────────────────────
+
+function formatNoteDate(iso: string) {
+  const d = new Date(iso)
+  const now = new Date()
+  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86_400_000)
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Yesterday'
+  if (diffDays < 7) return `${diffDays} days ago`
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: now.getFullYear() === d.getFullYear() ? undefined : 'numeric' })
+}
+
+function CoachNotesFeed({ notes }: { notes: CoachNote[] }) {
+  if (!notes.length) {
+    return (
+      <div className="space-y-3 pt-2">
+        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-5">
+          <div className="w-10 h-10 rounded-xl bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center mb-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-5 h-5">
+              <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <p className="text-sm font-semibold text-[var(--c-text)]/80 mb-2">Coach Notes</p>
+          <p className="text-sm text-[var(--c-text3)] leading-relaxed">
+            Your coach will leave timestamped notes here from check-ins and calls — what's working, what to focus on next, anything you talked through.
+          </p>
+        </div>
+        <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-4">
+          <p className="text-xs text-[var(--c-accent-text)] font-medium">No notes yet.</p>
+          <p className="text-xs text-[var(--c-text3)] mt-1">You'll see them here as soon as your coach adds one.</p>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="space-y-3">
+      {notes.map(note => (
+        <div key={note.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-semibold text-[var(--c-accent-text)]">{note.author_name}</p>
+            <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest" suppressHydrationWarning>{formatNoteDate(note.created_at)}</p>
+          </div>
+          <p className="text-sm text-[var(--c-text2)] leading-relaxed whitespace-pre-wrap">{note.body}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ─── Empty state ──────────────────────────────────────────────────────────────
 
 function EmptyState({ message }: { message: string }) {
@@ -626,7 +685,7 @@ function EmptyState({ message }: { message: string }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ userId, firstName, role, split, food, habits }: Props) {
+export default function ProgramClient({ userId, firstName, role, split, food, habits, notes }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('split')
 
   const structuredSplit: StructuredSplit | null = (() => {
@@ -641,9 +700,13 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     { id: 'split', label: `${name} Split` },
     { id: 'food', label: `${name} Food` },
     { id: 'habits', label: `${name} Habits` },
+    { id: 'notes', label: 'Coach Notes' },
   ]
 
   function renderContent() {
+    if (activeTab === 'notes') {
+      return <CoachNotesFeed notes={notes} />
+    }
 
     const sectionMap = { split, food, habits }
     const section = sectionMap[activeTab]
