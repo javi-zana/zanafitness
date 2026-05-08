@@ -185,7 +185,7 @@ function LoginForm() {
           </p>
         </div>
         <Link
-          href="/system"
+          href="/pricing"
           className="block w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors text-center"
         >
           View Membership Plans
@@ -246,7 +246,7 @@ function LoginForm() {
         >
           Forgot password?
         </button>
-        <Link href="/system" className="text-sm text-[var(--c-accent-text)] hover:opacity-75 transition-colors">
+        <Link href="/pricing" className="text-sm text-[var(--c-accent-text)] hover:opacity-75 transition-colors">
           View plans
         </Link>
       </div>

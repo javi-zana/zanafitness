@@ -110,7 +110,7 @@ export default function LandingPage() {
             Without overhauling your life. A system built around how you actually live.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Link href="/system" className="inline-flex items-center gap-2 bg-[#b0e455] text-[#0f1a0c] px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#c9f070] transition-colors">
+            <Link href="/pricing" className="inline-flex items-center gap-2 bg-[#b0e455] text-[#0f1a0c] px-7 py-3.5 rounded-full font-semibold text-sm hover:bg-[#c9f070] transition-colors">
               Get Started <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link href="/about" className="inline-flex items-center gap-2 border border-white/20 text-white px-7 py-3.5 rounded-full text-sm hover:border-white/40 hover:bg-white/5 transition-colors">
@@ -255,7 +255,7 @@ export default function LandingPage() {
                   </div>
                 ))}
               </div>
-              <Link href="/system" className="inline-flex items-center gap-2 text-sm font-medium text-[#b0e455] hover:text-[#c9f070] transition-colors border border-[#b0e455]/25 px-6 py-3 rounded-full hover:border-[#b0e455]/50">
+              <Link href="/pricing" className="inline-flex items-center gap-2 text-sm font-medium text-[#b0e455] hover:text-[#c9f070] transition-colors border border-[#b0e455]/25 px-6 py-3 rounded-full hover:border-[#b0e455]/50">
                 View Plans <ArrowUpRight className="w-4 h-4" />
               </Link>
             </div>

@@ -91,7 +91,7 @@ export default function FAQPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link
-              href="/system"
+              href="/pricing"
               className="inline-flex items-center justify-center gap-2 bg-[#b0e455] text-[#0f1a0c] px-7 py-3.5 rounded-2xl font-semibold text-sm hover:bg-[#c9f070] transition-colors"
             >
               Join the System

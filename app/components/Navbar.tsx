@@ -49,7 +49,7 @@ export default function Navbar({ active }: { active?: string }) {
             <Link href="/login" className="text-sm font-medium text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors px-4 py-2">
               Log In
             </Link>
-            <Link href="/system" className="text-sm font-semibold bg-[#b0e455] text-[#0f1a0c] px-5 py-2.5 rounded-full hover:bg-[#c9f070] transition-colors">
+            <Link href="/pricing" className="text-sm font-semibold bg-[#b0e455] text-[#0f1a0c] px-5 py-2.5 rounded-full hover:bg-[#c9f070] transition-colors">
               Get Started
             </Link>
           </div>
@@ -83,7 +83,7 @@ export default function Navbar({ active }: { active?: string }) {
               <Link href="/login" onClick={() => setOpen(false)} className="text-sm font-medium text-center py-3 border border-[var(--c-border2)] text-[var(--c-text2)] rounded-2xl">
                 Log In
               </Link>
-              <Link href="/system" onClick={() => setOpen(false)} className="text-sm font-bold bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl text-center">
+              <Link href="/pricing" onClick={() => setOpen(false)} className="text-sm font-bold bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl text-center">
                 Get Started
               </Link>
             </div>
