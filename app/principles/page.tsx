@@ -197,8 +197,7 @@ export default function PrinciplesPage() {
             className="font-display leading-[1.02] mb-10"
             style={{ fontSize: "clamp(48px, 8vw, 96px)" }}
           >
-            Five principles.<br />
-            That&apos;s the whole game.
+            The Zana Fitness System.
           </h1>
 
           <p className="text-[#edf5e2]/75 text-base md:text-lg leading-relaxed max-w-xl">
