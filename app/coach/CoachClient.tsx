@@ -2921,7 +2921,14 @@ function ApplicationsSection() {
                 {app.instagram && (
                   <div>
                     <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1">Instagram</p>
-                    <p className="text-xs text-[var(--c-text2)]">@{app.instagram}</p>
+                    <a
+                      href={`https://instagram.com/${app.instagram.replace(/^@/, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-[var(--c-accent-text)] hover:underline"
+                    >
+                      @{app.instagram.replace(/^@/, '')}
+                    </a>
                   </div>
                 )}
                 {app.work && (
