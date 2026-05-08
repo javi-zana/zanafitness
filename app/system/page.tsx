@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, TrendingUp, Leaf, Target } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "The System | ZANA Fitness",
-  description: "I've been getting a lot of DMs asking about fitness. Here's everything I know in one place.",
+  description: "The habits-based lifestyle system I use to help professionals build a lean, aesthetic physique — that actually matches their life.",
 };
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
@@ -17,132 +17,155 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
-function DmBubble({ text, delay = "0" }: { text: string; delay?: string }) {
+function DmBubble({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-3" style={{ animationDelay: delay }}>
-      <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/15 shrink-0 flex items-center justify-center mt-0.5">
-        <div className="w-3 h-3 rounded-full bg-[#b0e455]/30" />
+    <div className="flex items-start gap-3">
+      <div className="w-8 h-8 rounded-full bg-[#edf5e2]/6 border border-[#edf5e2]/10 shrink-0 flex items-center justify-center mt-0.5">
+        <div className="w-2.5 h-2.5 rounded-full bg-[#edf5e2]/20" />
       </div>
-      <div className="bg-[#162212] border border-[#b0e455]/8 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs md:max-w-sm">
-        <p className="text-[#edf5e2]/65 text-sm leading-relaxed">{text}</p>
+      <div className="bg-[#162212] border border-[#b0e455]/8 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs md:max-w-md">
+        <p className="text-[#edf5e2]/60 text-sm leading-relaxed">{text}</p>
       </div>
     </div>
   );
 }
 
-type Feature = { text: string; included: boolean; emphasize?: string };
+type PrincipleData = {
+  num: string;
+  title: string;
+  lead: string;
+  cards: { label: string; body: string }[];
+};
 
-function PlanCard({
-  label, months, price, total, checkoutUrl, features, featured,
-}: {
-  label: string; months: number; price: number; total: number;
-  checkoutUrl: string; features: Feature[]; featured?: boolean;
-}) {
-  const dim = featured ? "text-[#0f1a0c]/50" : "text-[#edf5e2]/35";
-  const bright = featured ? "text-[#0f1a0c]" : "text-[#edf5e2]";
+const principles: PrincipleData[] = [
+  {
+    num: "01",
+    title: "Getting fit is simple.",
+    lead: "Simple doesn't mean easy. The hard part isn't knowing what to do — it's doing it consistently when life gets in the way.",
+    cards: [
+      {
+        label: "Why",
+        body: "The gap between knowing and doing is where 99% of fitness failure happens. The information has been free and largely the same for decades. The reason most people don't have the body they want isn't a missing secret — it's that they haven't applied the basics consistently for long enough.",
+      },
+      {
+        label: "How",
+        body: "Don't chase complexity. Don't add new tactics until the basics are bulletproof. The temptation to optimise, biohack, or stack supplements is almost always procrastination dressed up as work.",
+      },
+      {
+        label: "The Lever",
+        body: "When something isn't working, the answer is rarely a new tactic. The question is: am I actually doing the basic thing? The honest answer is almost always no.",
+      },
+    ],
+  },
+  {
+    num: "02",
+    title: "Lifestyle habits are everything.",
+    lead: "Lifestyle habits are ~80% of being fit. The other 20% is what happens at the gym.",
+    cards: [
+      {
+        label: "Why",
+        body: "An hour in the gym is 4% of your day. The other 96% — what you eat, how you sleep, how much you walk, how you handle stress — is what actually moves the needle. The workout is the smallest lever, not the biggest.",
+      },
+      {
+        label: "How",
+        body: "Build the day around a few non-negotiables: protein at every meal, 8k+ steps, a consistent bedtime, water on the desk. The workout slots into a life that's already pulling in the right direction.",
+      },
+      {
+        label: "The Lever",
+        body: "If you had 30 minutes of effort to spend, none of it would be in the gym. The gym is leverage on a base that's already there — without the base, it's just a workout.",
+      },
+    ],
+  },
+  {
+    num: "03",
+    title: "Train hard, but don't get injured.",
+    lead: "Hard training is what actually changes the body. Injury is what undoes it. The job is doing both — at the same time, for years.",
+    cards: [
+      {
+        label: "Why",
+        body: "Easy sessions don't move the needle — the body only adapts when it's pushed past where it's comfortable. But an injury is 6–12 weeks off, and that resets everything. The most underrated principle in fitness is being in the gym next week.",
+      },
+      {
+        label: "How",
+        body: "8/10 intensity floor on every working set. Compounds first, accessories second. Progressive overload — add weight every other week. Form before weight, always. Sharp pain stops the set; dull ache gets reported at check-in.",
+      },
+      {
+        label: "The Lever",
+        body: "Train like you want to be doing this in ten years. Hard enough to grow, smart enough to keep going. Better to leave a rep in the tank than miss eight weeks.",
+      },
+    ],
+  },
+  {
+    num: "04",
+    title: "Get enough sleep.",
+    lead: "You can't out-train a 5-hour night. Recovery happens here, not in the gym.",
+    cards: [
+      {
+        label: "Why",
+        body: "Sleep is when muscle is built and hunger hormones reset. Skip it and the next day's training is a 6/10, the next day's eating is chaos. Bad sleep wrecks the whole stack.",
+      },
+      {
+        label: "How",
+        body: "7+ hours, same window every night. Dark room, cool temperature, no phone in bed. If sleep is currently broken, fix it before fixing anything else.",
+      },
+      {
+        label: "The Lever",
+        body: "Under 7 hours? Train lighter, lean harder on protein, skip the session if it'd be sloppy. Don't be a hero on no sleep — that's how injuries happen.",
+      },
+    ],
+  },
+  {
+    num: "05",
+    title: "Fitness should feel effortless.",
+    lead: "If it feels like punishment, it won't last. The only fitness that compounds long-term is the kind you actually enjoy.",
+    cards: [
+      {
+        label: "Why",
+        body: "Long-term, motivation runs out. Discipline runs out. What's left is identity and habit — and you only build those around things you don't hate. The clients who keep their results are the ones who stopped white-knuckling and started living it.",
+      },
+      {
+        label: "How",
+        body: "Find the lifts you like. Eat food you actually want, within the rules. Pick a gym you don't dread. Within the principles there's a lot of room — find your version.",
+      },
+      {
+        label: "The Lever",
+        body: "At some point this should stop feeling like a project and start feeling like who you are. That's the goal — not a deadline, an identity.",
+      },
+    ],
+  },
+];
 
+function PrincipleSection({ p, alt }: { p: PrincipleData; alt: boolean }) {
   return (
-    <div className={`flex flex-col rounded-3xl relative overflow-hidden ${
-      featured ? "bg-[#b0e455] text-[#0f1a0c]" : "bg-[#162212] border border-[#b0e455]/10 text-[#edf5e2]"
-    }`}>
-      {featured && (
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: "radial-gradient(ellipse at 100% 0%, rgba(255,255,255,0.18) 0%, transparent 55%)" }} />
-      )}
-      <div className={`px-8 pt-8 pb-6 border-b ${featured ? "border-[#0f1a0c]/10" : "border-[#b0e455]/8"}`}>
-        <div className="flex items-center justify-between min-h-[24px] mb-4">
-          <p className={`text-[10px] font-bold tracking-[0.2em] uppercase ${featured ? "text-[#0f1a0c]/50" : "text-[#b0e455]"}`}>{label}</p>
-          {featured ? (
-            <span className="inline-block bg-[#0f1a0c] text-[#b0e455] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">Best Value</span>
-          ) : (
-            <span className="inline-block text-[10px] px-3 py-1 opacity-0 select-none">Best Value</span>
-          )}
+    <section className={`py-20 px-6 ${alt ? "bg-[#0f1a0c] border-y border-[#b0e455]/6" : ""}`}>
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center gap-4 mb-10">
+          <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#b0e455]/50">
+            Principle {p.num}
+          </span>
+          <div className="flex-1 h-px bg-[#b0e455]/8" />
         </div>
-        <div className="flex items-baseline gap-2 mb-1">
-          <span className={`font-display text-5xl leading-none ${bright}`}>{months}</span>
-          <span className={`text-base font-semibold ${dim}`}>months</span>
-        </div>
-        <p className={`text-xs mb-5 ${dim}`}>commitment period</p>
-        <div className={`flex items-center justify-between rounded-2xl px-4 py-3 ${featured ? "bg-[#0f1a0c]/8" : "bg-[#b0e455]/6"}`}>
+
+        <div className="grid md:grid-cols-2 gap-10 items-start">
           <div>
-            <div className="flex items-end gap-1">
-              <span className={`font-display text-3xl leading-none ${bright}`}>${total.toLocaleString()}</span>
-            </div>
-            <p className={`text-[10px] mt-0.5 ${dim}`}>${price} billed per month</p>
+            <h2 className="font-display leading-[1.05] mb-4" style={{ fontSize: "clamp(28px, 3.5vw, 44px)" }}>
+              {p.title}
+            </h2>
+            <p className="text-[#edf5e2]/55 text-base leading-relaxed italic">{p.lead}</p>
           </div>
-          <div className={`text-right text-[10px] font-bold tracking-wide uppercase ${featured ? "text-[#0f1a0c]/40" : "text-[#b0e455]/50"}`}>
-            {featured ? "Save $1,800" : ""}
+          <div className="space-y-3">
+            {p.cards.map((c) => (
+              <div key={c.label} className="bg-[#162212] rounded-2xl p-5 border border-[#b0e455]/6">
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/60 mb-2">{c.label}</p>
+                <p className="text-sm text-[#edf5e2]/65 leading-relaxed">{c.body}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-      <div className="px-8 py-6 flex-1">
-        <ul className="space-y-3">
-          {features.map((f) => (
-            <li key={f.text} className="flex items-center gap-3">
-              <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                f.included ? (featured ? "bg-[#0f1a0c]/10" : "bg-[#b0e455]/10") : "bg-[#edf5e2]/4"
-              }`}>
-                {f.included ? (
-                  <svg viewBox="0 0 12 12" className={`w-3 h-3 ${featured ? "text-[#0f1a0c]" : "text-[#b0e455]"}`} fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M2 6l3 3 5-5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 12 12" className="w-3 h-3 text-[#edf5e2]/20" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M3 3l6 6M9 3l-6 6" strokeLinecap="round" />
-                  </svg>
-                )}
-              </div>
-              {(() => {
-                const cls = `text-sm ${f.included ? (featured ? "text-[#0f1a0c]/80" : "text-[#edf5e2]/70") : "text-[#edf5e2]/20 line-through"}`;
-                if (f.emphasize && f.text.includes(f.emphasize)) {
-                  const [before, after] = f.text.split(f.emphasize);
-                  return (
-                    <span className={cls}>
-                      {before}<span className={`font-bold ${featured ? "text-[#0f1a0c]" : "text-[#b0e455]"}`}>{f.emphasize}</span>{after}
-                    </span>
-                  );
-                }
-                return <span className={cls}>{f.text}</span>;
-              })()}
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="px-8 pb-8">
-        <a
-          href={checkoutUrl}
-          className={`w-full py-3.5 rounded-2xl text-sm font-semibold transition-colors text-center block ${
-            featured ? "bg-[#0f1a0c] text-[#b0e455] hover:bg-[#0a1208]" : "bg-[#b0e455] text-[#0f1a0c] hover:bg-[#c9f070]"
-          }`}
-        >
-          Start Now
-        </a>
-      </div>
-    </div>
+    </section>
   );
 }
-
-const committedFeatures: Feature[] = [
-  { text: "Access to the ZANA App", included: true },
-  { text: "Personalised training split", included: true },
-  { text: "Custom nutrition & macros", included: true },
-  { text: "Weekly check-ins with your coach", included: true },
-  { text: "Direct access to Javi", included: true },
-  { text: "Supplement & recovery guidance", included: true },
-  { text: "Video Calls on Demand", included: false },
-  { text: "Quarterly progress review call", included: false },
-];
-
-const allInFeatures: Feature[] = [
-  { text: "Access to the ZANA App", included: true },
-  { text: "Personalised training split", included: true },
-  { text: "Custom nutrition & macros", included: true },
-  { text: "Weekly check-ins with your coach", included: true },
-  { text: "Priority access to Javi", included: true, emphasize: "Priority" },
-  { text: "Supplement & recovery guidance", included: true },
-  { text: "Video Calls on Demand", included: true },
-  { text: "Quarterly progress review call", included: true },
-];
 
 export default function SystemPage() {
   return (
@@ -150,12 +173,12 @@ export default function SystemPage() {
 
       {/* ── NAV ───────────────────────────────────────────────────────────────── */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-[#b0e455]/6">
-        <Link href="/" className="text-[#edf5e2]/60 hover:text-[#edf5e2] transition-colors">
+        <Link href="/" className="text-[#edf5e2]/50 hover:text-[#edf5e2] transition-colors">
           <ZanaLogo className="h-5" />
         </Link>
         <Link
           href="/apply"
-          className="text-xs font-semibold tracking-wide text-[#b0e455] hover:text-[#edf5e2] transition-colors"
+          className="text-xs font-semibold tracking-wide text-[#b0e455] hover:text-[#c9f070] transition-colors"
         >
           Apply →
         </Link>
@@ -164,190 +187,168 @@ export default function SystemPage() {
       {/* ── HOOK ──────────────────────────────────────────────────────────────── */}
       <section className="pt-28 pb-16 px-6">
         <div className="max-w-2xl mx-auto">
-
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-8 h-8 rounded-full bg-[#b0e455]/10 border border-[#b0e455]/20 flex items-center justify-center shrink-0">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#b0e455]" />
-            </div>
-            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#b0e455]/70">From Javi</p>
+          <div className="flex items-center gap-3 mb-12">
+            <div className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
+            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#b0e455]/60">From Javi</p>
           </div>
 
-          <h1 className="font-display leading-[1.02] mb-8" style={{ fontSize: "clamp(44px, 7vw, 80px)" }}>
-            I've been getting a lot of DMs.
+          <h1 className="font-display leading-[1.02] mb-10" style={{ fontSize: "clamp(44px, 7vw, 84px)" }}>
+            I've been getting<br />a lot of DMs.
           </h1>
 
-          <p className="text-[#edf5e2]/60 text-lg md:text-xl leading-relaxed font-light mb-6">
-            Every week, the same questions come in. About training. About eating. About how to actually stay consistent when life doesn&apos;t slow down for you.
-          </p>
-          <p className="text-[#edf5e2]/40 text-base leading-relaxed">
-            I read every single one. And I figured it was time to answer them properly — in one place.
-          </p>
+          <div className="space-y-5 text-[#edf5e2]/55 text-base md:text-lg leading-relaxed">
+            <p>Every week, the same guy messages me. Different name. Same situation.</p>
+            <p>His career is in a great place. He earns well. He dresses well. He has the lifestyle most people are working toward.</p>
+            <p className="text-[#edf5e2]/80">
+              And he&apos;s frustrated that the one thing he can&apos;t seem to get control of is his own body.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* ── THE DMS ───────────────────────────────────────────────────────────── */}
-      <section className="py-16 px-6">
-        <div className="max-w-2xl mx-auto space-y-4">
-          <DmBubble text="Javi, I travel 3 weeks a month for work. How am I supposed to stay consistent with training?" />
-          <DmBubble text="I've tried so many diets. Nothing sticks past the first month. I don't know what I'm doing wrong." />
-          <DmBubble text="I'm earning good money now and feel like I have everything sorted — except my body. I just don't know where to start." />
-          <DmBubble text="I want to get in shape but I genuinely don't have 2 hours a day to spend in the gym. Is there even a point?" />
+      <section className="py-10 px-6">
+        <div className="max-w-2xl mx-auto space-y-3.5">
+          <DmBubble text="I look fine with clothes on but I can't take my shirt off without feeling embarrassed. I'm not overweight. I'm just... soft." />
+          <DmBubble text="I've tried everything. Gym programs, meal plans, apps, challenges. Nothing sticks past 3 weeks." />
+          <DmBubble text="My career is sorted, my wardrobe is sorted. I just feel like my body is the one thing that doesn't match the rest of my life." />
+          <DmBubble text="I travel constantly for work. I have no idea how to stay consistent when I'm not in my home city." />
 
-          {/* Javi reply */}
-          <div className="flex justify-end pt-2">
-            <div className="bg-[#b0e455]/12 border border-[#b0e455]/20 rounded-2xl rounded-tr-sm px-4 py-3 max-w-xs md:max-w-sm">
-              <p className="text-[#b0e455] text-sm font-medium leading-relaxed">These aren&apos;t excuses. They&apos;re real problems — and the reason I built this.</p>
+          <div className="flex justify-end pt-1">
+            <div className="bg-[#b0e455]/10 border border-[#b0e455]/20 rounded-2xl rounded-tr-sm px-5 py-3.5 max-w-xs md:max-w-sm">
+              <p className="text-[#b0e455] text-sm font-medium leading-relaxed">
+                These aren&apos;t excuses. They&apos;re the exact problems I built this system to solve.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── THE WHY ───────────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 border-t border-[#b0e455]/6">
+      <section className="py-24 px-6 border-t border-[#b0e455]/6">
         <div className="max-w-2xl mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-8">Why I&apos;m sharing this</p>
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-10">Why I built this</p>
 
-          <div className="space-y-6 text-[#edf5e2]/65 text-base md:text-lg leading-relaxed font-light">
+          <div className="space-y-6 text-[#edf5e2]/60 text-base md:text-lg leading-relaxed">
             <p>
-              Most fitness advice is built for people with unlimited time, zero responsibilities, and nothing better to do than meal prep for four hours on a Sunday.
+              I&apos;ve been coaching for years. And the one thing I keep seeing is that the fitness industry is not built for how most ambitious people actually live.
             </p>
             <p>
-              That&apos;s not how the people I talk to actually live. They&apos;re building businesses. Running teams. Raising families. Travelling constantly. They don&apos;t need another 12-week challenge designed by someone who&apos;s never had a calendar full of client calls.
+              Bodybuilder splits. Calorie tracking apps. Twelve-week challenges. Meal-prep Sundays. All of it designed for someone with unlimited time, zero work commitments, and nothing better to do.
             </p>
-            <p className="text-[#edf5e2]/90">
-              They need a system that works with their life — not against it.
+            <p className="text-[#edf5e2]/85 font-medium">
+              That&apos;s not you. And the programmes built for that person are why you&apos;ve tried and stopped — repeatedly — without it ever feeling like it was working.
             </p>
             <p>
-              I want to help as many people as I can actually get there. Not just get fit — but feel genuinely good in their body. Confident when they walk into a room. Proud of what they see. That&apos;s the version of this I&apos;m obsessed with making happen.
+              Getting fit was one of the highest-ROI decisions I ever made. Not just physically — but in business, in how I carry myself, in the way people read me before I say a word. I want that for as many people as I can help get there.
+            </p>
+            <p>
+              What I use with every client is a system built around five principles. Not tactics. Not a programme. Principles — because principles don&apos;t fall apart when life gets busy.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ── THE REALITY ───────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-[#0f1a0c] border-y border-[#b0e455]/6">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-8">What I&apos;ve learned</p>
-
-          <blockquote className="font-display leading-[1.08] text-[#edf5e2] mb-10" style={{ fontSize: "clamp(26px, 4vw, 44px)" }}>
-            &ldquo;Getting fit is one of the best financial decisions I have ever made.&rdquo;
-          </blockquote>
-
-          <p className="text-[#edf5e2]/50 text-sm leading-relaxed max-w-lg">
-            Not because of how it looks on paper — but because of what it does to everything else. Your energy levels. Your discipline. The way you carry yourself. The way people read you before you say a single word.
-          </p>
-
-          <div className="mt-12 grid sm:grid-cols-3 gap-4">
-            {[
-              { num: "Career", label: "sorted." },
-              { num: "Income", label: "sorted." },
-              { num: "Body", label: "the last piece." },
-            ].map((s) => (
-              <div key={s.num} className="bg-[#162212] rounded-2xl px-5 py-5 border border-[#b0e455]/6">
-                <p className="text-[#b0e455] text-sm font-bold mb-0.5">{s.num}</p>
-                <p className="text-[#edf5e2]/40 text-sm">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── THE SYSTEM ────────────────────────────────────────────────────────── */}
-      <section className="py-24 px-6">
+      {/* ── METHODOLOGY CONTRAST ──────────────────────────────────────────────── */}
+      <section className="py-16 px-6 bg-[#0f1a0c] border-y border-[#b0e455]/6">
         <div className="max-w-5xl mx-auto">
-          <div className="max-w-2xl mb-14">
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-4">The system</p>
-            <h2 className="font-display leading-none mb-4" style={{ fontSize: "clamp(32px, 4.5vw, 56px)" }}>
-              Three things.<br />That&apos;s it.
-            </h2>
-            <p className="text-[#edf5e2]/40 text-sm leading-relaxed">
-              Not a 30-step programme. Not a colour-coded meal plan you&apos;ll abandon by Thursday. Just three things, done consistently, that compound over time.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4">
-            {[
-              {
-                icon: <TrendingUp className="w-5 h-5 text-[#b0e455] stroke-1" />,
-                num: "01",
-                title: "Training",
-                sub: "Built for your schedule",
-                desc: "45–60 minute sessions, 4 days a week. Progressive splits designed to fit around client calls, travel, and late nights — not a bodybuilder's routine.",
-              },
-              {
-                icon: <Leaf className="w-5 h-5 text-[#b0e455] stroke-1" />,
-                num: "02",
-                title: "Nutrition",
-                sub: "Clarity, not restriction",
-                desc: "Clear macro targets and food habits that work wherever you are. No tracking obsession. No elimination diets. Just something you can actually follow for good.",
-              },
-              {
-                icon: <Target className="w-5 h-5 text-[#b0e455] stroke-[1.5]" />,
-                num: "03",
-                title: "Guidance",
-                sub: "Accountability that adapts",
-                desc: "Weekly check-ins with a coach who understands your world. Client dinners, travel, shifting deadlines — when life moves, the plan moves with it.",
-              },
-            ].map((p) => (
-              <div key={p.num} className="bg-[#162212] rounded-3xl p-7 border border-[#b0e455]/6 hover:border-[#b0e455]/14 transition-colors">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-9 h-9 rounded-xl bg-[#b0e455]/8 flex items-center justify-center">
-                    {p.icon}
-                  </div>
-                  <span className="text-xs font-bold text-[#edf5e2]/10">{p.num}</span>
-                </div>
-                <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#b0e455]/50 mb-1.5">{p.sub}</p>
-                <h3 className="text-base font-bold text-[#edf5e2] mb-2.5">{p.title}</h3>
-                <p className="text-sm text-[#edf5e2]/45 leading-relaxed">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── WHO IT'S FOR ──────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-[#0f1a0c] border-y border-[#b0e455]/6">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-8">Is this for you?</p>
-
-          <h2 className="font-display leading-none mb-10" style={{ fontSize: "clamp(28px, 4vw, 46px)" }}>
-            This works if you&apos;re<br />serious about it.
-          </h2>
-
-          <div className="grid sm:grid-cols-2 gap-8">
-            {/* This IS for you */}
-            <div>
-              <p className="text-xs font-bold tracking-[0.15em] uppercase text-[#b0e455] mb-5">This is for you if</p>
-              <ul className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-5">
+            <div className="rounded-3xl p-7 border border-[#edf5e2]/5 bg-[#0b1509]">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#edf5e2]/20 mb-5">What doesn&apos;t work</p>
+              <ul className="space-y-3.5">
                 {[
-                  "You're busy, but done using that as an excuse",
-                  "You want a real plan, not motivation quotes",
-                  "You're willing to be consistent for months, not days",
-                  "You understand that your body is a long-term investment",
-                  "You want someone in your corner who actually checks in",
+                  "2-hour gym sessions built for bodybuilders",
+                  "Meal plans you can't follow when you travel",
+                  "Programmes that require you to track everything",
+                  "Motivation-based approaches that fade by week 3",
+                  "Advice from people who don't live your life",
                 ].map((t) => (
                   <li key={t} className="flex items-start gap-3">
-                    <span className="text-[#b0e455] mt-0.5 shrink-0">→</span>
+                    <span className="text-[#edf5e2]/15 mt-0.5 shrink-0 text-sm">×</span>
+                    <span className="text-sm text-[#edf5e2]/25 line-through leading-relaxed">{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="rounded-3xl p-7 border border-[#b0e455]/12 bg-[#162212]">
+              <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/70 mb-5">What actually works</p>
+              <ul className="space-y-3.5">
+                {[
+                  "45–60 min sessions, 4x a week — around your calendar",
+                  "Eating habits that hold up in restaurants and airports",
+                  "A system where lifestyle does the heavy lifting",
+                  "Identity and habit, not motivation and willpower",
+                  "A coach who adapts the plan when life shifts",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3">
+                    <span className="text-[#b0e455] mt-0.5 shrink-0 text-sm">→</span>
+                    <span className="text-sm text-[#edf5e2]/75 leading-relaxed">{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── THE FIVE PRINCIPLES ───────────────────────────────────────────────── */}
+      <div className="pt-24 pb-0">
+        <div className="max-w-2xl mx-auto px-6 mb-16">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-4">The principles</p>
+          <h2 className="font-display leading-none mb-4" style={{ fontSize: "clamp(32px, 5vw, 56px)" }}>
+            Five things.<br />That&apos;s the whole system.
+          </h2>
+          <p className="text-[#edf5e2]/40 text-sm leading-relaxed max-w-md">
+            Get these right and everything else follows. Miss them and no programme — no matter how good — will save you.
+          </p>
+        </div>
+
+        {principles.map((p, i) => (
+          <PrincipleSection key={p.num} p={p} alt={i % 2 === 0} />
+        ))}
+      </div>
+
+      {/* ── WHO IT'S FOR ──────────────────────────────────────────────────────── */}
+      <section className="py-24 px-6 border-t border-[#b0e455]/6">
+        <div className="max-w-2xl mx-auto">
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-10">Is this for you?</p>
+
+          <h2 className="font-display leading-[1.05] mb-12" style={{ fontSize: "clamp(28px, 4vw, 46px)" }}>
+            I work with a specific type of person.<br />
+            <span className="text-[#b0e455]">You&apos;ll know if you&apos;re it.</span>
+          </h2>
+
+          <div className="grid sm:grid-cols-2 gap-10">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.16em] uppercase text-[#b0e455] mb-6">This is you if</p>
+              <ul className="space-y-4">
+                {[
+                  "Your career and income are sorted. Your body is the last piece.",
+                  "You've tried things before. They didn't stick. You know why now.",
+                  "You're done with motivation hacks. You want a system.",
+                  "You can commit to 4 months minimum. You think in quarters.",
+                  "You want a coach who adjusts when life happens — not one who gives up on you.",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-3">
+                    <span className="text-[#b0e455] mt-0.5 shrink-0 text-sm">→</span>
                     <span className="text-sm text-[#edf5e2]/70 leading-relaxed">{t}</span>
                   </li>
                 ))}
               </ul>
             </div>
-
-            {/* This is NOT for you */}
             <div>
-              <p className="text-xs font-bold tracking-[0.15em] uppercase text-[#edf5e2]/20 mb-5">This is not for you if</p>
+              <p className="text-[10px] font-bold tracking-[0.16em] uppercase text-[#edf5e2]/18 mb-6">This is not for you if</p>
               <ul className="space-y-4">
                 {[
-                  "You want a quick fix or a 30-day transformation",
-                  "You're not willing to show up to check-ins",
-                  "You expect results without any effort on your part",
-                  "You're looking for the cheapest option possible",
+                  "You want a 30-day transformation",
+                  "You won't show up for check-ins",
+                  "You expect results without effort on your side",
+                  "You're looking for the cheapest option",
                   "You can't commit to at least 4 months",
                 ].map((t) => (
                   <li key={t} className="flex items-start gap-3">
-                    <span className="text-[#edf5e2]/20 mt-0.5 shrink-0">×</span>
-                    <span className="text-sm text-[#edf5e2]/25 leading-relaxed line-through">{t}</span>
+                    <span className="text-[#edf5e2]/15 mt-0.5 shrink-0 text-sm">×</span>
+                    <span className="text-sm text-[#edf5e2]/22 leading-relaxed line-through">{t}</span>
                   </li>
                 ))}
               </ul>
@@ -356,69 +357,40 @@ export default function SystemPage() {
         </div>
       </section>
 
-      {/* ── OUTCOME ───────────────────────────────────────────────────────────── */}
-      <section className="py-24 px-6">
-        <div className="max-w-2xl mx-auto text-center">
-          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-8">The outcome</p>
-          <h2 className="font-display leading-[1.08] mb-6" style={{ fontSize: "clamp(28px, 4vw, 50px)" }}>
-            The one investment that shows up{" "}
-            <span className="text-[#b0e455]">in every room.</span>
-          </h2>
-          <p className="text-[#edf5e2]/40 text-sm leading-relaxed max-w-md mx-auto">
-            The right physique changes how you walk into a meeting, how you show up on camera, how people read you before you say a word. It&apos;s not vanity — it&apos;s leverage. And unlike most investments, this one compounds every single day.
-          </p>
-        </div>
-      </section>
-
-      {/* ── PRICING ───────────────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 border-t border-[#b0e455]/6" id="pricing">
+      {/* ── THE RHYTHM ────────────────────────────────────────────────────────── */}
+      <section className="py-20 px-6 bg-[#0f1a0c] border-y border-[#b0e455]/6">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-12">
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-4">The investment</p>
-            <h2 className="font-display leading-none mb-3" style={{ fontSize: "clamp(30px, 4vw, 52px)" }}>
-              The Zana Fitness System.
-            </h2>
-            <p className="text-sm text-[#edf5e2]/35">All plans include the full system. No upsells.</p>
+          <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/50 mb-8">What it looks like in practice</p>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {[
+              { label: "Daily", body: "Workouts in the app. Log every set. Intensity at 8/10 or above. Under 60 minutes." },
+              { label: "Weekly", body: "Check-in form on Sunday. My response and adjustments by Monday. Non-negotiable." },
+              { label: "When you travel", body: "The plan adapts. Hotel gym, no gym, client dinners — we account for it before it happens." },
+              { label: "When life shifts", body: "Deadlines, injury, a heavy work week — message me. Adapting is part of the job." },
+            ].map((r) => (
+              <div key={r.label} className="bg-[#162212] rounded-2xl p-6 border border-[#b0e455]/6">
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455]/60 mb-2.5">{r.label}</p>
+                <p className="text-sm text-[#edf5e2]/65 leading-relaxed">{r.body}</p>
+              </div>
+            ))}
           </div>
-          <div className="grid md:grid-cols-2 gap-5">
-            <PlanCard
-              label="Committed"
-              months={4}
-              price={500}
-              total={2000}
-              checkoutUrl="https://whop.com/checkout/plan_DAY1fwI5NfqJe"
-              features={committedFeatures}
-            />
-            <PlanCard
-              label="All In"
-              months={12}
-              price={350}
-              total={4200}
-              checkoutUrl="https://whop.com/checkout/plan_BwaPVLzVFjYWL"
-              features={allInFeatures}
-              featured
-            />
-          </div>
-          <p className="text-center text-xs text-[#edf5e2]/20 mt-7">7-day satisfaction guarantee · Secure checkout via Whop</p>
         </div>
       </section>
 
       {/* ── CTA ───────────────────────────────────────────────────────────────── */}
-      <section className="py-32 px-6 border-t border-[#b0e455]/6">
+      <section className="py-36 px-6">
         <div className="max-w-2xl mx-auto text-center">
+          <ZanaLogo className="h-7 text-[#edf5e2]/15 mx-auto mb-16" />
 
-          <ZanaLogo className="h-7 text-[#edf5e2]/20 mx-auto mb-14" />
-
-          <h2 className="font-display leading-[1.04] mb-6" style={{ fontSize: "clamp(38px, 6vw, 72px)" }}>
-            The gap between where you are<br />
-            <span className="text-[#b0e455]">and where you want to be</span><br />
-            is a decision.
+          <h2 className="font-display leading-[1.04] mb-6" style={{ fontSize: "clamp(36px, 6vw, 70px)" }}>
+            The gap between where you are<br />and where you want to be<br />
+            <span className="text-[#b0e455]">is a decision.</span>
           </h2>
 
-          <p className="text-[#edf5e2]/45 text-base leading-relaxed mb-3 max-w-md mx-auto">
-            I work with a small number of clients at a time. If you&apos;re serious about this, apply below and we&apos;ll see if we&apos;re the right fit.
+          <p className="text-[#edf5e2]/45 text-base leading-relaxed mb-2 max-w-md mx-auto">
+            If what you just read describes you — apply below. I review every application personally and I&apos;ll let you know if we&apos;re a good fit.
           </p>
-          <p className="text-[#edf5e2]/25 text-sm mb-14">No obligation. Takes two minutes.</p>
+          <p className="text-[#edf5e2]/22 text-sm mb-14">No obligation. No hard sell. Takes two minutes.</p>
 
           <Link
             href="/apply"
@@ -428,8 +400,8 @@ export default function SystemPage() {
             <ArrowRight className="w-4 h-4" />
           </Link>
 
-          <p className="text-[#edf5e2]/20 text-xs mt-8 tracking-wide">
-            Spots are limited · Most clients stay long-term
+          <p className="text-[#edf5e2]/18 text-xs mt-8 tracking-wide">
+            Limited spots · Most clients stay long-term
           </p>
         </div>
       </section>
