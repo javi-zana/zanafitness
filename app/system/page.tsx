@@ -53,7 +53,7 @@ export default function SystemPage() {
       </nav>
 
       {/* ── HOOK ──────────────────────────────────────────────────────────────── */}
-      <section className="pt-28 pb-6 px-6">
+      <section className="pt-14 pb-6 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 mb-12">
             <div className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
