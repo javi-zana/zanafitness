@@ -53,7 +53,7 @@ export default function SystemPage() {
       </nav>
 
       {/* ── HOOK ──────────────────────────────────────────────────────────────── */}
-      <section className="pt-28 pb-16 px-6">
+      <section className="pt-28 pb-6 px-6">
         <div className="max-w-2xl mx-auto">
           <div className="flex items-center gap-3 mb-12">
             <div className="w-1.5 h-1.5 rounded-full bg-[#b0e455]" />
@@ -72,7 +72,7 @@ export default function SystemPage() {
       </section>
 
       {/* ── THE DMS ───────────────────────────────────────────────────────────── */}
-      <section className="py-10 px-6">
+      <section className="pt-4 pb-10 px-6">
         <div className="max-w-2xl mx-auto space-y-3.5">
           <DmBubble text="I look fine with clothes on but I can't take my shirt off without feeling embarrassed. I'm not overweight. I'm just... soft." />
           <DmBubble text="I've tried everything. Programs, diets, apps. Nothing sticks past 3 weeks." />
@@ -153,7 +153,7 @@ export default function SystemPage() {
         <div className="max-w-2xl mx-auto text-center">
           <ZanaLogo className="h-7 text-[#edf5e2]/15 mx-auto mb-16" />
 
-          <h2 className="font-display leading-[1.04] mb-6" style={{ fontSize: "clamp(36px, 6vw, 70px)" }}>
+          <h2 className="font-display leading-[1.08] mb-6" style={{ fontSize: "clamp(22px, 3vw, 38px)" }}>
             The gap between where you are<br />and where you want to be<br />
             <span className="text-[#b0e455]">is a decision.</span>
           </h2>
