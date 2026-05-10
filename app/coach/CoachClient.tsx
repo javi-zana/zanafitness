@@ -2555,7 +2555,7 @@ function MessagesTab({
 type Application = {
   id: string
   created_at: string
-  status: 'pending' | 'accepted' | 'declined' | 'call_booked' | 'waiting' | 'closed'
+  status: 'pending' | 'accepted' | 'declined' | 'call_booked' | 'waiting' | 'won' | 'lost' | 'rejected' | 'closed'
   responded_at: string | null
   first_name: string | null
   email: string | null
@@ -2575,7 +2575,8 @@ type Application = {
   why_now: string | null
 }
 
-type KanbanColKey = 'new' | 'call_booked' | 'waiting' | 'closed'
+type KanbanColKey = 'new' | 'call_booked' | 'waiting' | 'closed' | 'lost' | 'rejected'
+type MoveStatus = 'call_booked' | 'waiting' | 'won' | 'lost' | 'rejected'
 
 function appRelTime(dateStr: string) {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000)
@@ -2587,15 +2588,29 @@ function appRelTime(dateStr: string) {
 function columnKey(status: Application['status']): KanbanColKey {
   if (['accepted', 'call_booked'].includes(status)) return 'call_booked'
   if (status === 'waiting') return 'waiting'
-  if (['declined', 'closed'].includes(status)) return 'closed'
+  if (status === 'won') return 'closed'
+  if (status === 'lost') return 'lost'
+  // 'rejected' (you said no), legacy 'declined' and legacy 'closed' (old decline-email auto-status) all land in Rejected
+  if (['rejected', 'declined', 'closed'].includes(status)) return 'rejected'
   return 'new'
+}
+
+function colToStatus(col: KanbanColKey): MoveStatus | null {
+  if (col === 'call_booked') return 'call_booked'
+  if (col === 'waiting') return 'waiting'
+  if (col === 'closed') return 'won'
+  if (col === 'lost') return 'lost'
+  if (col === 'rejected') return 'rejected'
+  return null
 }
 
 const KANBAN_COLS: { key: KanbanColKey; label: string; accent: string; dim: string }[] = [
   { key: 'new',        label: 'New',         accent: '#fbbf24', dim: '#fbbf24/15' },
   { key: 'call_booked',label: 'Call Booked', accent: '#b0e455', dim: '#b0e455/15' },
   { key: 'waiting',    label: 'Waiting',     accent: '#60a5fa', dim: '#60a5fa/15' },
-  { key: 'closed',     label: 'Closed',      accent: '#94a3b8', dim: '#94a3b8/15' },
+  { key: 'closed',     label: 'Closed',      accent: '#22c55e', dim: '#22c55e/15' },
+  { key: 'lost',       label: 'Lost',        accent: '#94a3b8', dim: '#94a3b8/15' },
+  { key: 'rejected',   label: 'Rejected',    accent: '#6b7280', dim: '#6b7280/15' },
 ]
 
 function ApplicationsSection() {
@@ -2604,7 +2619,6 @@ function ApplicationsSection() {
   const [selectedApp, setSelectedApp] = useState<Application | null>(null)
   const [actionState, setActionState] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
   const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [declineFlow, setDeclineFlow] = useState<{ appId: string; note: string; step: 'compose' | 'preview' } | null>(null)
   const [dragAppId, setDragAppId] = useState<string | null>(null)
   const [dragOverCol, setDragOverCol] = useState<KanbanColKey | null>(null)
 
@@ -2624,20 +2638,18 @@ function ApplicationsSection() {
     }
   }, [apps]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleAction(appId: string, action: 'accept' | 'decline', personalNote?: string) {
+  async function handleAccept(appId: string) {
     setActionState(s => ({ ...s, [appId]: 'loading' }))
     try {
       const res = await fetch('/api/application-action', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ applicationId: appId, action, personalNote }),
+        body: JSON.stringify({ applicationId: appId }),
       })
       const json = await res.json().catch(() => ({}))
       if (res.ok) {
-        const newStatus = action === 'accept' ? 'call_booked' : 'closed'
-        setApps(prev => prev.map(a => a.id === appId ? { ...a, status: newStatus, responded_at: new Date().toISOString() } : a))
+        setApps(prev => prev.map(a => a.id === appId ? { ...a, status: 'call_booked', responded_at: new Date().toISOString() } : a))
         setActionState(s => ({ ...s, [appId]: 'done' }))
-        if (action === 'decline') setDeclineFlow(null)
       } else {
         console.error('application-action error:', json.error)
         setActionState(s => ({ ...s, [appId]: 'error' }))
@@ -2649,7 +2661,7 @@ function ApplicationsSection() {
     }
   }
 
-  async function handleMove(appId: string, status: 'call_booked' | 'waiting' | 'closed') {
+  async function handleMove(appId: string, status: MoveStatus) {
     setActionState(s => ({ ...s, [appId]: 'loading' }))
     try {
       const res = await fetch('/api/move-application', {
@@ -2688,7 +2700,8 @@ function ApplicationsSection() {
     if (!dragAppId || targetCol === 'new') return
     const app = apps.find(a => a.id === dragAppId)
     if (!app || columnKey(app.status) === targetCol) return
-    handleMove(dragAppId, targetCol)
+    const status = colToStatus(targetCol)
+    if (status) handleMove(dragAppId, status)
   }
 
   if (loading) {
@@ -2705,15 +2718,36 @@ function ApplicationsSection() {
   }
 
   const colApps = (key: KanbanColKey) => apps.filter(a => columnKey(a.status) === key)
+  const wonCount = colApps('closed').length
+  const lostCount = colApps('lost').length
+  const qualified = wonCount + lostCount
+  const closeRate = qualified > 0 ? Math.round((wonCount / qualified) * 100) : null
 
   return (
     <div className="space-y-5">
+      {/* Close-rate stat — won / (won + lost), ignoring rejects */}
+      <div className="flex items-center justify-end gap-3 px-1 text-[10px] font-mono text-[var(--c-text4)]">
+        <span>
+          <span className="text-[#22c55e]">{wonCount}</span> won · <span className="text-[var(--c-text3)]">{lostCount}</span> lost
+        </span>
+        {closeRate !== null && (
+          <span className="text-[var(--c-text3)]">
+            close rate <span className="font-semibold text-[var(--c-text)]">{closeRate}%</span>
+          </span>
+        )}
+      </div>
+
       {/* Kanban board — horizontal scroll on mobile */}
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
         {KANBAN_COLS.map(col => {
           const items = colApps(col.key)
+          const isWonCol = col.key === 'closed'
           return (
-            <div key={col.key} className="flex-none w-60 space-y-2">
+            <div
+              key={col.key}
+              className={`flex-none w-60 space-y-2 rounded-2xl ${isWonCol ? 'p-2 ring-1 ring-[#22c55e]/25' : ''}`}
+              style={isWonCol ? { backgroundColor: '#22c55e14' } : undefined}
+            >
               {/* Column header */}
               <div className="flex items-center gap-2 px-1">
                 <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: col.accent }} />
@@ -2750,8 +2784,11 @@ function ApplicationsSection() {
                       } ${
                         isSelected
                           ? 'bg-[var(--c-card)] border-[var(--c-accent-text)]/30 shadow-md'
-                          : 'bg-[var(--c-card)] border-[var(--c-border)] hover:border-[var(--c-border2)] shadow-sm'
+                          : isWonCol
+                            ? 'border-[#22c55e]/30 hover:border-[#22c55e]/50 shadow-sm'
+                            : 'bg-[var(--c-card)] border-[var(--c-border)] hover:border-[var(--c-border2)] shadow-sm'
                       }`}
+                      style={isWonCol && !isSelected ? { backgroundColor: '#22c55e0f' } : undefined}
                       onClick={() => setSelectedApp(isSelected ? null : app)}
                     >
                       {/* Name + time */}
@@ -2797,18 +2834,14 @@ function ApplicationsSection() {
                       {col.key === 'new' && (
                         <div className="flex gap-1.5 mt-2.5">
                           <button
-                            onClick={e => {
-                              e.stopPropagation()
-                              setSelectedApp(app)
-                              setDeclineFlow({ appId: app.id, note: '', step: 'compose' })
-                            }}
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'rejected') }}
                             disabled={state === 'loading'}
-                            className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-red-400 hover:border-red-400/30 transition disabled:opacity-40"
+                            className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-[var(--c-text)] hover:border-[var(--c-border)] transition disabled:opacity-40"
                           >
-                            Decline
+                            Reject
                           </button>
                           <button
-                            onClick={e => { e.stopPropagation(); handleAction(app.id, 'accept') }}
+                            onClick={e => { e.stopPropagation(); handleAccept(app.id) }}
                             disabled={state === 'loading'}
                             className="flex-1 py-1.5 rounded-xl text-[10px] font-mono font-semibold transition disabled:opacity-40"
                             style={{ backgroundColor: col.accent, color: '#0f1a0c' }}
@@ -2827,33 +2860,33 @@ function ApplicationsSection() {
                             → Waiting
                           </button>
                           <button
-                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'closed') }}
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'won') }}
                             disabled={state === 'loading'}
-                            className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-[var(--c-text)] transition disabled:opacity-40"
+                            className="flex-1 py-1.5 rounded-xl text-[10px] font-mono font-semibold text-[#0f1a0c] bg-[#22c55e] hover:bg-[#16a34a] transition disabled:opacity-40"
                           >
-                            → Close
+                            → Won
                           </button>
                         </div>
                       )}
                       {col.key === 'waiting' && (
                         <div className="flex gap-1.5 mt-2.5">
                           <button
-                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'call_booked') }}
-                            disabled={state === 'loading'}
-                            className="flex-1 py-1.5 rounded-xl border border-[#b0e455]/30 text-[10px] font-mono text-[#b0e455] hover:bg-[#b0e455]/8 transition disabled:opacity-40"
-                          >
-                            → Call
-                          </button>
-                          <button
-                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'closed') }}
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'lost') }}
                             disabled={state === 'loading'}
                             className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-[var(--c-text)] transition disabled:opacity-40"
                           >
-                            → Close
+                            → Lost
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'won') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl text-[10px] font-mono font-semibold text-[#0f1a0c] bg-[#22c55e] hover:bg-[#16a34a] transition disabled:opacity-40"
+                          >
+                            → Won
                           </button>
                         </div>
                       )}
-                      {col.key === 'closed' && (
+                      {(col.key === 'closed' || col.key === 'lost' || col.key === 'rejected') && (
                         <button
                           onClick={e => { e.stopPropagation(); handleMove(app.id, 'waiting') }}
                           disabled={state === 'loading'}
@@ -2878,7 +2911,7 @@ function ApplicationsSection() {
         const colKey = columnKey(app.status)
         const col = KANBAN_COLS.find(c => c.key === colKey)!
         return (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onClick={() => { setSelectedApp(null); setDeclineFlow(null) }}>
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" onClick={() => setSelectedApp(null)}>
             <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
             <div className="relative bg-[var(--c-card)] rounded-t-2xl sm:rounded-2xl border border-[var(--c-border)] shadow-2xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             {/* Modal header */}
@@ -3003,87 +3036,23 @@ function ApplicationsSection() {
               {/* Actions */}
               {colKey === 'new' && (
                 <div className="pt-2 border-t border-[var(--c-border)] space-y-3">
-                  {/* Decline flow — compose or preview step */}
-                  {declineFlow?.appId === app.id ? (
-                    <>
-                      {declineFlow.step === 'compose' && (
-                        <>
-                          <div>
-                            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-2">Personal note <span className="normal-case tracking-normal text-[var(--c-text5)]">— optional, appears at the top of the email</span></p>
-                            <textarea
-                              value={declineFlow.note}
-                              onChange={e => setDeclineFlow(prev => prev ? { ...prev, note: e.target.value } : null)}
-                              placeholder={`e.g. Really appreciated your honesty about where you're at — that kind of self-awareness is rare.`}
-                              rows={3}
-                              className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[var(--c-border)] resize-none transition leading-relaxed"
-                            />
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => setDeclineFlow(null)}
-                              className="flex-1 py-2.5 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              onClick={() => setDeclineFlow(prev => prev ? { ...prev, step: 'preview' } : null)}
-                              className="flex-1 py-2.5 rounded-2xl bg-[var(--c-card2)] border border-[var(--c-border2)] text-sm text-[var(--c-text2)] hover:text-[var(--c-text)] transition"
-                            >
-                              Preview →
-                            </button>
-                          </div>
-                        </>
-                      )}
-                      {declineFlow.step === 'preview' && (
-                        <>
-                          <div className="bg-[var(--c-bg)] rounded-2xl p-4 space-y-2.5 border border-[var(--c-border)]">
-                            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Email preview — to {app.email}</p>
-                            <p className="text-sm font-bold text-[var(--c-text)]">Hey {app.first_name ?? 'there'}.</p>
-                            {declineFlow.note.trim() && (
-                              <p className="text-sm text-[var(--c-text)] italic leading-relaxed border-l-2 border-[var(--c-border2)] pl-3">{declineFlow.note.trim()}</p>
-                            )}
-                            <p className="text-sm text-[var(--c-text2)] leading-relaxed">Thank you for taking the time — I genuinely read every application, and yours was no different.</p>
-                            <p className="text-xs text-[var(--c-text4)] leading-relaxed">After sitting with it, I don&apos;t think the timing is right for us to work together. That&apos;s not a reflection of your goals or your drive — it&apos;s about fit...</p>
-                            <p className="text-xs text-[var(--c-text4)]">...Wishing you real progress on this. Keep going. 💪</p>
-                            <p className="text-sm text-[var(--c-text3)]">All the best,<br /><span className="font-semibold text-[var(--c-text2)]">Javi</span></p>
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => setDeclineFlow(prev => prev ? { ...prev, step: 'compose' } : null)}
-                              className="flex-1 py-2.5 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] transition"
-                            >
-                              ← Edit Note
-                            </button>
-                            <button
-                              onClick={() => handleAction(app.id, 'decline', declineFlow.note.trim() || undefined)}
-                              disabled={state === 'loading'}
-                              className="flex-1 py-2.5 rounded-2xl bg-red-500/10 border border-red-400/30 text-sm font-semibold text-red-400 hover:bg-red-500/15 transition disabled:opacity-40"
-                            >
-                              {state === 'loading' ? 'Sending…' : state === 'error' ? 'Error — retry' : 'Send Email'}
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    /* Normal accept / decline buttons */
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => setDeclineFlow({ appId: app.id, note: '', step: 'compose' })}
-                        disabled={state === 'loading'}
-                        className="flex-1 py-3 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[#f87171] hover:border-[#f87171]/30 transition disabled:opacity-40"
-                      >
-                        Decline
-                      </button>
-                      <button
-                        onClick={() => handleAction(app.id, 'accept')}
-                        disabled={state === 'loading'}
-                        className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
-                      >
-                        {state === 'loading' ? 'Sending…' : state === 'done' ? 'Sent ✓' : 'Accept — Send Invite'}
-                      </button>
-                    </div>
-                  )}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleMove(app.id, 'rejected')}
+                      disabled={state === 'loading'}
+                      className="flex-1 py-3 rounded-2xl border border-[var(--c-border2)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] hover:border-[var(--c-border)] transition disabled:opacity-40"
+                    >
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleAccept(app.id)}
+                      disabled={state === 'loading'}
+                      className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+                    >
+                      {state === 'loading' ? 'Sending…' : state === 'done' ? 'Sent ✓' : 'Accept — Send Invite'}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-[var(--c-text5)] font-mono text-center">Reject moves the card to Rejected — no email is sent.</p>
                 </div>
               )}
 

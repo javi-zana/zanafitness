@@ -123,92 +123,6 @@ function acceptEmailHtml(firstName: string) {
 </html>`
 }
 
-function declineEmailHtml(firstName: string, personalNote?: string) {
-  const noteHtml = personalNote?.trim()
-    ? `<p style="margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.75;color:#333333;font-style:italic;border-left:3px solid #d4d4d0;padding-left:16px;">${personalNote.trim()}</p>`
-    : ''
-  return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your Zana Application</title>
-</head>
-<body style="margin:0;padding:0;background-color:#f5f5f3;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f5f3;">
-  <tr>
-    <td align="center" style="padding:48px 24px;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
-
-      <!-- LOGO -->
-      <tr>
-        <td style="padding-bottom:32px;">${logoHtml()}</td>
-      </tr>
-
-      <!-- CARD -->
-      <tr>
-        <td style="background-color:#ffffff;border:1px solid #e5e5e3;border-radius:20px;padding:48px 44px;">
-
-          <!-- ACCENT BAR -->
-          <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
-            <tr>
-              <td style="background-color:#d4d4d0;border-radius:100px;width:36px;height:4px;font-size:0;line-height:0;">&nbsp;</td>
-            </tr>
-          </table>
-
-          <p style="margin:0 0 28px;font-family:Arial,Helvetica,sans-serif;font-size:22px;font-weight:700;color:#111111;line-height:1.3;">
-            Hey ${firstName}.
-          </p>
-
-          ${noteHtml}
-
-          <p style="margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.75;color:#444444;">
-            Thank you for taking the time — I genuinely read every application, and yours was no different.
-          </p>
-
-          <p style="margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.75;color:#444444;">
-            After sitting with it, I don't think the timing is right for us to work together. That's not a reflection of your goals or your drive — it's about fit, and fit matters a lot when coaching is this personal.
-          </p>
-
-          <p style="margin:0 0 18px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.75;color:#444444;">
-            I'll hold onto your info. Things change — programs evolve, spots open up — and if I ever feel like there's a real opening for you, I'll reach out personally.
-          </p>
-
-          <p style="margin:0 0 36px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.75;color:#444444;">
-            Wishing you real progress on this, wherever it comes from. The fact that you applied says a lot. Keep going. 💪
-          </p>
-
-          <!-- DIVIDER -->
-          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-            <tr><td style="height:1px;background-color:#eeeeec;font-size:0;line-height:0;">&nbsp;</td></tr>
-          </table>
-
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.6;color:#999999;">
-            All the best,<br />
-            <span style="color:#333333;font-weight:700;">Javi</span>
-          </p>
-
-        </td>
-      </tr>
-
-      <!-- FOOTER -->
-      <tr>
-        <td style="padding-top:28px;" align="center">
-          <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:11px;letter-spacing:1px;color:#aaaaaa;text-transform:uppercase;">
-            © 2026 Zana Fitness &nbsp;·&nbsp;
-            <a href="https://zanafitness.com/privacy" style="color:#aaaaaa;text-decoration:none;">Privacy</a>
-          </p>
-        </td>
-      </tr>
-
-    </table>
-    </td>
-  </tr>
-</table>
-</body>
-</html>`
-}
-
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -216,8 +130,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const { applicationId, action, personalNote } = await req.json()
-  if (!applicationId || !['accept', 'decline'].includes(action)) {
+  const { applicationId } = await req.json()
+  if (!applicationId) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
@@ -238,7 +152,7 @@ export async function POST(req: NextRequest) {
   }
 
   await db.from('applications').update({
-    status: action === 'accept' ? 'call_booked' : 'closed',
+    status: 'call_booked',
     responded_at: new Date().toISOString(),
   }).eq('id', applicationId)
 
@@ -248,15 +162,13 @@ export async function POST(req: NextRequest) {
   const { error: emailErr } = await resend.emails.send({
     from: FROM_EMAIL,
     to: app.email as string,
-    subject: action === 'accept'
-      ? "Let's talk — here's the link to book your call"
-      : 'Your Zana Application',
-    html: action === 'accept' ? acceptEmailHtml(firstName) : declineEmailHtml(firstName, personalNote),
+    subject: "Let's talk — here's the link to book your call",
+    html: acceptEmailHtml(firstName),
   })
 
   if (emailErr) {
     console.error('[application-action] Resend error:', emailErr)
   }
 
-  return NextResponse.json({ success: true, action, emailSent: !emailErr })
+  return NextResponse.json({ success: true, emailSent: !emailErr })
 }
