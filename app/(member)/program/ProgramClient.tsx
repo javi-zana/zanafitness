@@ -26,6 +26,12 @@ type HabitsContent = {
   habits: { id: string; text: string }[]
 }
 
+type OkrContent = {
+  type: 'okr'
+  objective: string
+  key_results: string[]
+}
+
 type SectionData = { section: string; content_json: object; updated_at: string } | null
 
 type CoachNote = {
@@ -40,7 +46,7 @@ type CoachNote = {
 type Props = {
   userId: string
   firstName: string | null
-  role: string
+  okr: SectionData
   split: SectionData
   food: SectionData
   habits: SectionData
@@ -48,7 +54,7 @@ type Props = {
   notes: CoachNote[]
 }
 
-type Tab = 'split' | 'food' | 'habits' | 'notes'
+type Module = 'split' | 'food' | 'habits' | 'notes'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -683,45 +689,161 @@ function EmptyState({ message }: { message: string }) {
   )
 }
 
+// ─── OKR card (top of page) ──────────────────────────────────────────────────
+
+function OkrCard({ okr }: { okr: OkrContent | null }) {
+  const objective = okr?.objective?.trim() ?? ''
+  const krs = (okr?.key_results ?? []).map(k => k?.trim() ?? '').filter(Boolean)
+  const empty = !objective && krs.length === 0
+
+  if (empty) {
+    return (
+      <div className="relative overflow-hidden rounded-3xl border border-dashed border-[var(--c-border2)] bg-[var(--c-card2)] p-6">
+        <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-[0.2em] mb-2">Objective</p>
+        <p className="text-sm text-[var(--c-text3)] leading-relaxed">
+          Your coach hasn't set your objective yet. You'll see what you're working toward here.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative overflow-hidden rounded-3xl border border-[var(--c-border2)] bg-gradient-to-br from-[var(--c-card)] to-[var(--c-card2)] p-6 lg:p-7 shadow-lg shadow-[#b0e455]/5">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#b0e455]/50 to-transparent" />
+      <div className="absolute -top-16 -right-16 w-40 h-40 rounded-full bg-[#b0e455]/8 blur-3xl pointer-events-none" />
+
+      <p className="relative text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-[0.2em] mb-3">Objective</p>
+      <h2 className="relative font-display leading-tight text-2xl lg:text-3xl text-[var(--c-text)]">
+        {objective || <span className="text-[var(--c-text4)]">Not set</span>}
+      </h2>
+
+      {krs.length > 0 && (
+        <div className="relative mt-6 pt-5 border-t border-[var(--c-border)]">
+          <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-[0.2em] mb-4">Key Results</p>
+          <div className="space-y-3">
+            {krs.map((kr, i) => (
+              <div key={i} className="flex gap-3">
+                <span className="font-mono text-xs text-[var(--c-accent-text)] shrink-0 mt-1 tabular-nums">0{i + 1}</span>
+                <p className="text-sm text-[var(--c-text2)] leading-relaxed">{kr}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Module grid ─────────────────────────────────────────────────────────────
+
+type ModuleMeta = { id: Module; label: string; subtitle: string; icon: React.ReactNode }
+
+function ModuleGrid({
+  modules,
+  onSelect,
+}: {
+  modules: ModuleMeta[]
+  onSelect: (m: Module) => void
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {modules.map(m => (
+        <button
+          key={m.id}
+          onClick={() => onSelect(m.id)}
+          className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-4 lg:p-5 text-left hover:border-[#b0e455]/30 hover:bg-[var(--c-hover)] transition active:scale-[0.98]"
+        >
+          <div className="w-9 h-9 rounded-xl bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center mb-3">
+            {m.icon}
+          </div>
+          <p className="text-sm font-semibold text-[var(--c-text)]">{m.label}</p>
+          <p className="text-[11px] text-[var(--c-text4)] mt-0.5">{m.subtitle}</p>
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ userId, firstName, role, split, food, habits, notes }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('split')
+export default function ProgramClient({ userId, firstName, okr, split, food, habits, notes }: Props) {
+  const [activeModule, setActiveModule] = useState<Module | null>(null)
 
   const structuredSplit: StructuredSplit | null = (() => {
     const c = split?.content_json as { type?: string } | null
     return c?.type === 'structured_split' ? (c as StructuredSplit) : null
   })()
 
-  const isHeadCoach = role === 'head_coach'
+  const okrContent: OkrContent | null = (() => {
+    const c = okr?.content_json as { type?: string } | null
+    if (c?.type === 'okr') return c as OkrContent
+    return null
+  })()
+
   const name = firstName ? `${firstName}'s` : 'Your'
 
-  const TABS: { id: Tab; label: string }[] = [
-    { id: 'split', label: `${name} Split` },
-    { id: 'food', label: `${name} Food` },
-    { id: 'habits', label: `${name} Habits` },
-    { id: 'notes', label: 'Coach Notes' },
+  const modules: ModuleMeta[] = [
+    {
+      id: 'split',
+      label: `${name} Split`,
+      subtitle: 'Training plan',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
+          <path d="M6 5v14M10 8l4 4-4 4M14 5v14" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      id: 'food',
+      label: `${name} Food`,
+      subtitle: 'Calories & protein',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
+          <path d="M12 2v20M5 7l7-5 7 5M5 7v10l7 5 7-5V7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      id: 'habits',
+      label: `${name} Habits`,
+      subtitle: 'Daily actions',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
+          <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
+    {
+      id: 'notes',
+      label: 'Coach Notes',
+      subtitle: notes.length > 0 ? `${notes.length} note${notes.length === 1 ? '' : 's'}` : 'From check-ins',
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
+          <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
   ]
 
-  function renderContent() {
-    if (activeTab === 'notes') {
+  function renderModuleContent(mod: Module) {
+    if (mod === 'notes') {
       return <CoachNotesFeed notes={notes} />
     }
 
     const sectionMap = { split, food, habits }
-    const section = sectionMap[activeTab]
+    const section = sectionMap[mod]
     const content = section?.content_json ?? null
     const updatedAt = section?.updated_at
 
-    if (activeTab === 'food' && content && (content as { type?: string }).type === 'bmr') {
+    if (mod === 'food' && content && (content as { type?: string }).type === 'bmr') {
       return <BmrDisplay data={content as BmrContent} />
     }
 
-    if (activeTab === 'habits' && content && (content as { type?: string }).type === 'habits') {
+    if (mod === 'habits' && content && (content as { type?: string }).type === 'habits') {
       return <HabitsDisplay data={content as HabitsContent} userId={userId} />
     }
 
-    if (activeTab === 'split' && structuredSplit) {
+    if (mod === 'split' && structuredSplit) {
       return <SplitViewer split={structuredSplit} />
     }
 
@@ -740,7 +862,7 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
           desc: 'The small daily actions - sleep, steps, stress management - that compound over time and make the rest of the program work.',
         },
       }
-      const info = sectionInfo[activeTab] ?? { title: 'Coming soon', desc: 'Your coach is working on this section.' }
+      const info = sectionInfo[mod] ?? { title: 'Coming soon', desc: 'Your coach is working on this section.' }
       return (
         <div className="space-y-3 pt-2">
           <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-5">
@@ -770,6 +892,8 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
     )
   }
 
+  const activeModuleMeta = activeModule ? modules.find(m => m.id === activeModule) : null
+
   return (
     <div className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] flex flex-col lg:pl-52">
       <div className="px-5 pt-12 pb-2 lg:px-10 lg:pt-10 lg:pb-4">
@@ -777,26 +901,26 @@ export default function ProgramClient({ userId, firstName, role, split, food, ha
         <p className="text-xs text-[var(--c-text4)] mt-0.5">Training & nutrition</p>
       </div>
 
-      <div className="overflow-x-auto border-b border-[var(--c-border)] lg:px-5">
-        <div className="flex min-w-max px-5">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition border-b-2 -mb-px ${
-                activeTab === tab.id
-                  ? 'border-[var(--c-accent-text)] text-[var(--c-accent-text)]'
-                  : 'border-transparent text-[var(--c-text4)] hover:text-[var(--c-text)]/60'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div className="flex-1 overflow-y-auto px-5 py-6 pb-28 lg:px-10 lg:pb-10 lg:py-8">
-        {renderContent()}
+        {activeModule === null ? (
+          <div className="space-y-6">
+            <OkrCard okr={okrContent} />
+            <ModuleGrid modules={modules} onSelect={setActiveModule} />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <button
+              onClick={() => setActiveModule(null)}
+              className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-[var(--c-text4)] hover:text-[var(--c-text)] transition"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              {activeModuleMeta?.label ?? 'Back'}
+            </button>
+            {renderModuleContent(activeModule)}
+          </div>
+        )}
       </div>
 
     </div>

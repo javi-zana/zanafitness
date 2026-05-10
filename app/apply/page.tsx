@@ -390,6 +390,7 @@ export default function ApplyPage() {
                 <h2 className="text-2xl font-semibold text-white leading-snug mb-2">
                   Are you in a position to invest in your health right now?
                 </h2>
+                <p className="text-sm text-white/40 leading-relaxed">This is a personalized, high-touch coaching service, meant for people ready to invest in their health and fitness. I only take on a few clients at a time so I can give each person the attention and results they came for.</p>
               </div>
               <div className="space-y-2 mb-6">
                 {[

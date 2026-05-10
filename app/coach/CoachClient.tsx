@@ -88,6 +88,12 @@ type HabitsData = {
   habits: { id: string; text: string }[]
 }
 
+type OkrData = {
+  type: 'okr'
+  objective: string
+  key_results: [string, string, string]
+}
+
 type CoachProfile = {
   id: string
   first_name: string | null
@@ -228,6 +234,81 @@ function HabitsSection({ initial, onSave, saving, saved }: {
         className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
       >
         {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save Habits'}
+      </button>
+    </div>
+  )
+}
+
+// ─── OKR section (coach Programs > pinned above tabs) ────────────────────────
+
+function OkrSection({ initial, onSave, saving, saved }: {
+  initial: OkrData | null
+  onSave: (data: OkrData) => void
+  saving: boolean
+  saved: boolean
+}) {
+  const [objective, setObjective] = useState(initial?.objective ?? '')
+  const [krs, setKrs] = useState<[string, string, string]>([
+    initial?.key_results?.[0] ?? '',
+    initial?.key_results?.[1] ?? '',
+    initial?.key_results?.[2] ?? '',
+  ])
+
+  const dirty =
+    objective !== (initial?.objective ?? '') ||
+    krs[0] !== (initial?.key_results?.[0] ?? '') ||
+    krs[1] !== (initial?.key_results?.[1] ?? '') ||
+    krs[2] !== (initial?.key_results?.[2] ?? '')
+
+  function updateKr(i: 0 | 1 | 2, v: string) {
+    setKrs(prev => {
+      const next: [string, string, string] = [prev[0], prev[1], prev[2]]
+      next[i] = v
+      return next
+    })
+  }
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-[var(--c-border2)] bg-gradient-to-br from-[var(--c-card)] to-[var(--c-card2)] p-4 lg:p-5 mb-5 space-y-3 shadow-sm">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#b0e455]/40 to-transparent" />
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-[0.2em]">Objective &amp; Key Results</p>
+        <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest">Member sees this at top</p>
+      </div>
+
+      <div className="space-y-1.5">
+        <label className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Objective</label>
+        <input
+          type="text"
+          value={objective}
+          onChange={e => setObjective(e.target.value)}
+          placeholder="e.g. Cut to 12% by July without losing strength"
+          className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-lg px-3 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Key Results</label>
+        {([0, 1, 2] as const).map(i => (
+          <div key={i} className="flex items-center gap-2">
+            <span className="font-mono text-[10px] text-[var(--c-accent-text)] w-6 shrink-0 text-right tabular-nums">0{i + 1}</span>
+            <input
+              type="text"
+              value={krs[i]}
+              onChange={e => updateKr(i, e.target.value)}
+              placeholder={`Key result ${i + 1}`}
+              className="flex-1 bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+            />
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={() => onSave({ type: 'okr', objective: objective.trim(), key_results: [krs[0].trim(), krs[1].trim(), krs[2].trim()] })}
+        disabled={saving || !dirty}
+        className="w-full py-2.5 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
+      >
+        {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save OKR'}
       </button>
     </div>
   )
@@ -1435,6 +1516,7 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [activeSection, setActiveSection] = useState<Section>('split')
   const [sections, setSections] = useState<Partial<Record<Section, object | null>>>({})
+  const [okr, setOkr] = useState<OkrData | null>(null)
   const [sectionLoadKey, setSectionLoadKey] = useState(0)
   const [loadingSections, setLoadingSections] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -1453,16 +1535,39 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
     setSelectedId(id)
     setActiveSection('split')
     setSections({})
+    setOkr(null)
     setLoadingSections(true)
     const { data } = await supabase
       .from('program_sections')
       .select('section, content_json')
       .eq('member_id', id)
     const map: Partial<Record<Section, object | null>> = {}
-    for (const row of data ?? []) map[row.section as Section] = row.content_json
+    let loadedOkr: OkrData | null = null
+    for (const row of data ?? []) {
+      if (row.section === 'okr') {
+        const c = row.content_json as { type?: string } | null
+        if (c?.type === 'okr') loadedOkr = c as OkrData
+      } else {
+        map[row.section as Section] = row.content_json
+      }
+    }
     setSections(map)
+    setOkr(loadedOkr)
     setLoadingSections(false)
     setSectionLoadKey(k => k + 1)
+  }
+
+  async function saveOkrSection(data: OkrData) {
+    if (!selectedId) return
+    setSaving(true)
+    await supabase.from('program_sections').upsert(
+      { member_id: selectedId, section: 'okr', content_json: data, updated_by: userId },
+      { onConflict: 'member_id,section' }
+    )
+    setOkr(data)
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
   async function saveHabitsSection(data: HabitsData) {
@@ -1556,6 +1661,14 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
         </button>
         <p className="text-sm font-semibold text-[var(--c-text)]">{memberName(selected!)}</p>
       </div>
+
+      <OkrSection
+        key={`${selectedId}-okr-${sectionLoadKey}`}
+        initial={okr}
+        onSave={saveOkrSection}
+        saving={saving}
+        saved={saved}
+      />
 
       {/* Section tabs */}
       <div className="border-b border-[var(--c-border)] mb-4">

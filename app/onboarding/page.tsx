@@ -809,7 +809,7 @@ export default function OnboardingPage() {
           )}
           <button type="button" onClick={advance} disabled={!canContinue() || saving}
             className="w-full bg-[#b0e455] text-[#0f1a0c] font-semibold text-sm py-4 rounded-2xl hover:bg-[#c9f070] transition-colors disabled:opacity-25 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-            {saving ? 'Saving…' : step === TOTAL_SCREENS - 1 ? 'Review' : 'Continue'}
+            {saving ? 'Saving…' : step === TOTAL_SCREENS - 1 ? 'Submit' : 'Continue'}
             {!saving && (
               <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                 <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />

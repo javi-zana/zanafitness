@@ -10,7 +10,7 @@ export default async function ProgramPage() {
   const [{ data: profile }, { data: sections }, { data: milestoneRows }, { data: notesRows }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('first_name, role')
+      .select('first_name')
       .eq('id', user.id)
       .single(),
     supabase
@@ -56,7 +56,7 @@ export default async function ProgramPage() {
     <ProgramClient
       userId={user.id}
       firstName={profile?.first_name ?? null}
-      role={profile?.role ?? 'member'}
+      okr={sectionMap['okr'] ?? null}
       split={sectionMap['split'] ?? null}
       food={sectionMap['food'] ?? null}
       habits={sectionMap['habits'] ?? null}
