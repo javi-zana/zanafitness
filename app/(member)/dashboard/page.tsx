@@ -30,6 +30,7 @@ export default async function DashboardPage() {
     { data: referralRow },
     activities,
     { data: activityDateRows },
+    { data: okrRow },
   ] = await Promise.all([
     supabase.from('threads').select('id').eq('member_id', user.id).maybeSingle(),
     supabase.from('member_milestones').select('type').eq('member_id', user.id),
@@ -40,6 +41,12 @@ export default async function DashboardPage() {
       .select('created_at')
       .eq('member_id', user.id)
       .gte('created_at', ninetyDaysAgo + 'T00:00:00'),
+    supabase
+      .from('program_sections')
+      .select('content_json')
+      .eq('member_id', user.id)
+      .eq('section', 'okr')
+      .maybeSingle(),
   ])
 
   let referralCode = referralRow?.code ?? null
@@ -80,6 +87,8 @@ export default async function DashboardPage() {
     (activityDateRows ?? []).map(r => (r.created_at as string).split('T')[0])
   ))
 
+  const okrJson = okrRow?.content_json ?? null
+
   return (
     <DashboardClient
       userId={user.id}
@@ -91,6 +100,7 @@ export default async function DashboardPage() {
       milestones={(milestoneRows ?? []).map(m => m.type as string)}
       referralCode={referralCode}
       unreadCount={unreadCount}
+      okr={okrJson}
     />
   )
 }

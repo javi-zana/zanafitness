@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ActivityCard, type ActivityWithDetails } from '@/components/ActivityCard'
+import { OkrCard, type OkrContent } from '@/components/OkrCard'
 import { useActivityRealtime } from '@/utils/use-activity-realtime'
 
 function computeStreak(dates: string[]): number {
@@ -39,6 +40,7 @@ export default function DashboardClient({
   milestones,
   referralCode,
   unreadCount,
+  okr,
 }: {
   userId: string
   firstName: string | null
@@ -49,7 +51,13 @@ export default function DashboardClient({
   milestones: string[]
   referralCode: string | null
   unreadCount: number
+  okr: object | null
 }) {
+  const okrContent: OkrContent | null = (() => {
+    const c = okr as { type?: string } | null
+    if (c?.type === 'okr') return c as OkrContent
+    return null
+  })()
   const [referralCopied, setReferralCopied] = useState(false)
 
   const { activities: liveActivities, mutate, remove } = useActivityRealtime({
@@ -101,6 +109,8 @@ export default function DashboardClient({
             )}
           </Link>
         </div>
+
+        {okrContent && <OkrCard okr={okrContent} showEmpty={false} />}
 
         {/* Streak + Quick actions */}
         <div className="grid grid-cols-2 gap-3">
