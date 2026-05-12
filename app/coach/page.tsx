@@ -21,7 +21,7 @@ export default async function CoachPage() {
     .eq('id', user.id)
     .single()
 
-  const COACH_EMAILS = ['me@javilorenzana.com', 'bea.ongg@gmail.com']
+  const COACH_EMAILS = ['me@javilorenzana.com']
   const isWhitelisted = COACH_EMAILS.includes(user.email ?? '')
   if (!profile && !isWhitelisted) redirect('/login')
   if (profile && !['coach', 'head_coach'].includes(profile.role ?? '') && !isWhitelisted) {

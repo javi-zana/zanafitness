@@ -2,7 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 
-const COACH_EMAILS = ["me@javilorenzana.com", "bea.ongg@gmail.com"];
+const COACH_EMAILS = ["me@javilorenzana.com"];
 
 // Readable alphabet: omits 0/O, 1/l/I to make the password easy to dictate
 const PASSWORD_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";

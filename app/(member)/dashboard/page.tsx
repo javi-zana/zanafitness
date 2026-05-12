@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { fetchActivities } from '@/utils/activities'
 import DashboardClient from './DashboardClient'
 
-const COACH_EMAILS = ['me@javilorenzana.com', 'bea.ongg@gmail.com']
+const COACH_EMAILS = ['me@javilorenzana.com']
 
 export default async function DashboardPage() {
   const supabase = await createClient()

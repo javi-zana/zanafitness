@@ -62,7 +62,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Coaches always get through
-  const COACH_EMAILS = ['me@javilorenzana.com', 'bea.ongg@gmail.com']
+  const COACH_EMAILS = ['me@javilorenzana.com']
   const isCoach = COACH_EMAILS.includes(user?.email ?? '')
 
   // Logged in but needs active subscription → check profile (coaches skip this)
