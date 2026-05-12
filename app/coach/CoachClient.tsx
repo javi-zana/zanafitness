@@ -3210,13 +3210,21 @@ function AdminTab({ userEmail }: { userEmail: string }) {
   const knownMemberIds = useRef<Set<string>>(new Set())
   const isFirstLoad = useRef(true)
 
-  // Invite
+  // Invite member
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteFirstName, setInviteFirstName] = useState('')
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
   const [inviteMsg, setInviteMsg] = useState('')
   const [inviteCredentials, setInviteCredentials] = useState<{ email: string; password: string; first_name: string | null } | null>(null)
   const [copiedField, setCopiedField] = useState<'email' | 'password' | 'both' | null>(null)
+
+  // Invite coach
+  const [coachInviteEmail, setCoachInviteEmail] = useState('')
+  const [coachInviteFirstName, setCoachInviteFirstName] = useState('')
+  const [coachInviteStatus, setCoachInviteStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
+  const [coachInviteMsg, setCoachInviteMsg] = useState('')
+  const [coachInviteCredentials, setCoachInviteCredentials] = useState<{ email: string; password: string; first_name: string | null } | null>(null)
+  const [coachCopiedField, setCoachCopiedField] = useState<'email' | 'password' | 'both' | null>(null)
 
   // Thread setup
   const [setupStatus, setSetupStatus] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
@@ -3310,6 +3318,45 @@ function AdminTab({ userEmail }: { userEmail: string }) {
     navigator.clipboard.writeText(text).then(() => {
       setCopiedField(field)
       setTimeout(() => setCopiedField(null), 1500)
+    })
+  }
+
+  async function handleInviteCoach(e: FormEvent) {
+    e.preventDefault()
+    if (!coachInviteEmail.trim()) return
+    setCoachInviteStatus('loading')
+    setCoachInviteMsg('')
+    try {
+      const res = await fetch('/api/invite-coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-coach-email': userEmail },
+        body: JSON.stringify({
+          email: coachInviteEmail.trim(),
+          first_name: coachInviteFirstName.trim() || null,
+        }),
+      })
+      const json = await res.json()
+      if (res.ok) {
+        setCoachInviteStatus('ok')
+        setCoachInviteCredentials({ email: json.email, password: json.password, first_name: json.first_name })
+        setCoachInviteEmail('')
+        setCoachInviteFirstName('')
+        setTimeout(() => loadData(), 2000)
+      } else {
+        setCoachInviteStatus('error')
+        setCoachInviteMsg(json.error ?? 'Failed to create account.')
+        setTimeout(() => { setCoachInviteStatus('idle'); setCoachInviteMsg('') }, 4000)
+      }
+    } catch {
+      setCoachInviteStatus('error'); setCoachInviteMsg('Network error.')
+      setTimeout(() => { setCoachInviteStatus('idle'); setCoachInviteMsg('') }, 4000)
+    }
+  }
+
+  function copyCoachToClipboard(text: string, field: 'email' | 'password' | 'both') {
+    navigator.clipboard.writeText(text).then(() => {
+      setCoachCopiedField(field)
+      setTimeout(() => setCoachCopiedField(null), 1500)
     })
   }
 
@@ -3492,6 +3539,106 @@ function AdminTab({ userEmail }: { userEmail: string }) {
               </div>
             ))}
           </div>
+        )}
+      </div>
+
+      {/* ── Invite a coach ── */}
+      <div>
+        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-1">Adding a new coach?</p>
+        <p className="text-xs text-[var(--c-text4)] mb-3">Create their account and share the credentials. They&apos;ll land in the coach dashboard on first sign-in.</p>
+
+        {coachInviteCredentials ? (
+          <div className="space-y-3">
+            <div className="bg-[#b0e455]/8 border border-[#b0e455]/30 rounded-xl p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#b0e455]/20 flex items-center justify-center">
+                  <svg viewBox="0 0 16 16" className="w-3 h-3 text-[#b0e455]" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M2 8l4 4 8-8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <p className="text-xs font-semibold text-[var(--c-text)]">
+                  Coach account created{coachInviteCredentials.first_name ? ` for ${coachInviteCredentials.first_name}` : ''}
+                </p>
+              </div>
+              <p className="text-[11px] text-[var(--c-text3)] leading-relaxed">
+                Share these credentials. They&apos;ll log in at zanafitness.com and land in the coach dashboard.
+              </p>
+
+              <div className="bg-[var(--c-bg)] border border-[var(--c-border)] rounded-lg px-3 py-2.5 flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] uppercase tracking-widest font-mono text-[var(--c-text5)] mb-0.5">Email</p>
+                  <p className="text-sm text-[var(--c-text)] font-mono truncate">{coachInviteCredentials.email}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyCoachToClipboard(coachInviteCredentials.email, 'email')}
+                  className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] hover:text-[var(--c-accent-text)] transition shrink-0"
+                >
+                  {coachCopiedField === 'email' ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+
+              <div className="bg-[var(--c-bg)] border border-[var(--c-border)] rounded-lg px-3 py-2.5 flex items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] uppercase tracking-widest font-mono text-[var(--c-text5)] mb-0.5">Password</p>
+                  <p className="text-sm text-[var(--c-text)] font-mono truncate select-all">{coachInviteCredentials.password}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyCoachToClipboard(coachInviteCredentials.password, 'password')}
+                  className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-text4)] hover:text-[var(--c-accent-text)] transition shrink-0"
+                >
+                  {coachCopiedField === 'password' ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => copyCoachToClipboard(`Email: ${coachInviteCredentials.email}\nPassword: ${coachInviteCredentials.password}`, 'both')}
+                className="w-full py-2.5 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-[11px] tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition"
+              >
+                {coachCopiedField === 'both' ? 'Copied to clipboard ✓' : 'Copy Both'}
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => { setCoachInviteCredentials(null); setCoachInviteStatus('idle') }}
+              className="w-full py-2.5 rounded-lg border border-[var(--c-border)] text-[var(--c-text3)] text-[11px] tracking-widest uppercase font-mono hover:bg-[var(--c-hover)] transition"
+            >
+              Add Another
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleInviteCoach} className="space-y-3">
+            <input
+              type="text"
+              value={coachInviteFirstName}
+              onChange={e => setCoachInviteFirstName(e.target.value)}
+              placeholder="First name (optional)"
+              autoComplete="given-name"
+              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-[var(--c-text)] text-sm placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition"
+            />
+            <input
+              type="email"
+              value={coachInviteEmail}
+              onChange={e => setCoachInviteEmail(e.target.value)}
+              placeholder="coach@email.com"
+              required
+              autoComplete="email"
+              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-[var(--c-text)] text-sm placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition"
+            />
+            <button
+              type="submit"
+              disabled={coachInviteStatus === 'loading' || !coachInviteEmail.trim()}
+              className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
+            >
+              {coachInviteStatus === 'loading' ? 'Creating…' : 'Create Coach Account'}
+            </button>
+            {coachInviteMsg && (
+              <p className={`text-xs font-medium ${coachInviteStatus === 'ok' ? 'text-[#15803d]' : 'text-[#dc2626]'}`}>{coachInviteMsg}</p>
+            )}
+          </form>
         )}
       </div>
 
