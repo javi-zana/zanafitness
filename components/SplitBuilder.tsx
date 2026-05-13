@@ -5,14 +5,14 @@ import { useState } from 'react'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export type SplitExercise = { id: string; name: string; sets: number | null; reps: string }
-export type SplitDay = { id: string; label: string; muscleGroups: string[]; exercises: SplitExercise[] }
+export type SplitDay = { id: string; label: string; muscleGroups: string[]; exercises: SplitExercise[]; notes?: string }
 export type StructuredSplit = { type: 'structured_split'; days: SplitDay[] }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function uid() { return Math.random().toString(36).slice(2, 10) }
 function emptyExercise(): SplitExercise { return { id: uid(), name: '', sets: null, reps: '' } }
-function emptyDay(): SplitDay { return { id: uid(), label: '', muscleGroups: [], exercises: [emptyExercise()] } }
+function emptyDay(): SplitDay { return { id: uid(), label: '', muscleGroups: [], exercises: [emptyExercise()], notes: '' } }
 
 const PRESET_MUSCLE_GROUPS = [
   'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core',
@@ -92,6 +92,10 @@ export function SplitBuilder({
 
   function updateDayLabel(id: string, label: string) {
     updateDays(prev => prev.map(d => d.id === id ? { ...d, label } : d))
+  }
+
+  function updateDayNotes(id: string, notes: string) {
+    updateDays(prev => prev.map(d => d.id === id ? { ...d, notes } : d))
   }
 
   function toggleMuscleGroup(dayId: string, group: string) {
@@ -382,6 +386,18 @@ export function SplitBuilder({
                     Add exercise
                   </button>
                 </div>
+
+                {/* Notes for the client */}
+                <div>
+                  <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-1.5">Notes</p>
+                  <textarea
+                    value={day.notes ?? ''}
+                    onChange={e => updateDayNotes(day.id, e.target.value)}
+                    rows={3}
+                    placeholder="Cues, warm-ups, things to remember on this day…"
+                    className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition resize-none"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -468,6 +484,14 @@ export function SplitViewer({
                         {group}
                       </span>
                     ))}
+                  </div>
+                )}
+
+                {/* Coach notes for this day */}
+                {day.notes?.trim() && (
+                  <div className="bg-[#b0e455]/8 border border-[#b0e455]/20 rounded-xl px-3 py-2.5">
+                    <p className="text-[9px] font-mono uppercase tracking-widest text-[var(--c-accent-text)] mb-1">Notes from Coach</p>
+                    <p className="text-sm text-[var(--c-text2)] whitespace-pre-wrap leading-relaxed">{day.notes}</p>
                   </div>
                 )}
 
