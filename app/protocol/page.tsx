@@ -55,7 +55,7 @@ const protocolBullets = [
   {
     num: "04",
     title: "Build the diet around your actual life.",
-    sub: "Night owl? Save calories for the late hours. Sweet tooth? Find clean substitutes — Greek yogurt and fruit beats ice cream. Allow the occasional bag of chips. Perfection kills consistency.",
+    sub: "Night owl? Save calories for the late hours. Sweet tooth? Find clean substitutes — Greek yogurt and fruit beats ice cream. Allow the occasional pint. Perfection kills consistency.",
   },
   {
     num: "05",
@@ -311,7 +311,7 @@ export default function ProtocolPage() {
           </figure>
 
           <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
-            <p>And I still ate Taki&apos;s sometimes. I was not a monk. The plan worked because it allowed for the occasional bag of chips. <strong className="text-[#0a0a0a] font-semibold">Perfection is the enemy of consistency.</strong></p>
+            <p>And I still ate Ben &amp; Jerry&apos;s sometimes. I was not a monk. The plan worked because it allowed for the occasional pint. <strong className="text-[#0a0a0a] font-semibold">Perfection is the enemy of consistency.</strong></p>
 
             <p>Every &quot;microhabit adjustment&quot; was really me learning something about myself and adjusting the plan to fit me.</p>
 
