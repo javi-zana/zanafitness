@@ -321,7 +321,7 @@ export default function ProtocolPage() {
               </p>
             </blockquote>
 
-            <p>Most fitness content fails you because it hands you someone else&apos;s life. Your job isn&apos;t to copy a routine. Your job is to figure out where your cravings, your schedule, and your psychology actually live — and build around that.</p>
+            <p>Most fitness content hands you someone else&apos;s life. Your job is to build around yours — your cravings, your schedule, your psychology.</p>
           </div>
 
           {/* SECTION 05 */}
@@ -407,7 +407,7 @@ export default function ProtocolPage() {
           <SectionHeader
             num="07"
             label="The Result"
-            title={<>Six months in, I took a picture in the mirror.</>}
+            title={<>I looked again.</>}
           />
           <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>Started seriously in January 2023. Middle of summer 2023, I took a picture in the mirror and I was like, wow. It is there. Eight pack.</p>
@@ -491,9 +491,6 @@ export default function ProtocolPage() {
             <p>
               Be <strong className="text-[#4d7c0f] font-semibold">strategically intelligent</strong> about who you actually are.
             </p>
-            <p className="text-[16px] md:text-[17px] text-[#1f2937]/70 leading-[1.75]">
-              The whole protocol in one sentence: figure out who you are, build a plan that fits your life, track your protein, stay consistent, adjust when injuries happen, don&apos;t try to be perfect.
-            </p>
             <p className="text-[#0a0a0a] font-semibold">
               The confidence compounds from there. That&apos;s the part nobody tells you.
             </p>
@@ -511,6 +508,32 @@ export default function ProtocolPage() {
               />
             </div>
           </figure>
+
+          {/* ── CALL TO ACTION ──────────────────────────────────────────────── */}
+          <aside className="mt-20 pt-12 border-t border-[#1f2937]/10">
+            <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mb-5">
+              Want help running this?
+            </p>
+            <h3
+              className="font-display leading-[1.15] text-[#0a0a0a] mb-5"
+              style={{ fontSize: "clamp(24px, 3.5vw, 32px)" }}
+            >
+              This is the same system I use<br />with every client.
+            </h3>
+            <p className="text-[16px] md:text-[17px] leading-[1.75] text-[#1f2937]/70 mb-8 max-w-xl">
+              If you can commit to six months and you want a coach who adjusts when life happens — apply below. I review every application personally.
+            </p>
+            <Link
+              href="/apply"
+              className="inline-flex items-center gap-3 bg-[#b0e455] text-[#0f1a0c] font-bold text-sm px-8 py-4 rounded-2xl hover:bg-[#c9f070] transition-colors"
+            >
+              Apply to Work With Me
+              <span aria-hidden="true">→</span>
+            </Link>
+            <p className="text-[12px] text-[#1f2937]/45 mt-5 tracking-wide">
+              Limited spots · Most clients stay long-term
+            </p>
+          </aside>
 
           {/* SIGNATURE */}
           <div className="mt-24 pt-10 border-t border-[#1f2937]/10 flex items-center gap-4">
