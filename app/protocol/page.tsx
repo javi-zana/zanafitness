@@ -5,7 +5,7 @@ import Image from "next/image";
 export const metadata: Metadata = {
   title: "The Skinny Fat Protocol | ZANA Fitness",
   description:
-    "The system that worked for me. How I went from 160 pounds skinny fat to an eight pack in six months — and why the body was just the gateway.",
+    "The system that worked for me. How I went from skinny fat to an eight pack in six months — and why the body was just the gateway.",
 };
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
@@ -114,7 +114,7 @@ export default function ProtocolPage() {
           </h1>
 
           <p className="text-[#1f2937]/65 text-lg md:text-xl leading-relaxed mb-10">
-            The system that worked for me. How I went from 160 pounds skinny fat to an eight pack in six months.
+            The system that worked for me. How I went from skinny fat to an eight pack in six months.
           </p>
 
           <div className="flex items-center gap-4 text-[12px] text-[#1f2937]/50">
@@ -133,7 +133,7 @@ export default function ProtocolPage() {
           <SectionHeader
             num="01"
             label="The Wake-Up Call"
-            title={<>It was 2022. I was 160 pounds.</>}
+            title={<>It was 2022. I was skinny fat.</>}
           />
           <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>Basically overweight for my frame. Peak skinny fat era.</p>
@@ -152,7 +152,7 @@ export default function ProtocolPage() {
             <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5">
               <Image
                 src="/protocol/before.jpg"
-                alt="Javi in 2022, 160 pounds, peak skinny fat era"
+                alt="Javi in 2022, peak skinny fat era"
                 width={1600}
                 height={1200}
                 sizes="(min-width: 768px) 672px, 100vw"
@@ -160,7 +160,7 @@ export default function ProtocolPage() {
               />
             </div>
             <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
-              2022. 160 pounds. Peak skinny fat era.
+              2022. Peak skinny fat era.
             </figcaption>
           </figure>
 
@@ -372,7 +372,7 @@ export default function ProtocolPage() {
           <SectionHeader
             num="08"
             label="The Protocol"
-            title={<>If I had to do it again from 160.</>}
+            title={<>If I had to do it again from skinny fat.</>}
           />
           <p className="text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/70 mb-8">
             Here&apos;s exactly what I&apos;d do.
