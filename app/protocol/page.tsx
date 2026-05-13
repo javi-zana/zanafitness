@@ -126,6 +126,45 @@ export default function ProtocolPage() {
           </div>
         </header>
 
+        {/* ── BEFORE / NOW HOOK ─────────────────────────────────────────────── */}
+        <div className="max-w-2xl mx-auto pt-12 md:pt-14 pb-4 border-b border-[#1f2937]/8">
+          <div className="grid grid-cols-2 gap-3 md:gap-4">
+            <figure>
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                <Image
+                  src="/protocol/before.jpg"
+                  alt="Javi in 2022, peak skinny fat era"
+                  width={1600}
+                  height={1200}
+                  sizes="(min-width: 768px) 336px, 50vw"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
+                Before
+              </figcaption>
+            </figure>
+            <figure>
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                <Image
+                  src="/protocol/now.jpg"
+                  alt="Javi today"
+                  width={1200}
+                  height={1600}
+                  sizes="(min-width: 768px) 336px, 50vw"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
+                Now
+              </figcaption>
+            </figure>
+          </div>
+          <p className="text-center text-[12px] text-[#1f2937]/45 mt-6 italic tracking-wide">
+            Same guy. Different system.
+          </p>
+        </div>
+
         {/* ── BODY ──────────────────────────────────────────────────────────── */}
         <div className="max-w-2xl mx-auto py-16 md:py-20">
 
@@ -147,22 +186,6 @@ export default function ProtocolPage() {
               If you&apos;ve been lifting for a year, two years, four years — and you still have nothing to show for it — this is for you. I was you.
             </p>
           </div>
-
-          <figure className="my-12 md:my-16">
-            <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5">
-              <Image
-                src="/protocol/before.jpg"
-                alt="Javi in 2022, peak skinny fat era"
-                width={1600}
-                height={1200}
-                sizes="(min-width: 768px) 672px, 100vw"
-                className="w-full h-auto"
-              />
-            </div>
-            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
-              2022. Peak skinny fat era.
-            </figcaption>
-          </figure>
 
           {/* SECTION 02 */}
           <SectionHeader
@@ -407,19 +430,6 @@ export default function ProtocolPage() {
               The confidence compounds from there. That&apos;s the part nobody tells you.
             </p>
           </div>
-
-          <figure className="my-16 md:my-20">
-            <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5 mx-auto max-w-md">
-              <Image
-                src="/protocol/now.jpg"
-                alt="Javi present day"
-                width={1200}
-                height={1600}
-                sizes="(min-width: 768px) 448px, 100vw"
-                className="w-full h-auto"
-              />
-            </div>
-          </figure>
 
           {/* SIGNATURE */}
           <div className="mt-24 pt-10 border-t border-[#1f2937]/10 flex items-center gap-4">
