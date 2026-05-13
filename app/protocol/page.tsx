@@ -324,6 +324,22 @@ export default function ProtocolPage() {
             <p>Most fitness content hands you someone else&apos;s life. Your job is to build around yours — your cravings, your schedule, your psychology.</p>
           </div>
 
+          {/* ── MID-ARTICLE CTA ─────────────────────────────────────────────── */}
+          <aside className="my-14 md:my-16 py-6 md:py-7 px-6 md:px-7 border-l-2 border-[#65a30d] bg-[#65a30d]/5 rounded-r-xl">
+            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mb-2">
+              Coaching
+            </p>
+            <p className="font-display text-lg md:text-xl leading-snug text-[#0a0a0a] mb-3">
+              Want help building yours?
+            </p>
+            <Link
+              href="/apply"
+              className="inline-flex items-center gap-1.5 text-[#4d7c0f] font-semibold text-sm hover:text-[#365314] transition-colors border-b border-[#4d7c0f]/30 pb-0.5"
+            >
+              Apply to work with me <span aria-hidden="true">→</span>
+            </Link>
+          </aside>
+
           {/* SECTION 05 */}
           <SectionHeader
             num="05"
