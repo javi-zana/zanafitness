@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "The Skinny Fat Protocol | ZANA Fitness",
@@ -147,6 +148,22 @@ export default function ProtocolPage() {
             </p>
           </div>
 
+          <figure className="my-12 md:my-16">
+            <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5">
+              <Image
+                src="/protocol/before.jpg"
+                alt="Javi in 2022, 160 pounds, peak skinny fat era"
+                width={1600}
+                height={1200}
+                sizes="(min-width: 768px) 672px, 100vw"
+                className="w-full h-auto"
+              />
+            </div>
+            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
+              2022. 160 pounds. Peak skinny fat era.
+            </figcaption>
+          </figure>
+
           {/* SECTION 02 */}
           <SectionHeader
             num="02"
@@ -182,6 +199,26 @@ export default function ProtocolPage() {
               <li>A side of eggs</li>
             </ul>
             <p>That was it. Clean, repeatable, boring.</p>
+
+            <div className="my-10 md:my-12">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-2.5">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                  <div key={n} className="aspect-square overflow-hidden rounded-lg bg-[#1f2937]/5">
+                    <Image
+                      src={`/protocol/meals/${String(n).padStart(2, "0")}.jpg`}
+                      alt="High-protein meal from the cut"
+                      width={600}
+                      height={600}
+                      sizes="(min-width: 768px) 168px, 50vw"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="text-center text-[12px] text-[#1f2937]/45 mt-4 italic tracking-wide">
+                A year of meals, more or less.
+              </p>
+            </div>
             <p>I did it for two days, and it was fucking hard. Cravings hit. I overate. The first time I went out with friends I basically blew the whole thing.</p>
             <p>
               The strict version did not survive contact with my actual life. That&apos;s important — because what replaced it is what actually worked.
@@ -283,6 +320,25 @@ export default function ProtocolPage() {
           />
           <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>Started seriously in January 2023. Middle of summer 2023, I took a picture in the mirror and I was like, wow. It is there. Eight pack.</p>
+          </div>
+
+          <figure className="my-12 md:my-14">
+            <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5 mx-auto max-w-md">
+              <Image
+                src="/protocol/after.jpg"
+                alt="Javi summer 2023, eight pack, six months in"
+                width={738}
+                height={1600}
+                sizes="(min-width: 768px) 448px, 100vw"
+                className="w-full h-auto"
+              />
+            </div>
+            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
+              Summer 2023. Six months in.
+            </figcaption>
+          </figure>
+
+          <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>The aesthetic payoff was real. But the bigger payoff was something I didn&apos;t see coming.</p>
           </div>
 
@@ -351,6 +407,19 @@ export default function ProtocolPage() {
               The confidence compounds from there. That&apos;s the part nobody tells you.
             </p>
           </div>
+
+          <figure className="my-16 md:my-20">
+            <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5 mx-auto max-w-md">
+              <Image
+                src="/protocol/now.jpg"
+                alt="Javi present day"
+                width={1200}
+                height={1600}
+                sizes="(min-width: 768px) 448px, 100vw"
+                className="w-full h-auto"
+              />
+            </div>
+          </figure>
 
           {/* SIGNATURE */}
           <div className="mt-24 pt-10 border-t border-[#1f2937]/10 flex items-center gap-4">
