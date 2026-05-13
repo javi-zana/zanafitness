@@ -203,6 +203,25 @@ export default function ProtocolPage() {
             </ol>
             <p>That&apos;s the truth. Most guys won&apos;t say it out loud. They dress it up in &quot;longevity&quot; and &quot;feeling good in my body&quot; and whatever else. But for me at 22, in Toronto, single, just back from abroad — it was confidence and girls.</p>
             <p>The smart thing I clocked early: losing body fat would lose face fat. And the face is what actually moves the needle on how attractive you look. Abs are a nice-to-have. <strong className="text-[#0a0a0a] font-semibold">The face is the unlock.</strong></p>
+          </div>
+
+          <figure className="my-10 md:my-12">
+            <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5 mx-auto max-w-md">
+              <Image
+                src="/protocol/fat-face.jpg"
+                alt="Javi pre-cut, face fat era"
+                width={1196}
+                height={2178}
+                sizes="(min-width: 768px) 448px, 100vw"
+                className="w-full h-auto"
+              />
+            </div>
+            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
+              The face fat era.
+            </figcaption>
+          </figure>
+
+          <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>The deeper version of the confidence thing came later. I didn&apos;t know that yet. At the time, it was pure aesthetics.</p>
           </div>
 
@@ -273,7 +292,25 @@ export default function ProtocolPage() {
               <p className="text-[#0a0a0a] font-semibold mb-2">I have a sweet tooth.</p>
               <p>Instead of trying to kill the craving, I found substitutes. Greek yogurt and fruit replaced ice cream. Clean swaps for whatever I was reaching for.</p>
             </div>
+          </div>
 
+          <figure className="my-10 md:my-12">
+            <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5">
+              <Image
+                src="/protocol/ice-cream.jpg"
+                alt="A bowl of ice cream"
+                width={1600}
+                height={1200}
+                sizes="(min-width: 768px) 672px, 100vw"
+                className="w-full h-auto"
+              />
+            </div>
+            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
+              Replaced with Greek yogurt and fruit.
+            </figcaption>
+          </figure>
+
+          <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>And I still ate Taki&apos;s sometimes. I was not a monk. The plan worked because it allowed for the occasional bag of chips. <strong className="text-[#0a0a0a] font-semibold">Perfection is the enemy of consistency.</strong></p>
 
             <p>Every &quot;microhabit adjustment&quot; was really me learning something about myself and adjusting the plan to fit me.</p>
@@ -295,6 +332,37 @@ export default function ProtocolPage() {
           />
           <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>It didn&apos;t. I kept getting stronger. One plate bench to two plate bench in three months.</p>
+          </div>
+
+          <figure className="my-10 md:my-12">
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                <Image
+                  src="/protocol/bench.jpg"
+                  alt="Bench press"
+                  width={1320}
+                  height={2065}
+                  sizes="(min-width: 768px) 332px, 50vw"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                <Image
+                  src="/protocol/dumbbell-bench.jpg"
+                  alt="Dumbbell bench press"
+                  width={1320}
+                  height={2308}
+                  sizes="(min-width: 768px) 332px, 50vw"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
+              One plate to two plate. Three months.
+            </figcaption>
+          </figure>
+
+          <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>The reason was protein. Chicken breast or ground beef at least once per meal. I tracked everything.</p>
             <p>I bought a kitchen scale and weighed out my protein. After about a month of doing that, I&apos;d built up an intuition for what calories look like on a plate. That intuition has stuck with me ever since.</p>
             <p>
@@ -430,6 +498,19 @@ export default function ProtocolPage() {
               The confidence compounds from there. That&apos;s the part nobody tells you.
             </p>
           </div>
+
+          <figure className="my-16 md:my-20">
+            <div className="overflow-hidden rounded-2xl bg-[#1f2937]/5 mx-auto max-w-md">
+              <Image
+                src="/protocol/shredded-again.jpg"
+                alt="Javi today"
+                width={1320}
+                height={2299}
+                sizes="(min-width: 768px) 448px, 100vw"
+                className="w-full h-auto"
+              />
+            </div>
+          </figure>
 
           {/* SIGNATURE */}
           <div className="mt-24 pt-10 border-t border-[#1f2937]/10 flex items-center gap-4">
