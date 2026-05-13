@@ -195,13 +195,13 @@ export default function ProtocolPage() {
           />
           <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>It wasn&apos;t.</p>
-            <p>I&apos;d just gotten back to Toronto from studying abroad. Came off a breakup. My whole life was getting reshuffled.</p>
+            <p>I was at university in Toronto, a long way from home in the Philippines. Came off a breakup. My whole life was getting reshuffled.</p>
             <p>My motivation was two things:</p>
             <ol className="space-y-2 pl-6 list-decimal marker:text-[#65a30d] marker:font-semibold">
               <li>Get my confidence back.</li>
               <li>Get girls.</li>
             </ol>
-            <p>That&apos;s the truth. Most guys won&apos;t say it out loud. They dress it up in &quot;longevity&quot; and &quot;feeling good in my body&quot; and whatever else. But for me at 22, in Toronto, single, just back from abroad — it was confidence and girls.</p>
+            <p>That&apos;s the truth. Most guys won&apos;t say it out loud. They dress it up in &quot;longevity&quot; and &quot;feeling good in my body&quot; and whatever else. But for me at 22, in Toronto, single, far from home — it was confidence and girls.</p>
             <p>The smart thing I clocked early: losing body fat would lose face fat. And the face is what actually moves the needle on how attractive you look. Abs are a nice-to-have. <strong className="text-[#0a0a0a] font-semibold">The face is the unlock.</strong></p>
           </div>
 
