@@ -101,7 +101,7 @@ export default function ProtocolPage() {
           <div className="flex items-center gap-2 mb-8">
             <span className="w-1.5 h-1.5 rounded-full bg-[#65a30d]" />
             <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/55">
-              The Skinny Fat Protocol
+              From Javi
             </p>
           </div>
 
@@ -109,11 +109,11 @@ export default function ProtocolPage() {
             className="font-display leading-[1.04] text-[#0a0a0a] mb-8"
             style={{ fontSize: "clamp(40px, 6.5vw, 72px)" }}
           >
-            The system that<br />worked for me.
+            The Skinny Fat<br />Protocol.
           </h1>
 
           <p className="text-[#1f2937]/65 text-lg md:text-xl leading-relaxed mb-10">
-            How I went from 160 pounds skinny fat to an eight pack in six months — and why the body was just the gateway.
+            The system that worked for me. How I went from 160 pounds skinny fat to an eight pack in six months.
           </p>
 
           <div className="flex items-center gap-4 text-[12px] text-[#1f2937]/50">
