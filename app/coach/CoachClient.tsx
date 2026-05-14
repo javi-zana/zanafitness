@@ -2734,6 +2734,8 @@ function ApplicationsSection() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [dragAppId, setDragAppId] = useState<string | null>(null)
   const [dragOverCol, setDragOverCol] = useState<KanbanColKey | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const scrollVxRef = useRef(0)
 
   useEffect(() => {
     fetch('/api/admin-applications')
@@ -2742,6 +2744,20 @@ function ApplicationsSection() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  // Edge auto-scroll while dragging — browsers don't auto-scroll custom overflow containers
+  useEffect(() => {
+    if (!dragAppId) { scrollVxRef.current = 0; return }
+    let raf = 0
+    const step = () => {
+      const el = scrollRef.current
+      const vx = scrollVxRef.current
+      if (el && vx !== 0) el.scrollLeft += vx
+      raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => { cancelAnimationFrame(raf); scrollVxRef.current = 0 }
+  }, [dragAppId])
 
   // Keep selectedApp in sync when apps list updates
   useEffect(() => {
@@ -2851,7 +2867,20 @@ function ApplicationsSection() {
       </div>
 
       {/* Kanban board — horizontal scroll on mobile */}
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+      <div
+        ref={scrollRef}
+        className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1"
+        onDragOver={e => {
+          if (!dragAppId) return
+          const el = scrollRef.current
+          if (!el) return
+          const r = el.getBoundingClientRect()
+          const EDGE = 80
+          if (e.clientX - r.left < EDGE) scrollVxRef.current = -12
+          else if (r.right - e.clientX < EDGE) scrollVxRef.current = 12
+          else scrollVxRef.current = 0
+        }}
+      >
         {KANBAN_COLS.map(col => {
           const items = colApps(col.key)
           const isWonCol = col.key === 'closed'
