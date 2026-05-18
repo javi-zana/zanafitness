@@ -54,12 +54,10 @@ export default async function ProgramPage() {
 
   return (
     <ProgramClient
-      userId={user.id}
       firstName={profile?.first_name ?? null}
       okr={sectionMap['okr'] ?? null}
       split={sectionMap['split'] ?? null}
       food={sectionMap['food'] ?? null}
-      habits={sectionMap['habits'] ?? null}
       milestones={(milestoneRows ?? []).map(m => m.type as string)}
       notes={notes}
     />

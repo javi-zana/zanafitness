@@ -22,11 +22,6 @@ type BmrContent = {
   notes: string
 }
 
-type HabitsContent = {
-  type: 'habits'
-  habits: { id: string; text: string }[]
-}
-
 type SectionData = { section: string; content_json: object; updated_at: string } | null
 
 type CoachNote = {
@@ -39,17 +34,15 @@ type CoachNote = {
 }
 
 type Props = {
-  userId: string
   firstName: string | null
   okr: SectionData
   split: SectionData
   food: SectionData
-  habits: SectionData
   milestones: string[]
   notes: CoachNote[]
 }
 
-type Module = 'split' | 'food' | 'habits' | 'notes'
+type Module = 'split' | 'food' | 'notes'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -509,71 +502,6 @@ function WorkoutLogSection({
   )
 }
 
-// ─── Habits display (member-facing habits tab) ────────────────────────────────
-
-function HabitsDisplay({ data, userId }: { data: HabitsContent; userId: string }) {
-  const [checked, setChecked] = useState<Record<string, boolean>>({})
-
-  useEffect(() => {
-    const key = `habits-${userId}-${new Date().toISOString().split('T')[0]}`
-    try {
-      const stored = localStorage.getItem(key)
-      if (stored) setChecked(JSON.parse(stored))
-    } catch { /* ignore */ }
-  }, [userId])
-
-  function toggle(id: string) {
-    const key = `habits-${userId}-${new Date().toISOString().split('T')[0]}`
-    const next = { ...checked, [id]: !checked[id] }
-    setChecked(next)
-    try { localStorage.setItem(key, JSON.stringify(next)) } catch { /* ignore */ }
-  }
-
-  const doneCount = data.habits.filter(h => checked[h.id]).length
-  const total = data.habits.length
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest">Today's Habits</p>
-        <p className="text-[10px] text-[var(--c-text4)] font-mono">{doneCount}/{total} done</p>
-      </div>
-      <div className="space-y-2">
-        {data.habits.map(habit => (
-          <button
-            key={habit.id}
-            onClick={() => toggle(habit.id)}
-            className={`w-full flex items-center gap-3 p-4 rounded-2xl border transition-all text-left ${
-              checked[habit.id]
-                ? 'bg-[#b0e455]/8 border-[var(--c-border2)]'
-                : 'bg-[var(--c-card2)] border-transparent hover:border-[#b0e455]/10'
-            }`}
-          >
-            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all ${
-              checked[habit.id] ? 'bg-[#b0e455] border-[#b0e455]' : 'border-[var(--c-border2)]'
-            }`}>
-              {checked[habit.id] && (
-                <svg viewBox="0 0 24 24" fill="none" stroke="#0f1a0c" strokeWidth="3" className="w-3 h-3">
-                  <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-            </div>
-            <span className={`text-sm transition-all ${checked[habit.id] ? 'text-[var(--c-text3)] line-through' : 'text-[var(--c-text)]'}`}>
-              {habit.text}
-            </span>
-          </button>
-        ))}
-      </div>
-      {doneCount === total && total > 0 && (
-        <div className="bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4 text-center">
-          <p className="text-sm font-semibold text-[var(--c-accent-text)]">All habits done today</p>
-          <p className="text-xs text-[var(--c-text4)] mt-0.5">Check back tomorrow to reset</p>
-        </div>
-      )}
-    </div>
-  )
-}
-
 // ─── BMR display (member-facing food tab) ─────────────────────────────────────
 
 function BmrDisplay({ data }: { data: BmrContent }) {
@@ -716,7 +644,7 @@ function ModuleGrid({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ userId, firstName, okr, split, food, habits, notes }: Props) {
+export default function ProgramClient({ firstName, okr, split, food, notes }: Props) {
   const [activeModule, setActiveModule] = useState<Module | null>(null)
 
   const structuredSplit: StructuredSplit | null = (() => {
@@ -754,16 +682,6 @@ export default function ProgramClient({ userId, firstName, okr, split, food, hab
       ),
     },
     {
-      id: 'habits',
-      label: `${name} Habits`,
-      subtitle: 'Daily actions',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
-          <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
-    },
-    {
       id: 'notes',
       label: 'Coach Notes',
       subtitle: notes.length > 0 ? `${notes.length} note${notes.length === 1 ? '' : 's'}` : 'From check-ins',
@@ -780,17 +698,13 @@ export default function ProgramClient({ userId, firstName, okr, split, food, hab
       return <CoachNotesFeed notes={notes} />
     }
 
-    const sectionMap = { split, food, habits }
+    const sectionMap = { split, food }
     const section = sectionMap[mod]
     const content = section?.content_json ?? null
     const updatedAt = section?.updated_at
 
     if (mod === 'food' && content && (content as { type?: string }).type === 'bmr') {
       return <BmrDisplay data={content as BmrContent} />
-    }
-
-    if (mod === 'habits' && content && (content as { type?: string }).type === 'habits') {
-      return <HabitsDisplay data={content as HabitsContent} userId={userId} />
     }
 
     if (mod === 'split' && structuredSplit) {
@@ -806,10 +720,6 @@ export default function ProgramClient({ userId, firstName, okr, split, food, hab
         food: {
           title: 'Your Nutrition Plan',
           desc: 'Calorie targets, macro splits, meal timing guidance, and food choices tailored to your body and goal.',
-        },
-        habits: {
-          title: 'Your Daily Habits',
-          desc: 'The small daily actions - sleep, steps, stress management - that compound over time and make the rest of the program work.',
         },
       }
       const info = sectionInfo[mod] ?? { title: 'Coming soon', desc: 'Your coach is working on this section.' }

@@ -58,7 +58,7 @@ type MsgPreview = { thread_id: string; body: string; created_at: string; author_
 type ReadReceipt = { thread_id: string; last_read_at: string }
 type ChatMessage = { id: string; author_id: string; body: string; created_at: string; message_attachments: { id: string; storage_path: string; kind: string }[] }
 type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'inbox' | 'applications' | 'admin' | 'more'
-type Section = 'split' | 'food' | 'habits' | 'notes'
+type Section = 'split' | 'food' | 'notes'
 
 type CoachNote = {
   id: string
@@ -81,11 +81,6 @@ type BmrData = {
   calorie_target: number
   protein_g: number
   notes: string
-}
-
-type HabitsData = {
-  type: 'habits'
-  habits: { id: string; text: string }[]
 }
 
 type OkrData = {
@@ -159,84 +154,6 @@ const ACTIVITY_LEVELS = [
 function calcBmr(gender: string, age: number, height_cm: number, weight_kg: number) {
   const base = 10 * weight_kg + 6.25 * height_cm - 5 * age
   return Math.round(gender === 'male' ? base + 5 : base - 161)
-}
-
-// ─── Habits section (coach Programs > Habits tab) ────────────────────────────
-
-function HabitsSection({ initial, onSave, saving, saved }: {
-  initial: HabitsData | null
-  onSave: (data: HabitsData) => void
-  saving: boolean
-  saved: boolean
-}) {
-  const [habits, setHabits] = useState<{ id: string; text: string }[]>(initial?.habits ?? [])
-  const [newText, setNewText] = useState('')
-
-  function addHabit() {
-    const text = newText.trim()
-    if (!text) return
-    setHabits(prev => [...prev, { id: crypto.randomUUID(), text }])
-    setNewText('')
-  }
-
-  function removeHabit(id: string) {
-    setHabits(prev => prev.filter(h => h.id !== id))
-  }
-
-  function updateHabit(id: string, text: string) {
-    setHabits(prev => prev.map(h => h.id === id ? { ...h, text } : h))
-  }
-
-  return (
-    <div className="space-y-3">
-      {habits.length > 0 && (
-        <div className="space-y-2">
-          {habits.map((habit, idx) => (
-            <div key={habit.id} className="flex items-center gap-2">
-              <span className="text-[10px] text-[var(--c-text4)] font-mono w-4 shrink-0 text-right">{idx + 1}</span>
-              <input
-                type="text"
-                value={habit.text}
-                onChange={e => updateHabit(habit.id, e.target.value)}
-                className="flex-1 bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] focus:outline-none focus:border-[#b0e455]/40 transition"
-              />
-              <button onClick={() => removeHabit(habit.id)} className="text-[var(--c-text4)] hover:text-[#f87171] transition shrink-0">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newText}
-          onChange={e => setNewText(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addHabit() } }}
-          placeholder="Add a habit…"
-          className="flex-1 bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-        />
-        <button
-          onClick={addHabit}
-          disabled={!newText.trim()}
-          className="px-4 py-2 rounded-lg bg-[var(--c-card2)] border border-[var(--c-border2)] text-[10px] text-[var(--c-accent-text)] font-mono uppercase tracking-widest hover:bg-[var(--c-hover)] transition disabled:opacity-30 shrink-0"
-        >
-          Add
-        </button>
-      </div>
-
-      <button
-        onClick={() => onSave({ type: 'habits', habits })}
-        disabled={saving || habits.length === 0}
-        className="w-full py-3 rounded-lg bg-[#b0e455] text-[#0f1a0c] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[#c9f070] transition disabled:opacity-40"
-      >
-        {saved ? 'Saved ✓' : saving ? 'Saving…' : 'Save Habits'}
-      </button>
-    </div>
-  )
 }
 
 // ─── OKR section (coach Programs > pinned above tabs) ────────────────────────
@@ -1523,7 +1440,7 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
   const [saved, setSaved] = useState(false)
 
   const selected = members.find(m => m.id === selectedId) ?? null
-  const SECTIONS: Section[] = ['split', 'food', 'habits', 'notes']
+  const SECTIONS: Section[] = ['split', 'food', 'notes']
 
   useEffect(() => {
     if (initialMemberId && initialMemberId !== selectedId) {
@@ -1570,19 +1487,6 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
     setTimeout(() => setSaved(false), 2000)
   }
 
-  async function saveHabitsSection(data: HabitsData) {
-    if (!selectedId) return
-    setSaving(true)
-    await supabase.from('program_sections').upsert(
-      { member_id: selectedId, section: 'habits', content_json: data, updated_by: userId },
-      { onConflict: 'member_id,section' }
-    )
-    setSections(prev => ({ ...prev, habits: data }))
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-
   async function saveFoodSection(data: BmrData) {
     if (!selectedId) return
     setSaving(true)
@@ -1615,7 +1519,7 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
         <div className="max-w-2xl mx-auto py-12 lg:py-20 space-y-4 text-center">
           <h1 className="font-display leading-none text-3xl lg:text-4xl">Programs.</h1>
           <p className="text-sm text-[var(--c-text3)] max-w-md mx-auto leading-relaxed">
-            No clients yet. Once you invite members, you'll come here to build their split, set calorie targets, and define daily habits.
+            No clients yet. Once you invite members, you'll come here to build their split and set calorie targets.
           </p>
         </div>
       )
@@ -1625,7 +1529,7 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
         <div className="space-y-1">
           <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Programs</p>
           <h1 className="font-display leading-none text-3xl lg:text-4xl">Pick a client.</h1>
-          <p className="text-sm text-[var(--c-text3)] mt-2">Build their split, food plan, and daily habits.</p>
+          <p className="text-sm text-[var(--c-text3)] mt-2">Build their split and food plan.</p>
         </div>
         <div className="space-y-2">
           {members.map(m => (
@@ -1639,7 +1543,7 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-[var(--c-text)] truncate">{memberName(m)}</p>
-                <p className="text-[11px] text-[var(--c-text4)] mt-0.5">Split · Food · Habits</p>
+                <p className="text-[11px] text-[var(--c-text4)] mt-0.5">Split · Food · Notes</p>
               </div>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5 text-[var(--c-text4)] shrink-0">
                 <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
@@ -1699,14 +1603,6 @@ function ProgramsTab({ members, userId, initialMemberId, isHeadCoach }: { member
           key={`${selectedId}-${sectionLoadKey}`}
           initial={(sections.food as BmrData | null | undefined) ?? null}
           onSave={saveFoodSection}
-          saving={saving}
-          saved={saved}
-        />
-      ) : activeSection === 'habits' ? (
-        <HabitsSection
-          key={`${selectedId}-${sectionLoadKey}`}
-          initial={(sections.habits as HabitsData | null | undefined) ?? null}
-          onSave={saveHabitsSection}
           saving={saving}
           saved={saved}
         />
@@ -2919,7 +2815,7 @@ function ApplicationsSection() {
                     <div
                       key={app.id}
                       draggable
-                      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; setDragAppId(app.id) }}
+                      onDragStart={e => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', app.id); setDragAppId(app.id) }}
                       onDragEnd={() => { setDragAppId(null); setDragOverCol(null) }}
                       className={`rounded-2xl border p-3 transition-all select-none ${
                         dragAppId === app.id ? 'opacity-40 cursor-grabbing' : 'cursor-grab'
