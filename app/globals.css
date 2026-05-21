@@ -76,6 +76,15 @@ body {
   }
 }
 
+/* Prevent iOS Safari from auto-zooming on input focus. Triggers when font-size < 16px. */
+@media (max-width: 768px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
