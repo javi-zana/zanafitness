@@ -2630,6 +2630,7 @@ function ApplicationsSection() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [dragAppId, setDragAppId] = useState<string | null>(null)
   const [dragOverCol, setDragOverCol] = useState<KanbanColKey | null>(null)
+  const [moveError, setMoveError] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const scrollVxRef = useRef(0)
 
@@ -2663,6 +2664,13 @@ function ApplicationsSection() {
     }
   }, [apps]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-dismiss move error toast
+  useEffect(() => {
+    if (!moveError) return
+    const t = setTimeout(() => setMoveError(null), 5000)
+    return () => clearTimeout(t)
+  }, [moveError])
+
   async function handleAccept(appId: string) {
     setActionState(s => ({ ...s, [appId]: 'loading' }))
     try {
@@ -2687,23 +2695,25 @@ function ApplicationsSection() {
   }
 
   async function handleMove(appId: string, status: MoveStatus) {
-    setActionState(s => ({ ...s, [appId]: 'loading' }))
+    // Optimistic update — move the card immediately
+    const prevApps = [...apps]
+    setApps(prev => prev.map(a => a.id === appId ? { ...a, status, responded_at: new Date().toISOString() } : a))
+    // Close detail modal on reject so the card visually moves
+    if (status === 'rejected') setSelectedApp(null)
     try {
       const res = await fetch('/api/move-application', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ applicationId: appId, status }),
       })
-      if (res.ok) {
-        setApps(prev => prev.map(a => a.id === appId ? { ...a, status, responded_at: new Date().toISOString() } : a))
-        setActionState(s => ({ ...s, [appId]: 'idle' }))
-      } else {
-        setActionState(s => ({ ...s, [appId]: 'error' }))
-        setTimeout(() => setActionState(s => ({ ...s, [appId]: 'idle' })), 3000)
+      if (!res.ok) {
+        // Revert on failure
+        setApps(prevApps)
+        setMoveError(`Failed to move — server returned ${res.status}`)
       }
     } catch {
-      setActionState(s => ({ ...s, [appId]: 'error' }))
-      setTimeout(() => setActionState(s => ({ ...s, [appId]: 'idle' })), 3000)
+      setApps(prevApps)
+      setMoveError('Network error — could not reach the server')
     }
   }
 
@@ -2750,6 +2760,14 @@ function ApplicationsSection() {
 
   return (
     <div className="space-y-5">
+      {/* Error toast */}
+      {moveError && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#f87171]/10 border border-[#f87171]/25 text-xs text-[#f87171]">
+          <span className="flex-1">{moveError}</span>
+          <button onClick={() => setMoveError(null)} className="shrink-0 hover:text-[#fca5a5] transition">✕</button>
+        </div>
+      )}
+
       {/* Close-rate stat — won / (won + lost), ignoring rejects */}
       <div className="flex items-center justify-end gap-3 px-1 text-[10px] font-mono text-[var(--c-text4)]">
         <span>
