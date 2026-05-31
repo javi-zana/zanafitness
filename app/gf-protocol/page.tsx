@@ -1,8 +1,12 @@
-"use client";
-
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { AlertCircle, ArrowRight, Heart } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "The GF Protocol | ZANA Fitness",
+  description:
+    "How I helped build my girlfriend the body she wanted. The exact framework I used to help her fix her eating habits, build the right kind of curves, and finally feel confident.",
+};
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
@@ -14,236 +18,300 @@ const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   </svg>
 );
 
-const ZIcon = ({ className = "h-8" }: { className?: string }) => (
-  <svg viewBox="0 0 32 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
-    <path d="M0,2 H32 L18.3,14" />
-    <path d="M13.7,18 L0,30 H32" />
-  </svg>
-);
+function SectionHeader({ num, label, title }: { num: string; label: string; title: React.ReactNode }) {
+  return (
+    <header className="mb-10 mt-20 first:mt-0">
+      <div className="flex items-center gap-3 mb-5">
+        <span className="text-[11px] font-bold tracking-[0.22em] text-[#65a30d]">{num}</span>
+        <span className="h-px w-8 bg-[#1f2937]/15" />
+        <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45">{label}</span>
+      </div>
+      <h2
+        className="font-display leading-[1.1] text-[#0a0a0a]"
+        style={{ fontSize: "clamp(28px, 3.8vw, 40px)" }}
+      >
+        {title}
+      </h2>
+    </header>
+  );
+}
 
 export default function GFProtocolPage() {
   return (
-    <main className="min-h-screen bg-white text-gray-900 font-sans selection:bg-[#b0e455] selection:text-[#0b1509]">
-      
-      {/* NAVBAR */}
-      <nav className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between p-8 md:px-16 overflow-hidden border-b border-gray-200">
-        <Link href="/">
-          <ZIcon className="h-4 md:h-5 text-gray-900 hover:text-black transition-colors" />
+    <main className="min-h-screen bg-white text-[#1f2937] font-sans selection:bg-[#b0e455] selection:text-[#0f1a0c]">
+
+      {/* ── NAV ───────────────────────────────────────────────────────────────── */}
+      <nav className="sticky top-0 z-10 flex items-center justify-between px-6 md:px-8 py-4 bg-white/85 backdrop-blur border-b border-[#1f2937]/8">
+        <Link href="/" className="text-[#1f2937]/60 hover:text-[#0a0a0a] transition-colors">
+          <ZanaLogo className="h-4" />
         </Link>
-        <div className="hidden md:flex items-center space-x-12 text-[10px] tracking-[0.2em] uppercase font-semibold text-gray-500">
-          <Link href="/about" className="hover:text-gray-900 transition-colors">About</Link>
-          <Link href="/system" className="hover:text-gray-900 transition-colors">The System</Link>
-          <Link href="/faq" className="hover:text-gray-900 transition-colors">FAQ</Link>
-          <Link href="/apply" className="bg-[#0b1509] text-white font-bold px-8 py-2.5 rounded-full hover:bg-black transition-colors">
-            APPLY FOR COACHING
-          </Link>
-        </div>
+        <Link
+          href="/apply"
+          className="text-xs font-semibold tracking-wide text-[#4d7c0f] hover:text-[#365314] transition-colors"
+        >
+          Apply →
+        </Link>
       </nav>
 
-      {/* HERO HEADER */}
-      <section className="pt-40 pb-16 px-6 text-center bg-white">
-        <div className="max-w-4xl mx-auto flex flex-col items-center">
-          <span className="inline-flex items-center gap-2 bg-gray-100 border border-gray-200 rounded-full px-4 py-1.5 mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#0b1509]" />
-            <p className="text-xs font-medium text-[#0b1509] uppercase tracking-wider">Case Study & Framework</p>
-          </span>
-          <h1 className="font-display leading-tight text-gray-900 mb-6" style={{ fontSize: 'clamp(32px, 5vw, 64px)' }}>
-            How I helped build my girlfriend the body she wanted.
+      {/* ── ARTICLE HEADER ────────────────────────────────────────────────────── */}
+      <article className="px-6">
+        <header className="max-w-2xl mx-auto pt-20 pb-16 md:pt-28 md:pb-20 border-b border-[#1f2937]/8">
+          <div className="flex items-center gap-2 mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#65a30d]" />
+            <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/55">
+              Case Study & Framework
+            </p>
+          </div>
+
+          <h1
+            className="font-display leading-[1.04] text-[#0a0a0a] mb-8"
+            style={{ fontSize: "clamp(40px, 6.5vw, 72px)" }}
+          >
+            How I helped build<br />my girlfriend the body<br />she wanted.
           </h1>
-          <p className="text-gray-500 text-sm md:text-base leading-relaxed">(The exact protocol I put MJ on)</p>
-        </div>
-      </section>
 
-      {/* DISCLAIMER */}
-      <section className="px-6 pb-20">
-        <div className="max-w-3xl mx-auto bg-gray-50 border border-gray-200 rounded-2xl p-8 md:p-10 relative overflow-hidden shadow-sm">
-          <div className="absolute top-0 left-0 w-1 h-full bg-gray-300"></div>
-          <div className="flex items-start gap-4">
-            <AlertCircle className="text-gray-500 w-6 h-6 flex-shrink-0 mt-1" />
-            <div>
-              <p className="font-semibold text-gray-700 text-sm uppercase tracking-widest mb-3">Disclaimer Before The Internet Cancels Me</p>
-              <p className="text-gray-600 text-[15px] leading-relaxed">
-                I love my girlfriend exactly the way she is, and I thought she looked perfect before. She specifically came to me complaining that she felt "flabby" despite being skinny, and explicitly asked me to write her a program. I am just a boyfriend following instructions so my girlfriend stays happy. Please do not cancel me. 😅
-              </p>
-            </div>
+          <p className="text-[#1f2937]/65 text-lg md:text-xl leading-relaxed mb-10">
+            The exact protocol I put MJ on. How we fixed her eating habits, built the right kind of curves, and got her feeling confident in her own skin.
+          </p>
+
+          <div className="flex items-center gap-4 text-[12px] text-[#1f2937]/50">
+            <span className="font-semibold text-[#1f2937]/75">Javi Lorenzana</span>
+            <span className="w-1 h-1 rounded-full bg-[#1f2937]/25" />
+            <span>@javi_zana</span>
+            <span className="w-1 h-1 rounded-full bg-[#1f2937]/25" />
+            <span>4 min read</span>
+          </div>
+        </header>
+
+        {/* ── DISCLAIMER ──────────────────────────────────────────────────────── */}
+        <div className="max-w-2xl mx-auto pt-12 pb-4">
+          <div className="bg-[#65a30d]/5 border-l-2 border-[#65a30d] rounded-r-2xl p-6 md:p-8">
+            <p className="font-display text-xl md:text-2xl leading-snug text-[#0a0a0a] mb-3">
+              Disclaimer Before The Internet Cancels Me
+            </p>
+            <p className="text-[#1f2937]/85 text-[15px] leading-relaxed">
+              I love my girlfriend exactly the way she is, and I thought she looked perfect before. She specifically came to me complaining that she felt "flabby" despite being skinny, and explicitly asked me to write her a program. I am just a boyfriend following instructions so my girlfriend stays happy. Please do not cancel me. 😅
+            </p>
           </div>
         </div>
-      </section>
 
-      {/* NARRATIVE INTRO */}
-      <section className="px-6 py-12 border-t border-gray-200 bg-white">
-        <div className="max-w-3xl mx-auto text-[15px] text-gray-600 leading-relaxed space-y-6">
-          <p>
-            <span className="text-gray-900 font-semibold">Hey, I'm Javi.</span> I'm a fitness coach, and yes, I'm the guy who "made" my girlfriend change her body (because she asked me to, I promise).
-          </p>
-          <p>
-            When MJ first came to me, she had a very common problem: <strong className="text-gray-900">She was skinny, but she wasn't in shape.</strong>
-          </p>
-          <p>
-            She was eating like a bird, doing random cardio, and feeling frustrated that she still felt "soft" or "flabby." She didn't need to lose weight—she needed to completely change her body composition.
-          </p>
-          <p>
-            Here is the exact framework I used to help her fix her eating habits, build the right kind of curves, and finally feel confident in her own skin.
-          </p>
-        </div>
-      </section>
+        {/* ── BODY ──────────────────────────────────────────────────────────── */}
+        <div className="max-w-2xl mx-auto py-10 md:py-14">
 
-      {/* THE PROTOCOL (PHASES) */}
-      <section className="py-24 px-6 bg-gray-50 border-t border-gray-200">
-        <div className="max-w-6xl mx-auto">
-          
-          <div className="text-center mb-20">
-            <ZanaLogo className="h-5 mx-auto text-gray-300 mb-6" />
-            <h2 className="font-display text-3xl md:text-5xl text-gray-900">The Protocol</h2>
+          {/* INTRO */}
+          <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
+            <p>Hey, I'm Javi. I'm a fitness coach, and yes, I'm the guy who "made" my girlfriend change her body (because she asked me to, I promise).</p>
+            <p>When MJ first came to me, she had a very common problem: <strong className="text-[#0a0a0a] font-semibold">She was skinny, but she wasn't in shape.</strong></p>
+            <p>She was eating like a bird, doing random cardio, and feeling frustrated that she still felt "soft" or "flabby." She didn't need to lose weight—she needed to completely change her body composition.</p>
+            <p>Here is the exact framework I used to help her fix her eating habits, build the right kind of curves, and finally feel confident.</p>
           </div>
 
-          <div className="space-y-32">
+          {/* SECTION 01 */}
+          <SectionHeader
+            num="01"
+            label="Phase 1"
+            title={<>Fixing the "Skinny-Fat" Diet</>}
+          />
+          <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
+            <p>Most girls think the answer to looking "toned" is eating salads and doing the treadmill. It's the exact opposite.</p>
             
-            {/* PHASE 1 */}
-            <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
-              <div className="order-2 md:order-1 grid grid-cols-2 gap-4">
-                <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 shadow-sm">
-                  <Image src="/before-after/before_IMG_3936.jpg" alt="Before" fill className="object-cover" />
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full border border-gray-200 text-[9px] uppercase tracking-widest text-gray-600 font-semibold">Before</div>
-                </div>
-                <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 mt-8 shadow-sm">
-                  <Image src="/before-after/before_IMG_6112.jpg" alt="Before" fill className="object-cover" />
-                </div>
-              </div>
-              <div className="order-1 md:order-2">
-                <span className="inline-block font-mono text-[10px] tracking-widest text-gray-500 bg-gray-200 border border-gray-300 px-3 py-1 rounded-full mb-6">PHASE 1</span>
-                <h3 className="font-display text-3xl text-gray-900 mb-6">Fixing the "Skinny-Fat" Diet</h3>
-                <p className="text-[15px] text-gray-600 mb-8 pb-8 border-b border-gray-200 leading-relaxed">
-                  Most girls think the answer to looking "toned" is eating salads and doing the treadmill. It's the exact opposite.
-                </p>
-                <ul className="space-y-6">
-                  <li className="flex gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
-                    <p className="text-[15px] text-gray-600 leading-relaxed"><strong className="text-gray-900">We stopped the starvation:</strong> I actually made her EAT MORE. To build a shape, you need building blocks. We bumped up her calories so she was eating enough to actually fuel her body.</p>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
-                    <p className="text-[15px] text-gray-600 leading-relaxed"><strong className="text-gray-900">Protein became a non-negotiable:</strong> She wasn't eating nearly enough protein. We set a strict target (about 0.8g to 1g per pound of her goal body weight) to ensure the weight she was putting on was lean muscle, not fat.</p>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
-                    <p className="text-[15px] text-gray-600 leading-relaxed"><strong className="text-gray-900">No more "good" or "bad" foods:</strong> I taught her how to track her macros so she could still eat the foods she loved without the guilt.</p>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* PHASE 2 */}
-            <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
-              <div>
-                <span className="inline-block font-mono text-[10px] tracking-widest text-gray-500 bg-gray-200 border border-gray-300 px-3 py-1 rounded-full mb-6">PHASE 2</span>
-                <h3 className="font-display text-3xl text-gray-900 mb-6">Training for Shape, Not Sweat</h3>
-                <p className="text-[15px] text-gray-600 mb-8 pb-8 border-b border-gray-200 leading-relaxed">
-                  Sweating a lot does not equal a good workout. We ditched the endless cardio and moved to the weight room.
-                </p>
-                <ul className="space-y-6">
-                  <li className="flex gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
-                    <p className="text-[15px] text-gray-600 leading-relaxed"><strong className="text-gray-900">Progressive Overload:</strong> We picked a few core exercises (RDLs, hip thrusts, split squats, shoulder presses) and focused on getting stronger at them every single week.</p>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
-                    <p className="text-[15px] text-gray-600 leading-relaxed"><strong className="text-gray-900">Building the "Illusion":</strong> To get that hourglass, "snatched" look, we focused heavily on building her glutes and her shoulders. When your shoulders and glutes grow, your waist naturally looks smaller.</p>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
-                    <p className="text-[15px] text-gray-600 leading-relaxed"><strong className="text-gray-900">Rest Days:</strong> I forced her to take rest days. You don't grow in the gym; you grow when you recover.</p>
-                  </li>
-                </ul>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 mb-8 shadow-sm">
-                  <Image src="/before-after/before_IMG_1275.jpg" alt="Before" fill className="object-cover" />
-                  <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full border border-gray-200 text-[9px] uppercase tracking-widest text-gray-600 font-semibold">Before</div>
-                </div>
-                <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden border border-[#0b1509]/20 bg-gray-100 mt-8 shadow-md">
-                  <Image src="/before-after/after_IMG_4277.jpg" alt="After Progress" fill className="object-cover" />
-                  <div className="absolute top-3 right-3 bg-[#0b1509] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-white shadow-sm">After</div>
-                </div>
-              </div>
-            </div>
-
-            {/* PHASE 3 */}
-            <div className="grid md:grid-cols-2 gap-12 md:gap-20 items-center">
-              <div className="order-2 md:order-1 grid grid-cols-2 gap-4">
-                <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden border border-[#0b1509]/20 bg-gray-100 mt-8 shadow-md">
-                  <Image src="/before-after/after_IMG_4865.jpg" alt="After" fill className="object-cover" />
-                  <div className="absolute bottom-3 left-3 bg-[#0b1509] px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-widest text-white shadow-sm">After</div>
-                </div>
-                <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden border border-[#0b1509]/20 bg-gray-100 shadow-md">
-                  <Image src="/before-after/after_IMG_5492.jpg" alt="After" fill className="object-cover" />
-                </div>
-              </div>
-              <div className="order-1 md:order-2">
-                <span className="inline-block font-mono text-[10px] tracking-widest text-gray-500 bg-gray-200 border border-gray-300 px-3 py-1 rounded-full mb-6">PHASE 3</span>
-                <h3 className="font-display text-3xl text-gray-900 mb-6">The Mindset Shift</h3>
-                <p className="text-[15px] text-gray-600 mb-8 pb-8 border-b border-gray-200 leading-relaxed">
-                  The hardest part wasn't the workouts—it was the mental shift of seeing the scale go UP, but realizing her body looked tighter, leaner, and better than ever.
-                </p>
-                <ul className="space-y-6">
-                  <li className="flex gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
-                    <p className="text-[15px] text-gray-600 leading-relaxed"><strong className="text-gray-900">Throw away the scale:</strong> Muscle is denser than fat. She gained weight, but she dropped dress sizes.</p>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
-                    <p className="text-[15px] text-gray-600 leading-relaxed"><strong className="text-gray-900">Consistency over perfection:</strong> We didn't aim for 100% perfection. We aimed for 80% consistency over a long period of time.</p>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* CTA / OUTRO */}
-      <section className="py-32 px-6 bg-white border-t border-gray-200 text-center relative overflow-hidden">
-        <div className="max-w-2xl mx-auto relative z-10 flex flex-col items-center">
-          
-          <div className="flex justify-center gap-4 mb-12">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border-[3px] border-white shadow-lg">
-              <Image src="/before-after/after_IMG_4688.jpg" alt="Final Result" fill className="object-cover" />
-            </div>
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border-[3px] border-white shadow-lg">
-              <Image src="/before-after/after_IMG_5533.jpg" alt="Final Result" fill className="object-cover" />
-            </div>
+            <ul className="space-y-4 pl-6 list-disc marker:text-[#65a30d]">
+              <li>
+                <strong className="text-[#0a0a0a] font-semibold">We stopped the starvation:</strong> I actually made her EAT MORE. To build a shape, you need building blocks. We bumped up her calories so she was eating enough to actually fuel her body.
+              </li>
+              <li>
+                <strong className="text-[#0a0a0a] font-semibold">Protein became a non-negotiable:</strong> She wasn't eating nearly enough protein. We set a strict target (about 0.8g to 1g per pound of her goal body weight) to ensure the weight she was putting on was lean muscle, not fat.
+              </li>
+              <li>
+                <strong className="text-[#0a0a0a] font-semibold">No more "good" or "bad" foods:</strong> I taught her how to track her macros so she could still eat the foods she loved without the guilt.
+              </li>
+            </ul>
           </div>
 
-          <Heart className="text-gray-300 w-8 h-8 mb-8" />
-          <h2 className="font-display text-4xl md:text-5xl text-gray-900 mb-6">
-            Want me to do for you what I did for MJ?
-          </h2>
-          <p className="text-[15px] text-gray-500 leading-relaxed mb-12 max-w-lg mx-auto">
-            I don't just train my girlfriend. I run a full online coaching program helping people stop guessing and actually build a physique that commands respect. If you want the exact step-by-step coaching, accountability, and custom programming to build your dream body...
-          </p>
-          
-          <Link href="/apply" className="group flex items-center gap-4 bg-[#0b1509] text-white font-semibold px-10 py-5 rounded-2xl hover:bg-black transition-all hover:scale-105 shadow-md">
-            <span className="text-sm">Apply For Coaching</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
-          <p className="text-[11px] text-gray-400 mt-6 tracking-wider uppercase">(Let me know MJ sent you!)</p>
-        </div>
-      </section>
+          <figure className="my-10 md:my-12">
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                <Image
+                  src="/before-after/before_IMG_3936.jpg"
+                  alt="Before"
+                  width={1200}
+                  height={1600}
+                  sizes="(min-width: 768px) 336px, 50vw"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                <Image
+                  src="/before-after/before_IMG_6112.jpg"
+                  alt="Before"
+                  width={1200}
+                  height={1600}
+                  sizes="(min-width: 768px) 336px, 50vw"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
+              The starting point.
+            </figcaption>
+          </figure>
 
-      {/* FOOTER */}
-      <footer className="py-10 px-10 md:px-24 bg-gray-50 flex flex-col md:flex-row items-center justify-between border-t border-gray-200 text-[11px] font-mono tracking-widest uppercase text-gray-400 gap-6">
-        <div className="flex-1 flex justify-center md:justify-start w-full md:w-auto">
-          <p>&copy; 2026 Zana Fitness</p>
+          {/* SECTION 02 */}
+          <SectionHeader
+            num="02"
+            label="Phase 2"
+            title={<>Training for Shape, Not Sweat</>}
+          />
+          <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
+            <p>Sweating a lot does not equal a good workout. We ditched the endless cardio and moved to the weight room.</p>
+            
+            <ul className="space-y-4 pl-6 list-disc marker:text-[#65a30d]">
+              <li>
+                <strong className="text-[#0a0a0a] font-semibold">Progressive Overload:</strong> We picked a few core exercises (RDLs, hip thrusts, split squats, shoulder presses) and focused on getting stronger at them every single week.
+              </li>
+              <li>
+                <strong className="text-[#0a0a0a] font-semibold">Building the "Illusion":</strong> To get that hourglass, "snatched" look, we focused heavily on building her glutes and her shoulders. When your shoulders and glutes grow, your waist naturally looks smaller.
+              </li>
+              <li>
+                <strong className="text-[#0a0a0a] font-semibold">Rest Days:</strong> I forced her to take rest days. You don't grow in the gym; you grow when you recover.
+              </li>
+            </ul>
+          </div>
+
+          {/* ── MID-ARTICLE CTA ─────────────────────────────────────────────── */}
+          <aside className="my-14 md:my-16 py-6 md:py-7 px-6 md:px-7 border-l-2 border-[#65a30d] bg-[#65a30d]/5 rounded-r-xl">
+            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mb-2">
+              Coaching
+            </p>
+            <p className="font-display text-lg md:text-xl leading-snug text-[#0a0a0a] mb-3">
+              Want the exact custom programming I built for MJ?
+            </p>
+            <Link
+              href="/apply"
+              className="inline-flex items-center gap-1.5 text-[#4d7c0f] font-semibold text-sm hover:text-[#365314] transition-colors border-b border-[#4d7c0f]/30 pb-0.5"
+            >
+              Apply to work with me <span aria-hidden="true">→</span>
+            </Link>
+          </aside>
+
+          {/* SECTION 03 */}
+          <SectionHeader
+            num="03"
+            label="Phase 3"
+            title={<>The Mindset Shift</>}
+          />
+          <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
+            <p>The hardest part wasn't the workouts—it was the mental shift of seeing the scale go UP, but realizing her body looked tighter, leaner, and better than ever.</p>
+            
+            <ul className="space-y-4 pl-6 list-disc marker:text-[#65a30d]">
+              <li>
+                <strong className="text-[#0a0a0a] font-semibold">Throw away the scale:</strong> Muscle is denser than fat. She gained weight, but she dropped dress sizes.
+              </li>
+              <li>
+                <strong className="text-[#0a0a0a] font-semibold">Consistency over perfection:</strong> We didn't aim for 100% perfection. We aimed for 80% consistency over a long period of time.
+              </li>
+            </ul>
+          </div>
+
+          {/* ── BEFORE / AFTER RESULTS ───────────────────────────────────────── */}
+          <figure className="my-14 md:my-16">
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <figure>
+                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                  <Image
+                    src="/before-after/before_IMG_1275.jpg"
+                    alt="Before"
+                    width={1600}
+                    height={1200}
+                    sizes="(min-width: 768px) 336px, 50vw"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
+                  Before
+                </figcaption>
+              </figure>
+              <figure>
+                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                  <Image
+                    src="/before-after/after_IMG_4277.jpg"
+                    alt="After"
+                    width={1200}
+                    height={1600}
+                    sizes="(min-width: 768px) 336px, 50vw"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
+                  After
+                </figcaption>
+              </figure>
+            </div>
+          </figure>
+
+          <figure className="my-10 md:my-12">
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                <Image
+                  src="/before-after/after_IMG_4865.jpg"
+                  alt="After"
+                  width={1320}
+                  height={2065}
+                  sizes="(min-width: 768px) 332px, 50vw"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                <Image
+                  src="/before-after/after_IMG_5492.jpg"
+                  alt="After"
+                  width={1320}
+                  height={2308}
+                  sizes="(min-width: 768px) 332px, 50vw"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
+              The Protocol applied consistently.
+            </figcaption>
+          </figure>
+
+          {/* ── CALL TO ACTION ──────────────────────────────────────────────── */}
+          <aside className="mt-20 pt-12 border-t border-[#1f2937]/10">
+            <p className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mb-5">
+              Want me to do for you what I did for MJ?
+            </p>
+            <h3
+              className="font-display leading-[1.15] text-[#0a0a0a] mb-5"
+              style={{ fontSize: "clamp(24px, 3.5vw, 32px)" }}
+            >
+              I don't just train my girlfriend.<br />I run a full online coaching program.
+            </h3>
+            <p className="text-[16px] md:text-[17px] leading-[1.75] text-[#1f2937]/70 mb-8 max-w-xl">
+              If you want the exact step-by-step coaching, accountability, and custom programming to build your dream body — apply below.
+            </p>
+            <Link
+              href="/apply"
+              className="inline-flex items-center gap-3 bg-[#b0e455] text-[#0f1a0c] font-bold text-sm px-8 py-4 rounded-2xl hover:bg-[#c9f070] transition-colors"
+            >
+              Apply to Work With Me
+              <span aria-hidden="true">→</span>
+            </Link>
+            <p className="text-[12px] text-[#1f2937]/45 mt-5 tracking-wide">
+              (Let me know MJ sent you!)
+            </p>
+          </aside>
+
+          {/* SIGNATURE */}
+          <div className="mt-24 pt-10 border-t border-[#1f2937]/10 flex items-center gap-4">
+            <ZanaLogo className="h-4 text-[#1f2937]/35" />
+            <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/40">
+              Javi · @javi_zana
+            </span>
+          </div>
         </div>
-        <div className="flex-1 flex justify-center">
-          <ZanaLogo className="h-3 text-gray-300" />
-        </div>
-        <div className="flex-1 flex justify-center md:justify-end gap-5 w-full md:w-auto">
-          <a href="https://www.instagram.com/javi_zana/" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">Instagram</a>
-          <a href="https://www.tiktok.com/@javi_zana?lang=en" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 transition-colors">TikTok</a>
-        </div>
-      </footer>
+      </article>
 
     </main>
   );
