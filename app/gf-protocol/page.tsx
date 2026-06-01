@@ -132,7 +132,7 @@ export default function GFProtocolPage() {
             <div className="grid grid-cols-2 gap-2 md:gap-3">
               <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                 <Image
-                  src="/before-after/before_IMG_1275.jpg"
+                  src="/before-after/before_1.jpg"
                   alt="Before"
                   width={1200}
                   height={1600}
@@ -142,7 +142,7 @@ export default function GFProtocolPage() {
               </div>
               <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                 <Image
-                  src="/before-after/before_IMG_1846.jpg"
+                  src="/before-after/before_2.jpg"
                   alt="Before"
                   width={1200}
                   height={1600}
@@ -222,7 +222,7 @@ export default function GFProtocolPage() {
                 <figure>
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                     <Image
-                      src="/before-after/before_IMG_2002.jpg"
+                      src="/before-after/before_3.jpg"
                       alt="Before"
                       width={1600}
                       height={1200}
@@ -237,7 +237,7 @@ export default function GFProtocolPage() {
                 <figure>
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                     <Image
-                      src="/before-after/after_IMG_4277.jpg"
+                      src="/before-after/after_1.jpg"
                       alt="After"
                       width={1200}
                       height={1600}
@@ -262,7 +262,7 @@ export default function GFProtocolPage() {
                 <figure>
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                     <Image
-                      src="/before-after/before_IMG_3936.jpg"
+                      src="/before-after/before_4.jpg"
                       alt="Before"
                       width={1600}
                       height={1200}
@@ -277,7 +277,7 @@ export default function GFProtocolPage() {
                 <figure>
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                     <Image
-                      src="/before-after/after_IMG_4688.jpg"
+                      src="/before-after/after_2.jpg"
                       alt="After"
                       width={1200}
                       height={1600}
@@ -301,7 +301,7 @@ export default function GFProtocolPage() {
               <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                   <Image
-                    src="/before-after/after_IMG_4865.jpg"
+                    src="/before-after/after_3.jpg"
                     alt="After"
                     width={1320}
                     height={2065}
@@ -311,7 +311,7 @@ export default function GFProtocolPage() {
                 </div>
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                   <Image
-                    src="/before-after/after_IMG_5492.jpg"
+                    src="/before-after/after_4.jpg"
                     alt="After"
                     width={1320}
                     height={2308}
