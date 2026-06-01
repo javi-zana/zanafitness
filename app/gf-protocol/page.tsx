@@ -87,11 +87,11 @@ export default function GFProtocolPage() {
 
         {/* ── DISCLAIMER ──────────────────────────────────────────────────────── */}
         <div className="max-w-2xl mx-auto pt-8 pb-4">
-          <div className="bg-[#f3f4f6] rounded-xl p-4 md:p-5">
-            <p className="font-bold text-[13px] md:text-[14px] text-[#4b5563] mb-1">
+          <div className="bg-[#e5e7eb] rounded-xl p-5 md:p-6">
+            <p className="font-display font-bold text-[16px] md:text-[18px] text-[#111827] mb-2">
               Disclaimer Before The Internet Cancels Me
             </p>
-            <p className="text-[#4b5563] text-[12px] md:text-[13px] leading-relaxed">
+            <p className="text-[#374151] text-[13px] md:text-[14px] leading-relaxed">
               I love my girlfriend exactly the way she is, and I thought she looked perfect before. She specifically came to me complaining that she felt "flabby" despite being skinny, and explicitly asked me to write her a program. I am just a boyfriend following instructions so my girlfriend stays happy. 😅
             </p>
           </div>
