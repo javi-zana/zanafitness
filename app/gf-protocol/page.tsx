@@ -65,11 +65,11 @@ export default function GFProtocolPage() {
 
           <h1
             className="font-display text-[#0a0a0a] mb-8 leading-[1.35] tracking-tight"
-            style={{ fontSize: "clamp(40px, 6.5vw, 72px)" }}
+            style={{ fontSize: "clamp(32px, 5vw, 56px)" }}
           >
-            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block">How I helped build</span><br />
-            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block">my girlfriend the body</span><br />
-            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block">she wanted.</span>
+            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block whitespace-nowrap">How I helped build my</span><br />
+            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block whitespace-nowrap">girlfriend the body</span><br />
+            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block whitespace-nowrap">she wanted.</span>
           </h1>
 
           <p className="text-[#1f2937]/65 text-lg md:text-xl leading-relaxed mb-10">
