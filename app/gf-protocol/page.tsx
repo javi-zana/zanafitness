@@ -178,6 +178,45 @@ export default function GFProtocolPage() {
             </ul>
           </div>
 
+          <div className="my-14 md:my-16">
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <figure>
+                <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
+                  <Image
+                    src="/before-after/before_3.png"
+                    alt="Before"
+                    width={638}
+                    height={736}
+                    sizes="(min-width: 768px) 336px, 50vw"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
+                  Before
+                </figcaption>
+              </figure>
+              <figure>
+                <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
+                  <Image
+                    src="/before-after/after_1.png"
+                    alt="After"
+                    width={576}
+                    height={860}
+                    sizes="(min-width: 768px) 336px, 50vw"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
+                  After
+                </figcaption>
+              </figure>
+            </div>
+            
+            <div className="mt-8 max-w-2xl mx-auto space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85 text-center italic">
+              <p>The physical changes were undeniable. She built the shape she always wanted without starving herself.</p>
+            </div>
+          </div>
+
           {/* ── MID-ARTICLE CTA ─────────────────────────────────────────────── */}
           <aside className="my-14 md:my-16 py-6 md:py-7 px-6 md:px-7 border-l-2 border-[#65a30d] bg-[#65a30d]/5 rounded-r-xl">
             <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mb-2">
@@ -216,45 +255,7 @@ export default function GFProtocolPage() {
           {/* ── BEFORE / AFTER RESULTS ───────────────────────────────────────── */}
           <div className="my-14 md:my-16 space-y-16">
             
-            {/* Pair 1: Before 3 / After 1 */}
-            <div>
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                <figure>
-                  <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
-                    <Image
-                      src="/before-after/before_3.png"
-                      alt="Before"
-                      width={638}
-                      height={736}
-                      sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
-                    Before
-                  </figcaption>
-                </figure>
-                <figure>
-                  <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
-                    <Image
-                      src="/before-after/after_1.png"
-                      alt="After"
-                      width={576}
-                      height={860}
-                      sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
-                    After
-                  </figcaption>
-                </figure>
-              </div>
-              
-              <div className="mt-8 max-w-2xl mx-auto space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85 text-center italic">
-                <p>The physical changes were undeniable. She built the shape she always wanted without starving herself.</p>
-              </div>
-            </div>
+
 
             {/* Pair 2: Before 4 / After 2 */}
             <div>
