@@ -132,22 +132,22 @@ export default function GFProtocolPage() {
             <div className="grid grid-cols-2 gap-2 md:gap-3">
               <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                 <Image
-                  src="/before-after/before_IMG_3936.jpg"
+                  src="/before-after/before_IMG_1275.jpg"
                   alt="Before"
                   width={1200}
                   height={1600}
                   sizes="(min-width: 768px) 336px, 50vw"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-[center_80%]"
                 />
               </div>
               <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                 <Image
-                  src="/before-after/before_IMG_6112.jpg"
+                  src="/before-after/before_IMG_1846.jpg"
                   alt="Before"
                   width={1200}
                   height={1600}
                   sizes="(min-width: 768px) 336px, 50vw"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-[center_80%]"
                 />
               </div>
             </div>
@@ -214,24 +214,38 @@ export default function GFProtocolPage() {
           </div>
 
           {/* ── BEFORE / AFTER RESULTS ───────────────────────────────────────── */}
-          <figure className="my-14 md:my-16">
-            <div className="grid grid-cols-2 gap-3 md:gap-4">
-              <figure>
+          <div className="my-14 md:my-16 space-y-12">
+            
+            <figure>
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                   <Image
-                    src="/before-after/before_IMG_1275.jpg"
+                    src="/before-after/before_IMG_2002.jpg"
                     alt="Before"
                     width={1600}
                     height={1200}
                     sizes="(min-width: 768px) 336px, 50vw"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-[center_80%]"
                   />
                 </div>
-                <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
-                  Before
-                </figcaption>
-              </figure>
-              <figure>
+                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                  <Image
+                    src="/before-after/before_IMG_3936.jpg"
+                    alt="Before"
+                    width={1600}
+                    height={1200}
+                    sizes="(min-width: 768px) 336px, 50vw"
+                    className="w-full h-full object-cover object-[center_80%]"
+                  />
+                </div>
+              </div>
+              <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
+                Before Protocol
+              </figcaption>
+            </figure>
+
+            <figure>
+              <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                   <Image
                     src="/before-after/after_IMG_4277.jpg"
@@ -239,43 +253,47 @@ export default function GFProtocolPage() {
                     width={1200}
                     height={1600}
                     sizes="(min-width: 768px) 336px, 50vw"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-[center_60%]"
                   />
                 </div>
-                <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
-                  After
-                </figcaption>
-              </figure>
-            </div>
-          </figure>
-
-          <figure className="my-10 md:my-12">
-            <div className="grid grid-cols-2 gap-3 md:gap-4">
-              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
-                <Image
-                  src="/before-after/after_IMG_4865.jpg"
-                  alt="After"
-                  width={1320}
-                  height={2065}
-                  sizes="(min-width: 768px) 332px, 50vw"
-                  className="w-full h-full object-cover"
-                />
+                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                  <Image
+                    src="/before-after/after_IMG_4688.jpg"
+                    alt="After"
+                    width={1200}
+                    height={1600}
+                    sizes="(min-width: 768px) 336px, 50vw"
+                    className="w-full h-full object-cover object-[center_60%]"
+                  />
+                </div>
               </div>
-              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
-                <Image
-                  src="/before-after/after_IMG_5492.jpg"
-                  alt="After"
-                  width={1320}
-                  height={2308}
-                  sizes="(min-width: 768px) 332px, 50vw"
-                  className="w-full h-full object-cover"
-                />
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
+                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                  <Image
+                    src="/before-after/after_IMG_4865.jpg"
+                    alt="After"
+                    width={1320}
+                    height={2065}
+                    sizes="(min-width: 768px) 332px, 50vw"
+                    className="w-full h-full object-cover object-[center_60%]"
+                  />
+                </div>
+                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                  <Image
+                    src="/before-after/after_IMG_5492.jpg"
+                    alt="After"
+                    width={1320}
+                    height={2308}
+                    sizes="(min-width: 768px) 332px, 50vw"
+                    className="w-full h-full object-cover object-[center_60%]"
+                  />
+                </div>
               </div>
-            </div>
-            <figcaption className="text-center text-[12px] text-[#1f2937]/45 mt-3 italic tracking-wide">
-              The Protocol applied consistently.
-            </figcaption>
-          </figure>
+              <figcaption className="text-center text-[12px] text-[#65a30d] font-bold uppercase mt-3 tracking-wide">
+                The Protocol applied consistently
+              </figcaption>
+            </figure>
+          </div>
 
           {/* ── CALL TO ACTION ──────────────────────────────────────────────── */}
           <aside className="mt-20 pt-12 border-t border-[#1f2937]/10">
