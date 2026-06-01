@@ -165,7 +165,7 @@ export default function PricingPage() {
           <div className="w-6 h-px bg-[#b0e455]/30 mb-8" />
 
           <h1 className="font-display leading-none mb-12" style={{ fontSize: "clamp(48px, 7vw, 88px)" }}>
-            Pricing.
+            The Zana Fitness Program.
           </h1>
 
           {/* Javi quote as hook */}
@@ -202,21 +202,21 @@ export default function PricingPage() {
               {
                 icon: <TrendingUp className="w-5 h-5 text-[#b0e455] stroke-1" />,
                 num: "01",
-                title: "Training",
+                title: "Aesthetic, lean physique",
                 sub: "Built for your schedule",
                 desc: "45–60 min sessions, 4 days a week. Progressive splits that fit around client calls, travel, and late nights — not a bodybuilder's routine.",
               },
               {
                 icon: <Leaf className="w-5 h-5 text-[#b0e455] stroke-1" />,
                 num: "02",
-                title: "Nutrition",
+                title: "Habit-based diet",
                 sub: "Clarity, not restriction",
                 desc: "Clear macro targets and food habits that work wherever you are. No tracking obsession. No elimination diets. Just something you can actually follow.",
               },
               {
                 icon: <Target className="w-5 h-5 text-[#b0e455] stroke-[1.5]" />,
                 num: "03",
-                title: "Guidance",
+                title: "Weekly checkins",
                 sub: "Accountability that adapts",
                 desc: "Weekly check-ins with a coach who knows your world. Client dinners, travel, a schedule that changes — when life shifts, the plan shifts with it.",
               },
