@@ -137,7 +137,7 @@ export default function GFProtocolPage() {
                   width={1200}
                   height={1600}
                   sizes="(min-width: 768px) 336px, 50vw"
-                  className="w-full h-full object-cover object-[center_80%]"
+                  className="w-full h-full object-cover scale-[1.10] object-[center_85%]"
                 />
               </div>
               <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
@@ -147,7 +147,7 @@ export default function GFProtocolPage() {
                   width={1200}
                   height={1600}
                   sizes="(min-width: 768px) 336px, 50vw"
-                  className="w-full h-full object-cover object-[center_80%]"
+                  className="w-full h-full object-cover scale-[1.15] object-[center_90%]"
                 />
               </div>
             </div>
@@ -227,7 +227,7 @@ export default function GFProtocolPage() {
                       width={1600}
                       height={1200}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover object-[center_80%]"
+                      className="w-full h-full object-cover scale-[1.15] object-[center_90%]"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
@@ -242,7 +242,7 @@ export default function GFProtocolPage() {
                       width={1200}
                       height={1600}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover object-[center_60%]"
+                      className="w-full h-full object-cover scale-[1.15] object-[center_85%]"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
@@ -267,7 +267,7 @@ export default function GFProtocolPage() {
                       width={1600}
                       height={1200}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover object-[center_80%]"
+                      className="w-full h-full object-cover scale-[1.15] object-[center_90%]"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
@@ -282,7 +282,7 @@ export default function GFProtocolPage() {
                       width={1200}
                       height={1600}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover object-[center_60%]"
+                      className="w-full h-full object-cover scale-[1.15] object-[center_85%]"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
@@ -306,7 +306,7 @@ export default function GFProtocolPage() {
                     width={1320}
                     height={2065}
                     sizes="(min-width: 768px) 332px, 50vw"
-                    className="w-full h-full object-cover object-[center_60%]"
+                    className="w-full h-full object-cover scale-[1.15] object-[center_85%]"
                   />
                 </div>
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
@@ -316,7 +316,7 @@ export default function GFProtocolPage() {
                     width={1320}
                     height={2308}
                     sizes="(min-width: 768px) 332px, 50vw"
-                    className="w-full h-full object-cover object-[center_60%]"
+                    className="w-full h-full object-cover scale-[1.15] object-[center_85%]"
                   />
                 </div>
               </div>
