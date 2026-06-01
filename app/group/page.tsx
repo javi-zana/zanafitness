@@ -17,22 +17,26 @@ type Feature = { text: string; included: boolean; emphasize?: string };
 function PlanCard({
   label,
   months,
-  price,
-  total,
+  monthly,
+  upfront,
   checkoutUrl,
   features,
   featured,
+  badge,
 }: {
   label: string;
   months: number;
-  price: number;
-  total: number;
+  monthly: number;
+  upfront: number;
   checkoutUrl: string;
   features: Feature[];
   featured?: boolean;
+  badge?: string;
 }) {
   const dim = featured ? "text-[#0f1a0c]/50" : "text-[#edf5e2]/35";
   const bright = featured ? "text-[#0f1a0c]" : "text-[#edf5e2]";
+  const monthlyTotal = monthly * months;
+  const savings = monthlyTotal - upfront;
 
   return (
     <div
@@ -51,30 +55,30 @@ function PlanCard({
       <div className={`px-8 pt-8 pb-6 border-b ${featured ? "border-[#0f1a0c]/10" : "border-[#b0e455]/8"}`}>
         <div className="flex items-center justify-between min-h-[24px] mb-4">
           <p className={`text-[10px] font-bold tracking-[0.2em] uppercase ${featured ? "text-[#0f1a0c]/50" : "text-[#b0e455]"}`}>{label}</p>
-          {featured ? (
+          {badge ? (
             <span className="inline-block bg-[#0f1a0c] text-[#b0e455] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">
-              Group Coaching
+              {badge}
             </span>
           ) : (
-            <span className="inline-block text-[10px] px-3 py-1 opacity-0 select-none">Group Coaching</span>
+            <span className="inline-block text-[10px] px-3 py-1 opacity-0 select-none">Best Value</span>
           )}
         </div>
 
-        {/* Total price — hero */}
+        {/* Upfront price — hero */}
         <div className="flex items-baseline gap-2 mb-1">
-          <span className={`font-display text-5xl leading-none ${bright}`}>${total.toLocaleString()}</span>
-          <span className={`text-base font-semibold ${dim}`}>total</span>
+          <span className={`font-display text-5xl leading-none ${bright}`}>${upfront.toLocaleString()}</span>
+          <span className={`text-base font-semibold ${dim}`}>upfront</span>
         </div>
-        <p className={`text-xs mb-5 ${dim}`}>over {months} months</p>
+        <p className={`text-xs mb-5 ${dim}`}>paid in full · {months} months · save ${savings.toLocaleString()}</p>
 
-        {/* Monthly fee — secondary */}
+        {/* Monthly option — secondary */}
         <div className={`flex items-center justify-between rounded-2xl px-4 py-3 ${featured ? "bg-[#0f1a0c]/8" : "bg-[#b0e455]/6"}`}>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className={`font-display text-2xl leading-none ${bright}`}>${price}</span>
+              <span className={`font-display text-2xl leading-none ${bright}`}>${monthly}</span>
               <span className={`text-xs font-semibold ${dim}`}>/month</span>
             </div>
-            <p className={`text-[10px] mt-1 ${dim}`}>billed monthly for {months} months</p>
+            <p className={`text-[10px] mt-1 ${dim}`}>billed monthly · ${monthlyTotal.toLocaleString()} over {months} months</p>
           </div>
         </div>
       </div>
@@ -136,7 +140,7 @@ const groupFeatures: Feature[] = [
   { text: "Guided onboarding sequence", included: true, emphasize: "onboarding" },
   { text: "Weekly group coaching calls", included: true, emphasize: "group coaching calls" },
   { text: "The full Zana system, with a community", included: true },
-  { text: "1-on-1 weekly check-ins with Javi", included: false },
+  { text: "Private weekly check-ins with Javi", included: false },
   { text: "Direct access to Javi", included: false },
 ];
 
@@ -157,7 +161,7 @@ export default function GroupPricingPage() {
           {/* Javi quote as hook */}
           <div className="max-w-lg">
             <p className="text-[#edf5e2]/80 text-lg md:text-xl leading-relaxed font-light italic">
-              &ldquo;Same system I coach 1-on-1 — the programs, the habits, the accountability — now run as a group. You get the full method at a fraction of the price.&rdquo;
+              &ldquo;The programs, the habits, the accountability — the full Zana method, run as a group. You get everything that works, at a fraction of the price.&rdquo;
             </p>
             <div className="flex items-center justify-center gap-3 mt-6">
               <div className="w-8 h-px bg-[#b0e455]/40" />
@@ -204,7 +208,7 @@ export default function GroupPricingPage() {
                 num: "03",
                 title: "Weekly group calls",
                 sub: "Accountability that adapts",
-                desc: "Weekly group coaching calls that mirror the 1-on-1 program. Bring your week, get your plan adjusted, and stay accountable alongside people on the same path.",
+                desc: "Weekly group coaching calls to bring your week, get your plan adjusted, and stay accountable alongside people on the same path.",
               },
             ].map(p => (
               <div key={p.num} className="bg-[#162212] rounded-3xl p-7 border border-[#b0e455]/6 hover:border-[#b0e455]/14 transition-colors">
@@ -239,21 +243,32 @@ export default function GroupPricingPage() {
 
       {/* ── PRICING ───────────────────────────────────────────────────────────── */}
       <section className="py-20 px-6 border-t border-[#b0e455]/6" id="pricing">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-4">The plan</p>
-            <h2 className="font-display leading-[1.05] mb-3" style={{ fontSize: "clamp(30px, 4vw, 52px)" }}>One system.<br />One group.</h2>
-            <p className="text-sm text-[#edf5e2]/35">The full Zana method, coached as a group.</p>
+            <h2 className="font-display leading-[1.05] mb-3" style={{ fontSize: "clamp(30px, 4vw, 52px)" }}>Choose your<br />commitment.</h2>
+            <p className="text-sm text-[#edf5e2]/35">Same group system either way. Pay upfront and save.</p>
           </div>
-          <PlanCard
-            label="Group"
-            months={6}
-            price={200}
-            total={1200}
-            checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_PLAN"
-            features={groupFeatures}
-            featured
-          />
+          <div className="grid md:grid-cols-2 gap-5">
+            <PlanCard
+              label="4 Months"
+              months={4}
+              monthly={250}
+              upfront={900}
+              checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_4MO"
+              features={groupFeatures}
+            />
+            <PlanCard
+              label="12 Months"
+              months={12}
+              monthly={200}
+              upfront={2000}
+              checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_12MO"
+              features={groupFeatures}
+              featured
+              badge="Best Value"
+            />
+          </div>
           <p className="text-center text-xs text-[#edf5e2]/20 mt-7">7-day satisfaction guarantee · Secure checkout via Whop</p>
         </div>
       </section>
