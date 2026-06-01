@@ -86,13 +86,13 @@ export default function GFProtocolPage() {
         </header>
 
         {/* ── DISCLAIMER ──────────────────────────────────────────────────────── */}
-        <div className="max-w-2xl mx-auto pt-12 pb-4">
-          <div className="bg-[#65a30d]/5 border-l-2 border-[#65a30d] rounded-r-2xl p-6 md:p-8">
-            <p className="font-display text-xl md:text-2xl leading-snug text-[#0a0a0a] mb-3">
+        <div className="max-w-2xl mx-auto pt-8 pb-4">
+          <div className="bg-[#f3f4f6] rounded-xl p-4 md:p-5">
+            <p className="font-bold text-[13px] md:text-[14px] text-[#4b5563] mb-1">
               Disclaimer Before The Internet Cancels Me
             </p>
-            <p className="text-[#1f2937]/85 text-[15px] leading-relaxed">
-              I love my girlfriend exactly the way she is, and I thought she looked perfect before. She specifically came to me complaining that she felt "flabby" despite being skinny, and explicitly asked me to write her a program. I am just a boyfriend following instructions so my girlfriend stays happy. Please do not cancel me. 😅
+            <p className="text-[#4b5563] text-[12px] md:text-[13px] leading-relaxed">
+              I love my girlfriend exactly the way she is, and I thought she looked perfect before. She specifically came to me complaining that she felt "flabby" despite being skinny, and explicitly asked me to write her a program. I am just a boyfriend following instructions so my girlfriend stays happy. 😅
             </p>
           </div>
         </div>
