@@ -47,7 +47,7 @@ export default function GFProtocolPage() {
         </Link>
         <Link
           href="/apply"
-          className="text-xs font-semibold tracking-wide text-[#4d7c0f] hover:text-[#365314] transition-colors"
+          className="bg-[#b0e455] text-[#0a0a0a] text-xs font-bold px-5 py-2.5 rounded-full hover:bg-[#a3e635] transition-transform hover:scale-105 active:scale-95"
         >
           Apply →
         </Link>
@@ -64,10 +64,12 @@ export default function GFProtocolPage() {
           </div>
 
           <h1
-            className="font-display leading-[1.04] text-[#0a0a0a] mb-8"
+            className="font-display text-[#0a0a0a] mb-8 leading-[1.35] tracking-tight"
             style={{ fontSize: "clamp(40px, 6.5vw, 72px)" }}
           >
-            How I helped build<br />my girlfriend the body<br />she wanted.
+            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block">How I helped build</span><br />
+            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block">my girlfriend the body</span><br />
+            <span className="bg-[#b0e455] px-3 py-1 mb-2 inline-block">she wanted.</span>
           </h1>
 
           <p className="text-[#1f2937]/65 text-lg md:text-xl leading-relaxed mb-10">
@@ -218,16 +220,16 @@ export default function GFProtocolPage() {
           </div>
 
           {/* ── MID-ARTICLE CTA ─────────────────────────────────────────────── */}
-          <aside className="my-14 md:my-16 py-6 md:py-7 px-6 md:px-7 border-l-2 border-[#65a30d] bg-[#65a30d]/5 rounded-r-xl">
-            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mb-2">
+          <aside className="my-14 md:my-16 py-10 px-6 md:px-10 border-2 border-[#b0e455] bg-[#b0e455]/5 rounded-3xl text-center">
+            <p className="text-[12px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mb-4">
               Coaching
             </p>
-            <p className="font-display text-lg md:text-xl leading-snug text-[#0a0a0a] mb-3">
+            <p className="font-display text-2xl md:text-3xl leading-snug text-[#0a0a0a] mb-8 max-w-md mx-auto">
               Want the exact custom programming I built for MJ?
             </p>
             <Link
               href="/apply"
-              className="inline-flex items-center gap-1.5 text-[#4d7c0f] font-semibold text-sm hover:text-[#365314] transition-colors border-b border-[#4d7c0f]/30 pb-0.5"
+              className="inline-flex items-center gap-2 bg-[#b0e455] text-[#0a0a0a] font-bold text-[15px] px-8 py-4 rounded-full hover:bg-[#a3e635] transition-transform hover:scale-105 active:scale-95 shadow-sm"
             >
               Apply to work with me <span aria-hidden="true">→</span>
             </Link>
