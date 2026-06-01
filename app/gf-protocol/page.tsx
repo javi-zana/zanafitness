@@ -129,25 +129,25 @@ export default function GFProtocolPage() {
           </div>
 
           <figure className="my-10 md:my-12">
-            <div className="grid grid-cols-2 gap-2 md:gap-3 items-start">
-              <div className="rounded-2xl overflow-hidden bg-[#1f2937]/5">
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
+              <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
                 <Image
                   src="/before-after/before_1.png"
                   alt="Before"
                   width={908}
                   height={1100}
                   sizes="(min-width: 768px) 336px, 50vw"
-                  className="w-full h-auto object-contain"
+                  className="w-full h-full object-cover"
                 />
               </div>
-              <div className="rounded-2xl overflow-hidden bg-[#1f2937]/5">
+              <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
                 <Image
                   src="/before-after/before_2.png"
                   alt="Before"
                   width={640}
                   height={902}
                   sizes="(min-width: 768px) 336px, 50vw"
-                  className="w-full h-auto object-contain"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
@@ -218,16 +218,16 @@ export default function GFProtocolPage() {
             
             {/* Pair 1: Before 3 / After 1 */}
             <div>
-              <div className="grid grid-cols-2 gap-3 md:gap-4 items-start">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <figure>
-                  <div className="rounded-2xl overflow-hidden bg-[#1f2937]/5">
+                  <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
                     <Image
                       src="/before-after/before_3.png"
                       alt="Before"
                       width={638}
                       height={736}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-auto object-contain"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
@@ -235,14 +235,14 @@ export default function GFProtocolPage() {
                   </figcaption>
                 </figure>
                 <figure>
-                  <div className="rounded-2xl overflow-hidden bg-[#1f2937]/5">
+                  <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
                     <Image
                       src="/before-after/after_1.png"
                       alt="After"
                       width={576}
                       height={860}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-auto object-contain"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
@@ -258,16 +258,16 @@ export default function GFProtocolPage() {
 
             {/* Pair 2: Before 4 / After 2 */}
             <div>
-              <div className="grid grid-cols-2 gap-3 md:gap-4 items-start">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <figure>
-                  <div className="rounded-2xl overflow-hidden bg-[#1f2937]/5">
+                  <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
                     <Image
                       src="/before-after/before_4.png"
                       alt="Before"
                       width={690}
                       height={852}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-auto object-contain"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
@@ -275,14 +275,14 @@ export default function GFProtocolPage() {
                   </figcaption>
                 </figure>
                 <figure>
-                  <div className="rounded-2xl overflow-hidden bg-[#1f2937]/5">
+                  <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
                     <Image
                       src="/before-after/after_2.png"
                       alt="After"
                       width={572}
                       height={842}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-auto object-contain"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
@@ -298,25 +298,25 @@ export default function GFProtocolPage() {
 
             {/* After 3 & 4 */}
             <figure>
-              <div className="grid grid-cols-2 gap-3 md:gap-4 items-start">
-                <div className="rounded-2xl overflow-hidden bg-[#1f2937]/5">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
+                <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
                   <Image
                     src="/before-after/after_3.png"
                     alt="After"
                     width={530}
                     height={818}
                     sizes="(min-width: 768px) 332px, 50vw"
-                    className="w-full h-auto object-contain"
+                    className="w-full h-full object-cover"
                   />
                 </div>
-                <div className="rounded-2xl overflow-hidden bg-[#1f2937]/5">
+                <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-[#1f2937]/5">
                   <Image
                     src="/before-after/after_4.png"
                     alt="After"
                     width={540}
                     height={844}
                     sizes="(min-width: 768px) 332px, 50vw"
-                    className="w-full h-auto object-contain"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </div>
