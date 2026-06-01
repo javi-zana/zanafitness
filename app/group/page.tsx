@@ -253,16 +253,16 @@ export default function GroupPricingPage() {
             <PlanCard
               label="4 Months"
               months={4}
-              monthly={200}
-              upfront={800}
+              monthly={250}
+              upfront={900}
               checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_4MO"
               features={groupFeatures}
             />
             <PlanCard
               label="12 Months"
               months={12}
-              monthly={150}
-              upfront={1500}
+              monthly={200}
+              upfront={2000}
               checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_12MO"
               features={groupFeatures}
               featured
