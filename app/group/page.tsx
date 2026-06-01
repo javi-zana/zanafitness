@@ -69,7 +69,7 @@ function PlanCard({
           <span className={`font-display text-5xl leading-none ${bright}`}>${upfront.toLocaleString()}</span>
           <span className={`text-base font-semibold ${dim}`}>upfront</span>
         </div>
-        <p className={`text-xs mb-5 ${dim}`}>paid in full · {months} months · save ${savings.toLocaleString()}</p>
+        <p className={`text-xs mb-5 ${dim}`}>paid in full · {months} months{savings > 0 ? ` · save $${savings.toLocaleString()}` : ""}</p>
 
         {/* Monthly option — secondary */}
         <div className={`flex items-center justify-between rounded-2xl px-4 py-3 ${featured ? "bg-[#0f1a0c]/8" : "bg-[#b0e455]/6"}`}>
@@ -253,16 +253,16 @@ export default function GroupPricingPage() {
             <PlanCard
               label="4 Months"
               months={4}
-              monthly={250}
-              upfront={900}
+              monthly={200}
+              upfront={800}
               checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_4MO"
               features={groupFeatures}
             />
             <PlanCard
               label="12 Months"
               months={12}
-              monthly={200}
-              upfront={2000}
+              monthly={150}
+              upfront={1500}
               checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_12MO"
               features={groupFeatures}
               featured
