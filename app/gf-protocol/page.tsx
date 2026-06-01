@@ -132,22 +132,22 @@ export default function GFProtocolPage() {
             <div className="grid grid-cols-2 gap-2 md:gap-3">
               <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                 <Image
-                  src="/before-after/before_1.jpg"
+                  src="/before-after/before_1.png"
                   alt="Before"
                   width={1200}
                   height={1600}
                   sizes="(min-width: 768px) 336px, 50vw"
-                  className="w-full h-full object-cover scale-[1.10] object-[center_85%]"
+                  className="w-full h-full object-cover"
                 />
               </div>
               <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                 <Image
-                  src="/before-after/before_2.jpg"
+                  src="/before-after/before_2.png"
                   alt="Before"
                   width={1200}
                   height={1600}
                   sizes="(min-width: 768px) 336px, 50vw"
-                  className="w-full h-full object-cover scale-[1.15] object-[center_90%]"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
@@ -222,12 +222,12 @@ export default function GFProtocolPage() {
                 <figure>
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                     <Image
-                      src="/before-after/before_3.jpg"
+                      src="/before-after/before_3.png"
                       alt="Before"
                       width={1600}
                       height={1200}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover scale-[1.15] object-[center_90%]"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
@@ -237,12 +237,12 @@ export default function GFProtocolPage() {
                 <figure>
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                     <Image
-                      src="/before-after/after_1.jpg"
+                      src="/before-after/after_1.png"
                       alt="After"
                       width={1200}
                       height={1600}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover scale-[1.15] object-[center_85%]"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
@@ -262,12 +262,12 @@ export default function GFProtocolPage() {
                 <figure>
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                     <Image
-                      src="/before-after/before_4.jpg"
+                      src="/before-after/before_4.png"
                       alt="Before"
                       width={1600}
                       height={1200}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover scale-[1.15] object-[center_90%]"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
@@ -277,12 +277,12 @@ export default function GFProtocolPage() {
                 <figure>
                   <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                     <Image
-                      src="/before-after/after_2.jpg"
+                      src="/before-after/after_2.png"
                       alt="After"
                       width={1200}
                       height={1600}
                       sizes="(min-width: 768px) 336px, 50vw"
-                      className="w-full h-full object-cover scale-[1.15] object-[center_85%]"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
@@ -301,22 +301,22 @@ export default function GFProtocolPage() {
               <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                   <Image
-                    src="/before-after/after_3.jpg"
+                    src="/before-after/after_3.png"
                     alt="After"
                     width={1320}
                     height={2065}
                     sizes="(min-width: 768px) 332px, 50vw"
-                    className="w-full h-full object-cover scale-[1.15] object-[center_85%]"
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                   <Image
-                    src="/before-after/after_4.jpg"
+                    src="/before-after/after_4.png"
                     alt="After"
                     width={1320}
                     height={2308}
                     sizes="(min-width: 768px) 332px, 50vw"
-                    className="w-full h-full object-cover scale-[1.15] object-[center_85%]"
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </div>
