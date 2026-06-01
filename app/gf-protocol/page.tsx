@@ -103,7 +103,7 @@ export default function GFProtocolPage() {
           {/* INTRO */}
           <div className="space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85">
             <p>Hey, I'm Javi. I'm a fitness coach, and yes, I'm the guy who "made" my girlfriend change her body (because she asked me to, I promise).</p>
-            <p>At the time, <strong className="text-[#0a0a0a] font-semibold">MJ was a full-time medical student.</strong> She was so busy trying to survive med school that she completely forgot how to take care of herself.</p>
+            <p><strong className="text-[#0a0a0a] font-semibold">MJ is a full-time medical student currently doing clinical rotations.</strong> She is so busy trying to survive med school that she has <strong className="text-[#0a0a0a] font-semibold">absolutely no free time</strong> and completely forgot how to take care of herself.</p>
             <p>She had a very common problem: <strong className="text-[#0a0a0a] font-semibold">she was skinny, but she wasn't in shape.</strong> She was eating like a bird, doing random cardio, and feeling frustrated that she still felt "soft." She didn't need to lose weight—she needed to completely change her body composition, but she had <strong className="text-[#0a0a0a] font-semibold">literally zero free time.</strong></p>
             <p>So, I built a system specifically for girls who have absolutely no time. Here is the exact framework I used to help her fix her eating habits, build the right kind of curves, and finally feel confident.</p>
           </div>
