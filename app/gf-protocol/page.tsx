@@ -214,59 +214,90 @@ export default function GFProtocolPage() {
           </div>
 
           {/* ── BEFORE / AFTER RESULTS ───────────────────────────────────────── */}
-          <div className="my-14 md:my-16 space-y-12">
+          <div className="my-14 md:my-16 space-y-16">
             
-            <figure>
+            {/* Pair 1: Before 3 / After 1 */}
+            <div>
               <div className="grid grid-cols-2 gap-3 md:gap-4">
-                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
-                  <Image
-                    src="/before-after/before_IMG_2002.jpg"
-                    alt="Before"
-                    width={1600}
-                    height={1200}
-                    sizes="(min-width: 768px) 336px, 50vw"
-                    className="w-full h-full object-cover object-[center_80%]"
-                  />
-                </div>
-                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
-                  <Image
-                    src="/before-after/before_IMG_3936.jpg"
-                    alt="Before"
-                    width={1600}
-                    height={1200}
-                    sizes="(min-width: 768px) 336px, 50vw"
-                    className="w-full h-full object-cover object-[center_80%]"
-                  />
-                </div>
+                <figure>
+                  <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                    <Image
+                      src="/before-after/before_IMG_2002.jpg"
+                      alt="Before"
+                      width={1600}
+                      height={1200}
+                      sizes="(min-width: 768px) 336px, 50vw"
+                      className="w-full h-full object-cover object-[center_80%]"
+                    />
+                  </div>
+                  <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
+                    Before
+                  </figcaption>
+                </figure>
+                <figure>
+                  <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                    <Image
+                      src="/before-after/after_IMG_4277.jpg"
+                      alt="After"
+                      width={1200}
+                      height={1600}
+                      sizes="(min-width: 768px) 336px, 50vw"
+                      className="w-full h-full object-cover object-[center_60%]"
+                    />
+                  </div>
+                  <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
+                    After
+                  </figcaption>
+                </figure>
               </div>
-              <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
-                Before Protocol
-              </figcaption>
-            </figure>
+              
+              <div className="mt-8 max-w-2xl mx-auto space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85 text-center italic">
+                <p>The physical changes were undeniable. She built the shape she always wanted without starving herself.</p>
+              </div>
+            </div>
 
-            <figure>
-              <div className="grid grid-cols-2 gap-3 md:gap-4 mb-3 md:mb-4">
-                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
-                  <Image
-                    src="/before-after/after_IMG_4277.jpg"
-                    alt="After"
-                    width={1200}
-                    height={1600}
-                    sizes="(min-width: 768px) 336px, 50vw"
-                    className="w-full h-full object-cover object-[center_60%]"
-                  />
-                </div>
-                <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
-                  <Image
-                    src="/before-after/after_IMG_4688.jpg"
-                    alt="After"
-                    width={1200}
-                    height={1600}
-                    sizes="(min-width: 768px) 336px, 50vw"
-                    className="w-full h-full object-cover object-[center_60%]"
-                  />
-                </div>
+            {/* Pair 2: Before 4 / After 2 */}
+            <div>
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
+                <figure>
+                  <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                    <Image
+                      src="/before-after/before_IMG_3936.jpg"
+                      alt="Before"
+                      width={1600}
+                      height={1200}
+                      sizes="(min-width: 768px) 336px, 50vw"
+                      className="w-full h-full object-cover object-[center_80%]"
+                    />
+                  </div>
+                  <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#1f2937]/45 mt-3">
+                    Before
+                  </figcaption>
+                </figure>
+                <figure>
+                  <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
+                    <Image
+                      src="/before-after/after_IMG_4688.jpg"
+                      alt="After"
+                      width={1200}
+                      height={1600}
+                      sizes="(min-width: 768px) 336px, 50vw"
+                      className="w-full h-full object-cover object-[center_60%]"
+                    />
+                  </div>
+                  <figcaption className="text-center text-[11px] font-bold tracking-[0.22em] uppercase text-[#65a30d] mt-3">
+                    After
+                  </figcaption>
+                </figure>
               </div>
+
+              <div className="mt-8 max-w-2xl mx-auto space-y-6 text-[17px] md:text-[18px] leading-[1.75] text-[#1f2937]/85 text-center italic">
+                <p>More importantly, her confidence skyrocketed. The body was just the physical proof of the mental shift.</p>
+              </div>
+            </div>
+
+            {/* After 3 & 4 */}
+            <figure>
               <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#1f2937]/5">
                   <Image
