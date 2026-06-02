@@ -126,7 +126,7 @@ function PlanCard({
               : "bg-[#b0e455] text-[#0f1a0c] hover:bg-[#c9f070]"
           }`}
         >
-          Start Now
+          Book Call
         </a>
       </div>
     </div>
@@ -139,7 +139,7 @@ const groupFeatures: Feature[] = [
   { text: "Habit-based nutrition guidance", included: true },
   { text: "Guided onboarding sequence", included: true, emphasize: "onboarding" },
   { text: "Weekly group coaching calls", included: true, emphasize: "group coaching calls" },
-  { text: "The full Zana system, with a community", included: true },
+  { text: "A private community of guys on the same path", included: true, emphasize: "community" },
   { text: "Private weekly check-ins with Javi", included: false },
   { text: "Direct access to Javi", included: false },
 ];
@@ -206,9 +206,9 @@ export default function GroupPricingPage() {
               {
                 icon: <Target className="w-5 h-5 text-[#b0e455] stroke-[1.5]" />,
                 num: "03",
-                title: "Weekly group calls",
-                sub: "Accountability that adapts",
-                desc: "Weekly group coaching calls to bring your week, get your plan adjusted, and stay accountable alongside people on the same path.",
+                title: "A community, not a solo grind",
+                sub: "You're not doing this alone",
+                desc: "Weekly group coaching calls and a private community of guys on the same path. Real accountability, shared wins, and people who get it — the part that actually keeps you consistent when motivation runs out.",
               },
             ].map(p => (
               <div key={p.num} className="bg-[#162212] rounded-3xl p-7 border border-[#b0e455]/6 hover:border-[#b0e455]/14 transition-colors">
@@ -255,7 +255,7 @@ export default function GroupPricingPage() {
               months={4}
               monthly={250}
               upfront={900}
-              checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_4MO"
+              checkoutUrl="https://cal.com/zanafitness/intro"
               features={groupFeatures}
             />
             <PlanCard
@@ -263,7 +263,7 @@ export default function GroupPricingPage() {
               months={12}
               monthly={200}
               upfront={2000}
-              checkoutUrl="https://whop.com/checkout/REPLACE_WITH_GROUP_12MO"
+              checkoutUrl="https://cal.com/zanafitness/intro"
               features={groupFeatures}
               featured
               badge="Best Value"

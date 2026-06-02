@@ -2584,8 +2584,8 @@ type Application = {
   why_now: string | null
 }
 
-type KanbanColKey = 'new' | 'call_booked' | 'waiting' | 'closed' | 'lost' | 'rejected'
-type MoveStatus = 'call_booked' | 'waiting' | 'won' | 'lost' | 'rejected'
+type KanbanColKey = 'new' | 'email_sent' | 'call_booked' | 'waiting' | 'closed' | 'lost' | 'rejected'
+type MoveStatus = 'accepted' | 'call_booked' | 'waiting' | 'won' | 'lost' | 'rejected'
 
 function appRelTime(dateStr: string) {
   const days = Math.floor((Date.now() - new Date(dateStr).getTime()) / 86_400_000)
@@ -2595,7 +2595,9 @@ function appRelTime(dateStr: string) {
 }
 
 function columnKey(status: Application['status']): KanbanColKey {
-  if (['accepted', 'call_booked'].includes(status)) return 'call_booked'
+  // 'accepted' = acceptance email sent, call not booked yet
+  if (status === 'accepted') return 'email_sent'
+  if (status === 'call_booked') return 'call_booked'
   if (status === 'waiting') return 'waiting'
   if (status === 'won') return 'closed'
   if (status === 'lost') return 'lost'
@@ -2605,6 +2607,7 @@ function columnKey(status: Application['status']): KanbanColKey {
 }
 
 function colToStatus(col: KanbanColKey): MoveStatus | null {
+  if (col === 'email_sent') return 'accepted'
   if (col === 'call_booked') return 'call_booked'
   if (col === 'waiting') return 'waiting'
   if (col === 'closed') return 'won'
@@ -2615,6 +2618,7 @@ function colToStatus(col: KanbanColKey): MoveStatus | null {
 
 const KANBAN_COLS: { key: KanbanColKey; label: string; accent: string; dim: string }[] = [
   { key: 'new',        label: 'New',         accent: '#fbbf24', dim: '#fbbf24/15' },
+  { key: 'email_sent', label: 'Email Sent',  accent: '#c084fc', dim: '#c084fc/15' },
   { key: 'call_booked',label: 'Call Booked', accent: '#b0e455', dim: '#b0e455/15' },
   { key: 'waiting',    label: 'Waiting',     accent: '#60a5fa', dim: '#60a5fa/15' },
   { key: 'closed',     label: 'Closed',      accent: '#22c55e', dim: '#22c55e/15' },
@@ -2681,7 +2685,7 @@ function ApplicationsSection() {
       })
       const json = await res.json().catch(() => ({}))
       if (res.ok) {
-        setApps(prev => prev.map(a => a.id === appId ? { ...a, status: 'call_booked', responded_at: new Date().toISOString() } : a))
+        setApps(prev => prev.map(a => a.id === appId ? { ...a, status: 'accepted', responded_at: new Date().toISOString() } : a))
         setActionState(s => ({ ...s, [appId]: 'done' }))
       } else {
         console.error('application-action error:', json.error)
@@ -2903,6 +2907,24 @@ function ApplicationsSection() {
                             style={{ backgroundColor: col.accent, color: '#0f1a0c' }}
                           >
                             {state === 'loading' ? '…' : state === 'done' ? '✓' : 'Accept'}
+                          </button>
+                        </div>
+                      )}
+                      {col.key === 'email_sent' && (
+                        <div className="flex gap-1.5 mt-2.5">
+                          <button
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'lost') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl border border-[var(--c-border2)] text-[10px] font-mono text-[var(--c-text4)] hover:text-[var(--c-text)] transition disabled:opacity-40"
+                          >
+                            → Lost
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); handleMove(app.id, 'call_booked') }}
+                            disabled={state === 'loading'}
+                            className="flex-1 py-1.5 rounded-xl text-[10px] font-mono font-semibold text-[#0f1a0c] bg-[#b0e455] hover:bg-[#9fd13e] transition disabled:opacity-40"
+                          >
+                            → Booked
                           </button>
                         </div>
                       )}

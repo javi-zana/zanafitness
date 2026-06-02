@@ -5,7 +5,7 @@ import { Resend } from 'resend'
 
 const ADMIN_EMAIL = 'me@javilorenzana.com'
 const FROM_EMAIL = 'Javier Lorenzana <javi@zanafitness.com>'
-const CALENDLY_URL = 'https://calendly.com/me-javilorenzana/30min?month=2026-05'
+const BOOKING_URL = 'https://cal.com/zanafitness/intro'
 
 function admin() {
   return createServiceClient(
@@ -84,7 +84,7 @@ function acceptEmailHtml(firstName: string) {
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:40px;">
             <tr>
               <td>
-                <a href="${CALENDLY_URL}"
+                <a href="${BOOKING_URL}"
                   style="display:inline-block;background-color:#b0e455;color:#1a3a06;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.5px;text-decoration:none;padding:15px 32px;border-radius:100px;">
                   Book Your Call →
                 </a>
@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
   }
 
   await db.from('applications').update({
-    status: 'call_booked',
+    status: 'accepted',
     responded_at: new Date().toISOString(),
   }).eq('id', applicationId)
 

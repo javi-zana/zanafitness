@@ -4,7 +4,7 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 
 const ADMIN_EMAIL = 'me@javilorenzana.com'
 
-const VALID_STATUSES = ['call_booked', 'waiting', 'won', 'lost', 'rejected'] as const
+const VALID_STATUSES = ['accepted', 'call_booked', 'waiting', 'won', 'lost', 'rejected'] as const
 type PipelineStatus = typeof VALID_STATUSES[number]
 
 function admin() {
