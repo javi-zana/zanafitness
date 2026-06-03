@@ -134,12 +134,12 @@ function PlanCard({
 }
 
 const groupFeatures: Feature[] = [
-  { text: "Access to the ZANA App", included: true },
-  { text: "Personalised training program", included: true, emphasize: "Personalised" },
-  { text: "Habit-based nutrition guidance", included: true },
-  { text: "Guided onboarding sequence", included: true, emphasize: "onboarding" },
-  { text: "Weekly group coaching calls", included: true, emphasize: "group coaching calls" },
-  { text: "A private community of guys on the same path", included: true, emphasize: "community" },
+  { text: "Weekly goal-setting and updates", included: true, emphasize: "goal-setting" },
+  { text: "Personalized training program", included: true, emphasize: "Personalized" },
+  { text: "Lifestyle-based nutrition guidance", included: true },
+  { text: "Library of fitness guides (diet, workouts, etc.)", included: true, emphasize: "Library of fitness guides" },
+  { text: "Weekly office hours", included: true, emphasize: "office hours" },
+  { text: "A private community of people on the same path", included: true, emphasize: "community" },
   { text: "Private weekly check-ins with Javi", included: false },
   { text: "Direct access to Javi", included: false },
 ];
@@ -208,7 +208,7 @@ export default function GroupPricingPage() {
                 num: "03",
                 title: "A community, not a solo grind",
                 sub: "You're not doing this alone",
-                desc: "Weekly group coaching calls and a private community of guys on the same path. Real accountability, shared wins, and people who get it — the part that actually keeps you consistent when motivation runs out.",
+                desc: "Weekly office hours and a private community of people on the same path. Real accountability, shared wins, and people who get it — the part that actually keeps you consistent when motivation runs out.",
               },
             ].map(p => (
               <div key={p.num} className="bg-[#162212] rounded-3xl p-7 border border-[#b0e455]/6 hover:border-[#b0e455]/14 transition-colors">
