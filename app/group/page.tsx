@@ -262,7 +262,7 @@ export default function GroupPricingPage() {
               label="12 Months"
               months={12}
               monthly={200}
-              upfront={2000}
+              upfront={1950}
               checkoutUrl="https://cal.com/zanafitness/intro"
               features={groupFeatures}
               featured
