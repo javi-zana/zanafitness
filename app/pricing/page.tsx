@@ -17,22 +17,26 @@ type Feature = { text: string; included: boolean; emphasize?: string };
 function PlanCard({
   label,
   months,
-  price,
-  total,
+  monthly,
+  upfront,
   checkoutUrl,
   features,
   featured,
+  badge,
 }: {
   label: string;
   months: number;
-  price: number;
-  total: number;
+  monthly: number;
+  upfront: number;
   checkoutUrl: string;
   features: Feature[];
   featured?: boolean;
+  badge?: string;
 }) {
   const dim = featured ? "text-[#0f1a0c]/50" : "text-[#edf5e2]/35";
   const bright = featured ? "text-[#0f1a0c]" : "text-[#edf5e2]";
+  const monthlyTotal = monthly * months;
+  const savings = monthlyTotal - upfront;
 
   return (
     <div
@@ -51,33 +55,30 @@ function PlanCard({
       <div className={`px-8 pt-8 pb-6 border-b ${featured ? "border-[#0f1a0c]/10" : "border-[#b0e455]/8"}`}>
         <div className="flex items-center justify-between min-h-[24px] mb-4">
           <p className={`text-[10px] font-bold tracking-[0.2em] uppercase ${featured ? "text-[#0f1a0c]/50" : "text-[#b0e455]"}`}>{label}</p>
-          {featured ? (
+          {badge ? (
             <span className="inline-block bg-[#0f1a0c] text-[#b0e455] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full">
-              Best Value
+              {badge}
             </span>
           ) : (
             <span className="inline-block text-[10px] px-3 py-1 opacity-0 select-none">Best Value</span>
           )}
         </div>
 
-        {/* Total price — hero */}
+        {/* Upfront price — hero */}
         <div className="flex items-baseline gap-2 mb-1">
-          <span className={`font-display text-5xl leading-none ${bright}`}>${total.toLocaleString()}</span>
-          <span className={`text-base font-semibold ${dim}`}>total</span>
+          <span className={`font-display text-5xl leading-none ${bright}`}>${upfront.toLocaleString()}</span>
+          <span className={`text-base font-semibold ${dim}`}>upfront</span>
         </div>
-        <p className={`text-xs mb-5 ${dim}`}>over {months} months</p>
+        <p className={`text-xs mb-5 ${dim}`}>paid in full · {months} months{savings > 0 ? ` · save $${savings.toLocaleString()}` : ""}</p>
 
-        {/* Monthly fee — secondary */}
+        {/* Monthly option — secondary */}
         <div className={`flex items-center justify-between rounded-2xl px-4 py-3 ${featured ? "bg-[#0f1a0c]/8" : "bg-[#b0e455]/6"}`}>
           <div>
             <div className="flex items-baseline gap-1">
-              <span className={`font-display text-2xl leading-none ${bright}`}>${price}</span>
+              <span className={`font-display text-2xl leading-none ${bright}`}>${monthly}</span>
               <span className={`text-xs font-semibold ${dim}`}>/month</span>
             </div>
-            <p className={`text-[10px] mt-1 ${dim}`}>billed monthly for {months} months</p>
-          </div>
-          <div className={`text-right text-[10px] font-bold tracking-wide uppercase ${featured ? "text-[#0f1a0c]/40" : "text-[#b0e455]/50"}`}>
-            {featured ? "Save $1,800" : ""}
+            <p className={`text-[10px] mt-1 ${dim}`}>billed monthly · ${monthlyTotal.toLocaleString()} over {months} months</p>
           </div>
         </div>
       </div>
@@ -132,26 +133,13 @@ function PlanCard({
   );
 }
 
-const committedFeatures: Feature[] = [
-  { text: "Access to the ZANA App", included: true },
-  { text: "Personalised training split", included: true },
-  { text: "Custom nutrition & macros", included: true },
-  { text: "Weekly check-ins with your coach", included: true },
-  { text: "Direct access to Javi", included: true },
-  { text: "Supplement & recovery guidance", included: true },
-  { text: "Video Calls on Demand", included: false },
-  { text: "Quarterly progress review call", included: false },
-];
-
-const allInFeatures: Feature[] = [
-  { text: "Access to the ZANA App", included: true },
-  { text: "Personalised training split", included: true },
-  { text: "Custom nutrition & macros", included: true },
-  { text: "Weekly check-ins with your coach", included: true },
-  { text: "Priority access to Javi", included: true, emphasize: "Priority" },
-  { text: "Supplement & recovery guidance", included: true },
-  { text: "Video Calls on Demand", included: true },
-  { text: "Quarterly progress review call", included: true },
+const programFeatures: Feature[] = [
+  { text: "Weekly goal-setting and updates", included: true, emphasize: "goal-setting" },
+  { text: "Personalized training program", included: true, emphasize: "Personalized" },
+  { text: "On-demand access", included: true, emphasize: "On-demand" },
+  { text: "Priority DM access", included: true, emphasize: "Priority DM" },
+  { text: "Library of fitness guides (diet, workouts, etc.)", included: true, emphasize: "Library of fitness guides" },
+  { text: "Weekly check-in calls", included: true, emphasize: "check-in calls" },
 ];
 
 export default function PricingPage() {
@@ -263,19 +251,20 @@ export default function PricingPage() {
             <PlanCard
               label="Committed"
               months={4}
-              price={500}
-              total={2000}
+              monthly={500}
+              upfront={2000}
               checkoutUrl="https://whop.com/checkout/plan_DAY1fwI5NfqJe"
-              features={committedFeatures}
+              features={programFeatures}
             />
             <PlanCard
               label="All In"
               months={12}
-              price={350}
-              total={4200}
+              monthly={350}
+              upfront={4200}
               checkoutUrl="https://whop.com/checkout/plan_BwaPVLzVFjYWL"
-              features={allInFeatures}
+              features={programFeatures}
               featured
+              badge="Best Value"
             />
           </div>
           <p className="text-center text-xs text-[#edf5e2]/20 mt-7">7-day satisfaction guarantee · Secure checkout via Whop</p>
