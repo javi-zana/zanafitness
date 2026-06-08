@@ -25,7 +25,7 @@ export type ReportMeta = {
 }
 
 // Lightweight index of Javi's curriculum so generated reports can point clients
-// at a real lesson. Grow this as sections get written (see app/curriculum).
+// at a real lesson. Grow this as sections get written (see app/(member)/classroom).
 export const CURRICULUM_INDEX = [
   { section: 'The Game', slug: 'the-game', lessons: ['The Fundamentals', 'Building Intuition', 'Troubleshooting & Plateaus'] },
   { section: 'Diet', slug: 'diet', lessons: ['High-protein eating', 'What to eat & what to avoid'] },

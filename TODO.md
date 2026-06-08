@@ -4,39 +4,29 @@ Lightweight backlog for the Zana repo. Cross items off as they ship.
 
 ---
 
-## Knowledge tab (in progress)
+## Classroom (member tab)
 
-The new member-area tab. Static written modules now, videos later.
+The **Classroom** sidebar tab — member-only, **not public-facing**. Skool-style: Sections → Modules → lesson. Lives at `/classroom` in `app/(member)/classroom/`.
 
-**Core modules**
-- [x] The Full Game Explained — BMR, protein, progressive overload
-- [ ] Diet — high protein
-- [ ] Working Out
-- [ ] Lifestyle & Recovery
+Data-driven: all content is in `app/(member)/classroom/content.tsx` (the `SECTIONS` array). Adding/filling a section is pure data entry — `**bold**`, `*italic*`, `` `code` `` work inline. Markdown mirror in `course/classroom/`.
 
-**Bonus modules**
-- [ ] What to Eat & What to Avoid
-- [ ] Optimal Workouts
-- [ ] The Pre-Workout Routine
+**Built**
+- [x] Section list (`/classroom`), module list (`/classroom/[slug]`), lesson page (`/classroom/[slug]/[module]`) with module sidebar + prev/next
+- [x] Gated via middleware `memberPaths`; sidebar "Classroom" tab points here
+- [x] Section 1 — **The Game** (3 modules: Fundamentals / Building Intuition / Troubleshooting)
+- [x] Retired old `/knowledge` tab; salvaged its one real article into **Bonus Resources → The Full Game Explained**
 
-**Polish (after content lands)**
-- [ ] Add video player component (drop-in for any module)
+**Content to write**
+- [ ] Section 2: Diet
+- [ ] Section 3: Fitness
+- [ ] Section 4: Lifestyle
+- [ ] Section 5: Bonus Resources — more deep cuts (sleep/cortisol, supplementation)
+- [ ] ⚠️ Reconcile the salvaged Bonus article with Section 1 canon: it still says **1g/lb** (vs **0.8g/lb**) and frames **3 levers** (vs **2**). Kept verbatim for now.
+
+**Polish (later)**
+- [ ] Video player component (drop-in for any module)
 - [ ] Track read/watched state per member (Supabase)
 - [ ] "Continue where you left off" card on Home
-
-**Curriculum** — public-facing, live at `/curriculum` (UI built)
-Data-driven: all content lives in `app/curriculum/content.tsx` (the `SECTIONS` array). Adding/filling a section is pure data entry — `**bold**`, `*italic*`, `` `code` `` work inline. Source markdown mirror in `course/curriculum/`.
-- [x] Landing page (`/curriculum`) — 5 sections, ready ones link, "soon" ones disabled
-- [x] Section page (`/curriculum/[slug]`) — module jump-nav, prev/next pager, coming-soon state
-- [x] Section 1: The Game Explained — 3 modules (Fundamentals / Building Intuition / Troubleshooting)
-- [ ] Write Section 2: Diet
-- [ ] Write Section 3: Fitness
-- [ ] Write Section 4: Lifestyle
-- [ ] Write Section 5: Bonus Resources
-- [ ] ⚠️ Reconcile with the member `the-full-game` page (`app/(member)/knowledge/`) — content conflicts:
-  - Old page: **3 levers** (BMR, protein, progressive overload) · **1g/lb** protein
-  - New §1: **2 levers** (calories, recomp) · **0.8g/lb** protein
-  - New curriculum used as canon. Decide whether to retire the old member page or point `/knowledge` at `/curriculum`.
 
 ---
 

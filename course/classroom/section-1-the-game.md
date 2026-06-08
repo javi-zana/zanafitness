@@ -2,8 +2,8 @@
 section: 1
 title: The Game
 subtitle: How to get your desired aesthetic.
-audience: public (member curriculum)
-status: drafted — ready to build into UI
+audience: members only (Classroom sidebar tab, /classroom)
+status: live in app/(member)/classroom/content.tsx
 ---
 
 # Section One: The Game

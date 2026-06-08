@@ -14,9 +14,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params
   const section = getSection(slug)
-  if (!section) return { title: 'Curriculum | ZANA Fitness' }
+  if (!section) return { title: 'Classroom | ZANA Fitness' }
   return {
-    title: `${section.title} | The Curriculum | ZANA Fitness`,
+    title: `${section.title} | Classroom | ZANA Fitness`,
     description: section.summary,
   }
 }
@@ -24,7 +24,7 @@ export async function generateMetadata({
 function BackLink() {
   return (
     <Link
-      href="/curriculum"
+      href="/classroom"
       className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[var(--c-text3)] hover:text-[var(--c-text)] transition-colors"
     >
       <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
@@ -53,22 +53,25 @@ export default async function SectionPage({
   const next = idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null
 
   return (
-    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)]">
+    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] pb-28 lg:pb-12 lg:pl-52">
       <div className="max-w-2xl mx-auto px-5 md:px-8 pt-8">
         <BackLink />
       </div>
 
-      <article className="max-w-2xl mx-auto px-5 md:px-8 pt-10 md:pt-14 pb-16">
+      <div className="max-w-2xl mx-auto px-5 md:px-8 pt-10 md:pt-14 pb-16">
         {/* ── Header ──────────────────────────────────────────────────────── */}
-        <header className="mb-12 pb-10 border-b border-[var(--c-border)]">
+        <header className="mb-10 pb-10 border-b border-[var(--c-border)]">
           <div className="flex items-center gap-2 mb-6">
             <span className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#4d8f1a] dark:text-[#b0e455]">
               Section {section.num}
             </span>
-            {section.readTime && (
+            {section.status === 'ready' && (
               <>
                 <span className="w-1 h-1 rounded-full bg-[var(--c-text4)]" />
-                <span className="text-[11px] text-[var(--c-text4)]">{section.readTime}</span>
+                <span className="text-[11px] text-[var(--c-text4)]">
+                  {section.modules.length}{' '}
+                  {section.modules.length === 1 ? 'module' : 'modules'}
+                </span>
               </>
             )}
           </div>
@@ -97,71 +100,62 @@ export default async function SectionPage({
           </div>
         ) : (
           <>
-            {/* ── Intro ──────────────────────────────────────────────────── */}
+            {/* ── Section intro ──────────────────────────────────────────── */}
             <p className="text-[17px] md:text-[18px] leading-[1.7] text-[var(--c-text2)] mb-8">
               {section.summary}
             </p>
 
             {section.intro && (
-              <div className="space-y-5 text-[16px] md:text-[17px] leading-[1.75] text-[var(--c-text2)] mb-12">
+              <div className="mb-12">
                 <Blocks blocks={section.intro} />
               </div>
             )}
 
-            {/* ── Module contents (jump nav) ─────────────────────────────── */}
-            {section.modules.length > 1 && (
-              <nav className="mb-14 rounded-2xl border border-[var(--c-border)] bg-[var(--c-card)] p-5 md:p-6">
-                <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[var(--c-text4)] mb-4">
-                  In this section
-                </p>
-                <ol className="space-y-2.5">
-                  {section.modules.map((m, i) => (
-                    <li key={m.id}>
-                      <a
-                        href={`#${m.id}`}
-                        className="group flex items-baseline gap-3 text-[var(--c-text2)] hover:text-[var(--c-text)] transition-colors"
-                      >
-                        <span className="font-display text-[#b0e455] text-sm tabular-nums shrink-0 w-6">
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span className="text-[15px] md:text-base font-medium group-hover:underline underline-offset-4">
-                          {m.title}
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
-            )}
-
-            {/* ── Modules ────────────────────────────────────────────────── */}
-            {section.modules.map((m) => (
-              <section key={m.id} id={m.id} className="scroll-mt-8 mb-16 last:mb-0">
-                <header className="mb-8">
-                  <div className="flex items-center gap-3 mb-5">
-                    <span className="text-[11px] font-bold tracking-[0.22em] uppercase text-[#4d8f1a] dark:text-[#b0e455]">
-                      {m.kicker}
-                    </span>
-                    <span className="h-px w-8 bg-[var(--c-border2)]" />
-                  </div>
-                  <h2
-                    className="font-display leading-[1.1] text-[var(--c-text)]"
-                    style={{ fontSize: 'clamp(26px, 3.6vw, 36px)' }}
+            {/* ── Module list (the lessons) ──────────────────────────────── */}
+            <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[var(--c-text4)] mb-4">
+              Modules
+            </p>
+            <ol className="space-y-2.5">
+              {section.modules.map((m, i) => (
+                <li key={m.id}>
+                  <Link
+                    href={`/classroom/${section.slug}/${m.id}`}
+                    className="group flex items-center gap-4 p-4 md:p-5 rounded-2xl border border-[var(--c-border)] bg-[var(--c-card)] hover:bg-[var(--c-hover)] transition-colors"
                   >
-                    {m.title}
-                  </h2>
-                </header>
-                <Blocks blocks={m.blocks} />
-              </section>
-            ))}
+                    <span className="font-display text-[#b0e455] text-base md:text-lg shrink-0 tabular-nums w-7">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-medium uppercase tracking-widest text-[var(--c-text4)] mb-0.5">
+                        {m.kicker}
+                      </p>
+                      <p className="font-semibold text-[15px] md:text-[17px] text-[var(--c-text)] leading-snug">
+                        {m.title}
+                      </p>
+                    </div>
+                    <svg
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="w-4 h-4 text-[var(--c-text4)] shrink-0 transition-transform group-hover:translate-x-0.5"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </Link>
+                </li>
+              ))}
+            </ol>
           </>
         )}
 
-        {/* ── Pager ──────────────────────────────────────────────────────── */}
-        <div className="mt-20 pt-10 border-t border-[var(--c-border)] grid grid-cols-2 gap-4">
+        {/* ── Section pager ──────────────────────────────────────────────── */}
+        <div className="mt-16 pt-10 border-t border-[var(--c-border)] grid grid-cols-2 gap-4">
           {prev ? (
             <Link
-              href={`/curriculum/${prev.slug}`}
+              href={`/classroom/${prev.slug}`}
               className="group rounded-2xl border border-[var(--c-border)] bg-[var(--c-card)] hover:bg-[var(--c-hover)] transition-colors p-5"
             >
               <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[var(--c-text4)] mb-2">
@@ -176,7 +170,7 @@ export default async function SectionPage({
           )}
           {next ? (
             <Link
-              href={`/curriculum/${next.slug}`}
+              href={`/classroom/${next.slug}`}
               className="group rounded-2xl border border-[var(--c-border)] bg-[var(--c-card)] hover:bg-[var(--c-hover)] transition-colors p-5 text-right"
             >
               <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[var(--c-text4)] mb-2">
@@ -190,7 +184,7 @@ export default async function SectionPage({
             <div />
           )}
         </div>
-      </article>
+      </div>
     </main>
   )
 }

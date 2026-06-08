@@ -1,9 +1,9 @@
 import React from 'react'
 
 /* ──────────────────────────────────────────────────────────────────────────
-   Curriculum content registry.
+   Classroom content registry.
 
-   This is the source of truth for the public curriculum. Adding a new section
+   This is the source of truth for the public classroom. Adding a new section
    (or filling in a "soon" one) is pure data entry below — no new components.
 
    Inline formatting inside any text string:
@@ -259,16 +259,147 @@ export const SECTIONS: Section[] = [
     num: '05',
     slug: 'bonus-resources',
     title: 'Bonus Resources',
-    tagline: 'The deeper cuts: cortisol, supplementation, and edge cases.',
+    tagline: 'The deeper cuts: full walkthroughs, supplementation, and edge cases.',
     summary:
-      'Extra material once the fundamentals are running — sleep, stress and cortisol, supplementation, and the situations the core sections don\'t cover.',
-    status: 'soon',
-    modules: [],
+      'Extra material once the fundamentals are running. Start with the original long-form walkthrough of the system; more deep cuts (sleep, stress and cortisol, supplementation) land here over time.',
+    status: 'ready',
+    readTime: '6 min read',
+    modules: [
+      {
+        id: 'the-full-game-explained',
+        kicker: 'Bonus Module',
+        title: 'The Full Game Explained',
+        blocks: [
+          {
+            type: 'p',
+            text: "There are three levers underneath everything I'll teach you: **BMR, protein, and progressive overload**. Get these three right and the rest of the system runs itself. Get them wrong and nothing else matters.",
+          },
+
+          { type: 'h3', text: 'BMR — How much you should eat' },
+          {
+            type: 'p',
+            text: "BMR is Basal Metabolic Rate — the number of calories your body burns just keeping you alive. Breathing, thinking, keeping your heart going. If you sat in a chair all day and did nothing, this is what you'd burn.",
+          },
+          {
+            type: 'p',
+            text: "Add activity on top of that — walking, working, training — and you get your **TDEE** (Total Daily Energy Expenditure). That's the real number we care about. That's how much you actually burn in a day.",
+          },
+          {
+            type: 'p',
+            text: "**Eat at TDEE → you stay the same. Eat below it → you lose fat. Eat above it → you gain.** That's the whole game on the food side. Everything else is execution.",
+          },
+          {
+            type: 'callout',
+            text: 'To lose fat without losing muscle, eat 300–400 calories below your TDEE. Not 1,000. Not "as little as possible."',
+          },
+          {
+            type: 'p',
+            text: 'Why 300–400 and not more? Bigger deficits feel faster but they cost you muscle, sleep, energy in the gym, and mood. You stop being able to push the weights, you stop progressing, you fall off in two weeks. A smaller deficit you can hold for six months will always beat a brutal one you hold for three.',
+          },
+          {
+            type: 'p',
+            text: "**Calculate it once. Then forget about it.** Use any calculator online — they're all close enough. Plug in your weight, height, age, and rough activity level. Subtract 300–400 from the TDEE. That's your target. Mine was 2,200. We don't recalculate every week.",
+          },
+
+          { type: 'h3', text: 'Protein — The anchor of every meal' },
+          {
+            type: 'p',
+            text: "Protein is the lever that lets you cut fat without losing muscle. It's also the most satiating macro — gram for gram, it keeps you fuller longer than carbs or fat. So it does two jobs at once: it protects your muscle while you're eating less, and it makes eating less actually bearable.",
+          },
+          {
+            type: 'p',
+            text: "**The target: roughly 1g of protein per pound of bodyweight.** If you weigh 170 lbs, you're aiming for ~170g of protein a day. You don't have to be perfect — being within 20g is fine — but if you're consistently 50g under, the whole thing breaks.",
+          },
+          {
+            type: 'callout',
+            text: 'Anchor every meal around protein first. Build the rest of the plate around it.',
+          },
+          {
+            type: 'p',
+            text: "The simplest version: chicken breast or ground beef at least once per meal, eggs as a side. That covers most of the day. If you eat twice, that's two servings of meat plus a few eggs and you're close.",
+          },
+          {
+            type: 'p',
+            text: "For the first 4–8 weeks, **buy a cheap kitchen scale and weigh your protein.** Not forever. Just long enough to build an intuition for what a portion actually looks like. After a month you'll be able to eyeball it and never need the scale again.",
+          },
+          {
+            type: 'p',
+            text: 'The fastest shortcut: **your closed fist is roughly 100g of cooked chicken breast.** Two fists per meal, twice a day, you\'re in the zone. That intuition lasts forever.',
+          },
+          {
+            type: 'p',
+            text: "The reason this matters more than you think: when you eat enough protein and lift heavy in a slight deficit, your body burns fat *and* builds muscle at the same time. That's called recomposition. You don't have to choose between leaner and stronger. With enough protein, you get both.",
+          },
+
+          { type: 'h3', text: 'Progressive Overload — How muscle actually grows' },
+          {
+            type: 'p',
+            text: "Muscle is built by giving your body a reason to grow. The reason is stress. Specifically, more stress than you gave it last week. If you bench 135 lbs for 8 reps every week for a year, your body has no reason to change — you've already adapted. You stay the same.",
+          },
+          {
+            type: 'p',
+            text: '**Progressive overload is the rule that says: every two weeks, push past what you did before.** A little more weight, a little more volume, a little more intensity. The body adapts upward.',
+          },
+          {
+            type: 'callout',
+            text: 'The cadence: weight up roughly every other week. 135 → 145 in two weeks. Boring, slow, undefeated.',
+          },
+          {
+            type: 'p',
+            text: "That doesn't mean every workout is a max effort. Most weeks are about *hitting* the weight you wrote down — clean form, full range of motion, every rep. Then every other week, you nudge it up.",
+          },
+          { type: 'p', text: "If you can't bump the weight, you can progress other ways:" },
+          {
+            type: 'list',
+            items: [
+              '**Add a rep.** Same weight, one more rep than last time.',
+              '**Add a set.** Three sets becomes four.',
+              '**Slow the negative.** Take 3 seconds to lower the weight instead of dropping it.',
+            ],
+          },
+          { type: 'p', text: 'All four count. The point is the same — give the body a reason to keep growing.' },
+          {
+            type: 'p',
+            text: "And the rule that holds the whole thing together: **8 out of 10 intensity, minimum.** If a set ended and you could've done four more reps easily, that set didn't count. Push to where the last rep or two feels genuinely hard. That's the threshold the body responds to.",
+          },
+
+          { type: 'h3', text: 'How they connect — The three levers, together' },
+          { type: 'p', text: 'Each of these alone does something. All three together is the whole thing.' },
+          {
+            type: 'list',
+            items: [
+              '**Slight calorie deficit** tells your body to use fat for fuel.',
+              "**High protein** tells it to keep the muscle while it's doing that.",
+              '**Progressive overload in the gym** tells it to *build* more muscle on top.',
+            ],
+          },
+          {
+            type: 'p',
+            text: "That's recomposition. Burning fat and building muscle at the same time. Most people are told this is impossible — that you have to bulk, then cut, then bulk again. That's outdated. Done right, you can run both directions at once for the first few years of serious training.",
+          },
+          {
+            type: 'p',
+            text: "You don't need to overthink any of this. **Eat 300–400 below TDEE. Hit your protein. Push the weights up every two weeks. Do that for six months.** The body that comes out the other side is the one you've been trying to get for years.",
+          },
+        ],
+      },
+    ],
   },
 ]
 
 export function getSection(slug: string): Section | undefined {
   return SECTIONS.find((s) => s.slug === slug)
+}
+
+export function getModule(
+  sectionSlug: string,
+  moduleId: string
+): { section: Section; module: Module; index: number } | undefined {
+  const section = getSection(sectionSlug)
+  if (!section) return undefined
+  const index = section.modules.findIndex((m) => m.id === moduleId)
+  if (index === -1) return undefined
+  return { section, module: section.modules[index], index }
 }
 
 /* ── Inline + block renderers ─────────────────────────────────────────────── */

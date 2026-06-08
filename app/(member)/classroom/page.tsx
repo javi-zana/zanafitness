@@ -3,27 +3,10 @@ import Link from 'next/link'
 import { SECTIONS } from './content'
 
 export const metadata: Metadata = {
-  title: 'The Curriculum | ZANA Fitness',
+  title: 'Classroom | ZANA Fitness',
   description:
     'The system, written out section by section. The Game, Diet, Fitness, Lifestyle, and Bonus Resources — the levers that make getting lean effortless.',
 }
-
-const ZanaLogo = ({ className = 'h-5' }: { className?: string }) => (
-  <svg
-    viewBox="0 0 180 32"
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="5"
-    strokeMiterlimit="10"
-  >
-    <path d="M0,2 H32 L18.3,14" />
-    <path d="M13.7,18 L0,30 H32" />
-    <path d="M48,30 L64,2 L80,30" />
-    <path d="M96,30 V2 L128,30 V2" />
-    <path d="M144,30 L160,2 L176,30" />
-  </svg>
-)
 
 function SectionCard({
   section,
@@ -75,7 +58,7 @@ function SectionCard({
   )
 
   return ready ? (
-    <Link href={`/curriculum/${section.slug}`} className="block">
+    <Link href={`/classroom/${section.slug}`} className="block">
       {inner}
     </Link>
   ) : (
@@ -83,30 +66,14 @@ function SectionCard({
   )
 }
 
-export default function CurriculumPage() {
+export default function ClassroomPage() {
   return (
-    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)]">
-      {/* ── Nav ──────────────────────────────────────────────────────────── */}
-      <nav className="flex items-center justify-between px-6 md:px-8 py-5 border-b border-[var(--c-border)]">
-        <Link
-          href="/"
-          className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition-colors"
-        >
-          <ZanaLogo />
-        </Link>
-        <Link
-          href="/apply"
-          className="text-xs font-semibold tracking-wide text-[#4d8f1a] dark:text-[#b0e455] hover:opacity-80 transition-opacity"
-        >
-          Apply →
-        </Link>
-      </nav>
-
-      <div className="max-w-3xl mx-auto px-5 md:px-8 pt-14 md:pt-20 pb-24">
+    <main className="min-h-screen bg-[var(--c-bg)] text-[var(--c-text)] pb-28 lg:pb-12 lg:pl-52">
+      <div className="max-w-3xl mx-auto px-5 md:px-8 pt-12 md:pt-16 pb-12">
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <header className="mb-12 md:mb-16">
           <p className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#4d8f1a] dark:text-[#b0e455] mb-3">
-            The Curriculum
+            Classroom
           </p>
           <h1
             className="font-display leading-[1.05] text-[var(--c-text)] mb-5"
