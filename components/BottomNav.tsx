@@ -2,8 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import { createClient } from '@/utils/supabase/client'
 import { useTheme } from '@/app/providers'
 
 const NAV = [
@@ -13,15 +11,6 @@ const NAV = [
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
         <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    ),
-  },
-  {
-    href: '/stats',
-    label: 'Track',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
-        <path d="M18 20V10M12 20V4M6 20v-6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -36,7 +25,7 @@ const NAV = [
   },
   {
     href: '/knowledge',
-    label: 'Learn',
+    label: 'Curriculum',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
         <path d="M4 19.5A2.5 2.5 0 016.5 17H20M4 19.5A2.5 2.5 0 006.5 22H20V2H6.5A2.5 2.5 0 004 4.5v15z" strokeLinecap="round" strokeLinejoin="round" />
@@ -44,11 +33,21 @@ const NAV = [
     ),
   },
   {
-    href: '/messages',
-    label: 'Messages',
+    href: '/calls',
+    label: 'Calls',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
-        <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="3" y="5" width="18" height="16" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M3 9h18M8 3v4M16 3v4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
+    href: '/checkin',
+    label: 'Check-in',
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -57,48 +56,6 @@ const NAV = [
 export default function BottomNav() {
   const pathname = usePathname()
   const { theme, toggleTheme } = useTheme()
-  const [unread, setUnread] = useState(false)
-
-  useEffect(() => {
-    const supabase = createClient()
-
-    async function checkUnread() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      // Collect all thread IDs: via member_id (legacy) and thread_participants
-      const [{ data: legacyThread }, { data: participations }] = await Promise.all([
-        supabase.from('threads').select('id').eq('member_id', user.id).maybeSingle(),
-        supabase.from('thread_participants').select('thread_id').eq('user_id', user.id),
-      ])
-      const ids = Array.from(new Set([
-        ...(legacyThread ? [legacyThread.id as string] : []),
-        ...((participations ?? []).map(p => p.thread_id as string)),
-      ]))
-      if (!ids.length) { setUnread(false); return }
-
-      const [{ data: reads }, { data: messages }] = await Promise.all([
-        supabase.from('message_reads').select('thread_id, last_read_at').eq('user_id', user.id).in('thread_id', ids),
-        supabase.from('messages').select('thread_id, created_at').in('thread_id', ids).neq('author_id', user.id).order('created_at', { ascending: false }).limit(ids.length),
-      ])
-
-      const readMap = Object.fromEntries((reads ?? []).map(r => [r.thread_id as string, r.last_read_at as string]))
-      const hasUnread = (messages ?? []).some(m => {
-        const read = readMap[m.thread_id as string]
-        return !read || new Date(m.created_at as string) > new Date(read)
-      })
-      setUnread(hasUnread)
-    }
-
-    checkUnread()
-
-    const channel = supabase.channel('bottomnav-unread')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, checkUnread)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reads' }, checkUnread)
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [])
 
   function isActive(href: string) {
     return href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href)
@@ -129,7 +86,6 @@ export default function BottomNav() {
         <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
           {NAV.map(item => {
             const active = isActive(item.href)
-            const showBadge = item.href === '/messages' && unread
             return (
               <Link
                 key={item.href}
@@ -140,10 +96,7 @@ export default function BottomNav() {
                     : 'text-[var(--c-text3)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
                 }`}
               >
-                <span className={`relative ${active ? 'text-[#0b1509]' : ''}`}>
-                  {item.icon}
-                  {showBadge && <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#f87171] rounded-full border-2 border-[var(--c-sidebar)]" />}
-                </span>
+                <span className={active ? 'text-[#0b1509]' : ''}>{item.icon}</span>
                 <span className="text-sm font-semibold">{item.label}</span>
               </Link>
             )
@@ -190,18 +143,16 @@ export default function BottomNav() {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] flex z-50">
         {NAV.map(item => {
           const active = isActive(item.href)
-          const showBadge = item.href === '/messages' && unread
           return (
             <Link
               key={item.href}
               href={item.href}
               className="flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors"
             >
-              <div className={`relative w-12 h-7 flex items-center justify-center rounded-full transition-all ${
+              <div className={`w-12 h-7 flex items-center justify-center rounded-full transition-all ${
                 active ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
               }`}>
                 {item.icon}
-                {showBadge && <span className="absolute top-0 right-1.5 w-2 h-2 bg-[#f87171] rounded-full border border-[var(--c-backdrop)]" />}
               </div>
               <span className={`text-[9px] tracking-wide uppercase font-medium ${
                 active ? 'text-[#b0e455]' : 'text-[var(--c-text4)]'
