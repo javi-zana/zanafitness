@@ -5,9 +5,20 @@ import { createServiceClient } from '@/lib/ai-supabase'
 // generation via fetchClientContext). The tool runs behind the password +
 // service role, so we attribute notes to the head coach (Javi).
 
+// coach_notes.author_id is NOT NULL, and the tool has no Supabase session, so
+// resolve an author robustly: head coach → Javi's email → any coach.
 async function headCoachId(supabase: ReturnType<typeof createServiceClient>): Promise<string | null> {
-  const { data } = await supabase.from('profiles').select('id').eq('role', 'head_coach').limit(1).maybeSingle()
-  return (data?.id as string) ?? null
+  const { data: head } = await supabase
+    .from('profiles').select('id').eq('role', 'head_coach').limit(1).maybeSingle()
+  if (head?.id) return head.id as string
+
+  const { data: byEmail } = await supabase
+    .from('profiles').select('id').eq('email', 'me@javilorenzana.com').maybeSingle()
+  if (byEmail?.id) return byEmail.id as string
+
+  const { data: anyCoach } = await supabase
+    .from('profiles').select('id').in('role', ['head_coach', 'coach']).limit(1).maybeSingle()
+  return (anyCoach?.id as string) ?? null
 }
 
 export async function POST(req: NextRequest) {
