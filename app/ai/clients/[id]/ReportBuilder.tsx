@@ -33,6 +33,8 @@ export default function ReportBuilder({
   const [generating, setGenerating] = useState(false)
   const [saving, setSaving] = useState(false)
   const [savedId, setSavedId] = useState<string | null>(null)
+  const [sending, setSending] = useState(false)
+  const [sentUrl, setSentUrl] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   useEffect(() => { setWeekLabel(mondayLabel()) }, [])
@@ -69,10 +71,36 @@ export default function ReportBuilder({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Save failed')
       setSavedId(data.id)
+      setSentUrl(null)
+      return data.id as string
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Save failed')
+      return null
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function send() {
+    setError('')
+    // Save first so we send exactly what's on screen.
+    const id = await save()
+    if (!id) return
+    if (!confirm('Send this report to the client? They will get it by email.')) return
+    setSending(true)
+    try {
+      const res = await fetch('/api/reports/send', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Send failed')
+      setSentUrl(data.shareUrl ?? null)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Send failed')
+    } finally {
+      setSending(false)
     }
   }
 
@@ -186,13 +214,30 @@ export default function ReportBuilder({
               )
             })}
 
-            <button
-              onClick={save}
-              disabled={saving}
-              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-100 transition hover:bg-zinc-800 disabled:opacity-40"
-            >
-              {saving ? 'Saving…' : savedId ? 'Saved ✓ — Save again' : 'Save draft'}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={save}
+                disabled={saving || sending}
+                className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-semibold text-zinc-100 transition hover:bg-zinc-800 disabled:opacity-40"
+              >
+                {saving ? 'Saving…' : savedId ? 'Saved ✓ — Save again' : 'Save draft'}
+              </button>
+              <button
+                onClick={send}
+                disabled={saving || sending}
+                className="rounded-lg bg-lime-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-lime-400 disabled:opacity-40"
+              >
+                {sending ? 'Sending…' : 'Send to client'}
+              </button>
+            </div>
+            {sentUrl && (
+              <p className="text-xs text-lime-400">
+                Sent ✓ ·{' '}
+                <a href={sentUrl} target="_blank" rel="noreferrer" className="underline hover:text-lime-300">
+                  shareable link
+                </a>
+              </p>
+            )}
           </div>
 
           {/* Live preview */}

@@ -90,7 +90,7 @@ export async function middleware(request: NextRequest) {
   // Paths that require login only
   const authPaths = ['/profile', '/onboarding']
   // Paths that require login AND active subscription
-  const memberPaths = ['/dashboard', '/workout', '/nutrition', '/progress', '/guidance', '/program', '/schedule', '/coach', '/knowledge', '/calls', '/checkin']
+  const memberPaths = ['/dashboard', '/reports', '/workout', '/nutrition', '/progress', '/guidance', '/program', '/schedule', '/coach', '/knowledge', '/calls', '/checkin', '/curriculum']
 
   const needsAuth = authPaths.some(p => pathname.startsWith(p))
   const needsMembership = memberPaths.some(p => pathname.startsWith(p))
@@ -140,7 +140,7 @@ export async function middleware(request: NextRequest) {
   // Already logged in → skip login screens (unless showing a no-access message)
   if (user && (pathname === '/' || pathname === '/login') && !request.nextUrl.searchParams.has('error')) {
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = '/reports'
     return NextResponse.redirect(url)
   }
 

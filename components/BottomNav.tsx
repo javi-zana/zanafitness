@@ -6,11 +6,11 @@ import { useTheme } from '@/app/providers'
 
 const NAV = [
   {
-    href: '/dashboard',
-    label: 'Home',
+    href: '/reports',
+    label: 'Reports',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
-        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M9 12h6m-6 4h4M7 3h7l5 5v11a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2zM14 3v5h5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
   },
@@ -24,7 +24,7 @@ const NAV = [
     ),
   },
   {
-    href: '/knowledge',
+    href: '/curriculum',
     label: 'Curriculum',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
@@ -58,7 +58,7 @@ export default function BottomNav() {
   const { theme, toggleTheme } = useTheme()
 
   function isActive(href: string) {
-    return href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href)
+    return pathname === href || pathname.startsWith(href + '/')
   }
 
   return (
