@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/ai-supabase'
 import { fetchClientContext } from '@/lib/client-context'
 import ReportBuilder from './ReportBuilder'
+import Notebook from './Notebook'
+import IntakeView from './IntakeView'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,11 +13,18 @@ export default async function ClientPage({ params }: { params: { id: string } })
   const ctx = await fetchClientContext(supabase, params.id)
   if (!ctx) notFound()
 
-  const { data: reports } = await supabase
-    .from('reports')
-    .select('id, week_label, status, created_at')
-    .eq('member_id', params.id)
-    .order('created_at', { ascending: false })
+  const [{ data: reports }, { data: allNotes }] = await Promise.all([
+    supabase
+      .from('reports')
+      .select('id, week_label, status, created_at')
+      .eq('member_id', params.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('coach_notes')
+      .select('id, body, created_at')
+      .eq('member_id', params.id)
+      .order('created_at', { ascending: false }),
+  ])
 
   const p = ctx.profile
   const c = ctx.latestCheckin
@@ -30,7 +39,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
       </header>
 
       {/* Context snapshot */}
-      <div className="mb-8 grid gap-3 sm:grid-cols-2">
+      <div className="mb-4 grid gap-3 sm:grid-cols-2">
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
           <div className="mb-2 text-[10px] uppercase tracking-wider text-zinc-500">Goal</div>
           <p className="text-sm text-zinc-200">{(p.mirror_goal as string) || '—'}</p>
@@ -47,11 +56,20 @@ export default async function ClientPage({ params }: { params: { id: string } })
           ) : (
             <p className="text-sm text-zinc-500">No check-ins yet.</p>
           )}
-          <p className="mt-2 text-xs text-zinc-500">{ctx.notes.length} coach note{ctx.notes.length === 1 ? '' : 's'}</p>
         </div>
       </div>
 
-      {/* Builder */}
+      {/* Intake form (collapsible) */}
+      <div className="mb-4">
+        <IntakeView profile={p} />
+      </div>
+
+      {/* Meeting notes notebook */}
+      <div className="mb-8">
+        <Notebook memberId={params.id} initialNotes={(allNotes ?? []) as { id: string; body: string; created_at: string }[]} />
+      </div>
+
+      {/* Report generator */}
       <ReportBuilder memberId={params.id} clientName={p.first_name || 'Client'} />
 
       {/* Existing reports */}

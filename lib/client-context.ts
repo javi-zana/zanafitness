@@ -57,7 +57,7 @@ export async function fetchClientContext(
         .select('body, created_at')
         .eq('member_id', memberId)
         .order('created_at', { ascending: false })
-        .limit(8),
+        .limit(20),
       supabase
         .from('reports')
         .select('week_label')

@@ -135,7 +135,10 @@ export default function ReportBuilder({
 
   return (
     <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
-      <h2 className="mb-4 text-sm font-medium text-zinc-200">New weekly report</h2>
+      <h2 className="text-sm font-medium text-zinc-200">New weekly report</h2>
+      <p className="mb-4 mt-1 text-xs text-zinc-500">
+        Grounded automatically in their goals, intake, latest check-in, and your meeting notes. Add a prompt below to steer this week.
+      </p>
 
       {/* Inputs */}
       <div className="space-y-3">
@@ -148,8 +151,8 @@ export default function ReportBuilder({
         <textarea
           value={focusNote}
           onChange={(e) => setFocusNote(e.target.value)}
-          placeholder="Your rough focus for this week (optional) — paste notes, what to push on, anything. The AI grounds the report in their data + this."
-          rows={3}
+          placeholder="Your prompt for this report — what to focus on, what you discussed on the call, what to push on this week. Leave blank to let the AI infer from their data + notes."
+          rows={4}
           className={inputCls}
         />
         <button
