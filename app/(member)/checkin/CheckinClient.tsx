@@ -130,7 +130,7 @@ export default function CheckinClient() {
           <div className="text-4xl">✓</div>
           <h1 className="font-display text-2xl">Check-in submitted</h1>
           <p className="text-sm text-[var(--c-text3)]">Javi will see this before your next report. Nice work this week.</p>
-          <Link href="/home" className="inline-block text-sm font-semibold text-[var(--c-accent-text)]">← Back to Home</Link>
+          <Link href="/dashboard" className="inline-block text-sm font-semibold text-[var(--c-accent-text)]">← Back to Home</Link>
         </div>
       </main>
     )

@@ -30,7 +30,7 @@ export default async function MemberReportPage({ params }: { params: { id: strin
   return (
     <main className="min-h-screen bg-[#efeee8]">
       <div className="sticky top-0 z-10 bg-[#efeee8]/90 backdrop-blur px-4 py-3 border-b border-[#cfccc0]">
-        <Link href="/home" className="text-xs font-medium text-[#5b665f] hover:text-[#14201a]">← Home</Link>
+        <Link href="/dashboard" className="text-xs font-medium text-[#5b665f] hover:text-[#14201a]">← Home</Link>
       </div>
       <iframe title="Weekly brief" srcDoc={html} className="w-full h-[calc(100vh-49px)] border-0" />
     </main>

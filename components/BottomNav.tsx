@@ -6,7 +6,7 @@ import { useTheme } from '@/app/providers'
 
 const NAV = [
   {
-    href: '/home',
+    href: '/dashboard',
     label: 'Home',
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5">
