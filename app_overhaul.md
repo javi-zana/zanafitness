@@ -28,23 +28,24 @@ Both share one Supabase backend. This supersedes parts of the earlier "rewrite v
 - [ ] Remove **Messages** (member) — delete `app/(member)/messages`, drop from nav + dashboard, drop `/messages` from `memberPaths`
 - [ ] Remove **Stats** (member) — delete `app/(member)/stats`, drop "Track" tab, drop `/stats` from `memberPaths`
 - [ ] Remove **Activity feed** from member Home — drop the feed, `ActivityCard`, `useActivityRealtime`, streak, achievements from the dashboard
-- [ ] Rework `/dashboard` (Home) into a clean hub: keep OKR + referral, add "this week's report" placeholder + links to Program/Curriculum
-- [ ] Create `/calls` (member) — move the Cal.com booking here (VIP gating later)
-- [ ] Create `/checkin` (member) — placeholder until the form is built
+- [x] Reworked landing → Reports is the first tab (`/dashboard` redirects to `/reports`)
+- [x] Create `/calls` (member) — Cal.com booking moved here (VIP gating later)
+- [x] Create `/checkin` (member) — now a real form (see B.5)
 
 ### A2. Deferred to their workstreams (not in cleanup)
-- [ ] **Reports** gets its own nav tab once the `reports` table + view exist (B.1) — lives on Home for now
-- [ ] **Curriculum** consolidation: tab points at `/knowledge` for now; gate `/curriculum` + retire `/knowledge` in B.3
+- [x] **Reports** is now its own landing tab (B.1 shipped)
+- [ ] **Classroom** (curriculum): nav now points at `/classroom`; bring content under `(member)` + gate in `memberPaths` (B.3, in progress by Javi)
 - [ ] Remove API routes + drop DB tables for messages/activities — only after coach side is rebuilt
 - [ ] Add **membership tier** to `profiles` (standard / VIP) — with Calls gating (B.4)
 
 ## B. Client side — the 5 sections
 
-### 1. Reports (NEW)
-- [ ] Member-facing report view — read from the `reports` table (created by the coach tool)
-- [ ] List of past reports + open one (rendered with the report template)
-- [ ] Entry from a shareable link too (`/r/<token>`) for non-app delivery
-- *Depends on:* coach tool report builder + `reports` table (workstream C)
+### 1. Reports (SHIPPED — coach builder + member view + send)
+- [x] Member-facing report view (`/reports`) — landing tab: greeting + OKR + this-week brief + past briefs
+- [x] Single report full-screen (`/reports/[id]`) rendered with the shared template
+- [x] Public shareable link (`/r/[token]`)
+- [x] Coach tool: client list → generate (Claude) → edit → save → **Send** (Resend email)
+- [x] `reports` table + RLS (members see only their own sent)
 
 ### 2. Program (EXISTS — keep, light polish)
 - [ ] Keep OKR (objective + 3 KRs) + Split / Food + Principles, read-only for member
@@ -64,18 +65,11 @@ Both share one Supabase backend. This supersedes parts of the earlier "rewrite v
 - [ ] **VIP** members can book a call on demand; **standard** cannot (gate by `profiles.tier`)
 - [ ] Standard: view-only / upsell state
 
-### 5. Weekly Check-in (NEW — build soon)
-- [ ] Member submit form with these fields:
-  - **Morale** (1–10): how happy with your progress?
-  - **Program changes needed?** (Yes/No + details)
-  - **Ratings (1–10):** Sleep quality · Energy · Strength · Stress · Workout adherence · Nutrition adherence
-  - **Weight change**
-  - **Went off-plan?** (Yes → explain)
-  - **One thing you're proud of**
-  - **One thing you can improve**
-  - **Final comments / questions / concerns**
-- [ ] Store check-ins (`weekly_checkins` table)
-- [ ] Surface latest check-in to the coach tool (feeds report generation)
+### 5. Weekly Check-in (SHIPPED)
+- [x] Member submit form (`/checkin`) — morale, 6 ratings, weight, program-changes Y/N, off-plan Y/N, proud-of, improve, comments
+- [x] Store check-ins (`weekly_checkins` table) via member-scoped insert
+- [x] Surface latest check-in to the coach tool (feeds report generation via `fetchClientContext`)
+- [ ] (Later) coach-side review UI; once-per-week guard / edit existing
 
 ## C. Coach side — `ai.zanafitness.com` (scope later)
 
