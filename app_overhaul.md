@@ -35,7 +35,7 @@ Both share one Supabase backend. This supersedes parts of the earlier "rewrite v
 ### A2. Deferred to their workstreams (not in cleanup)
 - [x] **Reports** is now its own landing tab (B.1 shipped)
 - [ ] **Classroom** (curriculum): nav now points at `/classroom`; bring content under `(member)` + gate in `memberPaths` (B.3, in progress by Javi)
-- [ ] Remove API routes + drop DB tables for messages/activities — only after coach side is rebuilt
+- [x] Remove API routes + drop DB tables for **messages + activity log** (code + DROP migration 20260608000004, applied)
 - [ ] Add **membership tier** to `profiles` (standard / VIP) — with Calls gating (B.4)
 
 ## B. Client side — the 5 sections
@@ -87,5 +87,6 @@ Both share one Supabase backend. This supersedes parts of the earlier "rewrite v
 - [x] `weekly_checkins` table — migration `20260608000002_weekly_checkins.sql`
 - [x] `profiles.tier` — migration `20260608000003_profiles_tier.sql`
 - [ ] **Apply** the three migrations to prod (`supabase db push`)
-- [ ] (Later, with coach rebuild) DROP migration for messages/threads, activities/*, stat_updates/calorie_logs/workout_logs/member_milestones
+- [x] DROP messages/threads + activities/* (migration 20260608000004, applied)
+- [ ] (Later) DROP stat_updates / calorie_logs / workout_logs / member_milestones — still referenced by coach MemberDetailPanel; remove with the next coach pass
 - [ ] Keep PWA "add to home screen" feel on mobile throughout
