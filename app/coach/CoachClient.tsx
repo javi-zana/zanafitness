@@ -5,9 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { SplitBuilder, StructuredSplit } from '@/components/SplitBuilder'
-import { ActivityCard } from '@/components/ActivityCard'
 import { useTheme } from '@/app/providers'
-import { useActivityRealtime } from '@/utils/use-activity-realtime'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,28 +34,7 @@ type Member = {
 }
 export type MemberWithIntake = Member
 type Stat = { id: string; member_id: string; weight_kg: number | null; confidence: number | null; created_at: string }
-type ThreadParticipant = {
-  user_id: string
-  first_name: string | null
-  email: string
-  role: string
-  avatar_url: string | null
-  avatar_color: string | null
-}
-
-type Thread = {
-  id: string
-  member_id: string | null
-  thread_type: 'dm' | 'group_member' | 'coaches_group' | 'custom'
-  title: string | null
-  is_group: boolean
-  last_message_at: string | null
-  participants: ThreadParticipant[]
-}
-type MsgPreview = { thread_id: string; body: string; created_at: string; author_id: string }
-type ReadReceipt = { thread_id: string; last_read_at: string }
-type ChatMessage = { id: string; author_id: string; body: string; created_at: string; message_attachments: { id: string; storage_path: string; kind: string }[] }
-type CoachTab = 'home' | 'members' | 'programs' | 'messages' | 'inbox' | 'applications' | 'admin' | 'more'
+type CoachTab = 'home' | 'members' | 'programs' | 'inbox' | 'applications' | 'admin' | 'more'
 type Section = 'split' | 'food' | 'notes'
 
 type CoachNote = {
@@ -89,17 +66,6 @@ type OkrData = {
   key_results: [string, string, string]
 }
 
-type CoachProfile = {
-  id: string
-  first_name: string | null
-  email: string
-  avatar_url: string | null
-  avatar_color: string | null
-  role: string
-}
-
-import type { ActivityWithDetails } from '@/components/ActivityCard'
-
 type Props = {
   userId: string
   userEmail: string
@@ -108,11 +74,6 @@ type Props = {
   avatarColor: string
   avatarUrl: string | null
   members: Member[]
-  activities: ActivityWithDetails[]
-  threads: Thread[]
-  lastMessages: MsgPreview[]
-  myReads: ReadReceipt[]
-  coachProfiles: CoachProfile[]
   snoozeMap: Record<string, string>
 }
 
@@ -356,7 +317,7 @@ function BmrSection({ initial, onSave, saving, saved }: {
 
 // ─── Coach nav ────────────────────────────────────────────────────────────────
 
-function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avatarUrl, userEmail, unreadCount }: {
+function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avatarUrl, userEmail }: {
   active: CoachTab
   onChange: (t: CoachTab) => void
   isHeadCoach: boolean
@@ -364,14 +325,12 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
   avatarColor: string
   avatarUrl: string | null
   userEmail: string
-  unreadCount: number
 }) {
   const { theme, toggleTheme } = useTheme()
   const tabs: { id: CoachTab; label: string; icon: JSX.Element }[] = [
     { id: 'home', label: 'Home', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" /></svg> },
     { id: 'members', label: 'Members', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" /><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" strokeLinecap="round" strokeLinejoin="round" /><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87" strokeLinecap="round" strokeLinejoin="round" /></svg> },
     { id: 'programs', label: 'Programs', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" /></svg> },
-    { id: 'messages', label: 'Messages', icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-4l-4 4v-4z" strokeLinecap="round" strokeLinejoin="round" /></svg> },
   ]
 
   const moreIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-5 h-5"><circle cx="5" cy="12" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="19" cy="12" r="1.5" /></svg>
@@ -415,14 +374,8 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
             >
               <span className="relative">
                 {t.icon}
-                {t.id === 'messages' && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#f87171] rounded-full border-2 border-[var(--c-sidebar)]" />
-                )}
               </span>
               <span className="text-sm font-semibold">{t.label}</span>
-              {t.id === 'messages' && unreadCount > 0 && active !== 'messages' && (
-                <span className="ml-auto text-[10px] font-mono bg-[#f87171]/15 text-[#f87171] px-1.5 py-0.5 rounded-full">{unreadCount}</span>
-              )}
             </button>
           ))}
           {showAdmin && (
@@ -483,9 +436,6 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
               active === t.id ? 'bg-[#b0e455] text-[#0f1a0c]' : 'text-[var(--c-text4)]'
             }`}>
               {t.icon}
-              {t.id === 'messages' && unreadCount > 0 && (
-                <span className="absolute top-0 right-1 w-2 h-2 bg-[#f87171] rounded-full border border-[var(--c-backdrop)]" />
-              )}
             </div>
             <span className={`text-[9px] uppercase font-medium ${
               active === t.id ? 'text-[var(--c-accent-text)]' : 'text-[var(--c-text4)]'
@@ -516,32 +466,19 @@ function CoachNav({ active, onChange, isHeadCoach, firstName, avatarColor, avata
 
 // ─── Home tab ─────────────────────────────────────────────────────────────────
 
-function HomeTab({ members, allStats, activities, mutateActivity, removeActivity, userId, threads, lastMessages, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed, onMessageMember }: {
+function HomeTab({ members, allStats, isHeadCoach, firstName, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
-  activities: ActivityWithDetails[]
-  mutateActivity: (id: string, m: (a: ActivityWithDetails) => ActivityWithDetails) => void
-  removeActivity: (id: string) => void
   userId: string
-  threads: Thread[]
-  lastMessages: MsgPreview[]
   isHeadCoach: boolean
   firstName: string | null
   snoozes: Record<string, string>
   onMarkAddressed: (memberId: string) => void
   onUndoAddressed: (memberId: string) => void
-  onMessageMember: (memberId: string) => void
 }) {
   const name = firstName ?? 'Coach'
   const h = new Date().getHours()
   const greet = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
-
-  const threadToMember = Object.fromEntries(threads.filter(t => t.member_id).map(t => [t.id, t.member_id!]))
-  const lastMsgByMember: Record<string, MsgPreview> = {}
-  for (const msg of lastMessages) {
-    const mid = threadToMember[msg.thread_id]
-    if (mid && !lastMsgByMember[mid]) lastMsgByMember[mid] = msg
-  }
 
   const latestPerMember = members.map(m => ({
     member: m,
@@ -623,12 +560,6 @@ function HomeTab({ members, allStats, activities, mutateActivity, removeActivity
                   </p>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <button
-                    onClick={() => onMessageMember(member.id)}
-                    className="text-[10px] font-mono tracking-widest uppercase text-[var(--c-accent-text)] border border-[var(--c-accent-text)]/40 rounded-lg px-3 py-1.5 hover:bg-[var(--c-accent-text)]/10 transition active:scale-95"
-                  >
-                    Message
-                  </button>
                   {attn ? (
                     <button
                       onClick={() => onMarkAddressed(member.id)}
@@ -650,30 +581,6 @@ function HomeTab({ members, allStats, activities, mutateActivity, removeActivity
           })}
         </div>
       )}
-
-      {/* Activity feed — the main thing */}
-      <div className="space-y-3">
-        <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono">Activity</p>
-        {activities.length === 0 ? (
-          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-8 text-center">
-            <p className="text-sm text-[var(--c-text3)] leading-relaxed">
-              Nothing posted yet.<br />
-              When your clients log activity, it shows up here.
-            </p>
-          </div>
-        ) : (
-          activities.slice(0, 20).map(a => (
-            <ActivityCard
-              key={a.id}
-              activity={a}
-              currentUserId={userId}
-              showMemberName
-              onMutate={mutateActivity}
-              onDelete={removeActivity}
-            />
-          ))
-        )}
-      </div>
     </div>
   )
 }
@@ -900,13 +807,9 @@ function IntakeCard({ member }: { member: Member }) {
   )
 }
 
-function MemberDetailPanel({ member, stat, activities, mutateActivity, removeActivity, currentUserId, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed, onDeleted, canDelete }: {
+function MemberDetailPanel({ member, stat, snoozedAt, onOpenProgram, onClose, onMarkAddressed, onUndoAddressed, onDeleted, canDelete }: {
   member: Member
   stat: Stat | null
-  activities: ActivityWithDetails[]
-  mutateActivity: (id: string, m: (a: ActivityWithDetails) => ActivityWithDetails) => void
-  removeActivity: (id: string) => void
-  currentUserId: string
   snoozedAt: string | null
   onOpenProgram: (id: string) => void
   onClose: () => void
@@ -937,34 +840,10 @@ function MemberDetailPanel({ member, stat, activities, mutateActivity, removeAct
   const weeklyPhotos = progressPhotos.filter(p => p.photo_type === 'weekly')
   const latestWeekly = weeklyPhotos[weeklyPhotos.length - 1] ?? null
 
-  // Confidence trend from activities
-  const confPts = [...activities].reverse().map(a => a.confidence)
-  const lastConf = activities[0]?.confidence ?? null
-
-  const last30Days: { date: string; active: boolean }[] = []
-  const activeDates = new Set(activities.map(a => a.created_at.split('T')[0]))
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    last30Days.push({ date: key, active: activeDates.has(key) })
-  }
-  const activeCount = last30Days.filter(d => d.active).length
-
   // Quick stats
   const daysIntoProgram = member.onboarded_at
     ? Math.floor((Date.now() - new Date(member.onboarded_at).getTime()) / 86_400_000)
     : null
-  const posts30d = activities.length // already filtered to this member by parent
-  const activeDateSet = new Set(activities.map(a => a.created_at.split('T')[0]))
-  let streak = 0
-  for (let i = 0; i < 60; i++) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    if (activeDateSet.has(key)) streak++
-    else if (i > 0) break
-  }
   const memberDisplayName = member.first_name ?? member.email.split('@')[0]
 
   return (
@@ -997,10 +876,6 @@ function MemberDetailPanel({ member, stat, activities, mutateActivity, removeAct
             {daysIntoProgram !== null && (
               <span><span className="text-[var(--c-text2)] font-semibold">{daysIntoProgram}</span>d in program</span>
             )}
-            {streak > 0 && (
-              <span><span className="text-[var(--c-text2)] font-semibold">{streak}</span>d streak</span>
-            )}
-            <span><span className="text-[var(--c-text2)] font-semibold">{posts30d}</span> {posts30d === 1 ? 'post' : 'posts'} / 30d</span>
           </div>
         </div>
       </div>
@@ -1042,47 +917,6 @@ function MemberDetailPanel({ member, stat, activities, mutateActivity, removeAct
         </div>
       ) : (
         <>
-          {/* 30-day activity calendar */}
-          <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest">30-Day Activity</p>
-              <p className="text-[9px] text-[var(--c-text4)] font-mono">{activeCount} / 30 days</p>
-            </div>
-            <div className="space-y-1">
-              {Array.from({ length: 5 }).map((_, row) => (
-                <div key={row} className="grid grid-cols-6 gap-1">
-                  {last30Days.slice(row * 6, row * 6 + 6).map(day => (
-                    <div
-                      key={day.date}
-                      title={`${day.date}${day.active ? ' · posted' : ''}`}
-                      className={`h-4 rounded-sm ${day.active ? 'bg-[#b0e455]' : 'bg-[var(--c-bg)] border border-[var(--c-border2)]'}`}
-                    />
-                  ))}
-                </div>
-              ))}
-            </div>
-            {confPts.length >= 2 && lastConf != null && (() => {
-              const W = 300; const H = 36
-              const coords = confPts.map((v, i) => ({
-                x: (i / (confPts.length - 1)) * W,
-                y: H - ((v - 1) / 9) * (H - 6) - 3,
-              }))
-              const poly = coords.map(c => `${c.x},${c.y}`).join(' ')
-              return (
-                <div className="mt-3 pt-3 border-t border-[var(--c-border)]">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-[9px] text-[var(--c-text5)] font-mono">Confidence trend (1–10)</p>
-                    <span className="text-[9px] font-mono font-semibold" style={{ color: confidenceColor(lastConf) }}>{lastConf}/10 now</span>
-                  </div>
-                  <svg viewBox={`0 0 ${W} ${H}`} className="w-full" preserveAspectRatio="none" style={{ height: 32 }}>
-                    <polyline points={poly} fill="none" stroke="#94a3b8" strokeWidth="1.5" />
-                    <circle cx={coords[coords.length - 1].x} cy={coords[coords.length - 1].y} r="3" fill={confidenceColor(lastConf)} />
-                  </svg>
-                </div>
-              )
-            })()}
-          </div>
-
           {/* Progress photos */}
           {(beforePhoto || latestWeekly) && (
             <div className="bg-[var(--c-card)] shadow-sm rounded-2xl p-4 border border-[var(--c-border)]">
@@ -1134,26 +968,6 @@ function MemberDetailPanel({ member, stat, activities, mutateActivity, removeAct
               )}
             </div>
           )}
-
-          {/* Activity feed for this member */}
-          <div>
-            <p className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Activity</p>
-            {activities.length === 0 ? (
-              <p className="text-sm text-[var(--c-text4)] text-center py-6">No activity logged yet.</p>
-            ) : (
-              <div className="space-y-3">
-                {activities.map(a => (
-                  <ActivityCard
-                    key={a.id}
-                    activity={a}
-                    currentUserId={currentUserId}
-                    onMutate={mutateActivity}
-                    onDelete={removeActivity}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
         </>
       )}
 
@@ -1234,15 +1048,9 @@ function MemberDetailPanel({ member, stat, activities, mutateActivity, removeAct
 
 // ─── Members tab ──────────────────────────────────────────────────────────────
 
-function MembersTab({ members, allStats, activities, mutateActivity, removeActivity, threads, lastMessages, myReads, userId, userEmail, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
+function MembersTab({ members, allStats, userId, userEmail, onOpenProgram, snoozes, onMarkAddressed, onUndoAddressed }: {
   members: Member[]
   allStats: Stat[]
-  activities: ActivityWithDetails[]
-  mutateActivity: (id: string, m: (a: ActivityWithDetails) => ActivityWithDetails) => void
-  removeActivity: (id: string) => void
-  threads: Thread[]
-  lastMessages: MsgPreview[]
-  myReads: ReadReceipt[]
   userId: string
   userEmail: string
   onOpenProgram: (memberId: string) => void
@@ -1250,50 +1058,12 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
   onMarkAddressed: (memberId: string) => void
   onUndoAddressed: (memberId: string) => void
 }) {
-  const supabase = createClient()
   const [stats] = useState<Stat[]>(allStats)
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
-
-  const threadToMember = Object.fromEntries(threads.filter(t => t.member_id).map(t => [t.id, t.member_id!]))
-  const memberToThread = Object.fromEntries(threads.filter(t => t.member_id).map(t => [t.member_id!, t.id]))
-  const lastMsgByMember: Record<string, MsgPreview> = {}
-  for (const msg of lastMessages) {
-    const mid = threadToMember[msg.thread_id]
-    if (mid && !lastMsgByMember[mid]) lastMsgByMember[mid] = msg
-  }
-  const readMap = Object.fromEntries(myReads.map(r => [r.thread_id, r.last_read_at]))
-  const unreadMembers = new Set(
-    members.filter(m => {
-      const tid = memberToThread[m.id]
-      const lastMsg = lastMsgByMember[m.id]
-      if (!tid || !lastMsg || lastMsg.author_id === userId) return false
-      const readAt = readMap[tid]
-      return !readAt || new Date(lastMsg.created_at) > new Date(readAt)
-    }).map(m => m.id)
-  )
-
-  const memberMap = Object.fromEntries(members.map(m => [m.id, m]))
-
-  // Per-member: latest activity (any kind) + count of activities in last 30 days
-  const thirtyDaysAgo = Date.now() - 30 * 86_400_000
-  const latestActivityByMember: Record<string, ActivityWithDetails | null> = {}
-  const activityCount30dByMember: Record<string, number> = {}
-  for (const a of activities) {
-    if (!latestActivityByMember[a.member_id] ||
-        new Date(a.created_at).getTime() > new Date(latestActivityByMember[a.member_id]!.created_at).getTime()) {
-      latestActivityByMember[a.member_id] = a
-    }
-    if (new Date(a.created_at).getTime() >= thirtyDaysAgo) {
-      activityCount30dByMember[a.member_id] = (activityCount30dByMember[a.member_id] ?? 0) + 1
-    }
-  }
 
   const latestPerMember = members.map(m => ({
     member: m,
     stat: stats.find(s => s.member_id === m.id) ?? null,
-    lastMsg: lastMsgByMember[m.id] ?? null,
-    latestActivity: latestActivityByMember[m.id] ?? null,
-    posts30d: activityCount30dByMember[m.id] ?? 0,
   }))
 
   // Summary counts
@@ -1323,15 +1093,10 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
 
   if (selectedMember) {
     const selectedStat = stats.find(s => s.member_id === selectedMember.id) ?? null
-    const memberActivities = activities.filter(a => a.member_id === selectedMember.id)
     return (
       <MemberDetailPanel
         member={selectedMember}
         stat={selectedStat}
-        activities={memberActivities}
-        mutateActivity={mutateActivity}
-        removeActivity={removeActivity}
-        currentUserId={userId}
         snoozedAt={snoozes[selectedMember.id] ?? null}
         canDelete={userEmail === 'me@javilorenzana.com'}
         onOpenProgram={(id) => { setSelectedMember(null); onOpenProgram(id) }}
@@ -1341,12 +1106,6 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
         onDeleted={() => { setSelectedMember(null); window.location.reload() }}
       />
     )
-  }
-
-  const KIND_EMOJI: Record<ActivityWithDetails['kind'], string> = {
-    workout: '🏋️',
-    win: '🏆',
-    meal: '🍽️',
   }
 
   return (
@@ -1367,7 +1126,7 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
 
       {/* Roster — richer rows */}
       <div className="space-y-2">
-        {sortedMembers.map(({ member, stat, latestActivity, posts30d }) => {
+        {sortedMembers.map(({ member, stat }) => {
           const status = checkinStatus(stat)
           const daysQuiet = stat ? Math.floor((Date.now() - new Date(stat.created_at).getTime()) / 86_400_000) : null
           return (
@@ -1385,24 +1144,6 @@ function MembersTab({ members, allStats, activities, mutateActivity, removeActiv
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-[var(--c-text)] truncate">{memberName(member)}</p>
-                  {unreadMembers.has(member.id) && (
-                    <span className="text-[9px] font-mono font-bold uppercase tracking-widest bg-[#b0e455] text-[#0f1a0c] px-2 py-0.5 rounded-full shrink-0">New msg</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[var(--c-text4)]">
-                  {latestActivity ? (
-                    <span suppressHydrationWarning>
-                      <span aria-hidden>{KIND_EMOJI[latestActivity.kind]}</span> {relTime(latestActivity.created_at)} ago
-                      {latestActivity.confidence != null && (
-                        <span style={{ color: confidenceColor(latestActivity.confidence) }}> · {latestActivity.confidence}/10</span>
-                      )}
-                    </span>
-                  ) : (
-                    <span>No posts yet</span>
-                  )}
-                  {posts30d > 0 && (
-                    <span className="text-[var(--c-text5)]">· {posts30d} in 30d</span>
-                  )}
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
@@ -1835,726 +1576,6 @@ function CoachNotesSection({ memberId, currentUserId, isHeadCoach }: { memberId:
           })}
         </div>
       )}
-    </div>
-  )
-}
-
-// ─── Messages tab ─────────────────────────────────────────────────────────────
-
-type MsgBucket = 'all' | 'coaches' | 'clients'
-
-function threadDisplayName(thread: Thread, myId: string): string {
-  if (thread.thread_type === 'coaches_group') return 'Team Chat'
-  if (thread.thread_type === 'dm') {
-    const other = thread.participants.find(p => p.user_id !== myId)
-    return other?.first_name ?? other?.email.split('@')[0] ?? 'Direct Message'
-  }
-  if (thread.title) return thread.title
-  if (thread.thread_type === 'group_member') {
-    const member = thread.participants.find(p => p.role === 'member')
-    return member?.first_name ?? member?.email.split('@')[0] ?? 'Group'
-  }
-  return thread.participants.filter(p => p.user_id !== myId).map(p => p.first_name ?? p.email.split('@')[0]).join(', ') || 'Group'
-}
-
-function isGroupThread(thread: Thread) {
-  return thread.thread_type === 'group_member' || thread.thread_type === 'coaches_group' || thread.thread_type === 'custom'
-}
-
-function GroupBadge() {
-  return (
-    <span className="inline-flex items-center gap-0.5 bg-[#b0e455]/15 border border-[#b0e455]/35 text-[#5a8a20] dark:text-[#b0e455] text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded-md shrink-0">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="w-2.5 h-2.5">
-        <circle cx="9" cy="8" r="3" /><path d="M3 21v-1a5 5 0 015-5h4a5 5 0 015 5v1" strokeLinecap="round" />
-        <path d="M16 4a3 3 0 010 6M21 21v-1a4 4 0 00-3-3.87" strokeLinecap="round" />
-      </svg>
-      Group
-    </span>
-  )
-}
-
-function threadSubLabel(thread: Thread, myId: string): string {
-  if (thread.thread_type === 'coaches_group') return 'All coaches'
-  if (thread.thread_type === 'group_member') {
-    const coaches = thread.participants.filter(p => p.role === 'coach' || p.role === 'head_coach')
-    return coaches.map(c => c.first_name ?? c.email.split('@')[0]).join(' · ')
-  }
-  if (thread.thread_type === 'dm') {
-    const other = thread.participants.find(p => p.user_id !== myId)
-    if (other?.role === 'head_coach') return 'Head Coach'
-    if (other?.role === 'coach') return 'Coach'
-    return 'Member'
-  }
-  return ''
-}
-
-function threadBucket(thread: Thread, myId: string): 'coaches' | 'clients' {
-  if (thread.thread_type === 'coaches_group') return 'coaches'
-  if (thread.thread_type === 'dm') {
-    const other = thread.participants.find(p => p.user_id !== myId)
-    return (other?.role === 'coach' || other?.role === 'head_coach') ? 'coaches' : 'clients'
-  }
-  return 'clients'
-}
-
-function threadLeadParticipant(thread: Thread, myId: string): ThreadParticipant | null {
-  if (thread.thread_type === 'group_member') return thread.participants.find(p => p.role === 'member') ?? null
-  if (thread.thread_type === 'dm') return thread.participants.find(p => p.user_id !== myId) ?? null
-  return null
-}
-
-function ParticipantAvatar({ p, size = 'sm' }: { p: ThreadParticipant | null; size?: 'sm' | 'md' }) {
-  const sz = size === 'sm' ? 'w-7 h-7 text-[11px]' : 'w-9 h-9 text-xs'
-  const color = p?.avatar_color ?? '#b0e455'
-  const initial = (p?.first_name ?? p?.email ?? '?').charAt(0).toUpperCase()
-  if (p?.avatar_url) return <img src={p.avatar_url} alt="" className={`${sz} rounded-full object-cover shrink-0`} style={{ border: `1.5px solid ${color}` }} />
-  return <div className={`${sz} rounded-full flex items-center justify-center font-bold shrink-0`} style={{ background: color + '22', border: `1.5px solid ${color}`, color }}>{initial}</div>
-}
-
-function GroupIcon({ size = 'sm' }: { size?: 'sm' | 'md' }) {
-  const sz = size === 'sm' ? 'w-7 h-7' : 'w-9 h-9'
-  return (
-    <div className={`${sz} rounded-full bg-[#b0e455]/15 border border-[#b0e455]/40 flex items-center justify-center shrink-0`}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
-        <circle cx="9" cy="7" r="3" /><path d="M3 21v-1.5a4.5 4.5 0 014.5-4.5h3A4.5 4.5 0 0115 19.5V21" strokeLinecap="round" />
-        <path d="M16 3.13a3 3 0 010 5.75M21 21v-1a3.5 3.5 0 00-3-3.47" strokeLinecap="round" />
-      </svg>
-    </div>
-  )
-}
-
-function MessagesTab({
-  userId,
-  isHeadCoach,
-  members,
-  coachProfiles,
-  threads,
-  lastMessages,
-  myReads,
-  myName,
-  myAvatarUrl,
-  myAvatarColor,
-  initialThreadId,
-  onInitialThreadConsumed,
-}: {
-  userId: string
-  isHeadCoach: boolean
-  members: Member[]
-  coachProfiles: CoachProfile[]
-  threads: Thread[]
-  lastMessages: MsgPreview[]
-  myReads: ReadReceipt[]
-  myName: string | null
-  myAvatarUrl: string | null
-  myAvatarColor: string
-  initialThreadId?: string | null
-  onInitialThreadConsumed?: () => void
-}) {
-  const supabase = createClient()
-  const [selectedThreadId, setSelectedThreadId] = useState<string | null>(initialThreadId ?? null)
-
-  useEffect(() => {
-    if (initialThreadId && initialThreadId !== selectedThreadId) {
-      setSelectedThreadId(initialThreadId)
-      onInitialThreadConsumed?.()
-    }
-  }, [initialThreadId]) // eslint-disable-line react-hooks/exhaustive-deps
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
-  const [lastMsgState, setLastMsgState] = useState<MsgPreview[]>(lastMessages)
-  const [allThreads, setAllThreads] = useState<Thread[]>(threads)
-  const [body, setBody] = useState('')
-  const [sending, setSending] = useState(false)
-  const [sendError, setSendError] = useState<string | null>(null)
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [loadingMessages, setLoadingMessages] = useState(false)
-  const [bucket, setBucket] = useState<MsgBucket>('all')
-  const [showNewChat, setShowNewChat] = useState(false)
-  const [newChatMode, setNewChatMode] = useState<'dm' | 'group'>('dm')
-  const [newChatSearch, setNewChatSearch] = useState('')
-  const [groupSelected, setGroupSelected] = useState<string[]>([])
-  const [groupName, setGroupName] = useState('')
-  const [creatingChat, setCreatingChat] = useState(false)
-  const [createChatError, setCreateChatError] = useState<string | null>(null)
-  const [renamingThread, setRenamingThread] = useState(false)
-  const [renameValue, setRenameValue] = useState('')
-  const [renameSaving, setRenameSaving] = useState(false)
-  const bottomRef = useRef<HTMLDivElement>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const latestMsgAt = useRef<string | null>(null)
-
-  const threadMap = Object.fromEntries(allThreads.map(t => [t.id, t]))
-
-  const lastMsgByThread: Record<string, MsgPreview> = {}
-  for (const msg of lastMsgState) {
-    if (!lastMsgByThread[msg.thread_id]) lastMsgByThread[msg.thread_id] = msg
-  }
-
-  const readMap: Record<string, string> = {}
-  for (const r of myReads) readMap[r.thread_id] = r.last_read_at
-
-  function isUnread(threadId: string) {
-    const last = lastMsgByThread[threadId]
-    if (!last || last.author_id === userId) return false
-    const read = readMap[threadId]
-    return !read || new Date(last.created_at) > new Date(read)
-  }
-
-  const sortedThreads = [...allThreads].sort((a, b) => {
-    const ta = lastMsgByThread[a.id]?.created_at ?? a.last_message_at ?? ''
-    const tb = lastMsgByThread[b.id]?.created_at ?? b.last_message_at ?? ''
-    return tb.localeCompare(ta)
-  })
-
-  const filteredThreads = sortedThreads.filter(t => {
-    if (bucket === 'all') return true
-    return threadBucket(t, userId) === bucket
-  })
-
-  async function openThread(threadId: string) {
-    setSelectedThreadId(threadId)
-    setChatMessages([])
-    setLoadError(null)
-    setLoadingMessages(true)
-    try {
-      const res = await fetch(`/api/get-thread-messages?thread_id=${threadId}`)
-      const json = await res.json()
-      if (!res.ok) {
-        setLoadError(`Could not load messages: ${json.error ?? 'Unknown error'}`)
-      } else {
-        const msgs = json.messages as ChatMessage[]
-        setChatMessages(msgs)
-        if (msgs.length > 0) {
-          const latest = msgs[msgs.length - 1]
-          setLastMsgState(prev => {
-            const filtered = prev.filter(m => m.thread_id !== threadId)
-            return [{ thread_id: threadId, body: latest.body, created_at: latest.created_at, author_id: latest.author_id }, ...filtered]
-          })
-        }
-      }
-    } catch {
-      setLoadError('Network error loading messages.')
-    }
-    setLoadingMessages(false)
-    await supabase.from('message_reads').upsert({ thread_id: threadId, user_id: userId, last_read_at: new Date().toISOString() })
-    setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'instant' }), 50)
-  }
-
-  useEffect(() => {
-    if (!selectedThreadId) return
-    const channel = supabase
-      .channel(`coach-${selectedThreadId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `thread_id=eq.${selectedThreadId}` },
-        payload => {
-          const msg = payload.new as ChatMessage
-          setChatMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, message_attachments: [] }])
-          setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
-          supabase.from('message_reads').upsert({ thread_id: selectedThreadId, user_id: userId, last_read_at: new Date().toISOString() })
-        }
-      )
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [selectedThreadId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Keep latest message timestamp in a ref for polling
-  useEffect(() => {
-    if (chatMessages.length > 0) {
-      latestMsgAt.current = chatMessages[chatMessages.length - 1].created_at
-    }
-  }, [chatMessages])
-
-  // Polling — guaranteed fallback every 3s
-  useEffect(() => {
-    if (!selectedThreadId) return
-    const poll = async () => {
-      const since = latestMsgAt.current
-      if (!since) return
-      try {
-        const res = await fetch(`/api/get-thread-messages?thread_id=${selectedThreadId}&since=${encodeURIComponent(since)}`)
-        const json = await res.json()
-        if (!json.messages?.length) return
-        setChatMessages(prev => {
-          const ids = new Set(prev.map(m => m.id))
-          const fresh = (json.messages as ChatMessage[]).filter((m: ChatMessage) => !ids.has(m.id))
-          if (!fresh.length) return prev
-          const last = fresh[fresh.length - 1]
-          setLastMsgState(p => {
-            const filtered = p.filter(m => m.thread_id !== selectedThreadId)
-            return [{ thread_id: selectedThreadId!, body: last.body, created_at: last.created_at, author_id: last.author_id }, ...filtered]
-          })
-          setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
-          supabase.from('message_reads').upsert({ thread_id: selectedThreadId, user_id: userId, last_read_at: new Date().toISOString() })
-          return [...prev, ...fresh.map(m => ({ ...m, message_attachments: [] }))]
-        })
-      } catch { /* silent */ }
-    }
-    const interval = setInterval(poll, 3000)
-    return () => clearInterval(interval)
-  }, [selectedThreadId]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  async function send() {
-    if (!selectedThreadId || !body.trim() || sending) return
-    setSending(true)
-    setSendError(null)
-    const text = body.trim()
-    try {
-      const res = await fetch('/api/send-message', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ thread_id: selectedThreadId, body: text }),
-      })
-      const json = await res.json()
-      if (!res.ok || !json.msg) {
-        setSendError(`Failed to send: ${json.error ?? 'Unknown error'}`)
-      } else {
-        setBody('')
-        if (textareaRef.current) textareaRef.current.style.height = 'auto'
-        setChatMessages(prev => prev.some(m => m.id === json.msg.id) ? prev : [...prev, { ...json.msg, message_attachments: [] }])
-        setLastMsgState(prev => {
-          const filtered = prev.filter(m => m.thread_id !== selectedThreadId)
-          return [{ thread_id: selectedThreadId!, body: text, created_at: json.msg.created_at, author_id: userId }, ...filtered]
-        })
-        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
-      }
-    } catch {
-      setSendError('Network error — check your connection.')
-    }
-    setSending(false)
-  }
-
-  async function startDM(targetId: string) {
-    setCreatingChat(true)
-    setCreateChatError(null)
-    try {
-      const res = await fetch('/api/create-thread', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'dm', participant_ids: [targetId] }),
-      })
-      const json = await res.json()
-      if (!res.ok) {
-        setCreateChatError(json.error ?? 'Failed to create thread')
-        setCreatingChat(false)
-        return
-      }
-      if (json.thread_id) {
-        setShowNewChat(false)
-        setNewChatSearch('')
-        const existing = allThreads.find(t => t.id === json.thread_id)
-        if (existing) {
-          openThread(json.thread_id)
-        } else {
-          // Build thread optimistically from what we know — no page reload needed
-          const target = dmOptions.find(o => o.id === targetId)
-          const newThread: Thread = {
-            id: json.thread_id,
-            member_id: null,
-            thread_type: 'dm',
-            title: null,
-            is_group: false,
-            last_message_at: null,
-            participants: [
-              { user_id: userId, first_name: myName, email: '', role: isHeadCoach ? 'head_coach' : 'coach', avatar_url: myAvatarUrl, avatar_color: myAvatarColor },
-              ...(target ? [{ user_id: target.id, first_name: target.name, email: '', role: target.label === 'Head Coach' ? 'head_coach' : target.label === 'Coach' ? 'coach' : 'member', avatar_url: target.avatarUrl, avatar_color: target.avatarColor }] : []),
-            ],
-          }
-          setAllThreads(prev => [newThread, ...prev])
-          openThread(json.thread_id)
-        }
-      }
-    } catch (err) {
-      setCreateChatError('Network error — check your connection.')
-    }
-    setCreatingChat(false)
-  }
-
-  async function createGroup() {
-    if (groupSelected.length < 2) { setCreateChatError('Pick at least 2 people.'); return }
-    setCreatingChat(true)
-    setCreateChatError(null)
-    try {
-      const res = await fetch('/api/create-thread', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'custom', participant_ids: groupSelected, title: groupName.trim() || null }),
-      })
-      const json = await res.json()
-      if (!res.ok) { setCreateChatError(json.error ?? 'Failed to create group'); setCreatingChat(false); return }
-      if (json.thread_id) {
-        setShowNewChat(false)
-        setNewChatSearch('')
-        setGroupSelected([])
-        setGroupName('')
-        const selectedPeople = dmOptions.filter(o => groupSelected.includes(o.id))
-        const newThread: Thread = {
-          id: json.thread_id,
-          member_id: null,
-          thread_type: 'custom',
-          title: groupName.trim() || null,
-          is_group: true,
-          last_message_at: null,
-          participants: [
-            { user_id: userId, first_name: myName, email: '', role: isHeadCoach ? 'head_coach' : 'coach', avatar_url: myAvatarUrl, avatar_color: myAvatarColor },
-            ...selectedPeople.map(p => ({ user_id: p.id, first_name: p.name, email: '', role: p.label === 'Head Coach' ? 'head_coach' : p.label === 'Coach' ? 'coach' : 'member', avatar_url: p.avatarUrl, avatar_color: p.avatarColor })),
-          ],
-        }
-        setAllThreads(prev => [newThread, ...prev])
-        openThread(json.thread_id)
-      }
-    } catch { setCreateChatError('Network error — check your connection.') }
-    setCreatingChat(false)
-  }
-
-  function resetNewChat() {
-    setShowNewChat(false)
-    setNewChatMode('dm')
-    setNewChatSearch('')
-    setGroupSelected([])
-    setGroupName('')
-    setCreateChatError(null)
-  }
-
-  function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() }
-  }
-
-  // ── People available for new DM ─────────────────────────────────────────────
-  const dmOptions: { id: string; name: string; label: string; avatarUrl: string | null; avatarColor: string | null }[] = [
-    ...coachProfiles.map(c => ({
-      id: c.id,
-      name: c.first_name ?? c.email.split('@')[0],
-      label: c.role === 'head_coach' ? 'Head Coach' : 'Coach',
-      avatarUrl: c.avatar_url,
-      avatarColor: c.avatar_color,
-    })),
-    ...(isHeadCoach ? members.map(m => ({
-      id: m.id,
-      name: m.first_name ?? m.email.split('@')[0],
-      label: 'Member',
-      avatarUrl: m.avatar_url,
-      avatarColor: m.avatar_color,
-    })) : members.map(m => ({
-      id: m.id,
-      name: m.first_name ?? m.email.split('@')[0],
-      label: 'Member',
-      avatarUrl: m.avatar_url,
-      avatarColor: m.avatar_color,
-    }))),
-  ]
-  const filteredDmOptions = dmOptions.filter(o =>
-    !newChatSearch || o.name.toLowerCase().includes(newChatSearch.toLowerCase())
-  )
-
-  // ── Thread list view ────────────────────────────────────────────────────────
-  if (!selectedThreadId) {
-    return (
-      <div className="space-y-3">
-        {/* Bucket tabs + New chat button */}
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1 flex-1">
-            {(['all', 'coaches', 'clients'] as MsgBucket[]).map(b => (
-              <button
-                key={b}
-                onClick={() => setBucket(b)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition ${
-                  bucket === b
-                    ? 'bg-[#b0e455] text-[#0b1509]'
-                    : 'text-[var(--c-text4)] hover:text-[var(--c-text)] hover:bg-[var(--c-card)]'
-                }`}
-              >{b}</button>
-            ))}
-          </div>
-          <button
-            onClick={() => setShowNewChat(v => !v)}
-            className="w-8 h-8 rounded-full bg-[var(--c-card)] border border-[var(--c-border)] flex items-center justify-center text-[var(--c-text3)] hover:text-[var(--c-text)] hover:border-[var(--c-border2)] transition"
-            title="New chat"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
-              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-
-        {/* New chat picker */}
-        {showNewChat && (
-          <div className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold text-[var(--c-text)] uppercase tracking-wider">New conversation</p>
-              <button onClick={resetNewChat} className="text-[var(--c-text4)] hover:text-[var(--c-text)] text-lg leading-none">×</button>
-            </div>
-
-            {/* DM / Group toggle — head coach only */}
-            {isHeadCoach && (
-              <div className="flex gap-1 bg-[var(--c-card2)] rounded-xl p-1">
-                <button onClick={() => { setNewChatMode('dm'); setGroupSelected([]); setCreateChatError(null) }}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition ${newChatMode === 'dm' ? 'bg-[var(--c-card)] text-[var(--c-text)] shadow-sm' : 'text-[var(--c-text4)]'}`}>
-                  Direct Message
-                </button>
-                <button onClick={() => { setNewChatMode('group'); setCreateChatError(null) }}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition ${newChatMode === 'group' ? 'bg-[var(--c-card)] text-[var(--c-text)] shadow-sm' : 'text-[var(--c-text4)]'}`}>
-                  Group Chat
-                </button>
-              </div>
-            )}
-
-            {createChatError && (
-              <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-3 py-2 text-xs text-[#f87171]">{createChatError}</div>
-            )}
-
-            {/* Group name input */}
-            {newChatMode === 'group' && (
-              <input
-                value={groupName}
-                onChange={e => setGroupName(e.target.value)}
-                placeholder="Group name (optional)…"
-                className="w-full bg-[var(--c-card2)] border border-[var(--c-border)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40"
-              />
-            )}
-
-            <input
-              value={newChatSearch}
-              onChange={e => setNewChatSearch(e.target.value)}
-              placeholder={newChatMode === 'group' ? 'Add people…' : 'Search by name…'}
-              className="w-full bg-[var(--c-card2)] border border-[var(--c-border)] rounded-xl px-3 py-2 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40"
-            />
-
-            {/* Selected group members chips */}
-            {newChatMode === 'group' && groupSelected.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {groupSelected.map(id => {
-                  const o = dmOptions.find(x => x.id === id)
-                  return o ? (
-                    <span key={id} className="flex items-center gap-1.5 bg-[#b0e455]/15 border border-[#b0e455]/30 text-[var(--c-text)] text-xs font-medium px-2.5 py-1 rounded-full">
-                      {o.name}
-                      <button onClick={() => setGroupSelected(prev => prev.filter(x => x !== id))} className="text-[var(--c-text4)] hover:text-[var(--c-text)] leading-none">×</button>
-                    </span>
-                  ) : null
-                })}
-              </div>
-            )}
-
-            <div className="space-y-1 max-h-48 overflow-y-auto">
-              {filteredDmOptions.filter(o => !groupSelected.includes(o.id)).map(o => {
-                const isSelected = groupSelected.includes(o.id)
-                return (
-                  <button
-                    key={o.id}
-                    onClick={() => {
-                      if (newChatMode === 'dm') { startDM(o.id) }
-                      else { setGroupSelected(prev => prev.includes(o.id) ? prev.filter(x => x !== o.id) : [...prev, o.id]) }
-                    }}
-                    disabled={creatingChat}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition text-left disabled:opacity-50 ${isSelected ? 'bg-[#b0e455]/10' : 'hover:bg-[var(--c-card2)]'}`}
-                  >
-                    {o.avatarUrl
-                      ? <img src={o.avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" style={{ border: `1.5px solid ${o.avatarColor ?? '#b0e455'}` }} />
-                      : <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0" style={{ background: (o.avatarColor ?? '#b0e455') + '22', border: `1.5px solid ${o.avatarColor ?? '#b0e455'}`, color: o.avatarColor ?? '#b0e455' }}>{o.name.charAt(0).toUpperCase()}</div>
-                    }
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-[var(--c-text)]">{o.name}</p>
-                      <p className="text-xs text-[var(--c-text4)]">{o.label}</p>
-                    </div>
-                    {newChatMode === 'dm' && creatingChat && <div className="w-4 h-4 border-2 border-[var(--c-border2)] border-t-[#b0e455] rounded-full animate-spin shrink-0" />}
-                    {newChatMode === 'group' && (
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition ${isSelected ? 'bg-[#b0e455] border-[#b0e455]' : 'border-[var(--c-border2)]'}`}>
-                        {isSelected && <svg viewBox="0 0 24 24" fill="none" stroke="#0b1509" strokeWidth="3" className="w-3 h-3"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" /></svg>}
-                      </div>
-                    )}
-                  </button>
-                )
-              })}
-              {filteredDmOptions.filter(o => !groupSelected.includes(o.id)).length === 0 && (
-                <p className="text-xs text-[var(--c-text4)] px-3 py-2">{groupSelected.length > 0 ? 'Everyone added' : 'No results'}</p>
-              )}
-            </div>
-
-            {/* Group create button */}
-            {newChatMode === 'group' && (
-              <button
-                onClick={createGroup}
-                disabled={creatingChat || groupSelected.length < 2}
-                className="w-full py-2.5 rounded-xl bg-[#b0e455] text-[#0b1509] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-40 flex items-center justify-center gap-2"
-              >
-                {creatingChat ? <div className="w-4 h-4 border-2 border-[#0b1509]/30 border-t-[#0b1509] rounded-full animate-spin" /> : null}
-                Create Group {groupSelected.length >= 2 ? `(${groupSelected.length + 1})` : ''}
-              </button>
-            )}
-          </div>
-        )}
-
-        {filteredThreads.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm text-[var(--c-text4)]">No conversations yet.</p>
-            <p className="text-xs text-[var(--c-text5)] mt-1">Use + to start a new chat.</p>
-          </div>
-        )}
-
-        {filteredThreads.map(thread => {
-          const lead = threadLeadParticipant(thread, userId)
-          const isGroup = thread.is_group || thread.thread_type === 'group_member' || thread.thread_type === 'coaches_group'
-          const last = lastMsgByThread[thread.id]
-          const unread = isUnread(thread.id)
-          return (
-            <button
-              key={thread.id}
-              onClick={() => openThread(thread.id)}
-              className="w-full bg-[var(--c-card)] shadow-sm rounded-2xl p-4 flex items-center gap-3 border border-[var(--c-border)] hover:border-[var(--c-accent-text)]/20 hover:bg-[var(--c-hover)] transition text-left"
-            >
-              <div className="relative shrink-0">
-                {isGroup && !lead ? <GroupIcon size="md" /> : <ParticipantAvatar p={lead} size="md" />}
-                {unread && <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#f87171] rounded-full border-2 border-[var(--c-bg)]" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  {isGroupThread(thread) && <GroupBadge />}
-                  <p className={`text-sm truncate ${unread ? 'font-semibold text-[var(--c-text)]' : 'text-[var(--c-text2)]'}`}>
-                    {threadDisplayName(thread, userId)}
-                  </p>
-                </div>
-                <p className="text-[10px] text-[var(--c-text4)] truncate">{threadSubLabel(thread, userId)}</p>
-                {last && (
-                  <p className={`text-[11px] truncate mt-0.5 ${unread ? 'text-[var(--c-text3)]' : 'text-[var(--c-text4)]'}`}>{last.body || '📎 Attachment'}</p>
-                )}
-              </div>
-              <div className="flex flex-col items-end gap-1.5 shrink-0">
-                {last && <p className="text-[10px] text-[var(--c-text4)] font-mono" suppressHydrationWarning>{relTime(last.created_at)}</p>}
-                {unread && <span className="text-[9px] font-mono font-bold uppercase tracking-widest bg-[#f87171]/15 text-[#f87171] px-2 py-0.5 rounded-full">New</span>}
-              </div>
-            </button>
-          )
-        })}
-      </div>
-    )
-  }
-
-  // ── Chat view ───────────────────────────────────────────────────────────────
-  const thread = threadMap[selectedThreadId]
-  const participantMap = Object.fromEntries((thread?.participants ?? []).map(p => [p.user_id, p]))
-
-  return (
-    <div className="flex flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4 shrink-0">
-        <button onClick={() => setSelectedThreadId(null)} className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition shrink-0">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
-            <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <div className="flex-1 min-w-0">
-          {renamingThread && thread ? (
-            <form
-              onSubmit={async e => {
-                e.preventDefault()
-                if (!renameValue.trim()) return
-                setRenameSaving(true)
-                await fetch('/api/rename-thread', {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ thread_id: thread.id, title: renameValue.trim() }),
-                })
-                setAllThreads(prev => prev.map((t: Thread) => t.id === thread.id ? { ...t, title: renameValue.trim() } : t))
-                setRenamingThread(false)
-                setRenameSaving(false)
-              }}
-              className="flex items-center gap-2"
-            >
-              <input
-                autoFocus
-                value={renameValue}
-                onChange={e => setRenameValue(e.target.value)}
-                className="text-sm font-semibold bg-[var(--c-card)] border border-[var(--c-border2)] rounded-lg px-2 py-0.5 text-[var(--c-text)] focus:outline-none focus:border-[#b0e455]/60 w-40"
-              />
-              <button type="submit" disabled={renameSaving} className="text-xs text-[#b0e455] font-semibold disabled:opacity-40">Save</button>
-              <button type="button" onClick={() => setRenamingThread(false)} className="text-xs text-[var(--c-text4)]">Cancel</button>
-            </form>
-          ) : (
-            <div className="flex items-center gap-1.5">
-              {thread && isGroupThread(thread) && <GroupBadge />}
-              <p className="text-sm font-semibold text-[var(--c-text)] truncate">{thread ? threadDisplayName(thread, userId) : 'Chat'}</p>
-              {thread && isGroupThread(thread) && isHeadCoach && (
-                <button
-                  onClick={() => { setRenameValue(thread.title ?? threadDisplayName(thread, userId)); setRenamingThread(true) }}
-                  className="text-[var(--c-text4)] hover:text-[var(--c-text)] transition shrink-0"
-                  title="Rename"
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="w-3.5 h-3.5">
-                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          )}
-          {thread && <p className="text-[10px] text-[var(--c-text4)]">{threadSubLabel(thread, userId)}</p>}
-        </div>
-      </div>
-
-      {/* Messages (flow naturally with parent scroll; bottom padding clears the fixed composer) */}
-      <div className="space-y-1 pb-36 lg:pb-24">
-        {loadError && <div className="bg-[#f87171]/10 border border-[#f87171]/25 rounded-xl px-4 py-3 text-xs text-[#f87171]">{loadError}</div>}
-        {loadingMessages && <div className="flex justify-center py-16"><div className="w-5 h-5 border-2 border-[var(--c-border2)] border-t-[#b0e455]/60 rounded-full animate-spin" /></div>}
-        {!loadError && !loadingMessages && chatMessages.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm text-[var(--c-text4)]">No messages yet.</p>
-            <p className="text-xs text-[var(--c-text5)] mt-1">Send the first message below.</p>
-          </div>
-        )}
-        {chatMessages.map((msg, i) => {
-          const isMine = msg.author_id === userId
-          const prev = chatMessages[i - 1]
-          const next = chatMessages[i + 1]
-          const isFirst = !prev || prev.author_id !== msg.author_id
-          const isLast = !next || next.author_id !== msg.author_id
-          const authorP = isMine
-            ? { user_id: userId, first_name: myName, email: '', role: 'coach', avatar_url: myAvatarUrl, avatar_color: myAvatarColor }
-            : (participantMap[msg.author_id] ?? null)
-          return (
-            <div key={msg.id} className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}>
-              {!isMine && (isLast ? <ParticipantAvatar p={authorP} /> : <div className="w-7 shrink-0" />)}
-              <div className={`max-w-[75%] flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-                {isFirst && authorP?.first_name && (
-                  <p className="text-[11px] text-[var(--c-text4)] font-medium mb-1 px-1">{authorP.first_name}</p>
-                )}
-                <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                  isMine ? 'bg-[#b0e455] text-[#0f1a0c] rounded-br-sm' : 'bg-[var(--c-card)] text-[var(--c-text)] border border-[var(--c-border)] rounded-bl-sm'
-                }`}>
-                  {msg.body}
-                </div>
-              </div>
-              {isMine && (isLast ? <ParticipantAvatar p={authorP} /> : <div className="w-7 shrink-0" />)}
-            </div>
-          )
-        })}
-        <div ref={bottomRef} />
-      </div>
-
-      {/* Composer pinned to viewport bottom, accounts for coach mobile nav + desktop sidebar */}
-      <div className="fixed bottom-16 left-0 right-0 lg:bottom-0 lg:left-52 bg-[var(--c-backdrop)] backdrop-blur-md border-t border-[var(--c-border)] px-4 py-3 z-40">
-        {sendError && (
-          <div className="mb-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/20">
-            <p className="text-xs text-red-400">{sendError}</p>
-          </div>
-        )}
-        <div className="flex items-end gap-2 max-w-3xl mx-auto">
-          <textarea
-            ref={textareaRef}
-            value={body}
-            onChange={e => { setBody(e.target.value); setSendError(null); const ta = textareaRef.current; if (ta) { ta.style.height = 'auto'; ta.style.height = `${ta.scrollHeight}px` } }}
-            onKeyDown={handleKeyDown}
-            placeholder="Message…"
-            rows={1}
-            className="flex-1 bg-[var(--c-card2)] border border-[var(--c-border)] rounded-2xl px-4 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text4)] resize-none focus:outline-none focus:border-[#b0e455]/35 transition max-h-32 overflow-y-auto leading-relaxed"
-          />
-          <button
-            onClick={send}
-            disabled={sending || !body.trim()}
-            className="shrink-0 w-9 h-9 rounded-full bg-[#b0e455] flex items-center justify-center text-[#0f1a0c] hover:bg-[#c9f070] transition disabled:opacity-30 mb-0.5 active:scale-95"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4 translate-x-px">
-              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
     </div>
   )
 }
@@ -3166,7 +2187,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
   const [coaches, setCoaches] = useState<AdminProfile[]>([])
   const [members, setMembers] = useState<AdminProfile[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
-  const [threads, setThreads] = useState<Thread[]>([])
   const [loading, setLoading] = useState(true)
 
   // New member notifications
@@ -3191,17 +2211,10 @@ function AdminTab({ userEmail }: { userEmail: string }) {
   const [coachInviteCredentials, setCoachInviteCredentials] = useState<{ email: string; password: string; first_name: string | null } | null>(null)
   const [coachCopiedField, setCoachCopiedField] = useState<'email' | 'password' | 'both' | null>(null)
 
-  // Thread setup
-  const [setupStatus, setSetupStatus] = useState<Record<string, 'idle' | 'loading' | 'done' | 'error'>>({})
-
   // Assign
   const [assignMemberId, setAssignMemberId] = useState('')
   const [assignCoachId, setAssignCoachId] = useState('')
   const [assignStatus, setAssignStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
-
-  // Broadcast
-  const [broadcastBody, setBroadcastBody] = useState('')
-  const [broadcastStatus, setBroadcastStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
 
   async function loadData(showLoading = true) {
     if (showLoading) setLoading(true)
@@ -3227,7 +2240,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
       setCoaches(json.coaches ?? [])
       setMembers(freshMembers)
       setAssignments(json.assignments ?? [])
-      setThreads(json.threads ?? [])
     }
     if (showLoading) setLoading(false)
   }
@@ -3240,8 +2252,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const assignMap = Object.fromEntries(assignments.map(a => [a.member_id, a.coach_id]))
-  const threadMemberIds = new Set(threads.map(t => t.member_id))
-  const membersWithoutThread = members.filter(m => !threadMemberIds.has(m.id))
 
   function profileName(p: AdminProfile) { return p.first_name ?? p.email.split('@')[0] }
   function coachName(id: string) { return coaches.find(c => c.id === id) }
@@ -3348,19 +2358,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
     }
   }
 
-  async function setupThread(member: AdminProfile) {
-    setSetupStatus(s => ({ ...s, [member.id]: 'loading' }))
-    const res = await fetch('/api/admin-action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'setup_thread', memberId: member.id }),
-    })
-    if (!res.ok) { setSetupStatus(s => ({ ...s, [member.id]: 'error' })); return }
-    setSetupStatus(s => ({ ...s, [member.id]: 'done' }))
-    await loadData()
-    setTimeout(() => setNewMembers(prev => prev.filter(m => m.id !== member.id)), 1500)
-  }
-
   async function handleQuickAssign(memberId: string) {
     const coachId = newMemberCoach[memberId]
     if (!coachId) return
@@ -3370,20 +2367,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
       body: JSON.stringify({ action: 'assign', memberId, coachId }),
     })
     await loadData()
-  }
-
-  async function handleBroadcast(e: FormEvent) {
-    e.preventDefault()
-    if (!broadcastBody.trim() || !threads.length) return
-    setBroadcastStatus('loading')
-    await fetch('/api/admin-action', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'broadcast', threadIds: threads.map(t => t.id), body: broadcastBody.trim() }),
-    })
-    setBroadcastBody('')
-    setBroadcastStatus('done')
-    setTimeout(() => setBroadcastStatus('idle'), 3000)
   }
 
   if (loading) {
@@ -3410,7 +2393,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
             </p>
           </div>
           {newMembers.map(m => {
-            const hasThread = threadMemberIds.has(m.id)
             const alreadyAssigned = !!assignMap[m.id]
             return (
               <div key={m.id} className="bg-[var(--c-card)] border border-[var(--c-border)] rounded-2xl overflow-hidden shadow-sm">
@@ -3460,18 +2442,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
                   {alreadyAssigned && (
                     <p className="text-xs text-[#16a34a] font-medium">Coach assigned ✓</p>
                   )}
-
-                  <button
-                    onClick={() => setupThread(m)}
-                    disabled={hasThread || setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
-                    className="w-full py-2.5 rounded-xl bg-[var(--c-bg)] border border-[var(--c-border)] text-xs font-semibold text-[var(--c-text2)] hover:border-[var(--c-border2)] hover:text-[var(--c-text)] transition disabled:opacity-40"
-                  >
-                    {hasThread || setupStatus[m.id] === 'done'
-                      ? 'Messaging Active ✓'
-                      : setupStatus[m.id] === 'loading' ? 'Setting up…'
-                      : setupStatus[m.id] === 'error' ? 'Error — retry'
-                      : 'Setup Messaging Thread'}
-                  </button>
                 </div>
               </div>
             )
@@ -3643,33 +2613,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
         </div>
       )}
 
-      {/* ── Setup messaging threads ── */}
-      {membersWithoutThread.length > 0 && (
-        <div>
-          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">Setup Messaging Thread</p>
-          <div className="space-y-2">
-            {membersWithoutThread.map(m => (
-              <div key={m.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl px-4 py-3 flex items-center gap-3 border border-[var(--c-border)]">
-                <div className="w-8 h-8 rounded-full bg-[var(--c-accent-text)]/10 border border-[var(--c-border2)] flex items-center justify-center text-xs font-bold text-[var(--c-accent-text)] shrink-0">
-                  {profileName(m).charAt(0).toUpperCase()}
-                </div>
-                <p className="text-sm text-[var(--c-text)] flex-1 truncate">{profileName(m)}</p>
-                <button
-                  onClick={() => setupThread(m)}
-                  disabled={setupStatus[m.id] === 'loading' || setupStatus[m.id] === 'done'}
-                  className="text-[10px] tracking-widest uppercase font-mono text-[var(--c-accent-text)] hover:text-[var(--c-accent-text)]/70 transition disabled:opacity-40 shrink-0"
-                >
-                  {setupStatus[m.id] === 'loading' ? 'Setting up…'
-                    : setupStatus[m.id] === 'done' ? 'Done!'
-                    : setupStatus[m.id] === 'error' ? 'Error - retry'
-                    : 'Setup Thread'}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* ── Create member account ── */}
       <div>
         <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-1">Onboarding a new client?</p>
@@ -3771,31 +2714,6 @@ function AdminTab({ userEmail }: { userEmail: string }) {
           </form>
         )}
       </div>
-
-      {/* ── Broadcast ── */}
-      {threads.length > 0 && (
-        <div>
-          <p className="text-[10px] text-[var(--c-text4)] tracking-widest uppercase font-mono mb-3">
-            Broadcast to All Members ({threads.length})
-          </p>
-          <form onSubmit={handleBroadcast} className="space-y-3">
-            <textarea
-              value={broadcastBody}
-              onChange={e => setBroadcastBody(e.target.value)}
-              rows={3}
-              placeholder="Send one message to every member's inbox…"
-              className="w-full bg-[var(--c-card)] border border-[var(--c-border)] rounded-lg px-4 py-3 text-[var(--c-text)] text-sm placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/60 transition resize-none"
-            />
-            <button
-              type="submit"
-              disabled={broadcastStatus === 'loading' || !broadcastBody.trim()}
-              className="w-full py-3 rounded-lg border border-[var(--c-accent-text)]/30 text-[var(--c-accent-text)] text-xs tracking-widest uppercase font-mono font-semibold hover:bg-[var(--c-accent-text)]/8 transition disabled:opacity-50"
-            >
-              {broadcastStatus === 'loading' ? 'Sending…' : broadcastStatus === 'done' ? 'Sent to All!' : 'Broadcast'}
-            </button>
-          </form>
-        </div>
-      )}
 
     </div>
   )
@@ -4215,54 +3133,19 @@ function MorePage({ onChange }: { onChange: (t: CoachTab) => void }) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, activities, threads, lastMessages, myReads, coachProfiles, snoozeMap }: Props) {
+export default function CoachClient({ userId, userEmail, userRole, firstName, avatarColor, avatarUrl, members, snoozeMap }: Props) {
   const supabase = createClient()
   const [activeTab, setActiveTab] = useState<CoachTab>('home')
   const [programMemberId, setProgramMemberId] = useState<string | null>(null)
-  const [initialMessageThreadId, setInitialMessageThreadId] = useState<string | null>(null)
   const [snoozes, setSnoozes] = useState<Record<string, string>>(snoozeMap)
   const isHeadCoach = userRole === 'head_coach'
 
-  // Live activity feed across all assigned members. Author lookup so incoming
-  // realtime comments show the right name (members commenting on their own posts).
-  const memberIds = members.map(m => m.id)
-  const authorMap = Object.fromEntries(
-    members.map(m => [m.id, { name: m.first_name ?? m.email.split('@')[0], role: 'member' as const }])
-  )
-  const { activities: liveActivities, mutate: mutateActivity, remove: removeActivity } = useActivityRealtime({
-    initial: activities,
-    memberIds,
-    authorMap,
-  })
-
-  // Derive a Stat-shape "latest activity per member" from the live feed for
-  // attention/needsAttention logic.
-  const allStats: Stat[] = (() => {
-    const seen = new Set<string>()
-    const out: Stat[] = []
-    for (const a of liveActivities) {
-      if (seen.has(a.member_id)) continue
-      seen.add(a.member_id)
-      out.push({
-        id: a.id,
-        member_id: a.member_id,
-        weight_kg: null,
-        confidence: a.confidence,
-        created_at: a.created_at,
-      })
-    }
-    return out
-  })()
+  // Members no longer post activity; attention scaffolding renders empty.
+  const allStats: Stat[] = []
 
   function openMemberProgram(memberId: string) {
     setProgramMemberId(memberId)
     setActiveTab('programs')
-  }
-
-  function openMemberMessage(memberId: string) {
-    const thread = threads.find(t => t.member_id === memberId && !t.is_group)
-    if (thread) setInitialMessageThreadId(thread.id)
-    setActiveTab('messages')
   }
 
   function markAddressed(memberId: string) {
@@ -4276,40 +3159,10 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
     supabase.from('attention_snoozes').delete().eq('coach_id', userId).eq('member_id', memberId)
   }
 
-  const initialUnread = (() => {
-    const readMap = Object.fromEntries(myReads.map(r => [r.thread_id, r.last_read_at]))
-    return threads.filter(t => {
-      const lastMsg = lastMessages.find(m => m.thread_id === t.id)
-      if (!lastMsg || lastMsg.author_id === userId) return false
-      const readAt = readMap[t.id]
-      return !readAt || new Date(lastMsg.created_at) > new Date(readAt)
-    }).length
-  })()
-  const [unreadCount, setUnreadCount] = useState(initialUnread)
-
-  useEffect(() => {
-    const threadIds = threads.map(t => t.id)
-    if (!threadIds.length) return
-    const channel = supabase.channel('coach-unread-badge')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-        const msg = payload.new as { author_id: string; thread_id: string }
-        if (threadIds.includes(msg.thread_id) && msg.author_id !== userId) {
-          setUnreadCount(c => c + 1)
-        }
-      })
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, []) // eslint-disable-line
-
-  useEffect(() => {
-    if (activeTab === 'messages') setUnreadCount(0)
-  }, [activeTab])
-
   const TAB_TITLES: Record<CoachTab, string> = {
     home: 'Home',
     members: 'Members',
     programs: 'Programs',
-    messages: 'Messages',
     inbox: 'DM Inbox',
     applications: 'Applications',
     admin: 'Admin',
@@ -4339,29 +3192,13 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
       {/* Tab content */}
       <div className="flex-1 overflow-y-auto px-5 pb-28 lg:px-10 lg:pb-10 lg:pt-6">
         {activeTab === 'home' && (
-          <HomeTab members={members} allStats={allStats} activities={liveActivities} mutateActivity={mutateActivity} removeActivity={removeActivity} userId={userId} threads={threads} lastMessages={lastMessages} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} onMessageMember={openMemberMessage} />
+          <HomeTab members={members} allStats={allStats} userId={userId} isHeadCoach={isHeadCoach} firstName={firstName} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'members' && (
-          <MembersTab members={members} allStats={allStats} activities={liveActivities} mutateActivity={mutateActivity} removeActivity={removeActivity} threads={threads} lastMessages={lastMessages} myReads={myReads} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
+          <MembersTab members={members} allStats={allStats} userId={userId} userEmail={userEmail} onOpenProgram={openMemberProgram} snoozes={snoozes} onMarkAddressed={markAddressed} onUndoAddressed={undoAddressed} />
         )}
         {activeTab === 'programs' && (
           <ProgramsTab members={members} userId={userId} initialMemberId={programMemberId} isHeadCoach={isHeadCoach} />
-        )}
-        {activeTab === 'messages' && (
-          <MessagesTab
-            userId={userId}
-            isHeadCoach={isHeadCoach}
-            members={members}
-            coachProfiles={coachProfiles}
-            threads={threads}
-            lastMessages={lastMessages}
-            myReads={myReads}
-            myName={firstName}
-            myAvatarUrl={avatarUrl}
-            myAvatarColor={avatarColor}
-            initialThreadId={initialMessageThreadId}
-            onInitialThreadConsumed={() => setInitialMessageThreadId(null)}
-          />
         )}
 {activeTab === 'applications' && isHeadCoach && userEmail === 'me@javilorenzana.com' && (
           <ApplicationsSection />
@@ -4382,7 +3219,6 @@ export default function CoachClient({ userId, userEmail, userRole, firstName, av
         avatarColor={avatarColor}
         avatarUrl={avatarUrl}
         userEmail={userEmail}
-        unreadCount={unreadCount}
       />
     </div>
   )

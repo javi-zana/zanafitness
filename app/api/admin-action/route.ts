@@ -25,118 +25,21 @@ export async function POST(req: NextRequest) {
   const { action } = body
   const admin = adminClient()
 
-  // ── Setup messaging thread for a member ──────────────────────────────────
-  if (action === 'setup_thread') {
-    const { memberId } = body
-    if (!memberId) return NextResponse.json({ error: 'memberId required' }, { status: 400 })
-
-    const { data: thread, error: te } = await admin
-      .from('threads')
-      .insert({ member_id: memberId })
-      .select('id')
-      .single()
-
-    if (te || !thread) {
-      return NextResponse.json({ error: te?.message ?? 'Failed to create thread' }, { status: 500 })
-    }
-
-    await admin.from('thread_participants').insert([
-      { thread_id: thread.id, user_id: memberId, role: 'member' },
-      { thread_id: thread.id, user_id: user.id, role: 'head_coach' },
-    ])
-
-    return NextResponse.json({ thread })
-  }
-
   // ── Assign member to coach ────────────────────────────────────────────────
-  // Also ensures the member's messaging thread is a group containing
-  // [member, head coach (me), assigned coach]. Replaces any previously-assigned
-  // coach.
+  // Replaces any previously-assigned coach.
   if (action === 'assign') {
     const { memberId, coachId } = body
     if (!memberId || !coachId) return NextResponse.json({ error: 'memberId and coachId required' }, { status: 400 })
 
-    // 1. Replace any existing assignment for this member (composite PK on
-    //    coach_assignments means upsert with `onConflict: 'member_id'` doesn't
-    //    work cleanly — delete + insert is the safer pattern).
+    // Replace any existing assignment for this member (composite PK on
+    // coach_assignments means upsert with `onConflict: 'member_id'` doesn't
+    // work cleanly — delete + insert is the safer pattern).
     await admin.from('coach_assignments').delete().eq('member_id', memberId)
     const { error: assignErr } = await admin
       .from('coach_assignments')
       .insert({ member_id: memberId, coach_id: coachId })
     if (assignErr) return NextResponse.json({ error: assignErr.message }, { status: 500 })
 
-    // 2. Find or create the member's thread (member_id is UNIQUE on threads)
-    const { data: existing } = await admin
-      .from('threads')
-      .select('id')
-      .eq('member_id', memberId)
-      .maybeSingle()
-
-    let threadId: string
-    if (existing) {
-      threadId = existing.id as string
-    } else {
-      const { data: newThread, error: te } = await admin
-        .from('threads')
-        .insert({ member_id: memberId, created_by: user.id })
-        .select('id')
-        .single()
-      if (te || !newThread) return NextResponse.json({ error: te?.message ?? 'Failed to create thread' }, { status: 500 })
-      threadId = newThread.id as string
-    }
-
-    // 3. Mark thread as a coaching group
-    await admin
-      .from('threads')
-      .update({ is_group: true, thread_type: 'group_member' })
-      .eq('id', threadId)
-
-    // 4. Sync participants to exactly: [member, head coach (me), assigned coach]
-    const desired = new Set<string>([memberId, user.id, coachId])
-
-    const { data: currentParts } = await admin
-      .from('thread_participants')
-      .select('user_id')
-      .eq('thread_id', threadId)
-    const currentSet = new Set((currentParts ?? []).map(p => p.user_id as string))
-
-    const toAdd = Array.from(desired).filter(uid => !currentSet.has(uid))
-    if (toAdd.length > 0) {
-      const { error: addErr } = await admin.from('thread_participants').insert(
-        toAdd.map(uid => ({
-          thread_id: threadId,
-          user_id: uid,
-          role: uid === memberId ? 'member' : uid === user.id ? 'head_coach' : 'coach',
-        }))
-      )
-      if (addErr) console.error('[assign] failed to add participants:', addErr)
-    }
-
-    const toRemove = Array.from(currentSet).filter(uid => !desired.has(uid))
-    if (toRemove.length > 0) {
-      await admin
-        .from('thread_participants')
-        .delete()
-        .eq('thread_id', threadId)
-        .in('user_id', toRemove)
-    }
-
-    return NextResponse.json({ ok: true, threadId, addedParticipants: toAdd, removedParticipants: toRemove })
-  }
-
-  // ── Broadcast message to all threads ─────────────────────────────────────
-  if (action === 'broadcast') {
-    const { threadIds, body: msgBody } = body
-    if (!threadIds?.length || !msgBody) return NextResponse.json({ error: 'threadIds and body required' }, { status: 400 })
-
-    const messages = threadIds.map((tid: string) => ({
-      thread_id: tid,
-      author_id: user.id,
-      body: msgBody,
-    }))
-
-    const { error } = await admin.from('messages').insert(messages)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })
   }
 
@@ -156,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Best-effort: clean up storage files. Each bucket stores files under {user_id}/...
-    const buckets = ['progress-photos', 'profile-photos', 'stat-photos', 'message-attachments']
+    const buckets = ['progress-photos', 'profile-photos', 'stat-photos']
     for (const bucket of buckets) {
       const { data: files } = await admin.storage.from(bucket).list(memberId)
       if (files && files.length > 0) {

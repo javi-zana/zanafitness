@@ -18,17 +18,15 @@ export async function GET() {
     { data: coaches, error: e1 },
     { data: members, error: e2 },
     { data: assignments, error: e3 },
-    { data: threads, error: e4 },
   ] = await Promise.all([
     admin.from('profiles').select('id, email, first_name, role').in('role', ['coach', 'head_coach']),
     admin.from('profiles').select('id, email, first_name, role').eq('role', 'member'),
     admin.from('coach_assignments').select('member_id, coach_id'),
-    admin.from('threads').select('id, member_id'),
   ])
 
-  if (e1 || e2 || e3 || e4) {
-    console.error('[admin-data] query errors:', { e1, e2, e3, e4 })
+  if (e1 || e2 || e3) {
+    console.error('[admin-data] query errors:', { e1, e2, e3 })
   }
 
-  return NextResponse.json({ coaches, members, assignments, threads, errors: { e1, e2, e3, e4 } })
+  return NextResponse.json({ coaches, members, assignments, errors: { e1, e2, e3 } })
 }
