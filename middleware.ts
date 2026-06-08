@@ -1,8 +1,50 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
+import { AI_SESSION_COOKIE, getAiSecret, verifySessionToken } from '@/lib/ai-auth'
 
 export async function middleware(request: NextRequest) {
+  const host = request.headers.get('host') ?? ''
+  const pathname = request.nextUrl.pathname
+
+  // ── ai.zanafitness.com — password-gated internal tool ─────────────────────
+  // Fully separate from the member app. The subdomain serves the app/ai/* route
+  // group; everything but the login screen requires a valid session cookie.
+  if (host.startsWith('ai.')) {
+    const isPublic = pathname === '/login' || pathname === '/api/login'
+    const authed =
+      isPublic ||
+      (await verifySessionToken(request.cookies.get(AI_SESSION_COOKIE)?.value, getAiSecret()))
+
+    if (!authed) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+      }
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
+
+    // Serve from app/ai/* while keeping clean subdomain URLs (/, /login, ...).
+    const target = request.nextUrl.clone()
+    target.pathname = `/ai${pathname === '/' ? '' : pathname}`
+    return NextResponse.rewrite(target)
+  }
+
+  // The /ai/* route group is reachable ONLY via the ai. subdomain.
+  if (pathname.startsWith('/ai')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
+
+  // Main-app API routes keep their original behavior (no auth middleware).
+  if (pathname.startsWith('/api')) {
+    return NextResponse.next({ request })
+  }
+
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return NextResponse.next({ request })
   }
@@ -30,7 +72,6 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const pathname = request.nextUrl.pathname
   const searchParams = request.nextUrl.searchParams
 
   // Supabase auth errors redirect to the site root — catch and forward to login
@@ -107,7 +148,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
+    // Note: api/ is intentionally NOT excluded — the ai. subdomain needs its
+    // /api/login to pass through middleware. Main-app /api requests are short-
+    // circuited inside the middleware body (return next() before any auth work).
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
