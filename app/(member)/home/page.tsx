@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import type { ReportContent } from '@/lib/report-template'
-import ReportsHomeClient from './ReportsHomeClient'
+import HomeClient from './HomeClient'
 
 const COACH_EMAILS = ['me@javilorenzana.com']
 
-export default async function ReportsPage() {
+export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -46,7 +46,7 @@ export default async function ReportsPage() {
   }))
 
   return (
-    <ReportsHomeClient
+    <HomeClient
       firstName={profile?.first_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
       avatarColor={profile?.avatar_color ?? '#b0e455'}
