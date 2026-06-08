@@ -46,7 +46,7 @@ export const SECTIONS: Section[] = [
   {
     num: '01',
     slug: 'the-game',
-    title: 'The Game Explained',
+    title: 'The Game',
     tagline: 'How to get your desired aesthetic.',
     summary:
       "Fitness looks complicated, but it runs on a small number of levers. Once you understand them and build the intuition to pull them without thinking, the whole thing becomes effortless. That's the goal of this section.",
