@@ -54,25 +54,32 @@ export async function POST(req: NextRequest) {
     `\nWeek this report covers: ${weekLabel || '(unspecified)'}`,
   ].join('\n')
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY!,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
-      system: SYSTEM,
-      messages: [{ role: 'user', content: userPrompt }],
-    }),
-  })
+  let res: Response
+  try {
+    res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2000,
+        system: SYSTEM,
+        messages: [{ role: 'user', content: userPrompt }],
+      }),
+    })
+  } catch (e) {
+    console.error('[ai/generate] fetch threw:', e)
+    return NextResponse.json({ error: `Network error reaching Claude: ${e instanceof Error ? e.message : String(e)}` }, { status: 502 })
+  }
 
-  const json = await res.json()
+  const json = await res.json().catch(() => ({}))
   if (!res.ok) {
-    console.error('[ai/generate] Claude error:', json)
-    return NextResponse.json({ error: 'Generation failed' }, { status: 502 })
+    console.error('[ai/generate] Claude error:', res.status, json)
+    const detail = json?.error?.message || JSON.stringify(json).slice(0, 300)
+    return NextResponse.json({ error: `Claude API ${res.status}: ${detail}` }, { status: 502 })
   }
 
   const text: string = (json.content?.[0]?.text ?? '').trim()
