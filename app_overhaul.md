@@ -21,12 +21,22 @@ Both share one Supabase backend. This supersedes parts of the earlier "rewrite v
 
 ## A. Foundation & cleanup
 
-- [ ] Restructure bottom nav from `Home · Track · Program · Learn · Messages` → the new 5 sections
-- [ ] Remove **Messages** — route `app/(member)/messages`, nav item, `/api` message routes (decide: keep `threads`/`messages` tables dormant or migrate out)
-- [ ] Remove **Activity log / feed** — `activities` (workout/win/meal), reactions, comments; nav/UI
-- [ ] Remove **Stats** — route `app/(member)/stats`, nav "Track" item (replaced by weekly check-in)
-- [ ] Rework `/dashboard` into a clean hub of the 5 sections
-- [ ] Add **membership tier** to `profiles` (standard / VIP) — even if VIP-gating is wired later
+**Strategy:** strip only the *member* surface now. Leave coach side, API routes, the Activity components, and DB tables in place (coach still uses them; reversible). Login landing stays `/dashboard`.
+
+### A1. Member cleanup (IN PROGRESS)
+- [ ] Rewire **BottomNav** → 5 tabs: `Home · Program · Curriculum · Calls · Check-in`; remove the messages-unread logic
+- [ ] Remove **Messages** (member) — delete `app/(member)/messages`, drop from nav + dashboard, drop `/messages` from `memberPaths`
+- [ ] Remove **Stats** (member) — delete `app/(member)/stats`, drop "Track" tab, drop `/stats` from `memberPaths`
+- [ ] Remove **Activity feed** from member Home — drop the feed, `ActivityCard`, `useActivityRealtime`, streak, achievements from the dashboard
+- [ ] Rework `/dashboard` (Home) into a clean hub: keep OKR + referral, add "this week's report" placeholder + links to Program/Curriculum
+- [ ] Create `/calls` (member) — move the Cal.com booking here (VIP gating later)
+- [ ] Create `/checkin` (member) — placeholder until the form is built
+
+### A2. Deferred to their workstreams (not in cleanup)
+- [ ] **Reports** gets its own nav tab once the `reports` table + view exist (B.1) — lives on Home for now
+- [ ] **Curriculum** consolidation: tab points at `/knowledge` for now; gate `/curriculum` + retire `/knowledge` in B.3
+- [ ] Remove API routes + drop DB tables for messages/activities — only after coach side is rebuilt
+- [ ] Add **membership tier** to `profiles` (standard / VIP) — with Calls gating (B.4)
 
 ## B. Client side — the 5 sections
 
@@ -79,7 +89,9 @@ Both share one Supabase backend. This supersedes parts of the earlier "rewrite v
 ---
 
 ## Cross-cutting / shared
-- [ ] `reports` table (shared by coach builder + member Reports section)
-- [ ] `weekly_checkins` table (shared by member submit + coach review)
-- [ ] `profiles.tier` (shared by Calls gating + coach admin)
+- [x] `reports` table — migration `20260608000001_reports.sql`
+- [x] `weekly_checkins` table — migration `20260608000002_weekly_checkins.sql`
+- [x] `profiles.tier` — migration `20260608000003_profiles_tier.sql`
+- [ ] **Apply** the three migrations to prod (`supabase db push`)
+- [ ] (Later, with coach rebuild) DROP migration for messages/threads, activities/*, stat_updates/calorie_logs/workout_logs/member_milestones
 - [ ] Keep PWA "add to home screen" feel on mobile throughout
