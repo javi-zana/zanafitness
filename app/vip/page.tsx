@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, TrendingUp, Leaf, Target } from "lucide-react";
+import { Check, X, TrendingUp, Leaf, Target, ClipboardList, Video, MessageCircle } from "lucide-react";
 
 const ZanaLogo = ({ className = "h-8" }: { className?: string }) => (
   <svg viewBox="0 0 180 32" className={className} fill="none" stroke="currentColor" strokeWidth="5" strokeMiterlimit="10">
@@ -219,6 +219,46 @@ export default function VipPricingPage() {
                 <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#b0e455]/50 mb-1.5">{p.sub}</p>
                 <h3 className="text-base font-bold text-[#edf5e2] mb-2.5">{p.title}</h3>
                 <p className="text-sm text-[#edf5e2]/45 leading-relaxed">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── WHAT'S INCLUDED ───────────────────────────────────────────────────── */}
+      <section className="py-24 px-6 border-t border-[#b0e455]/6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-4">What&apos;s included</p>
+            <h2 className="font-display leading-none" style={{ fontSize: "clamp(30px, 4vw, 48px)" }}>
+              Everything in VIP.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            {[
+              {
+                icon: <ClipboardList className="w-5 h-5 text-[#b0e455] stroke-1" />,
+                title: "Custom fitness planning & strategy",
+                desc: "Training and nutrition built around your schedule, goals, and lifestyle — adjusted as you progress, not a one-size-fits-all template.",
+              },
+              {
+                icon: <Video className="w-5 h-5 text-[#b0e455] stroke-1" />,
+                title: "On-demand coaching & strategy calls",
+                desc: "Book calls when you need them. Form checks, plan adjustments, strategy sessions — no waiting until next week's check-in.",
+              },
+              {
+                icon: <MessageCircle className="w-5 h-5 text-[#b0e455] stroke-1" />,
+                title: "24/7 DM support",
+                desc: "Message Javi whenever something comes up — travel, a client dinner, a rough week. Real answers, not automated replies.",
+              },
+            ].map(item => (
+              <div key={item.title} className="bg-[#162212] rounded-3xl p-7 border border-[#b0e455]/6 hover:border-[#b0e455]/14 transition-colors">
+                <div className="w-9 h-9 rounded-xl bg-[#b0e455]/8 flex items-center justify-center mb-6">
+                  {item.icon}
+                </div>
+                <h3 className="text-base font-bold text-[#edf5e2] mb-2.5">{item.title}</h3>
+                <p className="text-sm text-[#edf5e2]/45 leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
