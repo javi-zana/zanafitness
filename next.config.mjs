@@ -1,6 +1,14 @@
 /** @type {import('next').Next.jsConfig} */
 const nextConfig = {
-  /* config options here */
+  async redirects() {
+    return [
+      {
+        source: "/group",
+        destination: "/pricing",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

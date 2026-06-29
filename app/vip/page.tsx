@@ -126,25 +126,23 @@ function PlanCard({
               : "bg-[#b0e455] text-[#0f1a0c] hover:bg-[#c9f070]"
           }`}
         >
-          Book Call
+          Start Now
         </a>
       </div>
     </div>
   );
 }
 
-const groupFeatures: Feature[] = [
+const programFeatures: Feature[] = [
   { text: "Weekly goal-setting and updates", included: true, emphasize: "goal-setting" },
   { text: "Personalized training program", included: true, emphasize: "Personalized" },
-  { text: "Lifestyle-based nutrition guidance", included: true },
+  { text: "On-demand access", included: true, emphasize: "On-demand" },
+  { text: "Priority DM access", included: true, emphasize: "Priority DM" },
   { text: "Library of fitness guides (diet, workouts, etc.)", included: true, emphasize: "Library of fitness guides" },
-  { text: "Weekly office hours", included: true, emphasize: "office hours" },
-  { text: "A private community of people on the same path", included: true, emphasize: "community" },
-  { text: "Private weekly check-ins with Javi", included: false },
-  { text: "Direct access to Javi", included: false },
+  { text: "Weekly check-in calls", included: true, emphasize: "check-in calls" },
 ];
 
-export default function GroupPricingPage() {
+export default function VipPricingPage() {
   return (
     <main className="min-h-screen bg-[#0b1509] text-[#edf5e2] font-sans selection:bg-[#b0e455] selection:text-[#0f1a0c]">
 
@@ -155,13 +153,13 @@ export default function GroupPricingPage() {
           <div className="w-6 h-px bg-[#b0e455]/30 mb-8" />
 
           <h1 className="font-display leading-none mb-12" style={{ fontSize: "clamp(48px, 7vw, 88px)" }}>
-            Zana Fitness Group Coaching.
+            Zana Fitness VIP.
           </h1>
 
           {/* Javi quote as hook */}
           <div className="max-w-lg">
             <p className="text-[#edf5e2]/80 text-lg md:text-xl leading-relaxed font-light italic">
-              &ldquo;The programs, the habits, the accountability — the full Zana method, run as a group. You get everything that works, at a fraction of the price.&rdquo;
+              &ldquo;I always say that getting fit is one of the best financial decisions I have ever made. This is how I did it — and how you can too.&rdquo;
             </p>
             <div className="flex items-center justify-center gap-3 mt-6">
               <div className="w-8 h-px bg-[#b0e455]/40" />
@@ -206,9 +204,9 @@ export default function GroupPricingPage() {
               {
                 icon: <Target className="w-5 h-5 text-[#b0e455] stroke-[1.5]" />,
                 num: "03",
-                title: "A community, not a solo grind",
-                sub: "You're not doing this alone",
-                desc: "Weekly office hours and a private community of people on the same path. Real accountability, shared wins, and people who get it — the part that actually keeps you consistent when motivation runs out.",
+                title: "Weekly checkins",
+                sub: "Accountability that adapts",
+                desc: "Weekly check-ins with a coach who knows your world. Client dinners, travel, a schedule that changes — when life shifts, the plan shifts with it.",
               },
             ].map(p => (
               <div key={p.num} className="bg-[#162212] rounded-3xl p-7 border border-[#b0e455]/6 hover:border-[#b0e455]/14 transition-colors">
@@ -245,26 +243,26 @@ export default function GroupPricingPage() {
       <section className="py-20 px-6 border-t border-[#b0e455]/6" id="pricing">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-4">The plan</p>
+            <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#b0e455] mb-4">VIP</p>
             <h2 className="font-display leading-[1.05] mb-3" style={{ fontSize: "clamp(30px, 4vw, 52px)" }}>Choose your<br />commitment.</h2>
-            <p className="text-sm text-[#edf5e2]/35">Same group system either way. Pay upfront and save.</p>
+            <p className="text-sm text-[#edf5e2]/35">Full 1:1 coaching. Direct access to Javi.</p>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             <PlanCard
-              label="4 Months"
+              label="Committed"
               months={4}
-              monthly={250}
-              upfront={900}
-              checkoutUrl="https://cal.com/zanafitness/intro"
-              features={groupFeatures}
+              monthly={500}
+              upfront={2000}
+              checkoutUrl="https://whop.com/checkout/plan_DAY1fwI5NfqJe"
+              features={programFeatures}
             />
             <PlanCard
-              label="12 Months"
+              label="All In"
               months={12}
-              monthly={200}
-              upfront={1950}
-              checkoutUrl="https://cal.com/zanafitness/intro"
-              features={groupFeatures}
+              monthly={350}
+              upfront={4200}
+              checkoutUrl="https://whop.com/checkout/plan_BwaPVLzVFjYWL"
+              features={programFeatures}
               featured
               badge="Best Value"
             />

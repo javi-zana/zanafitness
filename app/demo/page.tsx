@@ -294,7 +294,7 @@ export default function DemoPage() {
           ← Home
         </Link>
         <p className="text-[10px] tracking-widest uppercase font-bold text-center hidden sm:block">Preview Mode - This is what your dashboard looks like inside</p>
-        <Link href="/pricing" className="text-[9px] tracking-widest uppercase bg-[#0f1a0c] text-[#b0e455] px-4 py-1.5 rounded-full font-bold hover:bg-[#162212] transition whitespace-nowrap">
+        <Link href="/vip" className="text-[9px] tracking-widest uppercase bg-[#0f1a0c] text-[#b0e455] px-4 py-1.5 rounded-full font-bold hover:bg-[#162212] transition whitespace-nowrap">
           Join →
         </Link>
       </div>
