@@ -49,8 +49,11 @@ function timeAgo(iso: string): string {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-const DM_SNIPPET =
-  "just accepted your application 🤝 sent you an email with the link to book your call — check your inbox (and spam folder just in case)"
+const DM_SNIPPET = `hey! read through your application, and this looks good!
+
+i sent you an email to book a call with me, but you can also do it here: https://cal.com/zanafitness/intro
+
+lmk when you've booked :)`
 
 const QA: Array<[keyof Application, string]> = [
   ['mirror_goal', 'Mirror goal'],
