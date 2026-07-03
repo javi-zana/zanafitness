@@ -6,11 +6,17 @@ export const dynamic = 'force-dynamic'
 
 export default async function AiHome() {
   const supabase = createServiceClient()
-  const { data: clients } = await supabase
-    .from('profiles')
-    .select('id, first_name, email, tier')
-    .eq('role', 'member')
-    .order('first_name', { ascending: true })
+  const [{ data: clients }, { count: pendingApps }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, first_name, email, tier')
+      .eq('role', 'member')
+      .order('first_name', { ascending: true }),
+    supabase
+      .from('applications')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+  ])
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-12">
@@ -21,6 +27,21 @@ export default async function AiHome() {
         </div>
         <LogoutButton />
       </header>
+
+      <Link
+        href="/applications"
+        className="mb-8 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/50 px-5 py-4 transition hover:border-zinc-700 hover:bg-zinc-900"
+      >
+        <div className="text-sm font-medium text-zinc-100">Applications</div>
+        <div className="flex items-center gap-3">
+          {(pendingApps ?? 0) > 0 && (
+            <span className="rounded-full bg-lime-400 px-2 py-0.5 text-[11px] font-bold text-lime-950">
+              {pendingApps} new
+            </span>
+          )}
+          <span className="text-zinc-600">→</span>
+        </div>
+      </Link>
 
       <div className="mb-3 flex items-baseline justify-between">
         <h1 className="text-lg font-medium text-zinc-100">Clients</h1>
