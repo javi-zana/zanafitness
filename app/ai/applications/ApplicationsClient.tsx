@@ -174,7 +174,7 @@ function Card({ app, onAction }: { app: Application; onAction: (id: string, acti
                   : 'border border-zinc-800 text-zinc-500 hover:border-red-500/40 hover:text-red-400'
               }`}
             >
-              {confirming === 'reject' ? 'Confirm reject' : 'Reject'}
+              {confirming === 'reject' ? 'Confirm — send guide email' : 'Reject'}
             </button>
           </>
         )}

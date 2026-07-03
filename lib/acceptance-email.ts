@@ -5,7 +5,7 @@ export const FROM_EMAIL = 'Javier Lorenzana <javi@zanafitness.com>'
 export const BOOKING_URL = 'https://cal.com/zanafitness/intro'
 export const ACCEPT_SUBJECT = "Let's talk — here's the link to book your call"
 
-function logoHtml() {
+export function logoHtml() {
   return `<table cellpadding="0" cellspacing="0">
     <tr>
       <td style="background-color:#b0e455;border-radius:8px;width:36px;height:36px;text-align:center;vertical-align:middle;">
