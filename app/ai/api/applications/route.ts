@@ -5,7 +5,7 @@ import { acceptEmailHtml, ACCEPT_SUBJECT, FROM_EMAIL } from '@/lib/acceptance-em
 import { rejectEmailHtml, REJECT_SUBJECT } from '@/lib/rejection-email'
 
 // Accept/reject applications from the ai-tool inbox. Auth is the ai.* password
-// wall (middleware) — same trust model as /ai/api/notes.
+// wall (middleware) — same trust model as the other /ai/api routes.
 
 export async function POST(req: NextRequest) {
   const { id, action } = await req.json().catch(() => ({}))
