@@ -76,7 +76,7 @@ ICP reminder: Asian male professional 25–34, status-driven recomp via lifestyl
 | **Applications inbox** | One click from home. Card per applicant: application answers inline, IG handle as a direct tap-to-open link (kills the extra step), Accept / Reject buttons. Accept → sends the Resend email *and* shows exactly what was sent + a copy-paste DM snippet so the follow-up IG message is one paste, not composed from scratch. **Pipeline collapsed to: New → Accepted / Rejected.** No later stages — qualification happens on IG and the untrusted CRM stages are deleted, not fixed. |
 | **New-application notifications** | Email (and PWA push if enabled) to Javi + MJ the moment an application lands. Kills P4 without touching Roadrunner. |
 | **Program templates + assignment** | PPL program lives as a template with phases (Phase 1, 2, 3…). Onboarding = pick template, optionally tweak exercises for this client, assign. Progression = "Advance to Phase 2" button. Kills P7 and manual phase-pushing. |
-| **Client detail page** | Per client: activity log, current program + phase, meal photo stream, weekly reports history, intake/meeting notes (already exists in AI tool — keep). |
+| **Client detail page** | Per client: vital stats (weight + trend, BF%, morale, last check-in), activity log, current program + phase, meal photo stream, reports history, intake viewer. Meeting notes dropped (2026-07-04) — Granola records calls. |
 | **On-demand report generation** | Keep the existing AI-report pipeline but drop the Monday cadence — Javi generates a report for any client whenever he wants, from the client detail page. Published reports become *visible to the client in their portal*, not just sent. |
 
 **Client Portal (main app)**
@@ -98,9 +98,19 @@ ICP reminder: Asian male professional 25–34, status-driven recomp via lifestyl
 - **Auto-progression suggestions** — "Jim has hit top-of-range on all Phase 1 lifts for 2 weeks → suggest Phase 2" surfaced on the coach dashboard; coach approves with one click.
 - **Meal-photo AI feedback** — habit-level observations ("protein looks light this week"), never macro counts.
 
+### V1.5 — "Roadrunner bridge" (DM signal into the dashboard)
+
+Constraint that shapes everything: Roadrunner reads DMs via the **Beeper Desktop API (localhost on Javi's Mac)** — a hosted portal can never reach it. So we bridge the *signal*, not the transport:
+
+- `sweep.py` (Roadrunner) gains a push step: POST its per-client triage JSON (who spoke last, days silent, snippet) to `/ai/api/sweep` (secret-authenticated).
+- Portal stores it in a `dm_signals` table (client → matched profile, last_dm_at, direction, snippet, swept_at).
+- Coach home merges DM + portal signals into one needs-attention truth: "needs reply — DM 2d" / "silent 6d (everywhere)". Dashboard shows sync staleness rather than guessing when Beeper is down.
+- Optional: `zana-leads` pushes new "ZANA"-keyword IG leads into the same bridge → Applications inbox shows DM leads that haven't applied yet.
+- Trigger stays local (manual sweep or launchd cron on the Mac).
+
 ### V3 — "Messaging"
 
-- Roadrunner / IG DM integration (pings, nudges, maybe two-way) — **only after Roadrunner is reliable.** Explicitly out of V1/V2; email + PWA push carry notifications until then.
+- Drafting/sending stays in Roadrunner on the Mac: the staging gate (identity verification + voice lint + explicit approval) is the safety-critical IP and its transport is desktop-only by design. Revisit a portal-side send path only if a reliable non-desktop IG transport appears.
 - Skool-style community feed — only if group-tier growth demands it.
 
 ---

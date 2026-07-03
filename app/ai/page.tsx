@@ -10,9 +10,19 @@ const SILENT_AFTER_DAYS = 5
 
 type Signal = { lastActivity: string | null; weightKg: number | null }
 
+type DmSignal = {
+  client_name: string
+  member_id: string | null
+  last_message_at: string | null
+  last_sender: string | null
+  draft_type: string | null
+  needs_attention: boolean
+  swept_at: string
+}
+
 export default async function AiHome() {
   const supabase = createServiceClient()
-  const [{ data: clients }, { count: pendingApps }, { data: checkins }, { data: stats }] =
+  const [{ data: clients }, { count: pendingApps }, { data: checkins }, { data: stats }, { data: dmSignals }] =
     await Promise.all([
       supabase
         .from('profiles')
@@ -34,6 +44,9 @@ export default async function AiHome() {
         .select('member_id, created_at, weight_kg')
         .order('created_at', { ascending: false })
         .limit(300),
+      supabase
+        .from('dm_signals')
+        .select('client_name, member_id, last_message_at, last_sender, draft_type, needs_attention, swept_at'),
     ])
 
   // One pass over all rows, newest first: first row seen per member sets
@@ -50,23 +63,39 @@ export default async function AiHome() {
     signals.set(id, s)
   }
 
+  const dms = (dmSignals ?? []) as DmSignal[]
+  const dmByMember = new Map(dms.filter((d) => d.member_id).map((d) => [d.member_id as string, d]))
+
   const list = (clients ?? []).map((c) => {
     const s = signals.get(c.id) ?? { lastActivity: null, weightKg: null }
-    const silentDays = daysSince(s.lastActivity)
+    const dm = dmByMember.get(c.id) ?? null
+    // True last contact = newest of portal activity and DM activity.
+    const lastContact =
+      [s.lastActivity, dm?.last_message_at].filter(Boolean).sort().pop() ?? null
+    const silentDays = daysSince(lastContact)
+    const needsReply = dm?.draft_type === 'reply'
     return {
       ...c,
       ...s,
-      needsAttention: s.lastActivity === null || (silentDays !== null && silentDays >= SILENT_AFTER_DAYS),
+      dm,
+      lastContact,
+      needsReply,
+      needsAttention:
+        needsReply || lastContact === null || (silentDays !== null && silentDays >= SILENT_AFTER_DAYS),
       silentDays,
     }
   })
-  // Needs-attention first (stalest on top), then active ones by recency.
+  // Needs-reply first, then other attention (stalest on top), then by recency.
   list.sort((a, b) => {
+    if (a.needsReply !== b.needsReply) return a.needsReply ? -1 : 1
     if (a.needsAttention !== b.needsAttention) return a.needsAttention ? -1 : 1
-    return (b.lastActivity ?? '').localeCompare(a.lastActivity ?? '')
+    return (b.lastContact ?? '').localeCompare(a.lastContact ?? '')
   })
 
   const attention = list.filter((c) => c.needsAttention).length
+  const dmOnly = dms.filter((d) => !d.member_id)
+  const lastSweep = dms.map((d) => d.swept_at).sort().pop() ?? null
+  const sweepStaleDays = daysSince(lastSweep)
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-12">
@@ -119,15 +148,20 @@ export default async function AiHome() {
               </div>
               <div className="mt-0.5 truncate text-xs text-zinc-500">
                 {c.weightKg != null ? `${c.weightKg.toFixed(1)} kg · ` : ''}
-                {c.lastActivity ? `active ${timeAgo(c.lastActivity)}` : 'no activity yet'}
+                {c.dm?.last_message_at ? `DM ${timeAgo(c.dm.last_message_at)} · ` : ''}
+                {c.lastActivity ? `app ${timeAgo(c.lastActivity)}` : 'no app activity'}
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-3">
-              {c.needsAttention && (
-                <span className="rounded-full border border-amber-500/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-400">
-                  {c.lastActivity ? `silent ${c.silentDays}d` : 'new'}
+              {c.needsReply ? (
+                <span className="rounded-full border border-lime-500/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-lime-400">
+                  needs reply
                 </span>
-              )}
+              ) : c.needsAttention ? (
+                <span className="rounded-full border border-amber-500/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-400">
+                  {c.lastContact ? `silent ${c.silentDays}d` : 'new'}
+                </span>
+              ) : null}
               <span className="text-zinc-600">→</span>
             </div>
           </Link>
@@ -138,6 +172,49 @@ export default async function AiHome() {
           </p>
         )}
       </div>
+
+      {/* Swept in Roadrunner but not matched to a portal profile */}
+      {dmOnly.length > 0 && (
+        <div className="mt-8">
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="text-sm font-medium text-zinc-400">DM only</h2>
+            <span className="text-xs text-zinc-600">no portal profile</span>
+          </div>
+          <div className="space-y-2">
+            {dmOnly.map((d) => (
+              <div
+                key={d.client_name}
+                className="flex items-center justify-between rounded-xl border border-zinc-800/60 bg-zinc-900/30 px-5 py-3"
+              >
+                <div>
+                  <div className="text-sm text-zinc-300">{d.client_name}</div>
+                  <div className="mt-0.5 text-xs text-zinc-600">
+                    {d.last_message_at ? `DM ${timeAgo(d.last_message_at)}` : '—'}
+                  </div>
+                </div>
+                {d.draft_type === 'reply' ? (
+                  <span className="rounded-full border border-lime-500/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-lime-400">
+                    needs reply
+                  </span>
+                ) : d.needs_attention ? (
+                  <span className="rounded-full border border-amber-500/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-amber-400">
+                    nudge
+                  </span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {lastSweep && (
+        <p className={`mt-8 text-center text-[11px] ${
+          (sweepStaleDays ?? 0) >= 2 ? 'text-amber-500' : 'text-zinc-600'
+        }`}>
+          DM sweep synced {timeAgo(lastSweep)}
+          {(sweepStaleDays ?? 0) >= 2 ? ' — run a sweep to refresh' : ''}
+        </p>
+      )}
     </main>
   )
 }
