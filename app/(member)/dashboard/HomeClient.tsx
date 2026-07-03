@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Script from 'next/script'
 import { OkrCard, type OkrContent } from '@/components/OkrCard'
 import { useTheme } from '@/app/providers'
+import MealLog, { type MealItem } from './MealLog'
 
 type ReportItem = { id: string; weekLabel: string; objective: string; sentAt: string | null }
 
@@ -20,6 +21,7 @@ export default function HomeClient({
   referralCode,
   okr,
   reports,
+  todayMeals,
 }: {
   firstName: string | null
   avatarUrl: string | null
@@ -27,6 +29,7 @@ export default function HomeClient({
   referralCode: string | null
   okr: object | null
   reports: ReportItem[]
+  todayMeals: MealItem[]
 }) {
   const { theme } = useTheme()
   const okrContent: OkrContent | null = (() => {
@@ -142,6 +145,9 @@ export default function HomeClient({
             <span className="text-[var(--c-text4)] text-sm transition-transform group-hover:translate-x-0.5">→</span>
           </Link>
         </div>
+
+        {/* Meal photo log */}
+        <MealLog initialMeals={todayMeals} />
 
         {/* Past reports */}
         {older.length > 0 && (

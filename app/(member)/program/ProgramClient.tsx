@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, FormEvent } from 'react'
+import { useState, useEffect, useMemo, useRef, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import { SplitViewer, StructuredSplit, SplitDay } from '@/components/SplitBuilder'
@@ -192,6 +192,55 @@ function WorkoutLogSection({
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+
+  // Newest kg/reps/sets per exercise name across history — powers the
+  // "last session pre-fill" so progressive overload is one glance away.
+  const lastByMove = useMemo(() => {
+    const map = new Map<string, { kg: string; reps: string; sets: string }>()
+    for (const log of workoutLogs) {
+      const { exercises } = parseWorkoutNotes(log.notes)
+      for (const ex of exercises) {
+        const key = ex.move.trim().toLowerCase()
+        if (key && !map.has(key)) map.set(key, { kg: ex.kg ?? '', reps: ex.reps ?? '', sets: ex.sets ?? '' })
+      }
+    }
+    return map
+  }, [workoutLogs])
+
+  // Exercise-library autocomplete (exercises table, 1.3k names)
+  const [sugRowId, setSugRowId] = useState<number | null>(null)
+  const [sugs, setSugs] = useState<string[]>([])
+  const sugTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  function fetchSuggestions(rowId: number, q: string) {
+    if (sugTimer.current) clearTimeout(sugTimer.current)
+    const query = q.trim()
+    if (query.length < 2) {
+      setSugRowId(null)
+      setSugs([])
+      return
+    }
+    sugTimer.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('exercises')
+        .select('name')
+        .ilike('name', `%${query}%`)
+        .order('name')
+        .limit(6)
+      setSugRowId(rowId)
+      setSugs((data ?? []).map((d) => d.name as string))
+    }, 200)
+  }
+
+  function pickSuggestion(rowId: number, name: string) {
+    setRows(prev => prev.map(r => {
+      if (r.id !== rowId) return r
+      const last = lastByMove.get(name.toLowerCase())
+      return { ...r, move: name, kg: r.kg || last?.kg || '', reps: r.reps || last?.reps || '', sets: r.sets || last?.sets || '' }
+    }))
+    setSugRowId(null)
+    setSugs([])
+  }
   const sectionElRef = useRef<HTMLElement | null>(null)
   const sectionRef = (el: HTMLElement | null) => { sectionElRef.current = el }
   let nextId = rows.length + 1
@@ -206,14 +255,17 @@ function WorkoutLogSection({
     setSelectedDay(day)
     const filled = day.exercises
       .filter(e => e.name)
-      .map((e, i) => ({
-        id: i + 1,
-        move: e.name,
-        kg: '',
-        reps: '',
-        sets: e.sets != null ? String(e.sets) : '',
-        targetReps: e.reps || '',
-      }))
+      .map((e, i) => {
+        const last = lastByMove.get(e.name.trim().toLowerCase())
+        return {
+          id: i + 1,
+          move: e.name,
+          kg: last?.kg ?? '',
+          reps: last?.reps ?? '',
+          sets: last?.sets || (e.sets != null ? String(e.sets) : ''),
+          targetReps: e.reps || '',
+        }
+      })
     setRows(filled.length ? filled : [{ id: 1, move: '', kg: '', reps: '', sets: '' }])
     nextId = filled.length + 1
     setStep('logging')
@@ -390,12 +442,32 @@ function WorkoutLogSection({
         <div className="space-y-3">
           {rows.map(row => (
             <div key={row.id} className="space-y-1.5">
-              <input
-                value={row.move}
-                onChange={e => updateRow(row.id, 'move', e.target.value)}
-                placeholder="Exercise name"
-                className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-              />
+              <div className="relative">
+                <input
+                  value={row.move}
+                  onChange={e => {
+                    updateRow(row.id, 'move', e.target.value)
+                    fetchSuggestions(row.id, e.target.value)
+                  }}
+                  onBlur={() => setTimeout(() => setSugRowId(s => (s === row.id ? null : s)), 150)}
+                  placeholder="Exercise name"
+                  className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+                />
+                {sugRowId === row.id && sugs.length > 0 && (
+                  <div className="absolute z-10 left-0 right-0 top-full mt-1 bg-[var(--c-card)] border border-[var(--c-border2)] rounded-xl shadow-lg overflow-hidden">
+                    {sugs.map(name => (
+                      <button
+                        key={name}
+                        type="button"
+                        onMouseDown={() => pickSuggestion(row.id, name)}
+                        className="w-full text-left px-3 py-2 text-sm text-[var(--c-text)] hover:bg-[var(--c-hover)] capitalize"
+                      >
+                        {name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-[1fr_1fr_1fr_28px] gap-1.5 items-end">
                 <div>
                   <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest text-center mb-1">kg</p>

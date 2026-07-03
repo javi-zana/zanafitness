@@ -55,7 +55,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
   const ctx = await fetchClientContext(supabase, params.id)
   if (!ctx) notFound()
 
-  const [{ data: reports }, { data: stats }] = await Promise.all([
+  const [{ data: reports }, { data: stats }, { data: workoutRows }, { data: meals }] = await Promise.all([
     supabase
       .from('reports')
       .select('id, week_label, status, created_at')
@@ -67,7 +67,28 @@ export default async function ClientPage({ params }: { params: { id: string } })
       .eq('member_id', params.id)
       .order('created_at', { ascending: true })
       .limit(200),
+    supabase
+      .from('workout_logs')
+      .select('id, logged_date, notes')
+      .eq('member_id', params.id)
+      .order('logged_date', { ascending: false })
+      .limit(8),
+    supabase
+      .from('meal_logs')
+      .select('id, photo_url, note, created_at')
+      .eq('member_id', params.id)
+      .order('created_at', { ascending: false })
+      .limit(12),
   ])
+
+  const workouts = (workoutRows ?? []).map((w) => {
+    let exercises: Array<{ move: string; kg?: string; reps?: string; sets?: string }> = []
+    try {
+      const p = typeof w.notes === 'string' ? JSON.parse(w.notes) : w.notes
+      exercises = (p?.exercises as typeof exercises) ?? []
+    } catch { /* legacy plain-text notes — show as zero exercises */ }
+    return { id: w.id as string, date: w.logged_date as string, exercises }
+  })
 
   const p = ctx.profile
   const c = ctx.latestCheckin
@@ -192,6 +213,57 @@ export default async function ClientPage({ params }: { params: { id: string } })
                 <span className="text-zinc-500">{String(label)}:</span> {String(v)}
               </p>
             ))}
+        </div>
+      )}
+
+      {/* Recent workouts */}
+      {workouts.length > 0 && (
+        <div className="mb-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <div className="mb-3 text-[10px] uppercase tracking-wider text-zinc-500">Recent workouts</div>
+          <div className="space-y-2">
+            {workouts.map((w) => (
+              <details key={w.id} className="group">
+                <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg bg-zinc-900 px-3 py-2">
+                  <span className="text-xs text-zinc-300">
+                    {new Date(w.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </span>
+                  <span className="text-[11px] text-zinc-500">
+                    {w.exercises.length} exercise{w.exercises.length !== 1 ? 's' : ''} <span className="inline-block transition-transform group-open:rotate-180">▾</span>
+                  </span>
+                </summary>
+                {w.exercises.length > 0 && (
+                  <div className="mt-1 space-y-0.5 px-3 pb-1">
+                    {w.exercises.map((ex, i) => (
+                      <div key={i} className="flex justify-between text-[11px]">
+                        <span className="text-zinc-400">{ex.move}</span>
+                        <span className="font-mono text-zinc-500">
+                          {[ex.kg && `${ex.kg}kg`, ex.reps && `×${ex.reps}`, ex.sets && `·${ex.sets} sets`].filter(Boolean).join(' ') || '—'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Meal photos */}
+      {meals && meals.length > 0 && (
+        <div className="mb-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+          <div className="mb-3 text-[10px] uppercase tracking-wider text-zinc-500">Meals</div>
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {meals.map((m) => (
+              <a key={m.id as string} href={m.photo_url as string} target="_blank" rel="noopener noreferrer" className="group relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={m.photo_url as string} alt={(m.note as string) ?? 'Meal'} className="aspect-square w-full rounded-lg object-cover" />
+                <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[9px] text-zinc-200">
+                  {timeAgo(m.created_at as string)}
+                </span>
+              </a>
+            ))}
+          </div>
         </div>
       )}
 

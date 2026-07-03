@@ -21,7 +21,10 @@ export default async function DashboardPage() {
     COACH_EMAILS.includes(user.email ?? '')
   if (isCoach) redirect('/coach')
 
-  const [{ data: referralRow }, { data: okrRow }, { data: reportRows }] = await Promise.all([
+  const todayStart = new Date()
+  todayStart.setHours(0, 0, 0, 0)
+
+  const [{ data: referralRow }, { data: okrRow }, { data: reportRows }, { data: mealRows }] = await Promise.all([
     supabase.from('referrals').select('code').eq('referrer_id', user.id).maybeSingle(),
     supabase
       .from('program_sections')
@@ -35,6 +38,12 @@ export default async function DashboardPage() {
       .select('id, week_label, content_json, sent_at')
       .eq('member_id', user.id)
       .eq('status', 'sent')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('meal_logs')
+      .select('id, photo_url, note, created_at')
+      .eq('member_id', user.id)
+      .gte('created_at', todayStart.toISOString())
       .order('created_at', { ascending: false }),
   ])
 
@@ -53,6 +62,7 @@ export default async function DashboardPage() {
       referralCode={referralRow?.code ?? null}
       okr={okrRow?.content_json ?? null}
       reports={reports}
+      todayMeals={(mealRows ?? []) as { id: string; photo_url: string; note: string | null; created_at: string }[]}
     />
   )
 }
