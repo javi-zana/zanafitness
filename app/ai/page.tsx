@@ -22,7 +22,7 @@ type DmSignal = {
 
 export default async function AiHome() {
   const supabase = createServiceClient()
-  const [{ data: clients }, { count: pendingApps }, { data: checkins }, { data: stats }, { data: dmSignals }] =
+  const [{ data: clients }, { count: pendingApps }, { data: checkins }, { data: stats }, { data: dmSignals }, { data: workouts }, { data: meals }] =
     await Promise.all([
       supabase
         .from('profiles')
@@ -47,13 +47,26 @@ export default async function AiHome() {
       supabase
         .from('dm_signals')
         .select('client_name, member_id, last_message_at, last_sender, draft_type, needs_attention, swept_at'),
+      supabase
+        .from('workout_logs')
+        .select('member_id, created_at')
+        .order('created_at', { ascending: false })
+        .limit(300),
+      supabase
+        .from('meal_logs')
+        .select('member_id, created_at')
+        .order('created_at', { ascending: false })
+        .limit(300),
     ])
 
   // One pass over all rows, newest first: first row seen per member sets
   // lastActivity; first row with a weight sets weightKg.
-  const rows = [...(checkins ?? []), ...(stats ?? [])].sort((a, b) =>
-    b.created_at.localeCompare(a.created_at),
-  )
+  const rows = [
+    ...(checkins ?? []),
+    ...(stats ?? []),
+    ...(workouts ?? []).map((w) => ({ ...w, weight_kg: null })),
+    ...(meals ?? []).map((m) => ({ ...m, weight_kg: null })),
+  ].sort((a, b) => b.created_at.localeCompare(a.created_at))
   const signals = new Map<string, Signal>()
   for (const row of rows) {
     const id = row.member_id as string
