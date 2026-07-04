@@ -220,14 +220,16 @@ export default async function AiHome() {
         </div>
       )}
 
-      {lastSweep && (
-        <p className={`mt-8 text-center text-[11px] ${
-          (sweepStaleDays ?? 0) >= 2 ? 'text-amber-500' : 'text-zinc-600'
-        }`}>
-          DM sweep synced {timeAgo(lastSweep)}
-          {(sweepStaleDays ?? 0) >= 2 ? ' — run a sweep to refresh' : ''}
-        </p>
-      )}
+      <Link
+        href="/sweep"
+        className={`mt-8 block text-center text-[11px] transition hover:text-zinc-300 ${
+          lastSweep && (sweepStaleDays ?? 0) >= 2 ? 'text-amber-500' : 'text-zinc-600'
+        }`}
+      >
+        {lastSweep
+          ? `DM sweep synced ${timeAgo(lastSweep)}${(sweepStaleDays ?? 0) >= 2 ? ' — run a sweep to refresh' : ''} · view board →`
+          : 'DM sweep: no data yet · view board →'}
+      </Link>
     </main>
   )
 }

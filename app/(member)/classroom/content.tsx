@@ -229,11 +229,213 @@ export const SECTIONS: Section[] = [
     num: '02',
     slug: 'diet',
     title: 'Diet',
-    tagline: 'Hydration, food choices, and the habits that run nutrition.',
+    tagline: 'Everything you need to get lean — and stay there.',
     summary:
-      'The nutrition system in full — how to eat for recomposition without macros or meal plans. Hydration, protein staples, smart swaps, and the rest of the habits that make it automatic.',
-    status: 'soon',
-    modules: [],
+      "How I actually eat to stay shredded, stripped down to what matters. No fads, no starving. The two levers, the 4 principles, how to execute, the mistakes that stall people — plus what's worth taking supplement-wise and what's just spending money.",
+    status: 'ready',
+    readTime: '8 min read',
+    intro: [
+      {
+        type: 'p',
+        text: "Before anything else, understand this: a diet is a **lifestyle choice**. It's changing your default meals — and a few habits around them: how you shop for food, how you order at a restaurant, how you approach food in general. Food is meant to be enjoyed — intentionally.",
+      },
+      {
+        type: 'quote',
+        text: "If you want a crazy body, you have to have a somewhat crazy diet. People have called my diet crazy. To me, it's just a lifestyle choice.",
+      },
+    ],
+    modules: [
+      {
+        id: 'the-two-levers',
+        kicker: 'Module One',
+        title: 'The Game: Two Levers',
+        blocks: [
+          { type: 'p', text: 'Getting lean comes down to two things:' },
+          {
+            type: 'list',
+            items: [
+              '**Calories in, calories out** — how much you eat vs. how much you burn.',
+              '**Body fat** — the percentage you carry on your frame.',
+            ],
+          },
+          {
+            type: 'p',
+            text: "Calories in vs. calories out determine your weight. Body fat determines how you look. Diet is the main lever you control for both — and combined with training in the gym, it's what gets you the lean aesthetic. For reference, a lean build sits around **10–12% body fat**.",
+          },
+        ],
+      },
+      {
+        id: 'the-4-principles',
+        kicker: 'Module Two',
+        title: 'The 4 Principles',
+        blocks: [
+          { type: 'h3', text: '1. Make it sustainable' },
+          {
+            type: 'p',
+            text: 'Food is meant to be enjoyed. Any diet that treats eating as the enemy will fail. Keep the foods you love — just account for them. This is a lifestyle, not a punishment.',
+          },
+          { type: 'h3', text: '2. Protein is the foundation' },
+          {
+            type: 'p',
+            text: "Protein anchors every meal. It's what makes you full — not carbs, not anything else. Treat it like an all-you-can-eat buffet and control everything else around it. The reason: protein is badly underrepresented in the Asian diet. Even if you feel like you're eating a lot, unless you're actually tracking it, you're almost certainly eating less than you think. Aim for at least **0.8g per pound of bodyweight** (a 150 lb person → ~120g/day). The more you eat, the more muscle you build.",
+          },
+          { type: 'h3', text: '3. Carbs are strategic — be intentional' },
+          {
+            type: 'p',
+            text: "A carb is fast energy and calorie-dense, so spend it on purpose. There's a big difference between eating white rice just because it's in front of you and enjoying real Italian pasta you actually want. Say yes to the pasta, no to the autopilot rice. Use a small amount pre-workout for fuel, otherwise treat carbs as a condiment that helps the protein go down. Sugar counts as carbs too.",
+          },
+          { type: 'h3', text: '4. Everything else fits' },
+          {
+            type: 'p',
+            text: "Once you've hit your protein and you're at or below maintenance calories, the rest of the budget is yours. A budget isn't restriction — it's being smart about where you spend.",
+          },
+        ],
+      },
+      {
+        id: 'how-to-execute',
+        kicker: 'Module Three',
+        title: 'How to Execute',
+        blocks: [
+          { type: 'p', text: 'There are two levels. Start wherever fits your life — both work.' },
+          { type: 'h3', text: 'Level 1 — Just eat less' },
+          {
+            type: 'p',
+            text: "A pure mindset shift, no apps. Generally aim for fewer carbs and stop at about **8 out of 10 fullness** every meal — satisfied, never stuffed. A simple trick: eat lighter in the morning so you've got room to enjoy more in the evening.",
+          },
+          { type: 'h3', text: 'Level 2 — Track for one month' },
+          {
+            type: 'p',
+            text: "Log everything for a month just to see how food adds up — it builds an intuition you keep for life. Your calorie target lives on your **Program** page: aim for ~200 below maintenance. That buffer keeps you in a deficit even on days you slip. Once the intuition is built, you can ease off the logging.",
+          },
+          { type: 'p', text: 'Either way, two habits help:' },
+          {
+            type: 'list',
+            items: [
+              '**Build a default meal.** Pick 2–3 high-protein, low-carb meals you can fall back on any day. They free up your budget for the meals that matter.',
+              "**Work with your biology.** Don't eat just because it's “mealtime” or because everyone else is. Eat when you're actually hungry.",
+            ],
+          },
+        ],
+      },
+      {
+        id: 'mistakes-and-asian-food',
+        kicker: 'Module Four',
+        title: 'The Biggest Mistakes — & Asian Food',
+        blocks: [
+          {
+            type: 'list',
+            items: [
+              "**Guessing your calories.** Most people are way off. A single spoon of peanut butter can hide a couple hundred calories. Until you've measured with a scale, you don't actually know.",
+              '**Underestimating hidden carbs.** Bread, noodles, sauces, drinks — they add up fast and quietly. This is the #1 reason a “clean” diet stalls.',
+              "**Forcing meal timing.** You don't need six meals on a clock. Rigid timing makes the diet harder to live with, not more effective.",
+              "**Cutting carbs out completely.** Carbs aren't the enemy — mindless carbs are. If it's amazing dumplings or real Italian pasta, the carb is worth it. If it's white rice or noodles just sitting there, you don't have to finish them. Eat fewer carbs through the day and you can reward yourself at night with something sweet. That's what keeps the diet sustainable.",
+            ],
+          },
+          { type: 'h3', text: 'A note on Asian food' },
+          {
+            type: 'p',
+            text: "Carbs are built deep into our food — rice, noodles, dumpling wrappers. They sneak up on you more than in most cuisines. You don't have to cut them out; just be deliberate. Lead with the protein on your plate and let the rice play a supporting role.",
+          },
+          {
+            type: 'p',
+            text: 'The flip side is that protein gets barely any priority in Asian cuisine. So look for small ways to add more — throw in extra eggs, or order an additional protein side dish. Little habits like these are what optimize the Asian diet.',
+          },
+        ],
+      },
+      {
+        id: 'eating-anywhere',
+        kicker: 'Module Five',
+        title: 'Protein Sources & Eating Out',
+        blocks: [
+          { type: 'h3', text: 'Best protein sources' },
+          {
+            type: 'list',
+            items: [
+              '**Lean meat:** chicken breast, lean beef, pork, turkey',
+              '**Seafood:** most white fish, salmon, tuna, shrimp',
+              '**Eggs:** whole eggs and egg whites',
+              '**Dairy:** Greek yogurt, cottage cheese, milk',
+              '**Plant-based:** tofu, tempeh, edamame, lentils',
+              '**Supplements:** whey or plant protein to fill the gap on busy days',
+            ],
+          },
+          { type: 'h3', text: 'What good meals look like' },
+          {
+            type: 'p',
+            text: 'Real meals, not photoshoots. Notice the pattern: **protein leads, carbs stay portioned, veggies show up.** Beef patty with rice as the side, not the star. Steak and eggs with the rice kept in its own bowl — carbs as a condiment. Chicken thighs, blended greens, soup — protein-forward, no rice needed.',
+          },
+          { type: 'h3', text: 'Eating out & ordering in' },
+          {
+            type: 'p',
+            text: "You don't have to cook every meal. Lead with the protein, keep the carbs in check, and you can hit your goals anywhere. Restaurant plate: grilled chicken leads, eggs stack the protein, rice stays one portion. Order-in: load up on the meat add-ons, go easy on the noodles. Buffet: shrimp, fish, and roast beef pile up first — pasta is just a taste.",
+          },
+          { type: 'h3', text: 'Quick FAQ' },
+          {
+            type: 'p',
+            text: "**Won't fewer carbs leave me low on energy?** Short term you may notice it as your body adjusts. But with enough protein and strategic carbs around your workouts, energy holds up fine — and most people feel steadier without the crashes that come from carb-heavy meals.",
+          },
+          {
+            type: 'p',
+            text: '**What if I get hungry at night?** Plan for it. Skip breakfast and save those calories for a midnight snack — ideally something that helps you wind down, eaten about 2 hours before you sleep. Shifting *when* you eat, not just *what*, makes the diet far easier to stick to.',
+          },
+          {
+            type: 'callout',
+            text: "Master the basics and the rest takes care of itself. Keep it sustainable — that's the whole game.",
+          },
+        ],
+      },
+      {
+        id: 'supplements',
+        kicker: 'Module Six',
+        title: "Supplements: What's Worth Taking",
+        blocks: [
+          {
+            type: 'p',
+            text: "Supplements fill gaps. They don't replace a diet that already prioritizes protein — that comes first.",
+          },
+          {
+            type: 'quote',
+            text: "Keep it simple. Keep it minimalist. Don't take anything you don't have to — otherwise you're just spending money for no reason.",
+          },
+          { type: 'h3', text: 'Protein powder' },
+          {
+            type: 'p',
+            text: "Powder is a gap-filler. Only reach for it on days you didn't hit your protein goal from real food. Bias toward natural sources — fish, chicken breast, ground beef, eggs. **Go isolate, not base whey:** isolate strips out much of the lactose, so it's easier on the stomach — especially if you're lactose-intolerant, which a lot of Asian people are — and it gives you a better protein-to-calorie ratio. Hydrolyzed is even more processed with an even better ratio, but it's pricier and for most people overkill. Isolate is the sweet spot.",
+          },
+          {
+            type: 'list',
+            items: [
+              "**Avoid protein bars.** They're basically candy with extra protein — a Snickers bar dressed up, often loaded with artificial sweeteners and maltodextrin.",
+              "**Avoid soy protein isolate.** It's an incomplete protein, lacking key amino acids like leucine. Watch for it on labels.",
+              '**Look for complete, high-quality protein** — whey isolate, eggs, meat. Optimum Nutrition is a solid, clean brand for isolate.',
+            ],
+          },
+          { type: 'h3', text: 'Creatine' },
+          {
+            type: 'p',
+            text: "One of the most researched supplements in the world and completely safe. **5g a day, every day** — no need to load, that just overcomplicates it. Don't overcomplicate what it does either: creatine raises your baseline energy (it helps recycle ADP back into ATP, the body's energy currency). More available energy means better workouts and sharper cognition. Time of day is irrelevant; consistency is everything.",
+          },
+          { type: 'h3', text: 'Pre-workout' },
+          {
+            type: 'p',
+            text: "Most blends run 120–200mg of caffeine. Aim for around **150mg** for a solid session, ~200mg when you really want to go hard. Read the label, check the caffeine per scoop, and adjust how full the scoop is — enough to fire you up without tipping into palpitations. Take it **20–30 minutes before training.** The payoff: caffeinated, pumped, slightly jittery, you treat the workout as the thing you're burning that energy on.",
+          },
+          { type: 'h3', text: 'Quick FAQ' },
+          {
+            type: 'p',
+            text: "**Do supplements work if my diet is bad?** No. They fill gaps — they don't patch holes. If your protein and calories aren't handled, no powder will save you. Diet first, supplements second.",
+          },
+          {
+            type: 'p',
+            text: '**Protein powder is breaking me out — now what?** It happens. Try switching the type (isolate works for most) or lean harder on whole-food protein for a while and see if it clears up.',
+          },
+          {
+            type: 'callout',
+            text: "Three things, taken consistently: protein to fill gaps, creatine daily, pre-workout to train hard. That's it.",
+          },
+        ],
+      },
+    ],
   },
   {
     num: '03',
@@ -249,11 +451,108 @@ export const SECTIONS: Section[] = [
     num: '04',
     slug: 'lifestyle',
     title: 'Lifestyle',
-    tagline: 'Sleep, walking, stress — the work that happens outside the gym.',
+    tagline: 'Recovery — where the work you put in actually pays off.',
     summary:
-      'The multipliers most people ignore. Sleep as a training variable, walking over cardio, and managing stress so the levers actually work.',
-    status: 'soon',
-    modules: [],
+      "Training is the stimulus, but your body doesn't get stronger in the gym — it gets stronger while it recovers. Get this part wrong and the diet and the workouts are half wasted.",
+    status: 'ready',
+    readTime: '4 min read',
+    intro: [
+      {
+        type: 'quote',
+        text: "If there were a drug that did everything sleep does for recovery, longevity, and energy, everyone would take it. It's free, and most people ignore it.",
+      },
+    ],
+    modules: [
+      {
+        id: 'two-pillars',
+        kicker: 'Module One',
+        title: 'The Two Pillars',
+        blocks: [
+          {
+            type: 'p',
+            text: 'My whole approach to recovery comes down to two things. Get these right and you barely need anything else.',
+          },
+          { type: 'h3', text: '1. Sleep' },
+          {
+            type: 'p',
+            text: "This is when the actual muscle recovery happens. It's also what keeps your energy high through the day and into the gym. When you're short on sleep you'll still show up and try — but you physically can't push the way you can when you're rested. The intensity just isn't there. Sleep is the foundation everything else sits on.",
+          },
+          { type: 'h3', text: '2. Protein' },
+          {
+            type: 'p',
+            text: "Protein is what rebuilds the muscle stronger — it's the reason the Diet section hammers so hard on anchoring every meal around it. Training breaks the muscle down; protein and sleep are what build it back up.",
+          },
+        ],
+      },
+      {
+        id: 'how-to-sleep',
+        kicker: 'Module Two',
+        title: 'How to Sleep for Recovery',
+        blocks: [
+          { type: 'h3', text: 'Aim for 8 hours' },
+          {
+            type: 'p',
+            text: "Keep 8 hours as your baseline, in the 7–9 range. Quality matters as much as quantity — you're after deep, uninterrupted sleep, not just time in bed.",
+          },
+          { type: 'h3', text: 'Consistency beats timing' },
+          {
+            type: 'p',
+            text: "It doesn't matter if you're a night owl who sleeps at 3am or an early riser. What matters is a consistent bedtime, give or take 30 minutes, so your body knows the rhythm. Get your hours, stay consistent, wake up rested — then you're good for the next workout.",
+          },
+          { type: 'h3', text: 'Your litmus test' },
+          {
+            type: 'p',
+            text: "Wake up feeling refreshed. A quick gauge: how tired your eyes feel in the morning — if they're heavy, you needed more. You can paper over it with caffeine, but your results won't be the same as a real night's rest.",
+          },
+          { type: 'h3', text: 'Pre-sleep protein' },
+          {
+            type: 'p',
+            text: 'A protein shake or a slow-digesting protein before bed (roughly 30–40g) feeds muscle repair overnight and helps prevent breakdown while you sleep. A small, easy win.',
+          },
+          { type: 'h3', text: 'Stretch before bed' },
+          {
+            type: 'p',
+            text: "Stretching at night loosens the muscles up and helps you wind down and sleep better. (Note this is different from post-workout, where you want to keep the pump rather than stretch it out.)",
+          },
+          { type: 'h3', text: 'Melatonin, if it helps' },
+          {
+            type: 'p',
+            text: "~5mg of melatonin can help you fall asleep and hold a consistent bedtime. The principle is the same one that underlines this whole system: use what makes the habit sustainable and effortless. If you naturally sleep on schedule without it, don't bother.",
+          },
+        ],
+      },
+      {
+        id: 'recovery-faq',
+        kicker: 'Module Three',
+        title: 'Recovery FAQ',
+        blocks: [
+          {
+            type: 'p',
+            text: "**Is 6–7 hours enough to still make gains?** It varies person to person — if you genuinely thrive on six or seven, fine. But know that adding training usually means your body wants more sleep than it did before. Adjust to your body. The goal is always waking up refreshed.",
+          },
+          {
+            type: 'p',
+            text: "**How do I know if I'm actually rested, or just tired?** Use 8 hours as your baseline. If you keep landing under it, sleep debt builds up — and past a certain point you'll physically feel it. It shows up in the gym first: when sleep debt is high, you simply can't push hard, no matter how dialed your pre-workout is.",
+          },
+          {
+            type: 'p',
+            text: "**Are naps worth it?** Optional, and schedule-dependent. If you're getting 8 consistent hours at night and don't feel wiped, you don't need them. If you do nap, keep it short and earlier in the day so it doesn't eat into your night sleep.",
+          },
+          {
+            type: 'p',
+            text: "**Do caffeine and alcohol late in the day really hurt sleep?** Yes. Caffeine has a long half-life (~5–6 hours), so front-load it in the morning and early afternoon — nothing past 4–5pm, roughly 8–10 hours before bed. Alcohol is sneakier: it might help you fall asleep, but it wrecks the deep and REM sleep where real recovery happens.",
+          },
+          {
+            type: 'p',
+            text: "**What if I can only work out at night?** Earlier in the day is ideal — you ride the post-workout energy and the caffeine through the rest of your day. But if night is your only window, take your caffeine a bit earlier (stay in that ~8-hours-before-bed range). One upside: you've got all that caffeine to burn before your night routine, which creates a natural pressure to push harder in the session. Turn the constraint into intensity.",
+          },
+          {
+            type: 'callout',
+            text: "Two things, done consistently: sleep enough, eat your protein. That's recovery.",
+          },
+        ],
+      },
+    ],
   },
   {
     num: '05',
