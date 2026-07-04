@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export type Application = {
   id: string
@@ -195,20 +196,32 @@ function Card({ app, onAction }: { app: Application; onAction: (id: string, acti
 export default function ApplicationsClient({ initial }: { initial: Application[] }) {
   const [apps, setApps] = useState(initial)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+
+  // Adopt fresh server data whenever the page refetches (focus refresh /
+  // router.refresh) — without this, useState pins the first-ever payload.
+  useEffect(() => setApps(initial), [initial])
 
   async function onAction(id: string, action: 'accept' | 'reject'): Promise<boolean> {
     setError(null)
-    const res = await fetch('/api/applications', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, action }),
-    })
+    let res: Response
+    try {
+      res = await fetch('/api/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action }),
+      })
+    } catch {
+      setError('Network error — check your connection and try again')
+      return false
+    }
     const json = await res.json().catch(() => ({}))
     if (!res.ok) {
       setError(json.error || 'Something went wrong')
       return false
     }
     setApps((prev) => prev.map((a) => (a.id === id ? { ...a, status: json.status } : a)))
+    router.refresh() // reconcile with server truth in the background
     return true
   }
 
