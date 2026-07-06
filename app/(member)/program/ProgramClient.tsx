@@ -65,6 +65,56 @@ function relativeTime(dateStr: string) {
 type SetRow = { id: number; kg: string; reps: string; done: boolean }
 type ExRow = { id: number; move: string; targetReps?: string; sets: SetRow[] }
 
+// ─── Rest timer (Strong-style: checking a set starts the countdown) ──────────
+
+const REST_KEY = 'zana_rest_seconds'
+const REST_DEFAULT = 120
+
+function RestTimer({ endsAt, onAdjust, onDismiss }: {
+  endsAt: number
+  onAdjust: (deltaSeconds: number) => void
+  onDismiss: () => void
+}) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 500)
+    return () => clearInterval(t)
+  }, [])
+
+  const remaining = Math.max(0, Math.round((endsAt - now) / 1000))
+  const finished = remaining === 0
+
+  useEffect(() => {
+    if (finished) {
+      try { navigator.vibrate?.([200, 100, 200]) } catch { /* unsupported */ }
+      const t = setTimeout(onDismiss, 2500)
+      return () => clearTimeout(t)
+    }
+  }, [finished, onDismiss])
+
+  const mm = String(Math.floor(remaining / 60))
+  const ss = String(remaining % 60).padStart(2, '0')
+
+  return (
+    <div className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 rounded-full border border-[var(--c-border)] bg-[var(--c-card)] shadow-lg px-3 py-2">
+      {finished ? (
+        <p className="text-sm font-semibold text-[var(--c-accent-text)] px-2">Rest done — go 💪</p>
+      ) : (
+        <>
+          <button type="button" onClick={() => onAdjust(-15)} className="w-8 h-8 rounded-full text-xs font-mono text-[var(--c-text3)] hover:bg-[var(--c-hover)] transition">−15</button>
+          <p className="text-base font-mono font-semibold text-[var(--c-text)] tabular-nums w-12 text-center">{mm}:{ss}</p>
+          <button type="button" onClick={() => onAdjust(15)} className="w-8 h-8 rounded-full text-xs font-mono text-[var(--c-text3)] hover:bg-[var(--c-hover)] transition">+15</button>
+        </>
+      )}
+      <button type="button" onClick={onDismiss} aria-label="Dismiss rest timer" className="w-8 h-8 rounded-full flex items-center justify-center text-[var(--c-text4)] hover:text-[var(--c-text)] transition">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+          <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
 function WorkoutHistory({ logs }: { logs: WorkoutLogRecord[] }) {
   const [expandedDate, setExpandedDate] = useState<string | null>(logs[0]?.logged_date ?? null)
   if (!logs.length) return null
@@ -154,6 +204,7 @@ function WorkoutLogSection({
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [restEndsAt, setRestEndsAt] = useState<number | null>(null)
   const idRef = useRef(1)
   const nextId = () => idRef.current++
   const sectionElRef = useRef<HTMLElement | null>(null)
@@ -287,13 +338,38 @@ function WorkoutLogSection({
   }
 
   function toggleDone(exId: number, setId: number) {
+    let startedRest = false
     setRows(prev =>
-      prev.map(r =>
-        r.id === exId
-          ? { ...r, sets: r.sets.map(s => (s.id === setId ? { ...s, done: !s.done } : s)) }
-          : r,
-      ),
+      prev.map(r => {
+        if (r.id !== exId) return r
+        return {
+          ...r,
+          sets: r.sets.map(s => {
+            if (s.id !== setId) return s
+            if (!s.done) startedRest = true // checking a set (not unchecking) starts rest
+            return { ...s, done: !s.done }
+          }),
+        }
+      }),
     )
+    if (startedRest) {
+      let secs = REST_DEFAULT
+      try { secs = Math.max(15, parseInt(localStorage.getItem(REST_KEY) ?? '') || REST_DEFAULT) } catch { /* ignore */ }
+      setRestEndsAt(Date.now() + secs * 1000)
+    }
+  }
+
+  function adjustRest(delta: number) {
+    setRestEndsAt(prev => {
+      if (!prev) return prev
+      const next = Math.max(Date.now() + 1000, prev + delta * 1000)
+      // remember the adjusted total as the new preferred rest length
+      try {
+        const current = Math.max(15, parseInt(localStorage.getItem(REST_KEY) ?? '') || REST_DEFAULT)
+        localStorage.setItem(REST_KEY, String(Math.max(15, current + delta)))
+      } catch { /* ignore */ }
+      return next
+    })
   }
 
   function addSet(exId: number) {
@@ -451,6 +527,9 @@ function WorkoutLogSection({
   if (step === 'logging') {
     return (
       <form ref={sectionRef} onSubmit={handleSubmit} className="mt-6 space-y-4">
+        {restEndsAt !== null && (
+          <RestTimer endsAt={restEndsAt} onAdjust={adjustRest} onDismiss={() => setRestEndsAt(null)} />
+        )}
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm font-semibold text-[var(--c-text2)]">
