@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { SECTIONS, getSection, Blocks } from '../content'
+import { ReadCheck } from '../progress'
 
 export function generateStaticParams() {
   return SECTIONS.map((s) => ({ slug: s.slug }))
@@ -133,6 +134,7 @@ export default async function SectionPage({
                         {m.title}
                       </p>
                     </div>
+                    <ReadCheck slug={section.slug} moduleId={m.id} />
                     <svg
                       viewBox="0 0 20 20"
                       fill="currentColor"

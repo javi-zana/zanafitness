@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { SECTIONS, getModule, Blocks } from '../../content'
+import { MarkRead } from '../../progress'
 
 export function generateStaticParams() {
   return SECTIONS.flatMap((s) =>
@@ -127,6 +128,7 @@ export default async function ModulePage({
             </h1>
           </header>
 
+          <MarkRead slug={section.slug} moduleId={mod.id} />
           <Blocks blocks={mod.blocks} />
 
           {/* ── Prev / next module ──────────────────────────────────────── */}

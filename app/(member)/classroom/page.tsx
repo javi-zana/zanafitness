@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { SECTIONS } from './content'
+import { ContinueReading, SectionProgress } from './progress'
 
 export const metadata: Metadata = {
   title: 'Classroom | ZANA Fitness',
@@ -36,6 +37,7 @@ function SectionCard({
           >
             {moduleLabel}
           </span>
+          {ready && <SectionProgress slug={section.slug} moduleIds={section.modules.map((m) => m.id)} />}
         </div>
         <p className="text-[14px] md:text-[15px] text-[var(--c-text3)] leading-relaxed">
           {section.tagline}
@@ -89,6 +91,14 @@ export default function ClassroomPage() {
             together. More sections going live as I write them.
           </p>
         </header>
+
+        <ContinueReading
+          sections={SECTIONS.filter((s) => s.status === 'ready').map((s) => ({
+            slug: s.slug,
+            title: s.title,
+            modules: s.modules.map((m) => ({ id: m.id, title: m.title })),
+          }))}
+        />
 
         {/* ── Sections ───────────────────────────────────────────────────── */}
         <div className="space-y-3">
