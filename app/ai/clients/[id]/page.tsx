@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/ai-supabase'
 import { fetchClientContext } from '@/lib/client-context'
 import { timeAgo } from '@/lib/format'
-import { parseWorkoutLog, setsSummary } from '@/lib/workout-notes'
+import { parseWorkoutLog, setsSummary, computeStreak } from '@/lib/workout-notes'
 import ReportBuilder from './ReportBuilder'
 import IntakeView from './IntakeView'
 
@@ -73,13 +73,13 @@ export default async function ClientPage({ params }: { params: { id: string } })
       .select('id, logged_date, notes')
       .eq('member_id', params.id)
       .order('logged_date', { ascending: false })
-      .limit(8),
+      .limit(30),
     supabase
       .from('meal_logs')
       .select('id, photo_url, note, created_at')
       .eq('member_id', params.id)
       .order('created_at', { ascending: false })
-      .limit(12),
+      .limit(60),
   ])
 
   const workouts = (workoutRows ?? []).map((w) => ({
@@ -87,6 +87,28 @@ export default async function ClientPage({ params }: { params: { id: string } })
     date: w.logged_date as string,
     exercises: parseWorkoutLog(w.notes as Record<string, unknown> | null).exercises,
   }))
+
+  // This-week adherence + per-day activity log (workouts and meals merged)
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().split('T')[0]
+  const workoutsThisWeek = workouts.filter((w) => w.date >= weekAgo).length
+  const mealsThisWeek = (meals ?? []).filter((m) => String(m.created_at) >= weekAgo).length
+  const streak = computeStreak(workouts.map((w) => w.date))
+
+  type DayEntry = { workout: (typeof workouts)[number] | null; meals: NonNullable<typeof meals> }
+  const days = new Map<string, DayEntry>()
+  const dayOf = (iso: string) => iso.split('T')[0]
+  for (const w of workouts) {
+    const d = days.get(w.date) ?? { workout: null, meals: [] }
+    d.workout = w
+    days.set(w.date, d)
+  }
+  for (const m of meals ?? []) {
+    const key = dayOf(String(m.created_at))
+    const d = days.get(key) ?? { workout: null, meals: [] }
+    d.meals.push(m)
+    days.set(key, d)
+  }
+  const dailyLog = [...days.entries()].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 10)
 
   const p = ctx.profile
   const c = ctx.latestCheckin
@@ -152,6 +174,17 @@ export default async function ClientPage({ params }: { params: { id: string } })
         <Stat label="Check-in" value={c ? timeAgo(String(c.created_at)) : 'none'} sub={c ? undefined : 'not yet'} />
       </div>
 
+      {/* This week */}
+      <div className="mb-3 grid grid-cols-3 gap-3">
+        <Stat
+          label="Workouts"
+          value={String(workoutsThisWeek)}
+          sub={p.training_frequency_per_week ? `target ${p.training_frequency_per_week}/wk` : 'this week'}
+        />
+        <Stat label="Meals logged" value={String(mealsThisWeek)} sub="this week" />
+        <Stat label="Streak" value={streak > 0 ? `${streak}d` : '—'} sub="consecutive days" />
+      </div>
+
       {/* Weight trend */}
       {series.length >= 2 && (
         <div className="mb-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
@@ -214,24 +247,26 @@ export default async function ClientPage({ params }: { params: { id: string } })
         </div>
       )}
 
-      {/* Recent workouts */}
-      {workouts.length > 0 && (
+      {/* Daily log — workouts and meals, day by day */}
+      {dailyLog.length > 0 && (
         <div className="mb-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-          <div className="mb-3 text-[10px] uppercase tracking-wider text-zinc-500">Recent workouts</div>
-          <div className="space-y-2">
-            {workouts.map((w) => (
-              <details key={w.id} className="group">
-                <summary className="flex cursor-pointer list-none items-center justify-between rounded-lg bg-zinc-900 px-3 py-2">
-                  <span className="text-xs text-zinc-300">
-                    {new Date(w.date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+          <div className="mb-3 text-[10px] uppercase tracking-wider text-zinc-500">Daily log</div>
+          <div className="space-y-4">
+            {dailyLog.map(([date, d]) => (
+              <div key={date}>
+                <div className="mb-1.5 flex items-baseline justify-between">
+                  <span className="text-xs font-medium text-zinc-300">
+                    {new Date(date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                   </span>
-                  <span className="text-[11px] text-zinc-500">
-                    {w.exercises.length} exercise{w.exercises.length !== 1 ? 's' : ''} <span className="inline-block transition-transform group-open:rotate-180">▾</span>
+                  <span className="text-[10px] text-zinc-600">
+                    {[d.workout && 'workout', d.meals.length > 0 && `${d.meals.length} meal${d.meals.length !== 1 ? 's' : ''}`]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </span>
-                </summary>
-                {w.exercises.length > 0 && (
-                  <div className="mt-1 space-y-0.5 px-3 pb-1">
-                    {w.exercises.map((ex, i) => (
+                </div>
+                {d.workout && d.workout.exercises.length > 0 && (
+                  <div className="mb-2 space-y-0.5 rounded-lg bg-zinc-900 px-3 py-2">
+                    {d.workout.exercises.map((ex, i) => (
                       <div key={i} className="flex justify-between gap-3 text-[11px]">
                         <span className="min-w-0 truncate text-zinc-400">{ex.move}</span>
                         <span className="shrink-0 font-mono text-zinc-500">{setsSummary(ex.sets)}</span>
@@ -239,25 +274,17 @@ export default async function ClientPage({ params }: { params: { id: string } })
                     ))}
                   </div>
                 )}
-              </details>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Meal photos */}
-      {meals && meals.length > 0 && (
-        <div className="mb-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-          <div className="mb-3 text-[10px] uppercase tracking-wider text-zinc-500">Meals</div>
-          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-            {meals.map((m) => (
-              <a key={m.id as string} href={m.photo_url as string} target="_blank" rel="noopener noreferrer" className="group relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={m.photo_url as string} alt={(m.note as string) ?? 'Meal'} className="aspect-square w-full rounded-lg object-cover" />
-                <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[9px] text-zinc-200">
-                  {timeAgo(m.created_at as string)}
-                </span>
-              </a>
+                {d.meals.length > 0 && (
+                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                    {d.meals.map((m) => (
+                      <a key={m.id as string} href={m.photo_url as string} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={m.photo_url as string} alt={(m.note as string) ?? 'Meal'} className="h-14 w-14 rounded-lg object-cover" />
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>

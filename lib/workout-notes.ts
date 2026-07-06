@@ -42,6 +42,26 @@ export function parseWorkoutLog(raw: string | Record<string, unknown> | null): P
   }
 }
 
+/** Consecutive-day workout streak ending today or yesterday. */
+export function computeStreak(dates: string[]): number {
+  if (!dates.length) return 0
+  const dateSet = new Set(dates)
+  const toKey = (d: Date) => d.toISOString().split('T')[0]
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const check = new Date(today)
+  if (!dateSet.has(toKey(check))) {
+    check.setDate(check.getDate() - 1)
+    if (!dateSet.has(toKey(check))) return 0
+  }
+  let streak = 0
+  while (dateSet.has(toKey(check))) {
+    streak++
+    check.setDate(check.getDate() - 1)
+  }
+  return streak
+}
+
 /** Compact one-line summary of an exercise's sets: "50×8 · 50×8 · 45×10". */
 export function setsSummary(sets: SetEntry[]): string {
   const parts = sets

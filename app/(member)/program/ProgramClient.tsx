@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import { SplitViewer, StructuredSplit, SplitDay } from '@/components/SplitBuilder'
-import { parseWorkoutLog, setsSummary, type SetEntry } from '@/lib/workout-notes'
+import { parseWorkoutLog, setsSummary, computeStreak, type SetEntry } from '@/lib/workout-notes'
 import { OkrCard, type OkrContent } from '@/components/OkrCard'
 
 const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ssr: false })
@@ -58,27 +58,6 @@ function relativeTime(dateStr: string) {
   if (days === 0) return 'Updated today'
   if (days === 1) return 'Updated yesterday'
   return `Updated ${days} days ago`
-}
-
-// ─── Streak helper ────────────────────────────────────────────────────────────
-
-function computeStreak(dates: string[]): number {
-  if (!dates.length) return 0
-  const dateSet = new Set(dates)
-  const toKey = (d: Date) => d.toISOString().split('T')[0]
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  let check = new Date(today)
-  if (!dateSet.has(toKey(check))) {
-    check.setDate(check.getDate() - 1)
-    if (!dateSet.has(toKey(check))) return 0
-  }
-  let streak = 0
-  while (dateSet.has(toKey(check))) {
-    streak++
-    check.setDate(check.getDate() - 1)
-  }
-  return streak
 }
 
 // ─── Workout log section ──────────────────────────────────────────────────────

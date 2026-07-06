@@ -76,6 +76,22 @@ export default async function AiHome() {
     signals.set(id, s)
   }
 
+  // Per-client logging counts for the last 7 days
+  const weekAgoIso = new Date(Date.now() - 7 * 86_400_000).toISOString()
+  const weekCounts = new Map<string, { workouts: number; meals: number }>()
+  for (const r of workouts ?? []) {
+    if (r.created_at < weekAgoIso) continue
+    const c = weekCounts.get(r.member_id) ?? { workouts: 0, meals: 0 }
+    c.workouts++
+    weekCounts.set(r.member_id, c)
+  }
+  for (const r of meals ?? []) {
+    if (r.created_at < weekAgoIso) continue
+    const c = weekCounts.get(r.member_id) ?? { workouts: 0, meals: 0 }
+    c.meals++
+    weekCounts.set(r.member_id, c)
+  }
+
   const dms = (dmSignals ?? []) as DmSignal[]
   const dmByMember = new Map(dms.filter((d) => d.member_id).map((d) => [d.member_id as string, d]))
 
@@ -161,6 +177,14 @@ export default async function AiHome() {
               </div>
               <div className="mt-0.5 truncate text-xs text-zinc-500">
                 {c.weightKg != null ? `${c.weightKg.toFixed(1)} kg · ` : ''}
+                {(() => {
+                  const wc = weekCounts.get(c.id)
+                  if (!wc) return ''
+                  const parts = []
+                  if (wc.workouts) parts.push(`${wc.workouts} gym`)
+                  if (wc.meals) parts.push(`${wc.meals} meals`)
+                  return parts.length ? `${parts.join(' · ')} this wk · ` : ''
+                })()}
                 {c.dm?.last_message_at ? `DM ${timeAgo(c.dm.last_message_at)} · ` : ''}
                 {c.lastActivity ? `app ${timeAgo(c.lastActivity)}` : 'no app activity'}
               </div>
