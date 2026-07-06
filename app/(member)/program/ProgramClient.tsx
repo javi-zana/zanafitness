@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import { SplitViewer, StructuredSplit, SplitDay } from '@/components/SplitBuilder'
+import { parseWorkoutLog, setsSummary, type SetEntry } from '@/lib/workout-notes'
 import { OkrCard, type OkrContent } from '@/components/OkrCard'
 
 const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ssr: false })
@@ -82,18 +83,8 @@ function computeStreak(dates: string[]): number {
 
 // ─── Workout log section ──────────────────────────────────────────────────────
 
-type ExerciseRow = { id: number; move: string; kg: string; reps: string; sets: string; targetReps?: string }
-type ParsedExercise = { move: string; kg: string; reps: string; sets: string }
-
-function parseWorkoutNotes(raw: string | Record<string, unknown> | null): { exercises: ParsedExercise[]; notes: string | null } {
-  if (!raw) return { exercises: [], notes: null }
-  try {
-    const p = typeof raw === 'string' ? JSON.parse(raw) : raw
-    return { exercises: (p.exercises as ParsedExercise[] | undefined) ?? [], notes: (p.notes as string | null | undefined) ?? null }
-  } catch {
-    return { exercises: [], notes: null }
-  }
-}
+type SetRow = { id: number; kg: string; reps: string; done: boolean }
+type ExRow = { id: number; move: string; targetReps?: string; sets: SetRow[] }
 
 function WorkoutHistory({ logs }: { logs: WorkoutLogRecord[] }) {
   const [expandedDate, setExpandedDate] = useState<string | null>(logs[0]?.logged_date ?? null)
@@ -102,7 +93,7 @@ function WorkoutHistory({ logs }: { logs: WorkoutLogRecord[] }) {
     <div className="mt-6 space-y-2">
       <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Recent workouts</p>
       {logs.slice(0, 10).map(log => {
-        const { exercises, notes: logNotes } = parseWorkoutNotes(log.notes)
+        const { exercises, notes: logNotes } = parseWorkoutLog(log.notes)
         const isExpanded = expandedDate === log.logged_date
         const d = new Date(log.logged_date + 'T12:00:00')
         const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
@@ -133,17 +124,10 @@ function WorkoutHistory({ logs }: { logs: WorkoutLogRecord[] }) {
               <div className="border-t border-[var(--c-border)] px-4 py-3 space-y-3">
                 {exercises.length > 0 ? (
                   <div className="space-y-1">
-                    <div className="grid grid-cols-[1fr_52px_44px_44px] gap-1 px-1 mb-1">
-                      {['Move', 'kg', 'Reps', 'Sets'].map(h => (
-                        <p key={h} className="text-[9px] text-[var(--c-text4)] font-mono uppercase tracking-wider text-center first:text-left">{h}</p>
-                      ))}
-                    </div>
                     {exercises.map((ex, i) => (
-                      <div key={i} className="grid grid-cols-[1fr_52px_44px_44px] gap-1 items-center py-1 border-b border-[var(--c-border)] last:border-0">
-                        <p className="text-sm text-[var(--c-text)]">{ex.move}</p>
-                        <p className="text-sm text-[var(--c-text3)] font-mono text-center">{ex.kg || '—'}</p>
-                        <p className="text-sm text-[var(--c-text3)] font-mono text-center">{ex.reps || '—'}</p>
-                        <p className="text-sm text-[var(--c-text3)] font-mono text-center">{ex.sets || '—'}</p>
+                      <div key={i} className="flex items-baseline justify-between gap-3 py-1 border-b border-[var(--c-border)] last:border-0">
+                        <p className="text-sm text-[var(--c-text)] min-w-0 truncate">{ex.move}</p>
+                        <p className="text-xs text-[var(--c-text3)] font-mono text-right shrink-0">{setsSummary(ex.sets)}</p>
                       </div>
                     ))}
                   </div>
@@ -183,25 +167,34 @@ function WorkoutLogSection({
   const today = new Date().toISOString().split('T')[0]
   const workoutDates = workoutLogs.map(w => w.logged_date)
   const todayLog = workoutLogs.find(w => w.logged_date === today)
-  const todayLogged = !!todayLog
   const historyLogs = workoutLogs.filter(w => w.logged_date !== today)
 
   const [step, setStep] = useState<'idle' | 'picking' | 'logging'>('idle')
   const [selectedDay, setSelectedDay] = useState<SplitDay | null>(null)
-  const [rows, setRows] = useState<ExerciseRow[]>([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
+  const [rows, setRows] = useState<ExRow[]>([])
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
+  const idRef = useRef(1)
+  const nextId = () => idRef.current++
+  const sectionElRef = useRef<HTMLElement | null>(null)
+  const sectionRef = (el: HTMLElement | null) => { sectionElRef.current = el }
 
-  // Newest kg/reps/sets per exercise name across history — powers the
-  // "last session pre-fill" so progressive overload is one glance away.
+  useEffect(() => {
+    if (step !== 'idle') {
+      setTimeout(() => sectionElRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+    }
+  }, [step])
+
+  // Newest per-set history per exercise name — powers the Strong-style
+  // "same weights as last time" prefill, set by set.
   const lastByMove = useMemo(() => {
-    const map = new Map<string, { kg: string; reps: string; sets: string }>()
+    const map = new Map<string, SetEntry[]>()
     for (const log of workoutLogs) {
-      const { exercises } = parseWorkoutNotes(log.notes)
+      const { exercises } = parseWorkoutLog(log.notes)
       for (const ex of exercises) {
         const key = ex.move.trim().toLowerCase()
-        if (key && !map.has(key)) map.set(key, { kg: ex.kg ?? '', reps: ex.reps ?? '', sets: ex.sets ?? '' })
+        if (key && !map.has(key) && ex.sets.length) map.set(key, ex.sets)
       }
     }
     return map
@@ -232,49 +225,50 @@ function WorkoutLogSection({
     }, 200)
   }
 
-  function pickSuggestion(rowId: number, name: string) {
-    setRows(prev => prev.map(r => {
-      if (r.id !== rowId) return r
-      const last = lastByMove.get(name.toLowerCase())
-      return { ...r, move: name, kg: r.kg || last?.kg || '', reps: r.reps || last?.reps || '', sets: r.sets || last?.sets || '' }
-    }))
-    setSugRowId(null)
-    setSugs([])
-  }
-  const sectionElRef = useRef<HTMLElement | null>(null)
-  const sectionRef = (el: HTMLElement | null) => { sectionElRef.current = el }
-  let nextId = rows.length + 1
+  const makeSet = (kg = '', reps = ''): SetRow => ({ id: nextId(), kg, reps, done: false })
+  const emptyRow = (): ExRow => ({ id: nextId(), move: '', sets: [makeSet()] })
 
-  useEffect(() => {
-    if (step !== 'idle') {
-      setTimeout(() => sectionElRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
-    }
-  }, [step])
+  function setsFromHistory(name: string, targetSets?: number | null): SetRow[] {
+    const last = lastByMove.get(name.trim().toLowerCase())
+    if (last?.length) return last.map(s => makeSet(s.kg, s.reps))
+    const n = Math.max(1, Math.min(10, targetSets ?? 3))
+    return Array.from({ length: n }, () => makeSet())
+  }
 
   function applyPreset(day: SplitDay) {
     setSelectedDay(day)
     const filled = day.exercises
       .filter(e => e.name)
-      .map((e, i) => {
-        const last = lastByMove.get(e.name.trim().toLowerCase())
-        return {
-          id: i + 1,
-          move: e.name,
-          kg: last?.kg ?? '',
-          reps: last?.reps ?? '',
-          sets: last?.sets || (e.sets != null ? String(e.sets) : ''),
-          targetReps: e.reps || '',
-        }
-      })
-    setRows(filled.length ? filled : [{ id: 1, move: '', kg: '', reps: '', sets: '' }])
-    nextId = filled.length + 1
+      .map(e => ({
+        id: nextId(),
+        move: e.name,
+        targetReps: e.reps || '',
+        sets: setsFromHistory(e.name, e.sets),
+      }))
+    setRows(filled.length ? filled : [emptyRow()])
+    setStep('logging')
+  }
+
+  function editToday() {
+    if (!todayLog) return
+    const { exercises, notes: n } = parseWorkoutLog(todayLog.notes)
+    setNotes(n ?? '')
+    setRows(
+      exercises.length
+        ? exercises.map(ex => ({
+            id: nextId(),
+            move: ex.move,
+            sets: ex.sets.map(s => ({ id: nextId(), kg: s.kg, reps: s.reps, done: true })),
+          }))
+        : [emptyRow()],
+    )
     setStep('logging')
   }
 
   function resetForm() {
     setStep('idle')
     setSelectedDay(null)
-    setRows([{ id: 1, move: '', kg: '', reps: '', sets: '' }])
+    setRows([])
     setNotes('')
   }
 
@@ -286,24 +280,81 @@ function WorkoutLogSection({
     }
   }, [triggerDay]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  function updateRow(id: number, field: keyof ExerciseRow, value: string) {
-    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
+  function updateMove(exId: number, value: string) {
+    setRows(prev => prev.map(r => (r.id === exId ? { ...r, move: value } : r)))
+    fetchSuggestions(exId, value)
   }
 
-  function addRow() {
-    setRows(prev => [...prev, { id: nextId++, move: '', kg: '', reps: '', sets: '' }])
+  function pickSuggestion(exId: number, name: string) {
+    setRows(prev =>
+      prev.map(r => {
+        if (r.id !== exId) return r
+        const hasValues = r.sets.some(s => s.kg || s.reps)
+        return { ...r, move: name, sets: hasValues ? r.sets : setsFromHistory(name) }
+      }),
+    )
+    setSugRowId(null)
+    setSugs([])
   }
 
-  function removeRow(id: number) {
-    setRows(prev => prev.length > 1 ? prev.filter(r => r.id !== id) : prev)
+  function updateSet(exId: number, setId: number, field: 'kg' | 'reps', value: string) {
+    setRows(prev =>
+      prev.map(r =>
+        r.id === exId
+          ? { ...r, sets: r.sets.map(s => (s.id === setId ? { ...s, [field]: value } : s)) }
+          : r,
+      ),
+    )
+  }
+
+  function toggleDone(exId: number, setId: number) {
+    setRows(prev =>
+      prev.map(r =>
+        r.id === exId
+          ? { ...r, sets: r.sets.map(s => (s.id === setId ? { ...s, done: !s.done } : s)) }
+          : r,
+      ),
+    )
+  }
+
+  function addSet(exId: number) {
+    setRows(prev =>
+      prev.map(r => {
+        if (r.id !== exId) return r
+        const lastSet = r.sets[r.sets.length - 1]
+        return { ...r, sets: [...r.sets, makeSet(lastSet?.kg ?? '', lastSet?.reps ?? '')] }
+      }),
+    )
+  }
+
+  function removeSet(exId: number, setId: number) {
+    setRows(prev =>
+      prev.map(r =>
+        r.id === exId && r.sets.length > 1 ? { ...r, sets: r.sets.filter(s => s.id !== setId) } : r,
+      ),
+    )
+  }
+
+  function addExercise() {
+    setRows(prev => [...prev, emptyRow()])
+  }
+
+  function removeExercise(exId: number) {
+    setRows(prev => (prev.length > 1 ? prev.filter(r => r.id !== exId) : prev))
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setLoading(true)
     setSaveError(null)
-    const exercises = rows.filter(r => r.move.trim()).map(({ targetReps: _t, ...r }) => r)
-    const notesPayload = { v: 1, exercises, notes: notes.trim() || null }
+    const exercises = rows
+      .filter(r => r.move.trim())
+      .map(r => ({
+        move: r.move.trim(),
+        sets: r.sets.filter(s => s.kg || s.reps).map(s => ({ kg: s.kg, reps: s.reps })),
+      }))
+      .filter(r => r.sets.length > 0)
+    const notesPayload = { v: 2, exercises, notes: notes.trim() || null }
     const { data: upserted, error: upsertErr } = await supabase
       .from('workout_logs')
       .upsert({ member_id: userId, logged_date: today, notes: notesPayload }, { onConflict: 'member_id,logged_date' })
@@ -338,8 +389,9 @@ function WorkoutLogSection({
     setLoading(false)
   }
 
-  if (todayLogged) {
-    const { exercises } = parseWorkoutNotes(todayLog.notes)
+  if (todayLog && step === 'idle') {
+    const { exercises } = parseWorkoutLog(todayLog.notes)
+    const totalSets = exercises.reduce((n, ex) => n + ex.sets.length, 0)
     return (
       <div className="mt-6 space-y-1 pt-6 border-t border-[var(--c-border)]">
         <div className="flex items-center gap-3 bg-[#b0e455]/8 border border-[var(--c-border2)] rounded-2xl p-4">
@@ -348,13 +400,19 @@ function WorkoutLogSection({
               <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-[var(--c-accent-text)]">Workout logged for today</p>
             <p className="text-xs text-[var(--c-text3)] mt-0.5">
               Streak: {computeStreak(workoutDates)} day{computeStreak(workoutDates) !== 1 ? 's' : ''}
-              {exercises.length > 0 ? ` · ${exercises.length} exercise${exercises.length !== 1 ? 's' : ''}` : ''}
+              {exercises.length > 0 ? ` · ${exercises.length} exercise${exercises.length !== 1 ? 's' : ''} · ${totalSets} set${totalSets !== 1 ? 's' : ''}` : ''}
             </p>
           </div>
+          <button
+            onClick={editToday}
+            className="shrink-0 text-xs font-medium text-[var(--c-accent-text)] underline hover:opacity-75 transition"
+          >
+            Edit
+          </button>
         </div>
         <WorkoutHistory logs={historyLogs} />
       </div>
@@ -401,7 +459,7 @@ function WorkoutLogSection({
           </button>
         ))}
         <button
-          onClick={() => setStep('logging')}
+          onClick={() => { setRows([emptyRow()]); setStep('logging') }}
           className="w-full py-3 rounded-2xl border border-[var(--c-border)] text-sm text-[var(--c-text3)] hover:text-[var(--c-text)] hover:border-[var(--c-border2)] transition"
         >
           Custom / No preset
@@ -410,24 +468,19 @@ function WorkoutLogSection({
     )
   }
 
-  // Step: logging form
+  // Step: logging form (Strong-style: one card per exercise, one row per set)
   if (step === 'logging') {
     return (
-      <form ref={sectionRef} onSubmit={handleSubmit} className="mt-6 space-y-4 bg-[var(--c-card)] shadow-sm rounded-2xl p-5 border border-[var(--c-border)]">
+      <form ref={sectionRef} onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-[var(--c-text2)]">Log today's workout</p>
+            <p className="text-sm font-semibold text-[var(--c-text2)]">
+              {todayLog ? "Edit today's workout" : "Log today's workout"}
+            </p>
             {selectedDay && (
               <div className="flex items-center gap-2 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#b0e455] shrink-0" />
                 <p className="text-xs text-[var(--c-accent-text)]">{selectedDay.label}</p>
-                <button
-                  type="button"
-                  onClick={() => { setSelectedDay(null); setRows([{ id: 1, move: '', kg: '', reps: '', sets: '' }]) }}
-                  className="text-[10px] text-[var(--c-text4)] hover:text-[var(--c-text)] transition underline"
-                >
-                  change
-                </button>
               </div>
             )}
           </div>
@@ -438,20 +491,17 @@ function WorkoutLogSection({
           </button>
         </div>
 
-        {/* Exercise rows — stacked layout for mobile readability */}
-        <div className="space-y-3">
-          {rows.map(row => (
-            <div key={row.id} className="space-y-1.5">
-              <div className="relative">
+        {rows.map(row => (
+          <div key={row.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4 space-y-2">
+            {/* Exercise name + remove */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1 min-w-0">
                 <input
                   value={row.move}
-                  onChange={e => {
-                    updateRow(row.id, 'move', e.target.value)
-                    fetchSuggestions(row.id, e.target.value)
-                  }}
+                  onChange={e => updateMove(row.id, e.target.value)}
                   onBlur={() => setTimeout(() => setSugRowId(s => (s === row.id ? null : s)), 150)}
                   placeholder="Exercise name"
-                  className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-3 py-2.5 text-sm text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
+                  className="w-full bg-transparent text-sm font-semibold text-[var(--c-text)] placeholder-[var(--c-text5)] focus:outline-none"
                 />
                 {sugRowId === row.id && sugs.length > 0 && (
                   <div className="absolute z-10 left-0 right-0 top-full mt-1 bg-[var(--c-card)] border border-[var(--c-border2)] rounded-xl shadow-lg overflow-hidden">
@@ -468,55 +518,92 @@ function WorkoutLogSection({
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-[1fr_1fr_1fr_28px] gap-1.5 items-end">
-                <div>
-                  <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest text-center mb-1">kg</p>
-                  <input
-                    value={row.kg}
-                    onChange={e => updateRow(row.id, 'kg', e.target.value)}
-                    placeholder="—"
-                    type="number"
-                    min="0"
-                    className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-                  />
-                </div>
-                <div>
-                  <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest text-center mb-1">Reps</p>
-                  <input
-                    value={row.reps}
-                    onChange={e => updateRow(row.id, 'reps', e.target.value)}
-                    placeholder={row.targetReps || '—'}
-                    className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-                  />
-                </div>
-                <div>
-                  <p className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest text-center mb-1">Sets</p>
-                  <input
-                    value={row.sets}
-                    onChange={e => updateRow(row.id, 'sets', e.target.value)}
-                    placeholder="—"
-                    type="number"
-                    min="0"
-                    className="w-full bg-[var(--c-bg)] border border-[var(--c-border2)] rounded-xl px-2 py-2 text-sm text-[var(--c-text)] text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition"
-                  />
-                </div>
+              {row.targetReps && (
+                <span className="text-[10px] text-[var(--c-text4)] font-mono shrink-0">{row.targetReps} reps</span>
+              )}
+              <button
+                type="button"
+                onClick={() => removeExercise(row.id)}
+                className="w-6 h-6 flex items-center justify-center text-[var(--c-text4)] hover:text-red-400 transition shrink-0"
+                aria-label="Remove exercise"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Set header */}
+            <div className="grid grid-cols-[28px_1fr_1fr_34px_24px] gap-1.5 px-0.5">
+              {['Set', 'kg', 'Reps', '', ''].map((h, i) => (
+                <p key={i} className="text-[9px] text-[var(--c-text5)] font-mono uppercase tracking-widest text-center first:text-left">{h}</p>
+              ))}
+            </div>
+
+            {/* Set rows */}
+            {row.sets.map((s, i) => (
+              <div key={s.id} className="grid grid-cols-[28px_1fr_1fr_34px_24px] gap-1.5 items-center">
+                <p className="text-xs text-[var(--c-text4)] font-mono text-left pl-1">{i + 1}</p>
+                <input
+                  value={s.kg}
+                  onChange={e => updateSet(row.id, s.id, 'kg', e.target.value)}
+                  placeholder="—"
+                  type="number"
+                  inputMode="decimal"
+                  min="0"
+                  className={`w-full border rounded-xl px-2 py-2 text-sm text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition ${
+                    s.done ? 'bg-[#b0e455]/10 border-[#b0e455]/40 text-[var(--c-accent-text)]' : 'bg-[var(--c-bg)] border-[var(--c-border2)] text-[var(--c-text)]'
+                  }`}
+                />
+                <input
+                  value={s.reps}
+                  onChange={e => updateSet(row.id, s.id, 'reps', e.target.value)}
+                  placeholder={row.targetReps || '—'}
+                  type="number"
+                  inputMode="numeric"
+                  min="0"
+                  className={`w-full border rounded-xl px-2 py-2 text-sm text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition ${
+                    s.done ? 'bg-[#b0e455]/10 border-[#b0e455]/40 text-[var(--c-accent-text)]' : 'bg-[var(--c-bg)] border-[var(--c-border2)] text-[var(--c-text)]'
+                  }`}
+                />
                 <button
                   type="button"
-                  onClick={() => removeRow(row.id)}
-                  className="w-7 h-7 mb-0.5 flex items-center justify-center text-[var(--c-text4)] hover:text-red-400 transition rounded-full"
+                  onClick={() => toggleDone(row.id, s.id)}
+                  aria-label={s.done ? 'Mark set not done' : 'Mark set done'}
+                  className={`h-8 w-full rounded-xl flex items-center justify-center transition ${
+                    s.done ? 'bg-[#b0e455] text-[#0f1a0c]' : 'bg-[var(--c-bg)] border border-[var(--c-border2)] text-[var(--c-text4)]'
+                  }`}
                 >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeSet(row.id, s.id)}
+                  className="w-6 h-6 flex items-center justify-center text-[var(--c-text5)] hover:text-red-400 transition"
+                  aria-label="Remove set"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3 h-3">
                     <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
                   </svg>
                 </button>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => addSet(row.id)}
+              className="w-full py-1.5 rounded-xl border border-dashed border-[var(--c-border2)] text-[11px] font-medium text-[var(--c-text3)] hover:text-[var(--c-text)] hover:border-[var(--c-border)] transition"
+            >
+              + Add set
+            </button>
+          </div>
+        ))}
 
         <button
           type="button"
-          onClick={addRow}
+          onClick={addExercise}
           className="flex items-center gap-1.5 text-xs font-medium text-[var(--c-accent-text)] hover:opacity-75 transition"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
@@ -550,7 +637,7 @@ function WorkoutLogSection({
             disabled={loading}
             className="flex-1 py-3 rounded-2xl bg-[#b0e455] text-[#0f1a0c] text-sm font-semibold hover:bg-[#c9f070] transition disabled:opacity-50"
           >
-            {loading ? 'Saving…' : 'Log It'}
+            {loading ? 'Saving…' : todayLog ? 'Save Changes' : 'Log It'}
           </button>
         </div>
       </form>
@@ -561,7 +648,7 @@ function WorkoutLogSection({
   return (
     <div className="mt-6 pt-6 border-t border-[var(--c-border)]">
       <button
-        onClick={() => split?.days?.length ? setStep('picking') : setStep('logging')}
+        onClick={() => split?.days?.length ? setStep('picking') : (setRows([emptyRow()]), setStep('logging'))}
         className="w-full flex items-center justify-center gap-2 bg-[#b0e455] text-[#0f1a0c] py-3.5 rounded-2xl text-sm font-semibold hover:bg-[#c9f070] transition active:scale-[0.98]"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4">

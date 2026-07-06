@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createServiceClient } from '@/lib/ai-supabase'
 import { fetchClientContext } from '@/lib/client-context'
 import { timeAgo } from '@/lib/format'
+import { parseWorkoutLog, setsSummary } from '@/lib/workout-notes'
 import ReportBuilder from './ReportBuilder'
 import IntakeView from './IntakeView'
 
@@ -81,14 +82,11 @@ export default async function ClientPage({ params }: { params: { id: string } })
       .limit(12),
   ])
 
-  const workouts = (workoutRows ?? []).map((w) => {
-    let exercises: Array<{ move: string; kg?: string; reps?: string; sets?: string }> = []
-    try {
-      const p = typeof w.notes === 'string' ? JSON.parse(w.notes) : w.notes
-      exercises = (p?.exercises as typeof exercises) ?? []
-    } catch { /* legacy plain-text notes — show as zero exercises */ }
-    return { id: w.id as string, date: w.logged_date as string, exercises }
-  })
+  const workouts = (workoutRows ?? []).map((w) => ({
+    id: w.id as string,
+    date: w.logged_date as string,
+    exercises: parseWorkoutLog(w.notes as Record<string, unknown> | null).exercises,
+  }))
 
   const p = ctx.profile
   const c = ctx.latestCheckin
@@ -234,11 +232,9 @@ export default async function ClientPage({ params }: { params: { id: string } })
                 {w.exercises.length > 0 && (
                   <div className="mt-1 space-y-0.5 px-3 pb-1">
                     {w.exercises.map((ex, i) => (
-                      <div key={i} className="flex justify-between text-[11px]">
-                        <span className="text-zinc-400">{ex.move}</span>
-                        <span className="font-mono text-zinc-500">
-                          {[ex.kg && `${ex.kg}kg`, ex.reps && `×${ex.reps}`, ex.sets && `·${ex.sets} sets`].filter(Boolean).join(' ') || '—'}
-                        </span>
+                      <div key={i} className="flex justify-between gap-3 text-[11px]">
+                        <span className="min-w-0 truncate text-zinc-400">{ex.move}</span>
+                        <span className="shrink-0 font-mono text-zinc-500">{setsSummary(ex.sets)}</span>
                       </div>
                     ))}
                   </div>
