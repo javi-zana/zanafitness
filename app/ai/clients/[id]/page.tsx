@@ -108,7 +108,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
     d.meals.push(m)
     days.set(key, d)
   }
-  const dailyLog = [...days.entries()].sort((a, b) => b[0].localeCompare(a[0])).slice(0, 10)
+  const dailyLog = Array.from(days.entries()).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 10)
 
   const p = ctx.profile
   const c = ctx.latestCheckin
