@@ -24,7 +24,7 @@ export default async function DashboardPage() {
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
-  const [{ data: referralRow }, { data: okrRow }, { data: reportRows }, { data: mealRows }] = await Promise.all([
+  const [{ data: referralRow }, { data: okrRow }, { data: reportRows }, { data: mealRows }, { data: workoutDateRows }] = await Promise.all([
     supabase.from('referrals').select('code').eq('referrer_id', user.id).maybeSingle(),
     supabase
       .from('program_sections')
@@ -45,6 +45,12 @@ export default async function DashboardPage() {
       .eq('member_id', user.id)
       .gte('created_at', todayStart.toISOString())
       .order('created_at', { ascending: false }),
+    supabase
+      .from('workout_logs')
+      .select('logged_date')
+      .eq('member_id', user.id)
+      .order('logged_date', { ascending: false })
+      .limit(60),
   ])
 
   const reports = (reportRows ?? []).map((r) => ({
@@ -63,6 +69,7 @@ export default async function DashboardPage() {
       okr={okrRow?.content_json ?? null}
       reports={reports}
       todayMeals={(mealRows ?? []) as { id: string; photo_url: string; note: string | null; created_at: string }[]}
+      workoutDates={(workoutDateRows ?? []).map((w) => w.logged_date as string)}
     />
   )
 }

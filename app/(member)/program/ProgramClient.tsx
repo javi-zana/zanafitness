@@ -43,6 +43,7 @@ type Props = {
   milestones: string[]
   workoutLogs: WorkoutLogRecord[]
   notes: CoachNote[]
+  autoLog?: boolean
 }
 
 type Module = 'split' | 'food' | 'notes'
@@ -185,6 +186,7 @@ function WorkoutLogSection({
   split,
   triggerDay,
   onTriggerConsumed,
+  autoStart,
 }: {
   userId: string
   workoutLogs: WorkoutLogRecord[]
@@ -193,6 +195,7 @@ function WorkoutLogSection({
   split?: StructuredSplit | null
   triggerDay?: SplitDay | null
   onTriggerConsumed?: () => void
+  autoStart?: boolean
 }) {
   const supabase = createClient()
   const today = localDateKey() // local calendar day — a 7am session belongs to today, not UTC-yesterday
@@ -311,6 +314,18 @@ function WorkoutLogSection({
       onTriggerConsumed?.()
     }
   }, [triggerDay]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Deep link from the home "Log today's workout" card: jump straight to the
+  // session picker (or the freeform form when no split is assigned)
+  useEffect(() => {
+    if (autoStart && !todayLog && step === 'idle') {
+      if (split?.days?.length) setStep('picking')
+      else {
+        setRows([emptyRow()])
+        setStep('logging')
+      }
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   function updateMove(exId: number, value: string) {
     setRows(prev => prev.map(r => (r.id === exId ? { ...r, move: value } : r)))
@@ -859,8 +874,9 @@ function ModuleGrid({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ firstName, userId, okr, split, food, milestones, workoutLogs, notes }: Props) {
-  const [activeModule, setActiveModule] = useState<Module | null>(null)
+export default function ProgramClient({ firstName, userId, okr, split, food, milestones, workoutLogs, notes, autoLog }: Props) {
+  // Deep link from the home card: open the split module immediately
+  const [activeModule, setActiveModule] = useState<Module | null>(autoLog ? 'split' : null)
 
   // Workout logs + milestones live in state so a save reflects immediately
   const [logs, setLogs] = useState<WorkoutLogRecord[]>(workoutLogs)
@@ -940,6 +956,7 @@ export default function ProgramClient({ firstName, userId, okr, split, food, mil
             milestones={earned}
             onLogged={handleLogged}
             split={structuredSplit}
+            autoStart={autoLog}
           />
         </>
       )

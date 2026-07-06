@@ -2,7 +2,11 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import ProgramClient from './ProgramClient'
 
-export default async function ProgramPage() {
+export default async function ProgramPage({
+  searchParams,
+}: {
+  searchParams?: { log?: string }
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -68,6 +72,7 @@ export default async function ProgramPage() {
       workoutLogs={(workoutRows ?? []) as { id: string; logged_date: string; notes: Record<string, unknown> | string | null }[]}
       userId={user.id}
       notes={notes}
+      autoLog={searchParams?.log === 'split'}
     />
   )
 }
