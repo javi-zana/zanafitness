@@ -443,9 +443,122 @@ export const SECTIONS: Section[] = [
     title: 'Fitness',
     tagline: 'Training that builds the look — PPL, intensity, progressive overload.',
     summary:
-      'How to train for aesthetics: the split, the exercises that move the needle, intensity, and the progressive-overload cadence that keeps you growing.',
-    status: 'soon',
-    modules: [],
+      'How to train for aesthetics: the split, the exercises that move the needle, intensity, and the progressive-overload cadence that keeps you growing. Not gym-bro volume — the minimum effective dose that actually shows.',
+    status: 'ready',
+    readTime: '6 min read',
+    intro: [
+      {
+        type: 'quote',
+        text: "I kept getting stronger the whole time I was cutting. One plate bench to two plate bench in three months. High protein + consistent training + a calorie deficit = recomposition. You don't have to choose between leaner and stronger.",
+      },
+    ],
+    modules: [
+      {
+        id: 'aesthetics-first',
+        kicker: 'Module One',
+        title: 'Aesthetics-First, Not Gym-Bro',
+        blocks: [
+          {
+            type: 'p',
+            text: "The split is **Push / Pull / Legs (PPL)**. It's a generic split — the framing is what makes it yours. Every session is filtered through one question: does this show in a fitted polo or a suit? Shoulders, chest, arms. That's the lens. Not powerlifting totals, not Instagram-influencer volume — the muscles that read as 'put together' with clothes on.",
+          },
+          {
+            type: 'p',
+            text: 'Workouts are **prescribed, not picked from a menu**. You get the exact exercises for your split — that removes a decision that adds friction without adding results.',
+          },
+          { type: 'h3', text: 'The 1-hour rule' },
+          {
+            type: 'p',
+            text: "Training time is **~1 hour a day**. Longer isn't better — it's usually just more rest between sets, more scrolling, more chances to talk yourself out of the next set. An hour, done with intent, beats two hours done half-present.",
+          },
+          { type: 'h3', text: 'Intensity floor: 8/10' },
+          {
+            type: 'p',
+            text: "Every set should land at **8 out of 10 effort** — a couple reps left in the tank, not grinding to failure every set, but never coasting either. Log it honestly. Anything below an 8 consistently is the conversation to have with your coach, not a stat to hide.",
+          },
+        ],
+      },
+      {
+        id: 'progressive-overload',
+        kicker: 'Module Two',
+        title: 'Progressive Overload — The Only Metric That Matters',
+        blocks: [
+          {
+            type: 'p',
+            text: "The whole training system reduces to one rule: **weight goes up every other week.** 135 → 145 over two weeks, then hold, then push again. That's it. Not every session — every other week. Consistent, boring, unglamorous. This is the one that actually changes your body over 6 months, more than any exercise selection ever will.",
+          },
+          {
+            type: 'callout',
+            text: "Give it six months. Not six weeks. Not three. Six. The plateau you're worried about mostly disappears if the weight keeps moving every other week.",
+          },
+          {
+            type: 'p',
+            text: "**Recomposition is real** — you can get leaner and stronger at the same time. The lever that makes it possible is protein (see the Diet section). High protein plus consistent progressive overload means a calorie deficit doesn't have to cost you strength.",
+          },
+        ],
+      },
+      {
+        id: 'pre-workout-routine',
+        kicker: 'Module Three',
+        title: 'The Pre-Workout Routine',
+        blocks: [
+          {
+            type: 'p',
+            text: "The 15 minutes before you touch a weight decide how good the next 60 are.",
+          },
+          { type: 'h3', text: 'Warm up on purpose' },
+          {
+            type: 'p',
+            text: "The warmup isn't a formality — it's the first line of defense against the injuries covered in the next module. A couple light ramp-up sets on your first lift, plus movement for whatever's tight that day.",
+          },
+          { type: 'h3', text: 'Caffeine timing' },
+          {
+            type: 'p',
+            text: 'Same principle as the Supplementation guide: take your pre-workout (or coffee) 20–30 minutes out so it hits right as you start, not halfway through.',
+          },
+          { type: 'h3', text: 'The mental switch' },
+          {
+            type: 'p',
+            text: "Walk in already decided. The session is won or lost before the first set — in whether you showed up ready to push at an 8/10, or planning to see how you feel.",
+          },
+        ],
+      },
+      {
+        id: 'weak-links-and-logging',
+        kicker: 'Module Four',
+        title: 'Weak Links & What to Log',
+        blocks: [
+          {
+            type: 'p',
+            text: "Around month three of building this system, stiff necks and foot pain showed up out of nowhere and stalled real progress. A physical therapist kept coming back to the same principle:",
+          },
+          {
+            type: 'quote',
+            text: 'Most injuries are caused by muscle imbalances.',
+          },
+          {
+            type: 'list',
+            items: [
+              "**Neck pain** → traps weren't trained, so they were underdeveloped and overcompensating for the load. Adding trap work directly ended the pain.",
+              "**Foot pain** → calves weren't trained. Adding calf work ended it.",
+            ],
+          },
+          {
+            type: 'p',
+            text: "Pain is usually not a signal to stop training — it's a signal that something *else* isn't getting trained. Audit your weak links: traps for the neck, calves for the feet, and whatever your own version of that turns out to be.",
+          },
+          { type: 'h3', text: 'What to log' },
+          {
+            type: 'p',
+            text: 'Track weight, reps, and sets for every exercise — that\'s what makes the every-other-week progression checkable instead of a vibe. Skip RPE-per-set logging and instead of the intensity number itself, log the felt result: did it hit 8/10?',
+          },
+          {
+            type: 'callout',
+            text: 'Work with your nature, not against it. That principle runs the diet system and it runs training too — the plan that survives six months beats the plan that looks perfect on paper.',
+          },
+        ],
+      },
+    ],
   },
   {
     num: '04',
