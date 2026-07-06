@@ -15,7 +15,7 @@ export default function TodayWorkout({ dates }: { dates: string[] }) {
   if (state?.logged) {
     return (
       <Link
-        href="/program?log=split"
+        href="/workouts"
         className="flex items-center gap-3 bg-[#b0e455]/8 border border-[#b0e455]/40 rounded-2xl p-4 transition hover:bg-[#b0e455]/12 group"
       >
         <div className="w-10 h-10 rounded-xl bg-[#b0e455] flex items-center justify-center shrink-0">

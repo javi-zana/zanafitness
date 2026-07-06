@@ -1,12 +1,19 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
+import { localDateKey } from '@/lib/workout-notes'
 
 export type MealItem = { id: string; photo_url: string; note: string | null; created_at: string }
 
 // Meal photo log: habits-based — a photo and an optional one-liner, no macros.
+// Receives recent meals and narrows to the client's local today in-browser.
 export default function MealLog({ initialMeals }: { initialMeals: MealItem[] }) {
-  const [meals, setMeals] = useState(initialMeals)
+  const [meals, setMeals] = useState<MealItem[]>([])
+  useEffect(() => {
+    const today = localDateKey()
+    setMeals(initialMeals.filter((m) => localDateKey(new Date(m.created_at)) === today))
+  }, [initialMeals])
   const [pending, setPending] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [note, setNote] = useState('')
@@ -68,25 +75,32 @@ export default function MealLog({ initialMeals }: { initialMeals: MealItem[] }) 
       />
 
       {!pending ? (
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="w-full flex items-center gap-3 text-left group"
-        >
-          <div className="w-10 h-10 rounded-xl bg-[#b0e455]/15 flex items-center justify-center shrink-0">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-5 h-5">
-              <path d="M4 8h3l2-3h6l2 3h3v11H4V8z" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="12" cy="13" r="3.2" />
-            </svg>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold">Log a meal</p>
-            <p className="text-[11px] text-[var(--c-text3)] mt-0.5">
-              {meals.length > 0 ? `${meals.length} logged today` : 'Snap a photo — that’s it'}
-            </p>
-          </div>
-          <span className="text-[var(--c-text4)] text-sm transition-transform group-hover:translate-x-0.5">→</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="flex-1 flex items-center gap-3 text-left group min-w-0"
+          >
+            <div className="w-10 h-10 rounded-xl bg-[#b0e455]/15 flex items-center justify-center shrink-0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-5 h-5">
+                <path d="M4 8h3l2-3h6l2 3h3v11H4V8z" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="12" cy="13" r="3.2" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">Log a meal</p>
+              <p className="text-[11px] text-[var(--c-text3)] mt-0.5">
+                {meals.length > 0 ? `${meals.length} logged today` : 'Snap a photo — that’s it'}
+              </p>
+            </div>
+          </button>
+          <Link
+            href="/meals"
+            className="shrink-0 text-[10px] font-mono tracking-widest uppercase text-[var(--c-accent-text)] hover:opacity-75 transition"
+          >
+            History
+          </Link>
+        </div>
       ) : (
         <div className="space-y-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}

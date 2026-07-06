@@ -275,11 +275,14 @@ export default async function ClientPage({ params }: { params: { id: string } })
                   </div>
                 )}
                 {d.meals.length > 0 && (
-                  <div className="flex gap-1.5 overflow-x-auto pb-1">
+                  <div className="flex gap-2 overflow-x-auto pb-1">
                     {d.meals.map((m) => (
-                      <a key={m.id as string} href={m.photo_url as string} target="_blank" rel="noopener noreferrer" className="shrink-0">
+                      <a key={m.id as string} href={m.photo_url as string} target="_blank" rel="noopener noreferrer" className="w-16 shrink-0">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={m.photo_url as string} alt={(m.note as string) ?? 'Meal'} className="h-14 w-14 rounded-lg object-cover" />
+                        <img src={m.photo_url as string} alt={(m.note as string) ?? 'Meal'} className="h-16 w-16 rounded-lg object-cover" />
+                        {m.note ? (
+                          <p className="mt-0.5 truncate text-[9px] leading-tight text-zinc-500" title={m.note as string}>{m.note as string}</p>
+                        ) : null}
                       </a>
                     ))}
                   </div>

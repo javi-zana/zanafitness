@@ -21,9 +21,6 @@ export default async function DashboardPage() {
     COACH_EMAILS.includes(user.email ?? '')
   if (isCoach) redirect('/coach')
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
-
   const [{ data: referralRow }, { data: okrRow }, { data: reportRows }, { data: mealRows }, { data: workoutDateRows }] = await Promise.all([
     supabase.from('referrals').select('code').eq('referrer_id', user.id).maybeSingle(),
     supabase
@@ -39,12 +36,14 @@ export default async function DashboardPage() {
       .eq('member_id', user.id)
       .eq('status', 'sent')
       .order('created_at', { ascending: false }),
+    // last 20 regardless of day — the card filters to the CLIENT's local
+    // today in the browser (server midnight is UTC and lies in UTC+8)
     supabase
       .from('meal_logs')
       .select('id, photo_url, note, created_at')
       .eq('member_id', user.id)
-      .gte('created_at', todayStart.toISOString())
-      .order('created_at', { ascending: false }),
+      .order('created_at', { ascending: false })
+      .limit(20),
     supabase
       .from('workout_logs')
       .select('logged_date')

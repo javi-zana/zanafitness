@@ -6,13 +6,13 @@ import { createClient } from '@/utils/supabase/client'
 import { SplitViewer, StructuredSplit, SplitDay } from '@/components/SplitBuilder'
 import { parseWorkoutLog, setsSummary, computeStreak, localDateKey, type SetEntry } from '@/lib/workout-notes'
 import { OkrCard, type OkrContent } from '@/components/OkrCard'
+import WorkoutHistory, { type WorkoutLogRecord } from '@/components/WorkoutHistory'
 
 const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ssr: false })
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false })
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type WorkoutLogRecord = { id: string; logged_date: string; notes: string | Record<string, unknown> | null }
 
 type BmrContent = {
   type: 'bmr'
@@ -25,15 +25,6 @@ type BmrContent = {
 
 type SectionData = { section: string; content_json: object; updated_at: string } | null
 
-type CoachNote = {
-  id: string
-  author_id: string
-  author_name: string
-  body: string
-  created_at: string
-  updated_at: string
-}
-
 type Props = {
   firstName: string | null
   userId: string
@@ -42,11 +33,10 @@ type Props = {
   food: SectionData
   milestones: string[]
   workoutLogs: WorkoutLogRecord[]
-  notes: CoachNote[]
   autoLog?: boolean
 }
 
-type Module = 'split' | 'food' | 'notes'
+type Module = 'split' | 'food'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -114,66 +104,6 @@ function RestTimer({ endsAt, onAdjust, onDismiss }: {
           <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
         </svg>
       </button>
-    </div>
-  )
-}
-
-function WorkoutHistory({ logs }: { logs: WorkoutLogRecord[] }) {
-  const [expandedDate, setExpandedDate] = useState<string | null>(logs[0]?.logged_date ?? null)
-  if (!logs.length) return null
-  return (
-    <div className="mt-6 space-y-2">
-      <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest mb-3">Recent workouts</p>
-      {logs.slice(0, 10).map(log => {
-        const { exercises, notes: logNotes } = parseWorkoutLog(log.notes)
-        const isExpanded = expandedDate === log.logged_date
-        const d = new Date(log.logged_date + 'T12:00:00')
-        const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-        return (
-          <div key={log.logged_date} className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] overflow-hidden">
-            <button
-              onClick={() => setExpandedDate(isExpanded ? null : log.logged_date)}
-              className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--c-hover)] transition"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-[#b0e455]/15 flex items-center justify-center shrink-0">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="2.5" className="w-3 h-3">
-                    <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <p className="text-sm font-medium text-[var(--c-text)]">{dayLabel}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                {exercises.length > 0 && (
-                  <span className="text-[10px] text-[var(--c-text4)] font-mono">{exercises.length} exercise{exercises.length !== 1 ? 's' : ''}</span>
-                )}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-3.5 h-3.5 text-[var(--c-text4)] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>
-                  <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            </button>
-            {isExpanded && (
-              <div className="border-t border-[var(--c-border)] px-4 py-3 space-y-3">
-                {exercises.length > 0 ? (
-                  <div className="space-y-1">
-                    {exercises.map((ex, i) => (
-                      <div key={i} className="flex items-baseline justify-between gap-3 py-1 border-b border-[var(--c-border)] last:border-0">
-                        <p className="text-sm text-[var(--c-text)] min-w-0 truncate">{ex.move}</p>
-                        <p className="text-xs text-[var(--c-text3)] font-mono text-right shrink-0">{setsSummary(ex.sets)}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-xs text-[var(--c-text4)]">No exercises recorded</p>
-                )}
-                {logNotes && (
-                  <p className="text-xs text-[var(--c-text3)] italic border-t border-[var(--c-border)] pt-2">{logNotes}</p>
-                )}
-              </div>
-            )}
-          </div>
-        )
-      })}
     </div>
   )
 }
@@ -778,72 +708,6 @@ function BmrDisplay({ data }: { data: BmrContent }) {
   )
 }
 
-// ─── Coach notes feed (read-only) ────────────────────────────────────────────
-
-function formatNoteDate(iso: string) {
-  const d = new Date(iso)
-  const now = new Date()
-  const diffDays = Math.floor((now.getTime() - d.getTime()) / 86_400_000)
-  if (diffDays === 0) return 'Today'
-  if (diffDays === 1) return 'Yesterday'
-  if (diffDays < 7) return `${diffDays} days ago`
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: now.getFullYear() === d.getFullYear() ? undefined : 'numeric' })
-}
-
-function CoachNotesFeed({ notes }: { notes: CoachNote[] }) {
-  if (!notes.length) {
-    return (
-      <div className="space-y-3 pt-2">
-        <div className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-5">
-          <div className="w-10 h-10 rounded-xl bg-[#b0e455]/10 border border-[var(--c-border2)] flex items-center justify-center mb-4">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.5" className="w-5 h-5">
-              <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <p className="text-sm font-semibold text-[var(--c-text)]/80 mb-2">Coach Notes</p>
-          <p className="text-sm text-[var(--c-text3)] leading-relaxed">
-            Your coach will leave timestamped notes here from check-ins and calls — what's working, what to focus on next, anything you talked through.
-          </p>
-        </div>
-        <div className="bg-[#b0e455]/6 border border-[var(--c-border2)] rounded-2xl p-4">
-          <p className="text-xs text-[var(--c-accent-text)] font-medium">No notes yet.</p>
-          <p className="text-xs text-[var(--c-text3)] mt-1">You'll see them here as soon as your coach adds one.</p>
-        </div>
-      </div>
-    )
-  }
-  return (
-    <div className="space-y-3">
-      {notes.map(note => (
-        <div key={note.id} className="bg-[var(--c-card)] shadow-sm rounded-2xl border border-[var(--c-border)] p-4">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-semibold text-[var(--c-accent-text)]">{note.author_name}</p>
-            <p className="text-[10px] text-[var(--c-text4)] font-mono uppercase tracking-widest" suppressHydrationWarning>{formatNoteDate(note.created_at)}</p>
-          </div>
-          <p className="text-sm text-[var(--c-text2)] leading-relaxed whitespace-pre-wrap">{note.body}</p>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-// ─── Empty state ──────────────────────────────────────────────────────────────
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="w-10 h-10 rounded-full bg-[#b0e455]/8 border border-[var(--c-border2)] flex items-center justify-center mb-4">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5 text-[var(--c-text4)]">
-          <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
-      <p className="text-sm text-[var(--c-text4)]">{message}</p>
-    </div>
-  )
-}
-
-// ─── Module grid ─────────────────────────────────────────────────────────────
-
 type ModuleMeta = { id: Module; label: string; subtitle: string; icon: React.ReactNode }
 
 function ModuleGrid({
@@ -874,7 +738,7 @@ function ModuleGrid({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ firstName, userId, okr, split, food, milestones, workoutLogs, notes, autoLog }: Props) {
+export default function ProgramClient({ firstName, userId, okr, split, food, milestones, workoutLogs, autoLog }: Props) {
   // Deep link from the home card: open the split module immediately
   const [activeModule, setActiveModule] = useState<Module | null>(autoLog ? 'split' : null)
 
@@ -920,23 +784,9 @@ export default function ProgramClient({ firstName, userId, okr, split, food, mil
         </svg>
       ),
     },
-    {
-      id: 'notes',
-      label: 'Coach Notes',
-      subtitle: notes.length > 0 ? `${notes.length} note${notes.length === 1 ? '' : 's'}` : 'From check-ins',
-      icon: (
-        <svg viewBox="0 0 24 24" fill="none" stroke="#b0e455" strokeWidth="1.8" className="w-4 h-4">
-          <path d="M9 12h6M9 16h6M7 4H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2M9 4a2 2 0 002 2h2a2 2 0 002-2M9 4a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
-    },
   ]
 
   function renderModuleContent(mod: Module) {
-    if (mod === 'notes') {
-      return <CoachNotesFeed notes={notes} />
-    }
-
     const sectionMap = { split, food }
     const section = sectionMap[mod]
     const content = section?.content_json ?? null
