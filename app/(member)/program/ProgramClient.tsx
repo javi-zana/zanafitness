@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef, FormEvent } from 'react'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import { SplitViewer, StructuredSplit, SplitDay } from '@/components/SplitBuilder'
-import { parseWorkoutLog, setsSummary, computeStreak, type SetEntry } from '@/lib/workout-notes'
+import { parseWorkoutLog, setsSummary, computeStreak, localDateKey, type SetEntry } from '@/lib/workout-notes'
 import { OkrCard, type OkrContent } from '@/components/OkrCard'
 
 const RichTextViewer = dynamic(() => import('@/components/RichTextViewer'), { ssr: false })
@@ -36,10 +36,12 @@ type CoachNote = {
 
 type Props = {
   firstName: string | null
+  userId: string
   okr: SectionData
   split: SectionData
   food: SectionData
   milestones: string[]
+  workoutLogs: WorkoutLogRecord[]
   notes: CoachNote[]
 }
 
@@ -193,7 +195,7 @@ function WorkoutLogSection({
   onTriggerConsumed?: () => void
 }) {
   const supabase = createClient()
-  const today = new Date().toISOString().split('T')[0]
+  const today = localDateKey() // local calendar day — a 7am session belongs to today, not UTC-yesterday
   const workoutDates = workoutLogs.map(w => w.logged_date)
   const todayLog = workoutLogs.find(w => w.logged_date === today)
   const historyLogs = workoutLogs.filter(w => w.logged_date !== today)
@@ -338,21 +340,17 @@ function WorkoutLogSection({
   }
 
   function toggleDone(exId: number, setId: number) {
-    let startedRest = false
+    // decide from current state BEFORE the update — the setRows updater runs
+    // at render time, so flags set inside it are not visible here
+    const willBeDone = !rows.find(r => r.id === exId)?.sets.find(s => s.id === setId)?.done
     setRows(prev =>
-      prev.map(r => {
-        if (r.id !== exId) return r
-        return {
-          ...r,
-          sets: r.sets.map(s => {
-            if (s.id !== setId) return s
-            if (!s.done) startedRest = true // checking a set (not unchecking) starts rest
-            return { ...s, done: !s.done }
-          }),
-        }
-      }),
+      prev.map(r =>
+        r.id === exId
+          ? { ...r, sets: r.sets.map(s => (s.id === setId ? { ...s, done: !s.done } : s)) }
+          : r,
+      ),
     )
-    if (startedRest) {
+    if (willBeDone) {
       let secs = REST_DEFAULT
       try { secs = Math.max(15, parseInt(localStorage.getItem(REST_KEY) ?? '') || REST_DEFAULT) } catch { /* ignore */ }
       setRestEndsAt(Date.now() + secs * 1000)
@@ -861,8 +859,16 @@ function ModuleGrid({
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-export default function ProgramClient({ firstName, okr, split, food, notes }: Props) {
+export default function ProgramClient({ firstName, userId, okr, split, food, milestones, workoutLogs, notes }: Props) {
   const [activeModule, setActiveModule] = useState<Module | null>(null)
+
+  // Workout logs + milestones live in state so a save reflects immediately
+  const [logs, setLogs] = useState<WorkoutLogRecord[]>(workoutLogs)
+  const [earned, setEarned] = useState<string[]>(milestones)
+  function handleLogged(date: string, newMilestones: string[], newLog: WorkoutLogRecord) {
+    setLogs(prev => [newLog, ...prev.filter(l => l.logged_date !== date)])
+    if (newMilestones.length) setEarned(prev => [...prev, ...newMilestones])
+  }
 
   const structuredSplit: StructuredSplit | null = (() => {
     const c = split?.content_json as { type?: string } | null
@@ -925,7 +931,18 @@ export default function ProgramClient({ firstName, okr, split, food, notes }: Pr
     }
 
     if (mod === 'split' && structuredSplit) {
-      return <SplitViewer split={structuredSplit} />
+      return (
+        <>
+          <SplitViewer split={structuredSplit} />
+          <WorkoutLogSection
+            userId={userId}
+            workoutLogs={logs}
+            milestones={earned}
+            onLogged={handleLogged}
+            split={structuredSplit}
+          />
+        </>
+      )
     }
 
     if (!hasContent(content)) {
@@ -955,6 +972,16 @@ export default function ProgramClient({ firstName, okr, split, food, notes }: Pr
             <p className="text-xs text-[var(--c-accent-text)] font-medium">Your coach is preparing this section.</p>
             <p className="text-xs text-[var(--c-text3)] mt-1">You'll see it here as soon as it's ready.</p>
           </div>
+          {mod === 'split' && (
+            /* no split assigned yet — freeform logging still works */
+            <WorkoutLogSection
+              userId={userId}
+              workoutLogs={logs}
+              milestones={earned}
+              onLogged={handleLogged}
+              split={null}
+            />
+          )}
         </div>
       )
     }

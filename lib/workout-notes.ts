@@ -42,11 +42,18 @@ export function parseWorkoutLog(raw: string | Record<string, unknown> | null): P
   }
 }
 
+/** Local calendar date as YYYY-MM-DD. Never use toISOString for day keys —
+ *  it returns the UTC date, which is off by one for most of the day in UTC+8
+ *  (where Javi's clients live). */
+export function localDateKey(d: Date = new Date()): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 /** Consecutive-day workout streak ending today or yesterday. */
 export function computeStreak(dates: string[]): number {
   if (!dates.length) return 0
   const dateSet = new Set(dates)
-  const toKey = (d: Date) => d.toISOString().split('T')[0]
+  const toKey = localDateKey
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const check = new Date(today)

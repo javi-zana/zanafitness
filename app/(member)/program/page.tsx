@@ -7,7 +7,7 @@ export default async function ProgramPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [{ data: profile }, { data: sections }, { data: milestoneRows }, { data: notesRows }] = await Promise.all([
+  const [{ data: profile }, { data: sections }, { data: milestoneRows }, { data: workoutRows }, { data: notesRows }] = await Promise.all([
     supabase
       .from('profiles')
       .select('first_name')
@@ -21,6 +21,12 @@ export default async function ProgramPage() {
       .from('member_milestones')
       .select('type')
       .eq('member_id', user.id),
+    supabase
+      .from('workout_logs')
+      .select('id, logged_date, notes')
+      .eq('member_id', user.id)
+      .order('logged_date', { ascending: false })
+      .limit(30),
     supabase
       .from('coach_notes')
       .select('id, author_id, body, created_at, updated_at, author:profiles!coach_notes_author_id_fkey(first_name, email)')
@@ -59,6 +65,8 @@ export default async function ProgramPage() {
       split={sectionMap['split'] ?? null}
       food={sectionMap['food'] ?? null}
       milestones={(milestoneRows ?? []).map(m => m.type as string)}
+      workoutLogs={(workoutRows ?? []) as { id: string; logged_date: string; notes: Record<string, unknown> | string | null }[]}
+      userId={user.id}
       notes={notes}
     />
   )
