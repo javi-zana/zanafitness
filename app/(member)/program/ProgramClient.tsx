@@ -254,6 +254,9 @@ function WorkoutLogSection({
         setRows([emptyRow()])
         setStep('logging')
       }
+      // deep-link arrivals land mid-page: give hydration a beat, then bring
+      // the picker into view (the 50ms step-effect scroll races first paint)
+      setTimeout(() => sectionElRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 450)
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -353,15 +356,21 @@ function WorkoutLogSection({
       }))
       .filter(r => r.sets.length > 0)
     const notesPayload = { v: 2, exercises, notes: notes.trim() || null }
-    const { data: upserted, error: upsertErr } = await supabase
-      .from('workout_logs')
-      .upsert({ member_id: userId, logged_date: today, notes: notesPayload }, { onConflict: 'member_id,logged_date' })
-      .select('id')
-      .single()
-
-    if (upsertErr) {
-      console.error('[workout_logs] upsert error:', upsertErr)
-      setSaveError('Failed to save — please try again.')
+    // 12s timeout: gym wifi and stale sessions must never strand the client
+    // on an eternal "Saving…" — fail loud, keep their entered data.
+    let upserted: { id: string } | null = null
+    try {
+      const { data, error: upsertErr } = await supabase
+        .from('workout_logs')
+        .upsert({ member_id: userId, logged_date: today, notes: notesPayload }, { onConflict: 'member_id,logged_date' })
+        .select('id')
+        .abortSignal(AbortSignal.timeout(12_000))
+        .single()
+      if (upsertErr) throw upsertErr
+      upserted = data
+    } catch (err) {
+      console.error('[workout_logs] upsert error:', err)
+      setSaveError('Could not save — check your connection and tap Log It again.')
       setLoading(false)
       return
     }
@@ -847,6 +856,7 @@ export default function ProgramClient({ firstName, userId, okr, split, food, mil
               milestones={earned}
               onLogged={handleLogged}
               split={null}
+              autoStart={autoLog}
             />
           )}
         </div>

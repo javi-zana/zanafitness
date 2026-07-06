@@ -56,7 +56,14 @@ export default function MealsClient({ initialMeals }: { initialMeals: Meal[] }) 
     const fd = new FormData()
     fd.append('file', pending)
     fd.append('note', note)
-    const res = await fetch('/api/upload-meal-photo', { method: 'POST', body: fd })
+    let res: Response
+    try {
+      res = await fetch('/api/upload-meal-photo', { method: 'POST', body: fd, signal: AbortSignal.timeout(30_000) })
+    } catch {
+      setBusy(false)
+      setError('Upload timed out — check your connection and try again')
+      return
+    }
     const json = await res.json().catch(() => ({}))
     setBusy(false)
     if (!res.ok) {

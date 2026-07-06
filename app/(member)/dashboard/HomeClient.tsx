@@ -90,6 +90,10 @@ export default function HomeClient({
           </Link>
         </div>
 
+        {/* Today's daily job: workout + meal */}
+        <TodayWorkout dates={workoutDates} />
+        <MealLog initialMeals={todayMeals} />
+
         {okrContent && <OkrCard okr={okrContent} showEmpty={false} />}
 
         {/* This week's brief */}
@@ -109,10 +113,6 @@ export default function HomeClient({
             </p>
           </div>
         )}
-
-        {/* Today's daily job: workout + meal */}
-        <TodayWorkout dates={workoutDates} />
-        <MealLog initialMeals={todayMeals} />
 
         {/* Actions: book a call + weekly check-in */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
