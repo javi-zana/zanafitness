@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { parseWorkoutLog, setsSummary, type LoggedExercise } from './workout-notes'
 
 // Assemble everything we know about a client to (a) show on the client page and
 // (b) feed the report generator. Read via the service-role client.
@@ -24,6 +25,9 @@ export type ClientContext = {
   recentCheckins: Record<string, unknown>[]
   notes: { body: string; created_at: string }[]
   lastReportWeek: string | null
+  workouts: { date: string; exercises: LoggedExercise[]; notes: string | null }[]
+  mealDays: { date: string; count: number; notes: string[] }[]
+  weightTrend: { firstKg: number; lastKg: number; firstAt: string; lastAt: string } | null
 }
 
 export async function fetchClientContext(
@@ -38,7 +42,10 @@ export async function fetchClientContext(
 
   if (!profile) return null
 
-  const [{ data: okrRow }, { data: checkins }, { data: notes }, { data: lastReport }] =
+  const twoWeeksAgo = new Date(Date.now() - 14 * 86_400_000).toISOString()
+  const sixWeeksAgo = new Date(Date.now() - 42 * 86_400_000).toISOString()
+
+  const [{ data: okrRow }, { data: checkins }, { data: notes }, { data: lastReport }, { data: workoutRows }, { data: mealRows }, { data: statRows }] =
     await Promise.all([
       supabase
         .from('program_sections')
@@ -65,11 +72,62 @@ export async function fetchClientContext(
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle(),
+      supabase
+        .from('workout_logs')
+        .select('logged_date, notes')
+        .eq('member_id', memberId)
+        .order('logged_date', { ascending: false })
+        .limit(14),
+      supabase
+        .from('meal_logs')
+        .select('note, created_at')
+        .eq('member_id', memberId)
+        .gte('created_at', twoWeeksAgo)
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase
+        .from('stat_updates')
+        .select('created_at, weight_kg')
+        .eq('member_id', memberId)
+        .gte('created_at', sixWeeksAgo)
+        .not('weight_kg', 'is', null)
+        .order('created_at', { ascending: true })
+        .limit(60),
     ])
 
   const okrJson = okrRow?.content_json as OkrContent | null
   const okr = okrJson?.type === 'okr' ? okrJson : null
   const recentCheckins = (checkins ?? []) as Record<string, unknown>[]
+
+  const workouts = (workoutRows ?? []).map((w) => {
+    const parsed = parseWorkoutLog(w.notes as Record<string, unknown> | string | null)
+    return { date: w.logged_date as string, exercises: parsed.exercises, notes: parsed.notes }
+  })
+
+  // Meals collapsed to per-day counts (with any notes) — the report cares about
+  // adherence cadence, not individual photos.
+  const mealByDay = new Map<string, { count: number; notes: string[] }>()
+  for (const m of mealRows ?? []) {
+    const day = String(m.created_at).split('T')[0]
+    const entry = mealByDay.get(day) ?? { count: 0, notes: [] }
+    entry.count++
+    if (m.note) entry.notes.push(m.note as string)
+    mealByDay.set(day, entry)
+  }
+  const mealDays = Array.from(mealByDay.entries())
+    .map(([date, v]) => ({ date, ...v }))
+    .sort((a, b) => b.date.localeCompare(a.date))
+
+  const stats = (statRows ?? []) as { created_at: string; weight_kg: number }[]
+  const weightTrend =
+    stats.length >= 2
+      ? {
+          firstKg: Number(stats[0].weight_kg),
+          lastKg: Number(stats[stats.length - 1].weight_kg),
+          firstAt: stats[0].created_at,
+          lastAt: stats[stats.length - 1].created_at,
+        }
+      : null
 
   return {
     profile: profile as unknown as ClientContext['profile'],
@@ -78,6 +136,9 @@ export async function fetchClientContext(
     recentCheckins,
     notes: (notes ?? []) as { body: string; created_at: string }[],
     lastReportWeek: (lastReport?.week_label as string) ?? null,
+    workouts,
+    mealDays,
+    weightTrend,
   }
 }
 
@@ -141,6 +202,41 @@ export function contextToPromptText(ctx: ClientContext): string {
     add('Proud of', c.proud_of)
     add('Wants to improve', c.improve)
     add('Comments', c.comments)
+  }
+
+  // Logged activity — the ground truth of what they actually DID, vs. the
+  // self-reported adherence ratings above. Reconcile the two in the report.
+  if (ctx.workouts.length) {
+    const days7 = new Date(Date.now() - 7 * 86_400_000).toISOString().split('T')[0]
+    const last7 = ctx.workouts.filter((w) => w.date >= days7).length
+    lines.push('\n## LOGGED WORKOUTS (newest first)')
+    lines.push(`${last7} in the last 7 days, ${ctx.workouts.length} shown`)
+    ctx.workouts.slice(0, 8).forEach((w) => {
+      const summary = w.exercises
+        .map((ex) => `${ex.move} ${setsSummary(ex.sets)}`)
+        .join('; ')
+      lines.push(`- ${w.date}: ${summary || 'no exercises recorded'}${w.notes ? ` — "${w.notes}"` : ''}`)
+    })
+  } else {
+    lines.push('\n## LOGGED WORKOUTS\nNone logged. If check-in claims high workout adherence, that gap is worth a gentle nudge to log.')
+  }
+
+  if (ctx.mealDays.length) {
+    const totalMeals = ctx.mealDays.reduce((n, d) => n + d.count, 0)
+    lines.push('\n## LOGGED MEALS (last 2 weeks)')
+    lines.push(`${totalMeals} meals across ${ctx.mealDays.length} days`)
+    const withNotes = ctx.mealDays.flatMap((d) => d.notes).slice(0, 8)
+    if (withNotes.length) lines.push(`Notes they left: ${withNotes.map((n) => `"${n}"`).join(', ')}`)
+  } else {
+    lines.push('\n## LOGGED MEALS\nNo meal photos logged in the last 2 weeks.')
+  }
+
+  if (ctx.weightTrend) {
+    const { firstKg, lastKg, firstAt, lastAt } = ctx.weightTrend
+    const delta = lastKg - firstKg
+    lines.push(
+      `\n## WEIGHT TREND\n${firstKg}kg (${firstAt.split('T')[0]}) → ${lastKg}kg (${lastAt.split('T')[0]}), ${delta >= 0 ? '+' : ''}${delta.toFixed(1)}kg`,
+    )
   }
 
   if (ctx.notes.length) {
