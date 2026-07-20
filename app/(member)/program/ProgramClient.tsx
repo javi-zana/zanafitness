@@ -370,7 +370,15 @@ function WorkoutLogSection({
       upserted = data
     } catch (err) {
       console.error('[workout_logs] upsert error:', err)
-      setSaveError('Could not save — check your connection and tap Log It again.')
+      // Surface the real reason — a DB rejection dressed up as "check your
+      // connection" cost us a week of clients thinking their wifi was broken.
+      const msg = (err as { message?: string })?.message
+      const isAbort = (err as { name?: string })?.name === 'TimeoutError' || (err as { name?: string })?.name === 'AbortError'
+      setSaveError(
+        isAbort || !msg
+          ? 'Could not save — check your connection and tap Log It again.'
+          : `Could not save (${msg}). Screenshot this and message your coach.`,
+      )
       setLoading(false)
       return
     }
@@ -560,6 +568,7 @@ function WorkoutLogSection({
                   placeholder="—"
                   type="number"
                   inputMode="decimal"
+                  step="any"
                   min="0"
                   className={`w-full border rounded-xl px-2 py-2 text-sm text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition ${
                     s.done ? 'bg-[#b0e455]/10 border-[#b0e455]/40 text-[var(--c-accent-text)]' : 'bg-[var(--c-bg)] border-[var(--c-border2)] text-[var(--c-text)]'
@@ -571,6 +580,7 @@ function WorkoutLogSection({
                   placeholder={row.targetReps || '—'}
                   type="number"
                   inputMode="numeric"
+                  step="any"
                   min="0"
                   className={`w-full border rounded-xl px-2 py-2 text-sm text-center placeholder-[var(--c-text5)] focus:outline-none focus:border-[#b0e455]/40 transition ${
                     s.done ? 'bg-[#b0e455]/10 border-[#b0e455]/40 text-[var(--c-accent-text)]' : 'bg-[var(--c-bg)] border-[var(--c-border2)] text-[var(--c-text)]'

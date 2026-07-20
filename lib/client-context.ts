@@ -43,9 +43,8 @@ export async function fetchClientContext(
   if (!profile) return null
 
   const twoWeeksAgo = new Date(Date.now() - 14 * 86_400_000).toISOString()
-  const sixWeeksAgo = new Date(Date.now() - 42 * 86_400_000).toISOString()
 
-  const [{ data: okrRow }, { data: checkins }, { data: notes }, { data: lastReport }, { data: workoutRows }, { data: mealRows }, { data: statRows }] =
+  const [{ data: okrRow }, { data: checkins }, { data: notes }, { data: lastReport }, { data: workoutRows }, { data: mealRows }] =
     await Promise.all([
       supabase
         .from('program_sections')
@@ -85,14 +84,6 @@ export async function fetchClientContext(
         .gte('created_at', twoWeeksAgo)
         .order('created_at', { ascending: false })
         .limit(100),
-      supabase
-        .from('stat_updates')
-        .select('created_at, weight_kg')
-        .eq('member_id', memberId)
-        .gte('created_at', sixWeeksAgo)
-        .not('weight_kg', 'is', null)
-        .order('created_at', { ascending: true })
-        .limit(60),
     ])
 
   const okrJson = okrRow?.content_json as OkrContent | null
@@ -118,14 +109,18 @@ export async function fetchClientContext(
     .map(([date, v]) => ({ date, ...v }))
     .sort((a, b) => b.date.localeCompare(a.date))
 
-  const stats = (statRows ?? []) as { created_at: string; weight_kg: number }[]
+  // stat_updates was dropped — check-in weights are the only weight source now.
+  const weights = recentCheckins
+    .filter((c) => c.weight_kg != null)
+    .map((c) => ({ at: String(c.created_at), kg: Number(c.weight_kg) }))
+    .sort((a, b) => a.at.localeCompare(b.at))
   const weightTrend =
-    stats.length >= 2
+    weights.length >= 2
       ? {
-          firstKg: Number(stats[0].weight_kg),
-          lastKg: Number(stats[stats.length - 1].weight_kg),
-          firstAt: stats[0].created_at,
-          lastAt: stats[stats.length - 1].created_at,
+          firstKg: weights[0].kg,
+          lastKg: weights[weights.length - 1].kg,
+          firstAt: weights[0].at,
+          lastAt: weights[weights.length - 1].at,
         }
       : null
 

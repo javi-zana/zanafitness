@@ -22,7 +22,7 @@ type DmSignal = {
 
 export default async function AiHome() {
   const supabase = createServiceClient()
-  const [{ data: clients }, { count: pendingApps }, { data: checkins }, { data: stats }, { data: dmSignals }, { data: workouts }, { data: meals }] =
+  const [{ data: clients }, { count: pendingApps }, { data: checkins }, { data: dmSignals }, { data: workouts }, { data: meals }] =
     await Promise.all([
       supabase
         .from('profiles')
@@ -36,11 +36,6 @@ export default async function AiHome() {
       // ponytail: small roster — grab recent rows and reduce in JS, no group-by
       supabase
         .from('weekly_checkins')
-        .select('member_id, created_at, weight_kg')
-        .order('created_at', { ascending: false })
-        .limit(300),
-      supabase
-        .from('stat_updates')
         .select('member_id, created_at, weight_kg')
         .order('created_at', { ascending: false })
         .limit(300),
@@ -63,7 +58,6 @@ export default async function AiHome() {
   // lastActivity; first row with a weight sets weightKg.
   const rows = [
     ...(checkins ?? []),
-    ...(stats ?? []),
     ...(workouts ?? []).map((w) => ({ ...w, weight_kg: null })),
     ...(meals ?? []).map((m) => ({ ...m, weight_kg: null })),
   ].sort((a, b) => b.created_at.localeCompare(a.created_at))

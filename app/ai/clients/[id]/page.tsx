@@ -11,13 +11,9 @@ export const dynamic = 'force-dynamic'
 
 type WeightPoint = { at: string; kg: number }
 
-// Weight series = stat updates + weekly check-in weights, oldest first.
-function weightSeries(
-  stats: Array<{ created_at: string; weight_kg: number | null }>,
-  checkins: Array<Record<string, unknown>>,
-): WeightPoint[] {
+// Weight series = weekly check-in weights, oldest first (stat_updates is gone).
+function weightSeries(checkins: Array<Record<string, unknown>>): WeightPoint[] {
   const pts: WeightPoint[] = []
-  for (const s of stats) if (s.weight_kg != null) pts.push({ at: s.created_at, kg: Number(s.weight_kg) })
   for (const c of checkins)
     if (c.weight_kg != null) pts.push({ at: String(c.created_at), kg: Number(c.weight_kg) })
   return pts.sort((a, b) => a.at.localeCompare(b.at))
@@ -56,18 +52,12 @@ export default async function ClientPage({ params }: { params: { id: string } })
   const ctx = await fetchClientContext(supabase, params.id)
   if (!ctx) notFound()
 
-  const [{ data: reports }, { data: stats }, { data: workoutRows }, { data: meals }] = await Promise.all([
+  const [{ data: reports }, { data: workoutRows }, { data: meals }] = await Promise.all([
     supabase
       .from('reports')
       .select('id, week_label, status, created_at')
       .eq('member_id', params.id)
       .order('created_at', { ascending: false }),
-    supabase
-      .from('stat_updates')
-      .select('created_at, weight_kg')
-      .eq('member_id', params.id)
-      .order('created_at', { ascending: true })
-      .limit(200),
     supabase
       .from('workout_logs')
       .select('id, logged_date, notes')
@@ -112,7 +102,7 @@ export default async function ClientPage({ params }: { params: { id: string } })
 
   const p = ctx.profile
   const c = ctx.latestCheckin
-  const series = weightSeries((stats ?? []) as Array<{ created_at: string; weight_kg: number | null }>, ctx.recentCheckins)
+  const series = weightSeries(ctx.recentCheckins)
   const latest = series[series.length - 1] ?? null
   const startKg = p.starting_weight_kg != null ? Number(p.starting_weight_kg) : null
   const delta = latest && startKg != null ? latest.kg - startKg : null
